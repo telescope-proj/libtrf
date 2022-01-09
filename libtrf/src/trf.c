@@ -22,6 +22,7 @@
 
 #include "trf.h"                         
 
+
 /*  Get the system page size. */
 size_t trfGetPageSize() {
     #if defined(_WIN32)
@@ -414,7 +415,6 @@ int trfAccept(PTRFContext ctx, PTRFContext client) {
     ssize_t ret;
     uint32_t evt;
     struct fi_eq_cm_entry entry;
-    struct fi_eq_err_entry err;
 
     ret = fi_eq_sread(ctx->eq, &evt, &entry, sizeof(entry), -1, 0);
     if (ret == 0) {
@@ -429,7 +429,7 @@ int trfAccept(PTRFContext ctx, PTRFContext client) {
         }
         return ret;
     } if (ret != sizeof(entry)) {
-        trf_error("EQ read failed: byte count invalid (%d/%d)\n", ret, sizeof(entry));
+        trf_error("EQ read failed: byte count invalid");
         return ret;
     } if (evt != FI_CONNREQ) {
         trf_error("EQ read failed: unexpected event %d\n", evt);
@@ -492,6 +492,8 @@ int trfAccept(PTRFContext ctx, PTRFContext client) {
         return ret;
     }
 
+    return 0;
+
 }
 
 
@@ -500,7 +502,6 @@ int trfPopEQ(struct fid_eq * eq, void * buf, size_t len, int nb, int consume) {
     ssize_t ret;
     uint32_t evt;
     struct fi_eq_cm_entry entry;
-    struct fi_eq_err_entry err;
     size_t expected = sizeof(entry);
 
     uint64_t flags = consume ? 0 : FI_PEEK;
@@ -522,7 +523,7 @@ int trfPopEQ(struct fid_eq * eq, void * buf, size_t len, int nb, int consume) {
             trf_error("EQ read failed: %s\n", out);
         }
     } if (ret != expected) {
-        trf_error("EQ read failed: byte count invalid (%d/%d)\n", ret, expected);
+        trf_error("EQ read failed: byte count invalid (%ld/%ld)\n", ret, expected);
         return ret;
     } if (evt != FI_CONNREQ) {
         trf_error("EQ read failed: unexpected event %d\n", evt);
@@ -572,8 +573,7 @@ int trfSourceCheckReq(PTRFContext ctx, int nb)
     ssize_t ret;
     uint32_t evt;
     struct fi_eq_cm_entry entry;
-    struct fi_eq_err_entry err;
-    uint32_t expected = sizeof(entry);
+    ssize_t expected = sizeof(entry);
 
     if (nb) {
         ret = fi_eq_read(ctx->eq, &evt, &entry, expected, FI_PEEK);
@@ -588,7 +588,7 @@ int trfSourceCheckReq(PTRFContext ctx, int nb)
         trfEQLastErrorDesc(ctx->eq, &ret);
         trf_error("ConnReq EQ read failed: %s\n", ret);
     } if (ret != expected) {
-        trf_error("ConnReq check failed, byte count invalid (%d/%d)\n", ret, expected);
+        trf_error("ConnReq check failed, byte count invalid (%ld/%ld)\n", ret, expected);
         return ret;
     } if (evt != FI_CONNREQ) {
         trf_error("ConnReq check failed: unexpected event %d\n", evt);

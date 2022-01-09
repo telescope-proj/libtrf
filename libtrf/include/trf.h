@@ -45,7 +45,7 @@
 #endif
 
 #define trf_error(...) fprintf(stderr, "[error] " __VA_ARGS__)
-#define trf_fi_error(call, err) fprintf(stderr, "[fabric] %s failed (%d): %s\n", call, -err, fi_strerror(-err))
+#define trf_fi_error(call, err) fprintf(stderr, "[fabric] %s failed (%d): %s\n", call, (int) -err, fi_strerror((int) -err))
 #define trf_log(...) printf("[general] " __VA_ARGS__)
 #define trf_debug(...) fprintf(stderr, "[debug] " __VA_ARGS__)
 

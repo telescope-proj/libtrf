@@ -7,6 +7,8 @@ set(SOURCES
     src/trf.c
 )
 
+find_library(Libfabric NAMES fabric)
+
 add_compile_options(
   "-Wall"
   "-Werror"
@@ -17,8 +19,9 @@ add_compile_options(
   "$<$<CONFIG:DEBUG>:-O0;-g3;-ggdb>"
 )
 
-add_library(libtrf STATIC ${SOURCES})
-target_include_directories(libtrf
+add_library(trf STATIC ${SOURCES})
+
+target_include_directories(trf
 	INTERFACE
 		include
 	PRIVATE

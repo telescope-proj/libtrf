@@ -1,0 +1,91 @@
+syntax = "proto3";
+
+package trf_msg;
+
+message Transport {
+    string name = 1;    // Transport provider name
+    string route = 2;   // Transport provider routing information
+                        // e.g. fi_sockaddr_in://1.2.3.4:5678
+}
+
+message Display {
+    uint32 id                   = 1;    // Display ID
+    string name                 = 2;    // Display friendly name e.g. monitor name
+    uint32 width                = 3;    // Display width
+    uint32 height               = 4;    // Display height
+    repeated uint32 tex_fmt     = 5;    // Native texture formats
+    uint32 x_offset             = 6;    // Relative display offset x
+    uint32 y_offset             = 7;    // Relative display offset y
+}
+
+message DisplayReq {
+    uint32 id       = 1;    // Requested display ID
+    uint32 width    = 2;    // Requested display width
+    uint32 height   = 3;    // Requested display height
+    uint32 tex_fmt  = 4;    // Requested texture format
+}
+
+/*  ----------- In order connection establishment messages ----------- */
+
+message ClientHello {
+    uint32 api_major            = 1;    // API major version
+    uint32 api_minor            = 2;    // API minor version
+    uint32 api_patch            = 3;    // API patch version
+}
+
+message ServerHello {
+    uint64 new_session_id       = 1;    // New session ID
+}
+
+message ClientCap {
+    repeated uint32 tex_fmt         = 1;    // Client supported texture formats
+    repeated Transport transports   = 2;    // Client supported transports
+}
+
+message ServerCap {
+    repeated Display display    = 1;    // Server displays
+    repeated uint32 xc_fmt      = 2;    // Server supported formats (transcoded)
+    repeated Transport transports  = 3;    // Server supported transports
+}
+
+message ClientReq {
+    repeated DisplayReq display = 1;    // Requested displays from server
+    Transport transport         = 2;    // Transport provider  
+}
+
+message ServerAckReq {
+    repeated uint32 display_ids = 1;    // Display ID confirmation
+}
+
+message ClientFrameReq {
+    uint32 id                   = 1;    // Display ID to update
+    uint32 frame_cntr           = 2;    // Current frame number
+    uint64 addr                 = 3;    // Client receive virtual memory address
+    uint64 rkey                 = 4;    // Client receive rkey
+}
+
+message ServerAckFrameReq {
+    uint32 id                   = 1;    // Display ID that was updated
+    uint32 frame_cntr           = 2;    // New frame number
+}
+
+message ClientDisconnect {
+    bool dummy = 1;                     // Dummy value, unused
+}
+
+/*  ----------- Message Wrapper Object ------------- */
+
+message MessageWrapper {
+    uint64 session_id               = 1;    // Session ID
+    oneof payload {
+        ClientHello client_hello    = 2;
+        ServerHello server_hello    = 3;
+        ClientCap client_cap        = 4;
+        ServerCap server_cap        = 5;
+        ClientReq client_req        = 6;
+        ServerAckReq server_ack     = 7;
+        ClientFrameReq client_frame = 8;
+        ServerAckFrameReq server_ack_frame = 9;
+        ClientDisconnect client_disconnect = 10;
+    };
+};

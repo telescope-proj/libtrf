@@ -20,6 +20,8 @@
     Inc., 51 Franklin Street, Fifth Floor, Boston, MA 02110-1301 USA
 */
 
+#pragma once
+
 #include <stdio.h>
 #include <string.h>
 #include <stdlib.h>
@@ -72,23 +74,35 @@ static inline void trfSleep(int ms) {
     trf_debug("hello\n");
 }
 
+struct TRFOOBContext {
+    int client_fd;
+    int listen_fd;
+};
+
 struct TRFContext {
+    enum TRFEPType      type;       // Endpoint type
+    struct TRFOOBContext * oob;     // Management channel
     struct fid_fabric   * fabric;   // Fabric interface
     struct fid_domain   * domain;   // Protection domain
     struct fid_eq       * eq;       // Event queue
-    struct fid_cq       * cq;       // Completion queue
-    void                * addr;     // Source or destination address depending on EP type
+    struct fid_cq       * cq;       // TX completion queue
+    struct fid_av       * av;       // Address vector
+    union {
+        fi_addr_t       src_addr;   // Local address
+        fi_addr_t       dst_addr;   // Peer address
+    };
     union {
         struct fid_pep  * pep;      // Passive endpoint (server)
         struct fid_ep   * ep;       // Active endpoint (client)
     };
     struct fid_mr       * msg_mr;   // Memory region for messages
     struct fid_mr       * fb_mr;    // Framebuffer
+    uint32_t            intrv;      // Interrupt vector
 };
 
 enum TRFEPType {
-    TRF_EP_CLIENT,
-    TRF_EP_SERVER
+    TRF_EP_SINK,
+    TRF_EP_SOURCE
 };
 
 struct TRFBufferData {
@@ -106,6 +120,15 @@ struct TRFBufferData {
     Returns 0 on success, negative error code on failure.
 */
 int trfAllocActiveEP(PTRFContext ctx, struct fi_info * fi);
+
+/*  Warm up the endpoint by sending several messages until the underlying
+    connection has been established. This is primarily useful for ofi_rxm
+    endpoints, where the connection is established on-demand. 
+    ctx: Allocated context
+    session_id: Session identifier from OOB channel
+    Returns 0 on success, negative error code on failure.
+*/
+int trfWarmupEP(PTRFContext ctx, uint32_t session_id);
 
 /*  Destroy resources associated with a context in the correct order.
     ctx: The context to destroy.
@@ -165,10 +188,9 @@ int trfSourceInit(char * node, char * service, PTRFContext ctx);
 /*  Detect an incoming connection from a client, but do not accept it.
     ctx: Server context
     nb: Non-blocking flag
-    Returns: number of clients waiting, negative error code on failure.
-    Currently this function only returns a max of 1 client waiting.
+    Returns: Session ID of the waiting client, negative error code on failure.
 */
-int trfSourceCheckReq(PTRFContext ctx, int nb);
+uint64_t trfSourceCheckReq(PTRFContext ctx, int nb);
 
 /*  Allocate a context for library use.
     This does not allocate any resources and is a simple wrapper around
@@ -186,20 +208,10 @@ PTRFContext trfAllocContext();
 */
 int trfAllocLocalBuffer(PTRFContext ctx, size_t size, struct fid_mr ** mr);
 
-
-int trfGetCQEvent(PTRFContext ctx);
-
-/*  Print allocated pointers in a context.
-    ctx: Context to print
+/*  Retrieve an event from the completion queue inside the context ctx.
+    ctx: Context to retrieve event from
+    cq_entry: Pointer to the entry to be filled with the event
+    nb: Non-blocking flag
+    Returns: Number of events retrieved, negative error code on failure.
 */
-inline void trfDebugContextPointers(PTRFContext ctx)
-{
-    printf("----------------------------\n");
-    printf("ctx->fabric: %p\n", ctx->fabric);
-    printf("ctx->domain: %p\n", ctx->domain);
-    printf("ctx->eq: %p\n", ctx->eq);
-    printf("ctx->cq: %p\n", ctx->cq);
-    printf("ctx->addr: %p\n", ctx->addr);
-    printf("ctx->pep: %p\n", ctx->pep);
-    printf("ctx->ep: %p\n", ctx->ep);
-}
+int trfGetCQEvent(PTRFContext ctx, struct fi_cq_entry * cq_entry, int nb);

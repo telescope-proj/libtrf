@@ -1,5 +1,6 @@
 # Telescope Remote Framebuffer Library
 
+[Documentation for Libtrf](https://telescope-proj.github.io/libtrf/)
 ## Introduction
 
 `libtrf` abstracts the connection, synchronization, and transmission aspects of remote framebuffer relay, attempting to make the best use of available network hardware. 

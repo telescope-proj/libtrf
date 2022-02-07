@@ -1,10 +1,24 @@
 syntax = "proto3";
 
-package trf_msg;
+package trfMsg;
+
+message APIVersion {
+    uint32 api_major            = 1;    // API major version
+    uint32 api_minor            = 2;    // API minor version
+    uint32 api_patch            = 3;    // API patch version
+}
+
+message AddrCand {
+    string addr     = 1;    // Interface address
+    int32 netmask   = 2;    // Netmask
+    int32 port      = 3;    // Preflight check port
+    int32 speed     = 4;    // Link speed
+}
 
 message Transport {
-    string name = 1;    // Transport provider name
-    string route = 2;   // Transport provider routing information
+    string name = 1;    // Transport provider name e.g. "tcp;ofi_rxm"
+    string proto = 2;   // Transport wire protocol e.g. "FI_PROTO_RXM"
+    string route = 3;   // Transport provider routing information
                         // e.g. fi_sockaddr_in://1.2.3.4:5678
 }
 
@@ -13,9 +27,11 @@ message Display {
     string name                 = 2;    // Display friendly name e.g. monitor name
     uint32 width                = 3;    // Display width
     uint32 height               = 4;    // Display height
-    repeated uint32 tex_fmt     = 5;    // Native texture formats
-    uint32 x_offset             = 6;    // Relative display offset x
-    uint32 y_offset             = 7;    // Relative display offset y
+    int32 rate                  = 5;    // Refresh rate
+    repeated uint32 tex_fmt     = 6;    // Native texture formats
+    uint32 dgid                 = 10;   // Display group ID
+    int32 x_offset              = 11;   // Relative display offset x
+    int32 y_offset              = 12;   // Relative display offset y
 }
 
 message DisplayReq {
@@ -25,67 +41,125 @@ message DisplayReq {
     uint32 tex_fmt  = 4;    // Requested texture format
 }
 
-/*  ----------- In order connection establishment messages ----------- */
+/* API Version Check Messages */
 
 message ClientHello {
-    uint32 api_major            = 1;    // API major version
-    uint32 api_minor            = 2;    // API minor version
-    uint32 api_patch            = 3;    // API patch version
+    APIVersion version = 1;     // API version
 }
 
 message ServerHello {
-    uint64 new_session_id       = 1;    // New session ID
+    uint64 new_session_id = 1;  // New session ID
 }
 
+message ServerReject {
+    APIVersion version = 1;     // Server API version
+}
+
+/* Preflight */
+
+message AddrPF {
+    repeated AddrCand addrs = 1;    // Address candidates
+}
+
+/* Negotiation Messages */
+
 message ClientCap {
-    repeated uint32 tex_fmt         = 1;    // Client supported texture formats
-    repeated Transport transports   = 2;    // Client supported transports
+    repeated Transport transports   = 1;    // Client supported transports
 }
 
 message ServerCap {
-    repeated Display display    = 1;    // Server displays
-    repeated uint32 xc_fmt      = 2;    // Server supported formats (transcoded)
-    repeated Transport transports  = 3;    // Server supported transports
+    string bind_addr                = 1;    // Recommended bind address
+    Transport transport             = 2;    // Server selected transport
 }
+
+message Endpoint {
+    Transport Transport             = 1;    // Selected endpoint transport details
+}
+
+/* Display messages */
+
+message ClientDispReq {
+    uint32 info                     = 1;    // Unused
+}
+
+message ServerDisp {
+    repeated Display displays       = 1;    // List of displays on server side
+}
+
+/* Setup Messages */
 
 message ClientReq {
     repeated DisplayReq display = 1;    // Requested displays from server
-    Transport transport         = 2;    // Transport provider  
 }
 
 message ServerAckReq {
     repeated uint32 display_ids = 1;    // Display ID confirmation
 }
 
-message ClientFrameReq {
+/* Frame Requests */
+
+message ClientFReq {
     uint32 id                   = 1;    // Display ID to update
     uint32 frame_cntr           = 2;    // Current frame number
     uint64 addr                 = 3;    // Client receive virtual memory address
     uint64 rkey                 = 4;    // Client receive rkey
 }
 
-message ServerAckFrameReq {
+message ServerAckFReq {
     uint32 id                   = 1;    // Display ID that was updated
     uint32 frame_cntr           = 2;    // New frame number
 }
 
-message ClientDisconnect {
-    bool dummy = 1;                     // Dummy value, unused
+/* Session Termination */
+
+message Disconnect {
+    uint32 info                 = 1;    // Extra info e.g. error, unused
+}
+
+/* Channel management */
+
+message ChannelOpen {
+    uint32 type                 = 1;    // Channel type
 }
 
 /*  ----------- Message Wrapper Object ------------- */
 
 message MessageWrapper {
-    uint64 session_id               = 1;    // Session ID
-    oneof payload {
-        ClientHello client_hello    = 2;
-        ServerHello server_hello    = 3;
-        ClientCap client_cap        = 4;
-        ServerCap server_cap        = 5;
-        ClientReq client_req        = 6;
-        ServerAckReq server_ack     = 7;
-        ClientFrameReq client_frame = 8;
-        ServerAckFrameReq server_ack_frame = 9;
-        ClientDisconnect client_disconnect = 10;
+    
+    reserved 5 to 8;
+    
+    uint64 session_id                       = 1;
+    
+    oneof wdata {
+        
+        /* Do not modify existing stable identifier values */
+
+        ClientHello client_hello            = 2;
+        ServerHello server_hello            = 3;
+        ServerReject server_reject          = 4;
+        
+        Disconnect disconnect               = 9;
+        
+        /*  API-version specific identifiers below this line */
+        
+        ClientCap client_cap                = 10;
+        ServerCap server_cap                = 11;
+        Endpoint endpoint                   = 12;
+
+        ClientDispReq client_disp_req       = 13;
+        ServerDisp server_disp              = 14;
+        
+        ClientReq client_req                = 15;
+        ServerAckReq server_ack             = 16;
+        
+        ClientFReq client_f_req             = 17;
+        ServerAckFReq server_ack_f_req      = 18;
+        
+        AddrPF addr_pf                      = 19;
+
+        /*  Channel management messages */
+
+        ChannelOpen ch_open                 = 20;
+
     };
 };

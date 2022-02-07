@@ -21,64 +21,25 @@
 */
 
 #include "trf.h"
+#include "trf_ncp.h"
+#include <signal.h>
 
 int main(int argc, char ** argv)
 {
-    int ret;
-    
-    /*  Allocate context to store connection information 
-    */
+    char* host = "127.0.0.1";
+    char* port = "35083";
 
     PTRFContext ctx = trfAllocContext();
-    if (!ctx) {
-        printf("Context creation failed...\n");
-        return 1;
+    if (trfNCServerInit(ctx,host,port) < 0){
+        fflush(stdout);
+        return -1;
     }
-    
-    /*  Enable the framebuffer source (server), specifying the host, port, and
-        context we just created. 
-    */
-    
-    ret = trfSourceInit("127.0.0.1", "1234", ctx);
-    if (ret < 0) {
-        printf("Source init failed...\n");
-        return 1;
+    PTRFContext client_ctx = trfAllocContext();
+    if ( trfNCAccept(ctx , client_ctx ) < 0){
+        fflush(stdout);
+        return -1;
     }
 
-    /*  Wait for a client to connect. */
-
-    while (1) 
-    {
-        ret = trfSourceCheckReq(ctx, 0);
-        if (ret > 0)
-        {
-            printf("Got request\n");
-            break;
-        }
-        else if (ret < 0)
-        {
-            printf("Error\n");
-            break;
-        }
-        trfSleep(1);
-    }
-
-    PTRFContext client = trfAllocContext();
-    ret = trfAccept(ctx, client);
-    if (ret < 0) {
-        printf("Accept failed...\n");
-        return 1;
-    }
-
-    trf_debug("Waiting for message...\n");
-
-    ret = trfGetCQEvent(ctx);
-    if (ret) {
-        printf("Failed to get CQ event!\n");
-        return 1;
-    }
-
-    printf("Message: %s\n", (char *) ctx->msg_mr->fid.context);
-    trfSleep(1000);
+    printf("Hello!\n");
 
 }

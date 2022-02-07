@@ -21,286 +21,645 @@
     Inc., 51 Franklin Street, Fifth Floor, Boston, MA 02110-1301 USA
 */
 
-#include "trf.h"                         
+#include "trf.h"
 
-/*  Get the system page size. */
-size_t trfGetPageSize() {
-    #if defined(_WIN32)
-        SYSTEM_INFO si;
-        GetSystemInfo(&si);
-        return si.dwPageSize;
-    #else
-        return sysconf(_SC_PAGESIZE);
-    #endif
-}
+static const char * __trf_fi_proto[] = {
+    "UNSPEC",
+    "RDMA_CM_IB_RC",
+    "IWARP",
+    "IB_UD",
+    "PSMX",
+    "UDP",
+    "SOCK_TCP",
+#if TRF_FABRIC_VERSION >= FI_VERSION(1, 2)
+    "MXM",
+    "IWARP_RDM",
+    "IB_RDM",
+    "GNI",
+#endif
+#if TRF_FABRIC_VERSION >= FI_VERSION(1, 4)
+    "RXM",
+    "RXD",
+#endif
+#if TRF_FABRIC_VERSION >= FI_VERSION(1, 5)
+    "MLX",
+    "NETWORKDIRECT",
+    "PSMX2",
+#endif
+#if TRF_FABRIC_VERSION >= FI_VERSION(1, 6)
+    "SHM",
+#endif
+#if TRF_FABRIC_VERSION >= FI_VERSION(1, 7)
+    "MRAIL",
+    "RSTREAM",
+    "RDMA_CM_IB_XRC",
+#endif
+#if TRF_FABRIC_VERSION >= FI_VERSION(1, 8)
+    "EFA",
+#endif
+#if TRF_FABRIC_VERSION >= FI_VERSION(1, 12)
+    "PSMX3",
+#endif
+    "__MAX"
+};
 
+static const uint32_t __trf_fi_enum[] = {
+    FI_PROTO_UNSPEC,
+    FI_PROTO_RDMA_CM_IB_RC,
+    FI_PROTO_IWARP,
+    FI_PROTO_IB_UD,
+    FI_PROTO_PSMX,
+    FI_PROTO_UDP,
+    FI_PROTO_SOCK_TCP,
+#if TRF_FABRIC_VERSION >= FI_VERSION(1, 2)
+    FI_PROTO_MXM,
+    FI_PROTO_IWARP_RDM,
+    FI_PROTO_IB_RDM,
+    FI_PROTO_GNI,
+#endif
+#if TRF_FABRIC_VERSION >= FI_VERSION(1, 4)
+    FI_PROTO_RXM,
+    FI_PROTO_RXD,
+#endif
+#if TRF_FABRIC_VERSION >= FI_VERSION(1, 5)
+    FI_PROTO_MLX,
+    FI_PROTO_NETWORKDIRECT,
+    FI_PROTO_PSMX2,
+#endif
+#if TRF_FABRIC_VERSION >= FI_VERSION(1, 6)
+    FI_PROTO_SHM,
+#endif
+#if TRF_FABRIC_VERSION >= FI_VERSION(1, 7)
+    FI_PROTO_MRAIL,
+    FI_PROTO_RSTREAM,
+    FI_PROTO_RDMA_CM_IB_XRC,
+#endif
+#if TRF_FABRIC_VERSION >= FI_VERSION(1, 8)
+    FI_PROTO_EFA,
+#endif
+#if TRF_FABRIC_VERSION >= FI_VERSION(1, 12)
+    FI_PROTO_PSMX3,
+#endif
+    0
+};
 
 PTRFContext trfAllocContext() {
     PTRFContext ctx = calloc(1, sizeof(struct TRFContext));
     return ctx;
 }
 
-
-int trfAllocActiveEP(PTRFContext ctx, struct fi_info * fi)
+int trfAllocActiveEP(PTRFXFabric ctx, struct fi_info * fi, void * data, 
+    size_t size)
 {
+    ctx->addr_fmt = fi->addr_format;
     int ret;
+    ret = fi_fabric(fi->fabric_attr, &ctx->fabric, NULL);
+    if (ret)
+    {
+        trf_fi_error("fi_fabric", ret);
+        return ret;
+    }
     ret = fi_domain(ctx->fabric, fi, &ctx->domain, NULL);
     if (ret)
     {
-        fprintf(stderr, "fi_domain failed with error: %s\n", fi_strerror(ret));
-        goto free_domain;
-    }
-    ret = fi_domain_bind(ctx->domain, &ctx->eq->fid, 0);
-    if (ret)
-    {
-        fprintf(stderr, "fi_domain_bind failed with error: %s\n", fi_strerror(ret));
-        goto free_domain;
+        trf_fi_error("fi_domain", ret);
+        goto free_fabric;
     }
     struct fi_cq_attr cq_attr;
     memset(&cq_attr, 0, sizeof(cq_attr));
-    cq_attr.size                = 64;
+    cq_attr.size                = fi->tx_attr->size;
     cq_attr.flags               = 0;
     cq_attr.wait_obj            = FI_WAIT_UNSPEC;
     cq_attr.format              = FI_CQ_FORMAT_MSG;
     cq_attr.signaling_vector    = 0;
     cq_attr.wait_cond           = FI_CQ_COND_NONE;
     cq_attr.wait_set            = NULL;
-
-    ret = fi_cq_open(ctx->domain, &cq_attr, &ctx->cq, NULL);
-    if (ret) {
-        trf_fi_error("Open completion queue", ret);
+    ret = fi_cq_open(ctx->domain, &cq_attr, &ctx->tx_cq, NULL);
+    if (ret)
+    {
+        trf_fi_error("Open TX completion queue", ret);
         goto free_domain;
     }
-
-    ret = fi_endpoint(ctx->domain, fi, &ctx->ep, NULL);
-    if (ret) {
-        trf_fi_error("Create endpoint on domain", ret);
-        goto free_domain;
+    cq_attr.size = fi->rx_attr->size;
+    ret = fi_cq_open(ctx->domain, &cq_attr, &ctx->rx_cq, NULL);
+    if (ret)
+    {
+        trf_fi_error("Open RX completion queue", ret);
+        goto free_tx_cq;
     }
-
-    ret = fi_ep_bind(ctx->ep, &ctx->eq->fid, 0);
-    if (ret) {
-        trf_fi_error("EP bind to EQ", ret);
-        goto free_domain;
-    }
-
-    ret = fi_ep_bind(ctx->ep, &ctx->cq->fid, FI_TRANSMIT | FI_RECV);
-    if (ret) {
-        trf_fi_error("EP bind to CQ", ret);
-        goto free_domain;
-    }
-
     struct fi_av_attr av_attr;
     memset(&av_attr, 0, sizeof(av_attr));
-    av_attr.type = FI_AV_MAP;
-    av_attr.count = 1;
-
+    av_attr.type = FI_AV_UNSPEC;
     ret = fi_av_open(ctx->domain, &av_attr, &ctx->av, NULL);
-    if (ret) {
+    if (ret)
+    {
         trf_fi_error("Open address vector", ret);
-        goto free_domain;
+        goto free_rx_cq;
     }
-
-    ret = fi_ep_bind(ctx->ep, &ctx->av->fid, 0);
-    if (ret) {
+    ret = fi_endpoint(ctx->domain, fi, &ctx->ep, NULL);
+    if (ret)
+    {
+        trf_fi_error("Create endpoint on domain", ret);
+        goto free_av;
+    }
+    ret = fi_ep_bind(ctx->ep, (fid_t)ctx->av, 0);
+    if (ret)
+    {
         trf_fi_error("EP bind to AV", ret);
-        goto free_domain;
+        goto free_endpoint;
     }
-
-    ret = fi_av_bind(ctx->av, &ctx->av->fid, 0);
-    if (ret) {
-        trf_fi_error("Bind address vector to EQ", ret);
-        goto free_domain;
+    ret = fi_ep_bind(ctx->ep, &ctx->tx_cq->fid, FI_TRANSMIT);
+    if (ret)
+    {
+        trf_fi_error("EP bind to TXCQ", ret);
+        goto free_endpoint;
     }
-
+    ret = fi_ep_bind(ctx->ep, &ctx->rx_cq->fid, FI_RECV);
+    if (ret)
+    {
+        trf_fi_error("EP bind to RXCQ", ret);
+        goto free_endpoint;
+    }
+    if (data)
+    {
+        ret = fi_setname(&ctx->ep->fid, data, size);
+        if (ret)
+        {
+            trf_fi_error("Bind EP address", ret);
+            goto free_endpoint;
+        }
+    }
     ret = fi_enable(ctx->ep);
-    if (ret) {
+    if (ret)
+    {
         trf_fi_error("Enable endpoint", ret);
-        goto free_domain;
+        goto free_endpoint;
     }
-
     return ret;
 
+free_endpoint:
+    fi_close(&ctx->ep->fid);
+    ctx->ep = NULL;
+free_av:
+    fi_close(&ctx->av->fid);
+    ctx->av = NULL;
+free_rx_cq:
+    fi_close(&ctx->rx_cq->fid);
+    ctx->rx_cq = NULL;
+free_tx_cq:
+    fi_close(&ctx->tx_cq->fid);
+    ctx->tx_cq = NULL;
 free_domain:
-    if (ctx->av) {
-        fi_close(&ctx->av->fid);
+    fi_close(&ctx->domain->fid);
+    ctx->domain = NULL;
+free_fabric:
+    fi_close(&ctx->fabric->fid);
+    ctx->fabric = NULL;
+    ctx->addr_fmt = 0;
+    return ret;
+}
+
+void trfDestroyFabricContext(PTRFXFabric ctx)
+{
+    if (ctx->fb_mr) {
+        fi_close(&ctx->fb_mr->fid);
+        ctx->fb_mr = NULL;
     }
-    if (ctx->ep) {
-        fi_shutdown(ctx->ep, 0);
+    if (ctx->msg_mr) {
+        fi_close(&ctx->msg_mr->fid);
+        ctx->msg_mr = NULL;
+    }
+    if (ctx->ep)
+    {
         fi_close(&ctx->ep->fid);
+        ctx->ep = NULL;
     }
-    if (ctx->cq) {
-        fi_close(&ctx->cq->fid);
+    if (ctx->tx_cq)
+    {
+        fi_close(&ctx->tx_cq->fid);
+        ctx->tx_cq = NULL;
     }
-    if (ctx->domain) {
+    if (ctx->rx_cq)
+    {
+        fi_close(&ctx->rx_cq->fid);
+        ctx->rx_cq = NULL;
+    }
+    if (ctx->av)
+    {
+        fi_close(&ctx->av->fid);
+        ctx->av = NULL;
+    }
+    if (ctx->domain)
+    {
         fi_close(&ctx->domain->fid);
         ctx->domain = NULL;
     }
-    return ret;
-}
-
-
-int trfClientResolveRoute(PTRFContext ctx)
-{
-    int ret;
-    void * addr;
-    size_t addrlen;
-
-    ret = fi_getname(&ctx->ep->fid, NULL, &addrlen);
-    if (ret) {
-        trf_fi_error("Get EP addr length", ret);
-    }
-
-    addr = malloc(addrlen);
-    if (!addr) {
-        fprintf(stderr, "Failed to allocate memory for EP addr\n");
-        ret = -FI_ENOMEM;
-    }
-
-    ret = fi_getname(&ctx->ep->fid, addr, &addrlen);
-    if (ret) {
-        trf_fi_error("Get EP addr", ret);
-    }
-
-    ret = fi_av_insert(ctx->av, addr, 1, &ctx->dst_addr, 0, NULL);
-    if (ret != 1) {
-        trf_fi_error("Insert EP addr", ret);
-    }
-
-    free(addr);
-}
-
-
-int trfWarmupEP(PTRFContext ctx, uint32_t session_id) {
-
-    ssize_t ret;
-    void * test_buf = calloc(1, 16);
-    if (!test_buf) {
-        fprintf(stderr, "Failed to allocate test buffer\n");
-        return -1;
-    }
-
-    *(uint32_t *) test_buf = htonl(session_id);
-    
-    int count = 0;
-
-    do {
-        ret = fi_inject(ctx->ep, test_buf, 16, ctx->dst_addr);
-        if (ret < 0 && ret != -FI_EAGAIN) {
-            trf_fi_error("Warmup", ret);
-            return (int) ret;
-        }
-        trfSleep(50);
-    } while (ret == -FI_EAGAIN || count < 50);
-
-    free(test_buf);
-    
-    if (count >= 50) {
-        trf_error("Warmup failed to complete\n");
-        return -1;
-    }
-
-    return 0;
-
-}
-
-
-int trfDestroyContext(PTRFContext ctx) {
-    int ret;
-    if (!ctx) {
-        return -EINVAL;
-    }
-    if (ctx->ep) {
-        ret = fi_shutdown(ctx->ep, 0);
-        if (ret)
-            return ret;
-        ret = fi_close(&ctx->ep->fid);
-        if (ret)
-            return ret;
-    }
-    else if (ctx->pep) {
-        ret = fi_close(&ctx->pep->fid);
-        if (ret)
-            return ret;
-    }
-    if (ctx->cq) {
-        ret = fi_close(&ctx->cq->fid);
-        if (ret)
-            return ret;
-    }
-    if (ctx->eq) {
-        ret = fi_close(&ctx->eq->fid);
-        if (ret)
-            return ret;
-    }
-    if (ctx->domain) {
-        ret = fi_close(&ctx->domain->fid);
-        if (ret)
-            return ret;
-    }
-    if (ctx->fabric) {
-        ret = fi_close(&ctx->fabric->fid);
-        if (ret)
-            return ret;
-    }
-    if (ctx->oob) {
-        ret = close(ctx->oob->fd);
-        if (ret)
-            return ret;
+    if (ctx->fabric)
+    {
+        fi_close(&ctx->fabric->fid);
+        ctx->fabric = NULL;
     }
     free(ctx);
-    return 0;
 }
 
+void trfSendDisconnectMsg(int fd, uint64_t session_id)
+{
+    //!todo actually send disconnect message
+    close(fd);
+}
 
-int trfAllocLocalBuffer(PTRFContext ctx, size_t size, struct fid_mr ** mr) {
+void trfDestroyContext(PTRFContext ctx)
+{
     int ret;
-    void * buf = aligned_alloc(trfGetPageSize(), size);
-    ret = fi_mr_reg(ctx->domain, buf, size, FI_SEND | FI_RECV, 0, 0, 0, mr, buf);
-    if (ret) {
-        trf_fi_error("Register memory region", ret);
-        return ret;
+    if (!ctx)
+        return;
+
+    PTRFContext cur_ctx = ctx;
+    PTRFContext prev_ctx = NULL;
+
+    while (cur_ctx)
+    {
+        switch (cur_ctx->type)
+        {
+            case TRF_EP_SOURCE:
+                close(cur_ctx->svr.listen_fd);
+                trfDestroyContext(cur_ctx->svr.clients);
+                break;
+            case TRF_EP_SINK:
+            case TRF_EP_CONN_ID:
+                trfSendDisconnectMsg(cur_ctx->cli.client_fd, 
+                    cur_ctx->cli.session_id);
+                close(cur_ctx->cli.client_fd);
+                break;
+                trfSendDisconnectMsg(cur_ctx->cli.client_fd,
+                    cur_ctx->cli.session_id);
+                close(cur_ctx->cli.client_fd);
+                break;
+            default:
+                break;
+        }
+        switch (ctx->xfer_type)
+        {
+            case TRFX_TYPE_LIBFABRIC:
+                trfDestroyFabricContext(ctx->xfer.fabric);
+                break;
+            default:
+                break;
+        }
+        prev_ctx = ctx;
+        cur_ctx = cur_ctx->next;
+        free(prev_ctx);
     }
-    return 0;
 }
 
-
-int trfGetCQEvent(PTRFContext ctx, struct fi_cq_entry * cq_entry, int nb) {
-    
-    int ret;
-    
-    if (!ctx->cq) {
+int trfCreateChannel(PTRFContext ctx, struct fi_info * fi, void * data, 
+    size_t size)
+{
+    if (!ctx || !fi)
         return -EINVAL;
-    }
     
-    if (nb) {
-        ret = fi_cq_sread(ctx->cq, cq_entry, 1, NULL, -1);
-    }
-    else {
-        ret = fi_cq_read(ctx->cq, cq_entry, 1);
+    int ret;
+
+    if (!ctx->xfer.fabric)
+    {
+        ctx->xfer.fabric = calloc(1, sizeof(*ctx->xfer.fabric));
+        if (!ctx->xfer.fabric)
+        {
+            trf__log_error("Failed to allocate fabric resources\n");
+            ret = -ENOMEM;
+            goto free_info;
+        }
     }
 
-    if (ret == -FI_EAGAIN) {
-        return 0;
-    }
-    else if (ret < 0) {
-        char * out;
-        trfCQLastErrorDesc(ctx->cq, &out);
-        trf_error("CQ read error: %s\n", out);
+    ctx->xfer_type = TRFX_TYPE_LIBFABRIC;
+
+    ret = trfAllocActiveEP(ctx->xfer.fabric, fi, data, size);
+    if (ret)
+    {
+        goto free_fabric;
     }
 
+    return 0;
+
+free_fabric:
+    free(ctx->xfer.fabric);
+free_info:
+    fi_freeinfo(fi);
     return ret;
 }
 
-
-int trfCreateEP(const char * host, const char * port, enum TRFEPType req_type, PTRFContext ctx)
+int trfDeserializeWireProto(const char * proto, uint32_t * out)
 {
+    if (!proto || !out)
+        return -EINVAL;
 
+    assert( (sizeof(__trf_fi_proto) / sizeof(__trf_fi_proto[0]))
+            == (sizeof(__trf_fi_enum) / sizeof(__trf_fi_enum[0])));
+
+    // Libfabric protocol strings
+
+    if (strncmp(proto, "FI_PROTO_", 9) == 0)
+    {
+        const char * tgt = proto + 9;
+        for (int i = 0; i < sizeof(__trf_fi_proto) / sizeof(__trf_fi_proto[0]); 
+            i++)
+        {
+            if (strcmp(tgt, __trf_fi_proto[i]) == 0)
+            {
+                *out = __trf_fi_enum[i];
+                return 0;
+            }
+        }
+    }
+    return -EINVAL;
+}
+
+int trfSerializeWireProto(uint32_t proto, char ** out)
+{
+    if (!out)
+        return -EINVAL;
+
+    assert( (sizeof(__trf_fi_proto) / sizeof(__trf_fi_proto[0]))
+            == (sizeof(__trf_fi_enum) / sizeof(__trf_fi_enum[0])));
+
+    // Libfabric protocol strings
+
+    for (int i = 0; i < sizeof(__trf_fi_proto) / sizeof(__trf_fi_proto[0]); 
+        i++)
+    {
+        if (proto == __trf_fi_enum[i])
+        {
+            *out = calloc(1, strlen(__trf_fi_proto[i]) + sizeof("FI_PROTO_"));
+            strcpy(*out, "FI_PROTO_");
+            strcpy(*out + 9, __trf_fi_proto[i]);
+            return 0;
+        }
+    }
+    return -EINVAL;
+}
+
+int trfGetRoute(const char * dst, const char * prov, const char * proto,
+    struct fi_info ** fi)
+{
     int ret;
-    struct fi_info *hints, *fi, *fi_node = NULL;
+    struct fi_info *hints, *info = NULL;
+
+    if (!dst || !prov)
+        return -EINVAL;
+
+    void * dst_copy;
+    int trf_fmt;
+    ret = trfDeserializeAddress(dst, strlen(dst), &dst_copy, &trf_fmt);
+    if (ret)
+        return ret;
+
+    hints = fi_allocinfo();
+    int lf_fmt = trfConvertInternalAF(trf_fmt);
+    switch (lf_fmt)
+    {
+        case FI_SOCKADDR:
+        case FI_SOCKADDR_IN:
+        case FI_SOCKADDR_IN6:
+            switch (((struct sockaddr *) dst_copy)->sa_family)
+            {
+                case AF_INET:
+                    hints->dest_addrlen = sizeof(struct sockaddr_in);
+                    break;
+                case AF_INET6:
+                    hints->dest_addrlen = sizeof(struct sockaddr_in6);
+                    break;
+                default:
+                    trf__log_warn("Unknown address family\n");
+                    break;
+            }
+            break;
+        case FI_ADDR_STR:
+            hints->dest_addrlen = strlen((char *) dst_copy);
+            break;
+        default:
+            trf__log_error("Unknown address format\n");
+            ret = -EINVAL;
+            goto free_hints;
+    }
+
+    uint32_t proto_id = 0;
+    ret = trfDeserializeWireProto(proto, &proto_id);
+    if (ret)
+        goto free_hints;
+
+    trf__log_debug("Libfabric Format: %d", lf_fmt);
     
-    if (!ctx)
-        return EINVAL;
+    hints->ep_attr->type    = FI_EP_RDM;
+    hints->caps             = FI_MSG | FI_RMA;
+    hints->mode             = FI_LOCAL_MR;
+    hints->addr_format      = lf_fmt;
+    hints->dest_addr        = dst_copy;
+    hints->ep_attr->protocol = proto_id;
+    hints->fabric_attr->prov_name = strdup(prov);
+
+    ret = fi_getinfo(TRF_FABRIC_VERSION, NULL, NULL, 0, hints, &info);
+    if (ret) {
+        trf_fi_error("fi_getinfo", ret);
+        goto free_hints;
+    }
+
+    trf__log_debug("info %s", fi_tostr(info, FI_TYPE_INFO));
+
+    ret = 0;
+    *fi = info;
+
+free_hints:
+    fi_freeinfo(hints);
+    return ret;
+
+}
+
+int trfConvertFabricAF(uint32_t fi_addr_format)
+{
+    switch (fi_addr_format)
+    {
+        case FI_SOCKADDR:
+            return TRFX_ADDR_SOCKADDR;
+        case FI_SOCKADDR_IN:
+            return TRFX_ADDR_SOCKADDR_IN;
+        case FI_SOCKADDR_IN6:
+            return TRFX_ADDR_SOCKADDR_IN6;
+        case FI_ADDR_STR:
+            return TRFX_ADDR_FI_STR;
+        default:
+            return -1;
+    }
+}
+
+int trfConvertInternalAF(uint32_t trf_addr_format)
+{
+    switch (trf_addr_format)
+    {
+        case TRFX_ADDR_SOCKADDR:
+            return FI_SOCKADDR;
+        case TRFX_ADDR_SOCKADDR_IN:
+            return FI_SOCKADDR_IN;
+        case TRFX_ADDR_SOCKADDR_IN6:
+            return FI_SOCKADDR_IN6;
+        case TRFX_ADDR_FI_STR:
+            return FI_ADDR_STR;
+        default:
+            return -1;
+    }
+}
+
+int trfSerializeAddress(void * data, enum TRFXAddr format, char ** out)
+{
+    int ret;
+    char * addr = NULL;
+    switch (format)
+    {
+        case TRFX_ADDR_SOCKADDR:
+            addr = calloc(1, TRFX_MAX_STR);
+            strcpy(addr, "trfx_sockaddr://");
+            ret = trfGetNodeService((struct sockaddr *)data,
+                addr + sizeof("trfx_sockaddr://") - 1);
+            if (ret)
+            {
+                free(addr);
+                return ret;
+            }
+            break;
+        case TRFX_ADDR_SOCKADDR_IN:
+            addr = calloc(1, TRFX_MAX_STR);
+            strcpy(addr, "trfx_sockaddr_in://");
+            ret = trfGetNodeService((struct sockaddr *)data,
+                addr + sizeof("trfx_sockaddr_in://") - 1);
+            if (ret)
+            {
+                free(addr);
+                return ret;
+            }
+            break;
+        case TRFX_ADDR_SOCKADDR_IN6:
+            addr = calloc(1, TRFX_MAX_STR);
+            strcpy(addr, "trfx_sockaddr_in6://");
+            ret = trfGetNodeService((struct sockaddr *)data,
+                addr + sizeof("trfx_sockaddr_in6://") - 1);
+            if (ret)
+            {
+                free(addr);
+                return ret;
+            }
+            break;
+        case TRFX_ADDR_FI_STR:
+            addr = strdup((char *)data);
+            break;
+        default:
+            return -EINVAL;
+    }
+    *out = addr;
+    return 0;
+}
+
+int trfDeserializeAddress(const char * ser_addr, int data_len, void ** data,
+    int * format)
+{
+    int fmt;
+    void * out = NULL;
+    if (strncmp(ser_addr, "fi_", sizeof("fi_") - 1) == 0)
+    {
+        fmt = TRFX_ADDR_FI_STR;
+        *data = strdup(ser_addr);
+    }
+    else if (strncmp(ser_addr, "trfx_sockaddr", sizeof("trfx_sockaddr") - 1) == 0)
+    {
+        const char * tgt = ser_addr + sizeof("trfx_sockaddr") - 1;
+        if (strncmp(tgt, "://", sizeof("://") - 1) == 0)
+        {
+            fmt = TRFX_ADDR_SOCKADDR;
+            tgt += sizeof("://") - 1;
+        } 
+        else if (strncmp(tgt, "_in6://", sizeof("_in6://") - 1) == 0)
+        {
+            fmt = TRFX_ADDR_SOCKADDR_IN6;
+            tgt += sizeof("_in6://") - 1;
+        }
+        else if (strncmp(tgt, "_in://", sizeof("_in://") - 1) == 0)
+        {
+            fmt = TRFX_ADDR_SOCKADDR_IN;
+            tgt += sizeof("_in://") - 1;
+        }
+        else
+        {
+            return -EINVAL;
+        }
+
+        struct sockaddr *sock = calloc(1, sizeof(*sock));
+        if (trfNodeServiceToAddr(tgt, sock) < 0)
+        {
+            trf__log_error("Unable to create sockaddr from node service");
+        }
+        out = (void *) sock;
+    }
+    else
+    {
+        return -EINVAL;
+    }
+
+    *data = (void *) out;
+    *format = fmt;
+    return 0;
+}
+
+int trfPrintFabricProviders(struct fi_info * fi)
+{
+    struct fi_info * fi_node;
+    for (fi_node = fi; fi_node; fi_node = fi_node->next)
+    {
+        char srcstr[INET6_ADDRSTRLEN];
+        char dststr[INET6_ADDRSTRLEN];
+        char * src;
+        char * dst;
+        switch (fi_node->addr_format)
+        {
+            case FI_SOCKADDR:
+            case FI_SOCKADDR_IN:
+            case FI_SOCKADDR_IN6:
+                if (fi_node->dest_addr)
+                {
+                    trfGetIPaddr(fi_node->dest_addr, dststr);
+                    dst = dststr;
+                }
+                else
+                {
+                    dst = "null";
+                }
+                if (fi_node->src_addr)
+                {
+                    trfGetIPaddr(fi_node->src_addr, srcstr);
+                    src = srcstr;
+                }
+                else
+                {
+                    dst = "null";
+                }
+            case FI_ADDR_STR:
+                src = (char *) fi_node->src_addr;
+                dst = (char *) fi_node->dest_addr;
+                break;
+        }
+        trf__log_debug("(fabric) provider: %s, src: %s, dst: %s", 
+            fi_node->fabric_attr->prov_name, src, dst
+        );
+    }
+    return 0;
+}
+
+int trfGetFabricProviders(const char * host, const char * port, 
+    enum TRFEPType req_type, struct fi_info ** fi_out)
+{
+    
+    int ret;
+    struct fi_info *hints, *fi = NULL;
+    
+    if (!host || !port)
+        return -EINVAL;
     
     /*  Specify the minimum feaure set required by the fabric. Note that just
         because you specify FI_RMA here doesn't mean the fabric natively
@@ -310,8 +669,9 @@ int trfCreateEP(const char * host, const char * port, enum TRFEPType req_type, P
 
     hints                   = fi_allocinfo();
     hints->ep_attr->type    = FI_EP_RDM;
-    hints->caps             = FI_MSG | FI_TAGGED;
+    hints->caps             = FI_MSG | FI_RMA;
     hints->mode             = FI_CONTEXT | FI_LOCAL_MR;
+    hints->addr_format      = FI_FORMAT_UNSPEC;
     
     /*  Search for an available fabric provider. This should return a list of
         available providers sorted by libfabric preference i.e. RDMA interfaces
@@ -319,388 +679,224 @@ int trfCreateEP(const char * host, const char * port, enum TRFEPType req_type, P
         BTL.
     */
 
-    trf_debug("fi_ep_rdm, format unspec\n");
-    trf_debug("Attempting to find fabric provider for %s:%s\n", host, port);
+    trf__log_debug("Attempting to find fabric provider for %s:%s", host, port);
     
     uint64_t fiflags    = (req_type == TRF_EP_SOURCE) ? FI_SOURCE : 0;
     //const char * g_host = (req_type == TRF_EP_SOURCE) ? NULL : host;
 
-    ret = fi_getinfo(FI_VERSION(1, 6), host, port, fiflags, hints, &fi);
-    if (ret) {
+    ret = fi_getinfo(TRF_FABRIC_VERSION, host, port, fiflags, hints, &fi);
+    if (ret)
+    {
         trf_fi_error("fi_getinfo", ret);
-        goto free_context;
+        return ret;
     }
 
     /*  Iterate through the list of interfaces and print out the name and
         provider name (debug)
     */
     
-    trf_debug("Available fabric providers:\n");
-    trf_debug("%30s %20s %20s\n", "Network", "Provider", "Address");
-    for (fi_node = fi; fi_node; fi_node = fi_node->next)
+    trfPrintFabricProviders(fi);
+
+    *fi_out = fi;
+    return 0;
+}
+
+int trfInsertAVSerialized(PTRFXFabric ctx, char * addr, fi_addr_t * addr_out)
+{
+    void ** data = calloc(1, sizeof(void *));
+
+    trf__log_trace("data: %p, data[0]: %p", data, data[0]);
+
+    int fmt, ret;
+    ret = trfDeserializeAddress(addr, strlen(addr), &data[0], &fmt);
+    if (ret)
     {
-        trf_debug("info: %s\n", fi_tostr(fi_node, FI_TYPE_INFO));
-        // trf_debug(
-        //     "%30s %20s %20s\n",
-        //     // fi_node->nic ? fi_node->nic->device_attr->name : "-",
-        //     // fi_node->nic ? fi_node->nic->link_attr->network_type : "-",
-        //     fi_node->fabric_attr ? fi_node->fabric_attr->name : "-",
-        //     fi_node->fabric_attr ? fi_node->fabric_attr->prov_name : "-",
-        //     req_type == TRF_EP_SOURCE ? (char *) fi_node->src_addr : (char *) fi_node->dest_addr
-        // );
+        trf__log_error("Unable to deserialize address");
+        return ret;
     }
 
-    if (req_type == TRF_EP_SOURCE) {
-        hints->src_addr = malloc(fi->src_addrlen);
-        hints->src_addrlen = fi->src_addrlen;
-        memcpy(hints->src_addr, fi->src_addr, fi->src_addrlen);
-    } else if (req_type == TRF_EP_SINK) {
-        hints->dest_addr = malloc(fi->dest_addrlen);
-        hints->dest_addrlen = fi->dest_addrlen;
-        memcpy(hints->dest_addr, fi->dest_addr, fi->dest_addrlen);
-    }
-    else
+    trf__log_trace("data: %p, data[0]: %p", data, data[0]);
+
+    char dbgav[128];
+    ret = trfGetIPaddr(data[0], dbgav);
+    if (ret)
     {
-        trf_debug("Invalid EP type\n");
+        trf__log_error("Unable to get IP address");
+        free(data);
+        return ret;
+    }
+
+    trf__log_debug("Inserting AV for %s", dbgav);
+    trf__log_debug("Family: %d", ((struct sockaddr *) data[0])->sa_family);
+
+    int res;
+
+    size_t addrlen = sizeof(struct sockaddr_storage);
+    const char * saddr = fi_av_straddr(ctx->av, data[0], dbgav, &addrlen);
+    if (!saddr)
+    {
+        trf__log_error("Unable to get address string");
         ret = -EINVAL;
-        goto free_context;
+        free(data);
+        return ret;
     }
 
-    /*  Create a fabric and event queue */
+    trf__log_debug("Fi AV %s", saddr);
+    trf__log_debug("Fi AV index %lu", *addr_out);
 
-    ret = fi_fabric(fi->fabric_attr, &ctx->fabric, NULL);
-    if (ret) {
-        trf_fi_error("Open fabric", ret);
-        goto free_context;
-    }
-
-    struct fi_eq_attr eq_attr;
-    memset(&eq_attr, 0, sizeof(eq_attr));
-    eq_attr.size = 64;
-    eq_attr.wait_obj = FI_WAIT_UNSPEC;
-    eq_attr.signaling_vector = 0;
-    eq_attr.flags = 0;
-    eq_attr.wait_set = NULL;
-    
-    ret = fi_eq_open(ctx->fabric, &eq_attr, &ctx->eq, NULL);
-    if (ret) {
-        trf_fi_error("Open event queue", ret);
-        goto free_context;
-    }
-
-    ret = trfAllocActiveEP(ctx, fi);
-    if (ret) {
-        trf_fi_error("Allocate active endpoint", ret);
-        goto free_context;
-    }
-    ret = fi_enable(ctx->ep);
-    if (ret) {
-        trf_fi_error("Enable endpoint", ret);
-        goto free_context;
-    }
-
-    
-    /*  If we are the server, we only need to create a domain when clients
-        connect.
-    */
-
-    if (req_type == TRF_EP_SINK)
+    ret = fi_av_insert(ctx->av, data[0], 1, addr_out, FI_SYNC_ERR, &res);
+    if (ret != 1 || res != 0)
     {
-        ret = trfAllocActiveEP(ctx, fi);
-        if (ret) {
-            trf_fi_error("Create active endpoint", ret);
-            goto free_context;
-        }
-        ret = fi_enable(ctx->ep);
-        if (ret) {
-            trf_fi_error("Enable endpoint", ret);
-            goto free_context;
-        }
-        ret = fi_connect(ctx->ep, (void *) fi->dest_addr, NULL, 0);
-        if (ret) {
-            trf_fi_error("Connect to remote endpoint", ret);
-            goto free_context;
-        }
-        
-        uint32_t expected = sizeof(struct fi_eq_cm_entry);
-        uint32_t evt;
-        struct fi_eq_cm_entry entry;
-        
-        ret = fi_eq_sread(ctx->eq, &evt, &entry, expected, -1, 0);
-        if (ret < 0) {
-            if (-ret == FI_EAVAIL) {
-                char * out;
-                ret = trfEQLastErrorDesc(ctx->eq, &out);
-                if (ret) {
-                    trf_fi_error("Get last EQ error", ret);
-                    goto free_context;
+        trf__log_error("Unable to insert address");
+        trf_fi_error("fi_av_insert", -res);
+        ret = (ret == 0) ? -EINVAL : ret;
+        free(data);
+        return ret;
+    }
+
+    trf__log_debug("Fi AV index2 %lu", *addr_out);
+
+    struct sockaddr_storage out;
+    ret = fi_av_lookup(ctx->av, *addr_out, &out, &addrlen);
+    if (ret < 0)
+    {
+        trf__log_error("Unable to lookup address");
+        ret = (ret == 0) ? -EINVAL : ret;
+        free(data);
+        return ret;
+    }
+
+    trf__log_debug("Family: %d", out.ss_family);
+    trf__log_debug("Address: %s", &out);
+
+    memset(dbgav, 0, INET6_ADDRSTRLEN);
+    ret = trfGetIPaddr((struct sockaddr *) &out, dbgav);
+    if (ret)
+    {
+        trf__log_error("Unable to get IP address");
+        free(data);
+        return ret;
+    }
+
+    trf__log_debug("Decoded address: %s", dbgav);
+
+    free(data[0]);
+    free(data);
+    return 0;
+}
+
+int trfRegBuf(PTRFXFabric ctx, void * addr, size_t len, uint64_t flags,
+    struct fid_mr ** mr_out)
+{
+    trf__log_debug("Registering buffer %p with size %lu", addr, len);
+    int ret;
+    struct fid_mr * mr;
+    struct fid_domain * domain = ctx->domain;
+
+    ret = fi_mr_reg(domain, addr, len, flags, 0, 0, flags, &mr, NULL);
+    if (ret)
+    {
+        trf_fi_error("fi_mr_reg", ret);
+        return ret;
+    }
+
+    *mr_out = mr;
+    return 0;
+}
+
+int trfRegInternalMsgBuf(PTRFContext ctx, void * addr, size_t len)
+{
+    if (!ctx || !ctx->xfer_type || !ctx->xfer.fabric || !addr || !len)
+    {
+        trf__log_debug("ctx: %p, xfer_type: %d, fabric: %p, addr: %p, len: %lu",
+            ctx, ctx->xfer_type, ctx->xfer.fabric, addr, len);
+        return -EINVAL;
+    }
+
+    PTRFXFabric f = ctx->xfer.fabric;
+    return trfRegBuf(f, addr, len, FI_READ | FI_WRITE, &f->msg_mr);
+}
+
+int trfRegInternalFrameRecvBuf(PTRFContext ctx, void * addr, size_t len)
+{
+    if (!ctx || !ctx->xfer_type || !ctx->xfer.fabric || !addr || !len)
+        return -EINVAL;
+
+    PTRFXFabric f = ctx->xfer.fabric;
+    return trfRegBuf(f, addr, len, FI_REMOTE_WRITE, &f->fb_mr);
+}
+
+int trfRegInternalFrameSendBuf(PTRFContext ctx, void * addr, size_t len)
+{
+    if (!ctx || !ctx->xfer_type || !ctx->xfer.fabric || !addr || !len)
+        return -EINVAL;
+
+    PTRFXFabric f = ctx->xfer.fabric;
+    return trfRegBuf(f, addr, len, FI_READ, &f->fb_mr);
+}
+
+int trf__CheckSessionID(PTRFContext ctx, uint64_t session, uint8_t first)
+{
+    if (!ctx)
+    {
+        return -EINVAL;
+    }
+
+    int found = 0;
+
+    switch (first)
+    {
+        case 0:
+            for (PTRFContext ctx_itm = ctx; ctx_itm; ctx_itm = ctx_itm->next)
+            {
+                if (ctx->cli.session_id == session)
+                {
+                    found++;
                 }
-                trf_error("Fabric error: %s\n", out);
             }
-            trf_fi_error("Connection event wait", ret);
-            goto free_context;
-        }
-        if (ret != expected)
-        {
-            struct fi_eq_err_entry *err = (struct fi_eq_err_entry *) &entry;
-            fprintf(stderr, "fi_eq_sread returned %d bytes, expected %d\n", ret, expected);
-            fprintf(stderr, "Error data: Fabric: %s, Provider: %s\n", 
-                fi_strerror(err->err), strerror(err->prov_errno));
-            goto free_context;
-        }
-        if (evt != FI_CONNECTED)
-        {
-            fprintf(stderr, "fi_eq_sread returned unexpected event (%d)\n", evt);
-            goto free_context;
-        }
+        case 1:
+            for (PTRFContext ctx_itm = ctx; ctx_itm; ctx_itm = ctx_itm->next)
+            {
+                if (ctx->cli.session_id == session)
+                {
+                    return 1;
+                }
+            }
     }
-    else if (req_type == TRF_EP_SOURCE)
-    {
-        ret = fi_passive_ep(ctx->fabric, fi, &ctx->pep, NULL);
-        if (ret) {
-            trf_fi_error("Create passive endpoint", ret);
-            goto free_context;
-        }
-        ret = fi_pep_bind(ctx->pep, &ctx->eq->fid, 0);
-        if (ret) {
-            trf_fi_error("Bind passive endpoint to event queue", ret);
-            goto free_context;
-        }
-        ret = fi_listen(ctx->pep);
-        if (ret) {
-            trf_fi_error("Listen on passive endpoint", ret);
-            goto free_context;
-        }
-        trf_debug("Listening...\n");
-    }
-    else
-    {
-        fprintf(stderr, "Invalid request type\n");
-        goto free_context;
-    }
-    
-    /*  Clean up the interface list */
-
-    return 0;
-
-free_context:
-    
-    if (fi) {
-        fi_freeinfo(fi);
-    }
-    if (hints) {
-        fi_freeinfo(hints);
-    }
-    if (ctx->ep) {
-        fi_shutdown(ctx->ep, 0);
-        fi_close(&ctx->ep->fid);
-    }
-    else if (ctx->pep) {
-        fi_close(&ctx->pep->fid);
-    }
-    if (ctx->cq) {
-        fi_close(&ctx->cq->fid);
-    }
-    if (ctx->eq) {
-        fi_close(&ctx->eq->fid);
-    }
-    if (ctx->domain) {
-        fi_close(&ctx->domain->fid);
-    }
-    if (ctx->fabric) {
-        fi_close(&ctx->fabric->fid);
-    }
-    return ret;
-
+    return found;
 }
 
+int trfGetEndpointName(PTRFContext ctx, char ** sas_buf)
+{
+    void * sas_tmp;
+    size_t sas_len = 0;
+    int ret;
 
-int trfAccept(PTRFContext ctx, PTRFContext client) {
-
-    if (!client || !ctx)
-        return -EINVAL;
-
-    ssize_t ret;
-    uint32_t evt;
-    struct fi_eq_cm_entry entry;
-
-    ret = fi_eq_sread(ctx->eq, &evt, &entry, sizeof(entry), -1, 0);
-    if (ret == 0) {
-        return ret;
-    } if (ret < 0) {
-        char * out = NULL;
-        ret = trfEQLastErrorDesc(ctx->eq, &out);
-        if (ret < 0) {
-            trf_error("Couldn't read error data: %s\n", out);
-        } else {
-            trf_error("EQ read failed: %s\n", out);
-        }
-        return ret;
-    } if (ret != sizeof(entry)) {
-        trf_error("EQ read failed: byte count invalid");
-        return ret;
-    } if (evt != FI_CONNREQ) {
-        trf_error("EQ read failed: unexpected event %d\n", evt);
-        return ret;
+    ret = fi_getname(&ctx->xfer.fabric->ep->fid, NULL, &sas_len);
+    if (ret != 0 && ret != -FI_ETOOSMALL)
+    {
+        trf_fi_error("Get endpoint name length", ret);
+        return -1;    
     }
-
-    trf_log("Handling connection request\n");
-
-    trf_debug("domain: %p, entry: %p, client: %p, ctx: %p\n",
-        ctx->domain, entry.info, client, ctx);
-
-    ret = fi_endpoint(ctx->domain, entry.info, &client->ep, NULL);
-    if (ret) {
-        trf_fi_error("Create endpoint", ret);
-        return ret;
+    sas_tmp = calloc(1, sas_len);
+    if (!sas_tmp)
+    {
+        trf__log_error("Unable to allocate source address buffer");
     }
-
-    trf_debug("Binding EP/EQ ep: %p, eq: %p\n", client->ep, ctx->eq);
-
-    ret = fi_ep_bind(client->ep, &ctx->eq->fid, 0);
-    if (ret) {
-        trf_fi_error("Bind endpoint to event queue", ret);
-        return ret;
-    }
-
-    trf_debug("Binding EP/CQ ep: %p, eq: %p\n", client->ep, ctx->eq);
-
-    ret = fi_ep_bind(client->ep, &ctx->cq->fid, FI_TRANSMIT | FI_RECV);
-    if (ret) {
-        trf_fi_error("Bind endpoint to completion queue", ret);
-        return ret;
-    }
-
-    trf_debug("Registering memory\n");
-
-    ret = trfAllocLocalBuffer(ctx, 4096, &ctx->msg_mr);
-    if (ret) {
-        trf_error("Couldn't allocate memory region\n");
-        return ret;
-    }
-
-    trf_debug("Queueing receive into %p\n", ctx->msg_mr->fid.context);
-    ret = fi_recv(client->ep, ctx->msg_mr->fid.context, 4096, ctx->msg_mr->mem_desc, 0, NULL);
-    if (ret) {
-        trf_fi_error("Queue receive", ret);
-        return ret;
-    }
-
-    trf_debug("Accepting\n");
-
-    ret = fi_accept(client->ep, NULL, 0);
-    if (ret) {
-        trf_fi_error("Could not accept connection", ret);
-        return ret;
-    }
-
-    ret = fi_eq_sread(ctx->eq, &evt, &entry, sizeof(entry), -1, 0);
-    if (evt != FI_CONNECTED) {
-        trf_error("Could not read event\n");
-        return ret;
-    }
-
-    return 0;
-
-}
-
-
-int trfPopEQ(struct fid_eq * eq, void * buf, size_t len, int nb, int consume) {
-    
-    ssize_t ret;
-    uint32_t evt;
-    struct fi_eq_cm_entry entry;
-    size_t expected = sizeof(entry);
-
-    uint64_t flags = consume ? 0 : FI_PEEK;
-
-    if (nb) {
-        ret = fi_eq_read(eq, &evt, &entry, expected, flags);
-    } else {
-        ret = fi_eq_sread(eq, &evt, &entry, expected, -1, flags);
-    }
-
-    if (ret == 0) {
-        return 0;
-    } if (ret < 0) {
-        char * out = NULL;
-        ret = trfEQLastErrorDesc(eq, &out);
-        if (ret < 0) {
-            trf_error("Couldn't read error data: %s\n", out);
-        } else {
-            trf_error("EQ read failed: %s\n", out);
-        }
-    } if (ret != expected) {
-        trf_error("EQ read failed: byte count invalid (%ld/%ld)\n", ret, expected);
-        return ret;
-    } if (evt != FI_CONNREQ) {
-        trf_error("EQ read failed: unexpected event %d\n", evt);
+    ret = fi_getname(&ctx->xfer.fabric->ep->fid, sas_tmp, &sas_len);
+    if (ret)
+    {
+        trf_fi_error("Get name", ret);
         return -1;
-    } else {
-        printf("hello client\n");
-        return 1;
     }
-}
 
-
-int trfEQLastErrorDesc(struct fid_eq * eq, char ** out)
-{
-    int ret;
-    struct fi_eq_err_entry err;
-    ret = fi_eq_readerr(eq, &err, 0);
+    ret = trfSerializeAddress(sas_tmp, 
+        trfConvertFabricAF(ctx->xfer.fabric->addr_fmt), sas_buf);
     if (ret < 0)
     {
-        *out = (char *) fi_strerror(ret);
+        trf__log_error("Unable to serialize address");
+        free(sas_tmp);
         return ret;
     }
-    *out = (char *) fi_eq_strerror(eq, err.prov_errno, err.err_data, NULL, 0);
     return 0;
-}
-
-
-int trfCQLastErrorDesc(struct fid_cq * cq, char ** out)
-{
-    int ret;
-    struct fi_cq_err_entry err;
-    ret = fi_cq_readerr(cq, &err, 0);
-    if (ret < 0)
-    {
-        *out = (char *) fi_strerror(ret);
-        return ret;
-    }
-    *out = (char *) fi_cq_strerror(cq, err.prov_errno, err.err_data, NULL, 0);
-    return 0;
-}
-
-
-int trfSinkInit(char * node, char * service, PTRFContext ctx)
-{
-    if (!ctx)
-        return -EINVAL;
-    
-    return trfCreateEP(node, service, TRF_EP_SINK, ctx);
-}
-
-
-int trfSourceInit(char * node, char * service, PTRFContext ctx)
-{
-    if (!ctx)
-        return -EINVAL;
-    
-    return trfCreateEP(node, service, TRF_EP_SOURCE, ctx);
-}
-
-
-uint64_t trfSourceCheckReq(PTRFContext ctx, int nb)
-{
-    if (!ctx)
-        return -EINVAL;
-    
-    struct fi_cq_entry cqe;
-    int ret;
-
-    ret = trfGetCQEvent(ctx->cq, &cqe, nb);
-    if (ret < 0)
-        return ret;
-
 }

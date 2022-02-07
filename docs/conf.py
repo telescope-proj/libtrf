@@ -83,7 +83,7 @@ html_theme_options = {
 html_static_path = ['_static']
 
 breathe_projects = {
-	"libtrf": "_build/xml/"
+	"libtrf": "_BUILD/xml/"
 }
 breathe_default_project = "libtrf"
 breathe_default_members = ('members', 'undoc-members')

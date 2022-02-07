@@ -1,0 +1,267 @@
+<!DOCTYPE html>
+<html class="writer-html5" lang="en" >
+<head>
+  <meta charset="utf-8" /><meta name="generator" content="Docutils 0.17.1: http://docutils.sourceforge.net/" />
+
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>TRF_NCP &mdash; libtrf  documentation</title>
+      <link rel="stylesheet" href="../_static/pygments.css" type="text/css" />
+      <link rel="stylesheet" href="../_static/css/theme.css" type="text/css" />
+      <link rel="stylesheet" href="../_static/graphviz.css" type="text/css" />
+  <!--[if lt IE 9]>
+    <script src="../_static/js/html5shiv.min.js"></script>
+  <![endif]-->
+  
+        <script data-url_root="../" id="documentation_options" src="../_static/documentation_options.js"></script>
+        <script src="../_static/jquery.js"></script>
+        <script src="../_static/underscore.js"></script>
+        <script src="../_static/doctools.js"></script>
+    <script src="../_static/js/theme.js"></script>
+    <link rel="index" title="Index" href="../genindex.html" />
+    <link rel="search" title="Search" href="../search.html" />
+    <link rel="next" title="TRF_PREFLIGHT" href="trf_preflight.html" />
+    <link rel="prev" title="TRF_MSG" href="trf_msg.html" /> 
+</head>
+
+<body class="wy-body-for-nav"> 
+  <div class="wy-grid-for-nav">
+    <nav data-toggle="wy-nav-shift" class="wy-nav-side">
+      <div class="wy-side-scroll">
+        <div class="wy-side-nav-search" >
+            <a href="../index.html" class="icon icon-home"> libtrf
+          </a>
+<div role="search">
+  <form id="rtd-search-form" class="wy-form" action="../search.html" method="get">
+    <input type="text" name="q" placeholder="Search docs" />
+    <input type="hidden" name="check_keywords" value="yes" />
+    <input type="hidden" name="area" value="default" />
+  </form>
+</div>
+        </div><div class="wy-menu wy-menu-vertical" data-spy="affix" role="navigation" aria-label="Navigation menu">
+              <ul class="current">
+<li class="toctree-l1 current"><a class="reference internal" href="index.html">Libtrf Documentation</a><ul class="current">
+<li class="toctree-l2"><a class="reference internal" href="trf.html">TRF</a></li>
+<li class="toctree-l2"><a class="reference internal" href="trf_inet.html">TRF_INET</a></li>
+<li class="toctree-l2"><a class="reference internal" href="trf_interface.html">TRF_INTERFACE</a></li>
+<li class="toctree-l2"><a class="reference internal" href="trf_internal.html">TRF_INTERNAL</a></li>
+<li class="toctree-l2"><a class="reference internal" href="trf_msg.html">TRF_MSG</a></li>
+<li class="toctree-l2 current"><a class="current reference internal" href="#">TRF_NCP</a></li>
+<li class="toctree-l2"><a class="reference internal" href="trf_preflight.html">TRF_PREFLIGHT</a></li>
+<li class="toctree-l2"><a class="reference internal" href="trf_proto.html">TRF_PROTOBUF</a></li>
+</ul>
+</li>
+</ul>
+
+        </div>
+      </div>
+    </nav>
+
+    <section data-toggle="wy-nav-shift" class="wy-nav-content-wrap"><nav class="wy-nav-top" aria-label="Mobile navigation menu" >
+          <i data-toggle="wy-nav-top" class="fa fa-bars"></i>
+          <a href="../index.html">libtrf</a>
+      </nav>
+
+      <div class="wy-nav-content">
+        <div class="rst-content">
+          <div role="navigation" aria-label="Page navigation">
+  <ul class="wy-breadcrumbs">
+      <li><a href="../index.html" class="icon icon-home"></a> &raquo;</li>
+          <li><a href="index.html">Libtrf Documentation</a> &raquo;</li>
+      <li>TRF_NCP</li>
+      <li class="wy-breadcrumbs-aside">
+            <a href="../_sources/api/trf_ncp.rst.txt" rel="nofollow"> View page source</a>
+      </li>
+  </ul>
+  <hr/>
+</div>
+          <div role="main" class="document" itemscope="itemscope" itemtype="http://schema.org/Article">
+           <div itemprop="articleBody">
+             
+  <section id="trf-ncp">
+<span id="api-ncp"></span><h1>TRF_NCP<a class="headerlink" href="#trf-ncp" title="Permalink to this headline"></a></h1>
+<p>Negotiation Channel Protocol Messaging Functions. </p>
+<div class="breathe-sectiondef docutils container">
+<p class="breathe-sectiondef-title rubric" id="breathe-section-title-defines">Defines</p>
+<dl class="cpp macro">
+<dt class="sig sig-object cpp" id="c.TRF_API_MAJOR">
+<span class="target" id="trf__ncp_8h_1aaa9c4613d002fe8b3843c60179b71f98"></span><span class="sig-name descname"><span class="n"><span class="pre">TRF_API_MAJOR</span></span></span><a class="headerlink" href="#c.TRF_API_MAJOR" title="Permalink to this definition"></a><br /></dt>
+<dd></dd></dl>
+
+<dl class="cpp macro">
+<dt class="sig sig-object cpp" id="c.TRF_API_MINOR">
+<span class="target" id="trf__ncp_8h_1a221ba8dbb463d99df7ff06f1c223302d"></span><span class="sig-name descname"><span class="n"><span class="pre">TRF_API_MINOR</span></span></span><a class="headerlink" href="#c.TRF_API_MINOR" title="Permalink to this definition"></a><br /></dt>
+<dd></dd></dl>
+
+<dl class="cpp macro">
+<dt class="sig sig-object cpp" id="c.TRF_API_PATCH">
+<span class="target" id="trf__ncp_8h_1a1e930d83eaa06bbe076984aaee353772"></span><span class="sig-name descname"><span class="n"><span class="pre">TRF_API_PATCH</span></span></span><a class="headerlink" href="#c.TRF_API_PATCH" title="Permalink to this definition"></a><br /></dt>
+<dd></dd></dl>
+
+</div>
+<div class="breathe-sectiondef docutils container">
+<p class="breathe-sectiondef-title rubric" id="breathe-section-title-functions">Functions</p>
+<dl class="cpp function">
+<dt class="sig sig-object cpp" id="_CPPv415trfNCServerInit11PTRFContextPcPc">
+<span id="_CPPv315trfNCServerInit11PTRFContextPcPc"></span><span id="_CPPv215trfNCServerInit11PTRFContextPcPc"></span><span id="trfNCServerInit__PTRFContext.cP.cP"></span><span class="target" id="trf__ncp_8h_1a8c87b953626c39fcf5c9cc9fd1fd3904"></span><span class="kt"><span class="pre">int</span></span><span class="w"> </span><span class="sig-name descname"><span class="n"><span class="pre">trfNCServerInit</span></span></span><span class="sig-paren">(</span><span class="n"><span class="pre">PTRFContext</span></span><span class="w"> </span><span class="n sig-param"><span class="pre">ctx</span></span>, <span class="kt"><span class="pre">char</span></span><span class="w"> </span><span class="p"><span class="pre">*</span></span><span class="n sig-param"><span class="pre">host</span></span>, <span class="kt"><span class="pre">char</span></span><span class="w"> </span><span class="p"><span class="pre">*</span></span><span class="n sig-param"><span class="pre">port</span></span><span class="sig-paren">)</span><a class="headerlink" href="#_CPPv415trfNCServerInit11PTRFContextPcPc" title="Permalink to this definition"></a><br /></dt>
+<dd><p>Initializes the out of band negatiation channel for the server. Sets the listening FD inside the context. </p>
+<p>Initialize the out-of-band negotiation channel client. Sets the client FD inside of the context to an established connection.</p>
+<p>
+Initializes the out of band negatiation channel for the server. Sets the listening FD inside the context.</p>
+<dl class="field-list simple">
+<dt class="field-odd">Parameters</dt>
+<dd class="field-odd"><ul class="simple">
+<li><p><strong>ctx</strong> – Context to use </p></li>
+<li><p><strong>host</strong> – Hostname to bind to </p></li>
+<li><p><strong>port</strong> – Port to bind to </p></li>
+<li><p><strong>ctx</strong> – Context to use. </p></li>
+<li><p><strong>host</strong> – Hostname to connect to </p></li>
+<li><p><strong>port</strong> – Port to connect to. </p></li>
+<li><p><strong>ctx</strong> – Context to use. </p></li>
+<li><p><strong>host</strong> – Hostname to connect to </p></li>
+<li><p><strong>port</strong> – Port to connect to. </p></li>
+</ul>
+</dd>
+<dt class="field-even">Returns</dt>
+<dd class="field-even"><p>0 on success, negative error code on failure</p>
+</dd>
+<dt class="field-odd">Returns</dt>
+<dd class="field-odd"><p>0 on success, negative error code on failure</p>
+</dd>
+<dt class="field-even">Returns</dt>
+<dd class="field-even"><p>0 on success, negative error code on failure </p>
+</dd>
+</dl>
+</dd></dl>
+
+<dl class="cpp function">
+<dt class="sig sig-object cpp" id="_CPPv411trfNCAccept11PTRFContext11PTRFContext">
+<span id="_CPPv311trfNCAccept11PTRFContext11PTRFContext"></span><span id="_CPPv211trfNCAccept11PTRFContext11PTRFContext"></span><span id="trfNCAccept__PTRFContext.PTRFContext"></span><span class="target" id="trf__ncp_8h_1a24d32617c0f7342d66f413b762668ab5"></span><span class="kt"><span class="pre">int</span></span><span class="w"> </span><span class="sig-name descname"><span class="n"><span class="pre">trfNCAccept</span></span></span><span class="sig-paren">(</span><span class="n"><span class="pre">PTRFContext</span></span><span class="w"> </span><span class="n sig-param"><span class="pre">ctx</span></span>, <span class="n"><span class="pre">PTRFContext</span></span><span class="w"> </span><span class="n sig-param"><span class="pre">ctx_out</span></span><span class="sig-paren">)</span><a class="headerlink" href="#_CPPv411trfNCAccept11PTRFContext11PTRFContext" title="Permalink to this definition"></a><br /></dt>
+<dd><p>Accepts an incoming connection. </p>
+<dl class="field-list simple">
+<dt class="field-odd">Parameters</dt>
+<dd class="field-odd"><ul class="simple">
+<li><p><strong>ctx</strong> – Context to use. </p></li>
+<li><p><strong>ctx_out</strong> – Client context. </p></li>
+</ul>
+</dd>
+<dt class="field-even">Returns</dt>
+<dd class="field-even"><p>0 on sucess, negative erro code on failure. </p>
+</dd>
+</dl>
+</dd></dl>
+
+<dl class="cpp function">
+<dt class="sig sig-object cpp" id="_CPPv416trfNCServerClose11PTRFContext">
+<span id="_CPPv316trfNCServerClose11PTRFContext"></span><span id="_CPPv216trfNCServerClose11PTRFContext"></span><span id="trfNCServerClose__PTRFContext"></span><span class="target" id="trf__ncp_8h_1ac5a2cc6c554f547627461446174758a4"></span><span class="kt"><span class="pre">int</span></span><span class="w"> </span><span class="sig-name descname"><span class="n"><span class="pre">trfNCServerClose</span></span></span><span class="sig-paren">(</span><span class="n"><span class="pre">PTRFContext</span></span><span class="w"> </span><span class="n sig-param"><span class="pre">ctx</span></span><span class="sig-paren">)</span><a class="headerlink" href="#_CPPv416trfNCServerClose11PTRFContext" title="Permalink to this definition"></a><br /></dt>
+<dd><p>Clos the negotiation channel server, disconneting the client. </p>
+<dl class="field-list simple">
+<dt class="field-odd">Parameters</dt>
+<dd class="field-odd"><p><strong>ctx</strong> – Context to use </p>
+</dd>
+<dt class="field-even">Returns</dt>
+<dd class="field-even"><p>0 on success, negative error code on failure </p>
+</dd>
+</dl>
+</dd></dl>
+
+<dl class="cpp function">
+<dt class="sig sig-object cpp" id="_CPPv415trfNCClientInit11PTRFContextPcPc">
+<span id="_CPPv315trfNCClientInit11PTRFContextPcPc"></span><span id="_CPPv215trfNCClientInit11PTRFContextPcPc"></span><span id="trfNCClientInit__PTRFContext.cP.cP"></span><span class="target" id="trf__ncp_8h_1a78458248dbc305a7d3bad07931cccaa9"></span><span class="kt"><span class="pre">int</span></span><span class="w"> </span><span class="sig-name descname"><span class="n"><span class="pre">trfNCClientInit</span></span></span><span class="sig-paren">(</span><span class="n"><span class="pre">PTRFContext</span></span><span class="w"> </span><span class="n sig-param"><span class="pre">ctx</span></span>, <span class="kt"><span class="pre">char</span></span><span class="w"> </span><span class="p"><span class="pre">*</span></span><span class="n sig-param"><span class="pre">host</span></span>, <span class="kt"><span class="pre">char</span></span><span class="w"> </span><span class="p"><span class="pre">*</span></span><span class="n sig-param"><span class="pre">port</span></span><span class="sig-paren">)</span><a class="headerlink" href="#_CPPv415trfNCClientInit11PTRFContextPcPc" title="Permalink to this definition"></a><br /></dt>
+<dd><p>Initiate the client server communitation, sending API version. </p>
+<dl class="field-list simple">
+<dt class="field-odd">Parameters</dt>
+<dd class="field-odd"><ul class="simple">
+<li><p><strong>ctx</strong> – Context to use </p></li>
+<li><p><strong>host</strong> – Server host </p></li>
+<li><p><strong>port</strong> – Server port </p></li>
+</ul>
+</dd>
+<dt class="field-even">Returns</dt>
+<dd class="field-even"><p>0 on success, negative erro code on error. </p>
+</dd>
+</dl>
+</dd></dl>
+
+<dl class="cpp function">
+<dt class="sig sig-object cpp" id="_CPPv416trfNCClientClose11PTRFContext">
+<span id="_CPPv316trfNCClientClose11PTRFContext"></span><span id="_CPPv216trfNCClientClose11PTRFContext"></span><span id="trfNCClientClose__PTRFContext"></span><span class="target" id="trf__ncp_8h_1ae1c54e2b5b782db6ebbf7451c630fce5"></span><span class="kt"><span class="pre">int</span></span><span class="w"> </span><span class="sig-name descname"><span class="n"><span class="pre">trfNCClientClose</span></span></span><span class="sig-paren">(</span><span class="n"><span class="pre">PTRFContext</span></span><span class="w"> </span><span class="n sig-param"><span class="pre">ctx</span></span><span class="sig-paren">)</span><a class="headerlink" href="#_CPPv416trfNCClientClose11PTRFContext" title="Permalink to this definition"></a><br /></dt>
+<dd><p>Close the negotiation channel from client. </p>
+<dl class="field-list simple">
+<dt class="field-odd">Parameters</dt>
+<dd class="field-odd"><p><strong>ctx</strong> – Context to use. </p>
+</dd>
+<dt class="field-even">Returns</dt>
+<dd class="field-even"><p>0 on success, negative error code on failure. </p>
+</dd>
+</dl>
+</dd></dl>
+
+<dl class="cpp function">
+<dt class="sig sig-object cpp" id="_CPPv415trfNCNewSession11PTRFContextP11PTRFContext">
+<span id="_CPPv315trfNCNewSession11PTRFContextP11PTRFContext"></span><span id="_CPPv215trfNCNewSession11PTRFContextP11PTRFContext"></span><span id="trfNCNewSession__PTRFContext.PTRFContextP"></span><span class="target" id="trf__ncp_8h_1a7a5015fb9142b2b3a9d044a7112767e6"></span><span class="kt"><span class="pre">int</span></span><span class="w"> </span><span class="sig-name descname"><span class="n"><span class="pre">trfNCNewSession</span></span></span><span class="sig-paren">(</span><span class="n"><span class="pre">PTRFContext</span></span><span class="w"> </span><span class="n sig-param"><span class="pre">ctx</span></span>, <span class="n"><span class="pre">PTRFContext</span></span><span class="w"> </span><span class="p"><span class="pre">*</span></span><span class="n sig-param"><span class="pre">out</span></span><span class="sig-paren">)</span><a class="headerlink" href="#_CPPv415trfNCNewSession11PTRFContextP11PTRFContext" title="Permalink to this definition"></a><br /></dt>
+<dd><p>Allocate memory for a new session. </p>
+<dl class="field-list simple">
+<dt class="field-odd">Parameters</dt>
+<dd class="field-odd"><ul class="simple">
+<li><p><strong>ctx</strong> – Context to store connection </p></li>
+<li><p><strong>out</strong> – Pointer to the created session, also accessible via the client list in ctx </p></li>
+</ul>
+</dd>
+<dt class="field-even">Returns</dt>
+<dd class="field-even"><p>0 on success, negative error code on failure. </p>
+</dd>
+</dl>
+</dd></dl>
+
+<dl class="cpp function">
+<dt class="sig sig-object cpp" id="_CPPv423trf__AddrMsgToInterfaceP22TrfMsg__MessageWrapperP13PTRFInterface">
+<span id="_CPPv323trf__AddrMsgToInterfaceP22TrfMsg__MessageWrapperP13PTRFInterface"></span><span id="_CPPv223trf__AddrMsgToInterfaceP22TrfMsg__MessageWrapperP13PTRFInterface"></span><span id="trf__AddrMsgToInterface__TrfMsg__MessageWrapperP.PTRFInterfaceP"></span><span class="target" id="trf__ncp_8h_1a01b200d153e893ed316772c122ffa3c4"></span><span class="kt"><span class="pre">int</span></span><span class="w"> </span><span class="sig-name descname"><span class="n"><span class="pre">trf__AddrMsgToInterface</span></span></span><span class="sig-paren">(</span><a class="reference internal" href="trf_proto.html#_CPPv422TrfMsg__MessageWrapper" title="TrfMsg__MessageWrapper"><span class="n"><span class="pre">TrfMsg__MessageWrapper</span></span></a><span class="w"> </span><span class="p"><span class="pre">*</span></span><span class="n sig-param"><span class="pre">msg</span></span>, <span class="n"><span class="pre">PTRFInterface</span></span><span class="w"> </span><span class="p"><span class="pre">*</span></span><span class="n sig-param"><span class="pre">out</span></span><span class="sig-paren">)</span><a class="headerlink" href="#_CPPv423trf__AddrMsgToInterfaceP22TrfMsg__MessageWrapperP13PTRFInterface" title="Permalink to this definition"></a><br /></dt>
+<dd><p>Add Protobuf message to PTRFInterface. </p>
+<dl class="field-list simple">
+<dt class="field-odd">Parameters</dt>
+<dd class="field-odd"><ul class="simple">
+<li><p><strong>msg</strong> – Protobuf message wrapper </p></li>
+<li><p><strong>out</strong> – PTRFInterface to message to be decoded into </p></li>
+</ul>
+</dd>
+<dt class="field-even">Returns</dt>
+<dd class="field-even"><p>0 on success, negative error code on failure </p>
+</dd>
+</dl>
+</dd></dl>
+
+</div>
+</section>
+
+
+           </div>
+          </div>
+          <footer><div class="rst-footer-buttons" role="navigation" aria-label="Footer">
+        <a href="trf_msg.html" class="btn btn-neutral float-left" title="TRF_MSG" accesskey="p" rel="prev"><span class="fa fa-arrow-circle-left" aria-hidden="true"></span> Previous</a>
+        <a href="trf_preflight.html" class="btn btn-neutral float-right" title="TRF_PREFLIGHT" accesskey="n" rel="next">Next <span class="fa fa-arrow-circle-right" aria-hidden="true"></span></a>
+    </div>
+
+  <hr/>
+
+  <div role="contentinfo">
+    <p>&#169; Copyright 2022, Telescope Team.</p>
+  </div>
+
+  Built with <a href="https://www.sphinx-doc.org/">Sphinx</a> using a
+    <a href="https://github.com/readthedocs/sphinx_rtd_theme">theme</a>
+    provided by <a href="https://readthedocs.org">Read the Docs</a>.
+   
+
+</footer>
+        </div>
+      </div>
+    </section>
+  </div>
+  <script>
+      jQuery(function () {
+          SphinxRtdTheme.Navigation.enable(true);
+      });
+  </script> 
+
+</body>
+</html>

@@ -1,0 +1,169 @@
+<!DOCTYPE html>
+<html class="writer-html5" lang="en" >
+<head>
+  <meta charset="utf-8" /><meta name="generator" content="Docutils 0.17.1: http://docutils.sourceforge.net/" />
+
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>TRF_PREFLIGHT &mdash; libtrf  documentation</title>
+      <link rel="stylesheet" href="../_static/pygments.css" type="text/css" />
+      <link rel="stylesheet" href="../_static/css/theme.css" type="text/css" />
+      <link rel="stylesheet" href="../_static/graphviz.css" type="text/css" />
+  <!--[if lt IE 9]>
+    <script src="../_static/js/html5shiv.min.js"></script>
+  <![endif]-->
+  
+        <script data-url_root="../" id="documentation_options" src="../_static/documentation_options.js"></script>
+        <script src="../_static/jquery.js"></script>
+        <script src="../_static/underscore.js"></script>
+        <script src="../_static/doctools.js"></script>
+    <script src="../_static/js/theme.js"></script>
+    <link rel="index" title="Index" href="../genindex.html" />
+    <link rel="search" title="Search" href="../search.html" />
+    <link rel="next" title="TRF_PROTOBUF" href="trf_proto.html" />
+    <link rel="prev" title="TRF_NCP" href="trf_ncp.html" /> 
+</head>
+
+<body class="wy-body-for-nav"> 
+  <div class="wy-grid-for-nav">
+    <nav data-toggle="wy-nav-shift" class="wy-nav-side">
+      <div class="wy-side-scroll">
+        <div class="wy-side-nav-search" >
+            <a href="../index.html" class="icon icon-home"> libtrf
+          </a>
+<div role="search">
+  <form id="rtd-search-form" class="wy-form" action="../search.html" method="get">
+    <input type="text" name="q" placeholder="Search docs" />
+    <input type="hidden" name="check_keywords" value="yes" />
+    <input type="hidden" name="area" value="default" />
+  </form>
+</div>
+        </div><div class="wy-menu wy-menu-vertical" data-spy="affix" role="navigation" aria-label="Navigation menu">
+              <ul class="current">
+<li class="toctree-l1 current"><a class="reference internal" href="index.html">Libtrf Documentation</a><ul class="current">
+<li class="toctree-l2"><a class="reference internal" href="trf.html">TRF</a></li>
+<li class="toctree-l2"><a class="reference internal" href="trf_inet.html">TRF_INET</a></li>
+<li class="toctree-l2"><a class="reference internal" href="trf_interface.html">TRF_INTERFACE</a></li>
+<li class="toctree-l2"><a class="reference internal" href="trf_internal.html">TRF_INTERNAL</a></li>
+<li class="toctree-l2"><a class="reference internal" href="trf_msg.html">TRF_MSG</a></li>
+<li class="toctree-l2"><a class="reference internal" href="trf_ncp.html">TRF_NCP</a></li>
+<li class="toctree-l2 current"><a class="current reference internal" href="#">TRF_PREFLIGHT</a></li>
+<li class="toctree-l2"><a class="reference internal" href="trf_proto.html">TRF_PROTOBUF</a></li>
+</ul>
+</li>
+</ul>
+
+        </div>
+      </div>
+    </nav>
+
+    <section data-toggle="wy-nav-shift" class="wy-nav-content-wrap"><nav class="wy-nav-top" aria-label="Mobile navigation menu" >
+          <i data-toggle="wy-nav-top" class="fa fa-bars"></i>
+          <a href="../index.html">libtrf</a>
+      </nav>
+
+      <div class="wy-nav-content">
+        <div class="rst-content">
+          <div role="navigation" aria-label="Page navigation">
+  <ul class="wy-breadcrumbs">
+      <li><a href="../index.html" class="icon icon-home"></a> &raquo;</li>
+          <li><a href="index.html">Libtrf Documentation</a> &raquo;</li>
+      <li>TRF_PREFLIGHT</li>
+      <li class="wy-breadcrumbs-aside">
+            <a href="../_sources/api/trf_preflight.rst.txt" rel="nofollow"> View page source</a>
+      </li>
+  </ul>
+  <hr/>
+</div>
+          <div role="main" class="document" itemscope="itemscope" itemtype="http://schema.org/Article">
+           <div itemprop="articleBody">
+             
+  <section id="trf-preflight">
+<span id="api-preflight"></span><h1>TRF_PREFLIGHT<a class="headerlink" href="#trf-preflight" title="Permalink to this headline"></a></h1>
+<p>Preflight Requests. </p>
+<div class="breathe-sectiondef docutils container">
+<p class="breathe-sectiondef-title rubric" id="breathe-section-title-functions">Functions</p>
+<dl class="cpp function">
+<dt class="sig sig-object cpp" id="_CPPv423trfNCClientGetReachable13PTRFInterface7int64_t">
+<span id="_CPPv323trfNCClientGetReachable13PTRFInterface7int64_t"></span><span id="_CPPv223trfNCClientGetReachable13PTRFInterface7int64_t"></span><span id="trfNCClientGetReachable__PTRFInterface.int64_t"></span><span class="target" id="trf__preflight_8h_1afb017bc40a3828cc3201adec9c414839"></span><span class="kt"><span class="pre">int</span></span><span class="w"> </span><span class="sig-name descname"><span class="n"><span class="pre">trfNCClientGetReachable</span></span></span><span class="sig-paren">(</span><span class="n"><span class="pre">PTRFInterface</span></span><span class="w"> </span><span class="n sig-param"><span class="pre">serverIf</span></span>, <span class="n"><span class="pre">int64_t</span></span><span class="w"> </span><span class="n sig-param"><span class="pre">sessionID</span></span><span class="sig-paren">)</span><a class="headerlink" href="#_CPPv423trfNCClientGetReachable13PTRFInterface7int64_t" title="Permalink to this definition"></a><br /></dt>
+<dd><p>Get Client reachables to server. </p>
+<dl class="field-list simple">
+<dt class="field-odd">Parameters</dt>
+<dd class="field-odd"><ul class="simple">
+<li><p><strong>serverIf</strong> – Server reachable interfaces </p></li>
+<li><p><strong>sessionID</strong> – SessionID provided by the server during handshake </p></li>
+</ul>
+</dd>
+<dt class="field-even">Returns</dt>
+<dd class="field-even"><p>0 on success, negative error code on failure </p>
+</dd>
+</dl>
+</dd></dl>
+
+<dl class="cpp function">
+<dt class="sig sig-object cpp" id="_CPPv420trfNCServerPreFlightPiP8uint16_t">
+<span id="_CPPv320trfNCServerPreFlightPiP8uint16_t"></span><span id="_CPPv220trfNCServerPreFlightPiP8uint16_t"></span><span id="trfNCServerPreFlight__iP.uint16_tP"></span><span class="target" id="trf__preflight_8h_1a493f5dc67ff85bba44eca4f9538dfb6e"></span><span class="kt"><span class="pre">int</span></span><span class="w"> </span><span class="sig-name descname"><span class="n"><span class="pre">trfNCServerPreFlight</span></span></span><span class="sig-paren">(</span><span class="kt"><span class="pre">int</span></span><span class="w"> </span><span class="p"><span class="pre">*</span></span><span class="n sig-param"><span class="pre">fd_out</span></span>, <span class="n"><span class="pre">uint16_t</span></span><span class="w"> </span><span class="p"><span class="pre">*</span></span><span class="n sig-param"><span class="pre">port</span></span><span class="sig-paren">)</span><a class="headerlink" href="#_CPPv420trfNCServerPreFlightPiP8uint16_t" title="Permalink to this definition"></a><br /></dt>
+<dd><p>Start server socket for client to test connections. </p>
+<dl class="field-list simple">
+<dt class="field-odd">Parameters</dt>
+<dd class="field-odd"><ul class="simple">
+<li><p><strong>fd_out</strong> – socket the server is listening to connections on </p></li>
+<li><p><strong>port</strong> – port listening for connections </p></li>
+</ul>
+</dd>
+<dt class="field-even">Returns</dt>
+<dd class="field-even"><p>0 on success, negative error code on failure </p>
+</dd>
+</dl>
+</dd></dl>
+
+<dl class="cpp function">
+<dt class="sig sig-object cpp" id="_CPPv425trfNCServerPreFlightCheckii8uint64_t13PTRFInterface">
+<span id="_CPPv325trfNCServerPreFlightCheckii8uint64_t13PTRFInterface"></span><span id="_CPPv225trfNCServerPreFlightCheckii8uint64_t13PTRFInterface"></span><span id="trfNCServerPreFlightCheck__i.i.uint64_t.PTRFInterface"></span><span class="target" id="trf__preflight_8h_1a827847db874355c1574d96b4bff57a2c"></span><span class="kt"><span class="pre">int</span></span><span class="w"> </span><span class="sig-name descname"><span class="n"><span class="pre">trfNCServerPreFlightCheck</span></span></span><span class="sig-paren">(</span><span class="kt"><span class="pre">int</span></span><span class="w"> </span><span class="n sig-param"><span class="pre">sfd</span></span>, <span class="kt"><span class="pre">int</span></span><span class="w"> </span><span class="n sig-param"><span class="pre">timeout</span></span>, <span class="n"><span class="pre">uint64_t</span></span><span class="w"> </span><span class="n sig-param"><span class="pre">session_id</span></span>, <span class="n"><span class="pre">PTRFInterface</span></span><span class="w"> </span><span class="n sig-param"><span class="pre">addrs</span></span><span class="sig-paren">)</span><a class="headerlink" href="#_CPPv425trfNCServerPreFlightCheckii8uint64_t13PTRFInterface" title="Permalink to this definition"></a><br /></dt>
+<dd><p>Check Incoming connections src addresses. </p>
+<dl class="field-list simple">
+<dt class="field-odd">Parameters</dt>
+<dd class="field-odd"><ul class="simple">
+<li><p><strong>sfd</strong> – socket server is listening on </p></li>
+<li><p><strong>timeout</strong> – timeout for preflight checking </p></li>
+<li><p><strong>session_id</strong> – session_id </p></li>
+<li><p><strong>addrs</strong> – list fo addresses client will be coming from </p></li>
+</ul>
+</dd>
+</dl>
+</dd></dl>
+
+</div>
+</section>
+
+
+           </div>
+          </div>
+          <footer><div class="rst-footer-buttons" role="navigation" aria-label="Footer">
+        <a href="trf_ncp.html" class="btn btn-neutral float-left" title="TRF_NCP" accesskey="p" rel="prev"><span class="fa fa-arrow-circle-left" aria-hidden="true"></span> Previous</a>
+        <a href="trf_proto.html" class="btn btn-neutral float-right" title="TRF_PROTOBUF" accesskey="n" rel="next">Next <span class="fa fa-arrow-circle-right" aria-hidden="true"></span></a>
+    </div>
+
+  <hr/>
+
+  <div role="contentinfo">
+    <p>&#169; Copyright 2022, Telescope Team.</p>
+  </div>
+
+  Built with <a href="https://www.sphinx-doc.org/">Sphinx</a> using a
+    <a href="https://github.com/readthedocs/sphinx_rtd_theme">theme</a>
+    provided by <a href="https://readthedocs.org">Read the Docs</a>.
+   
+
+</footer>
+        </div>
+      </div>
+    </section>
+  </div>
+  <script>
+      jQuery(function () {
+          SphinxRtdTheme.Navigation.enable(true);
+      });
+  </script> 
+
+</body>
+</html>

@@ -1,0 +1,200 @@
+<!DOCTYPE html>
+<html class="writer-html5" lang="en" >
+<head>
+  <meta charset="utf-8" /><meta name="generator" content="Docutils 0.17.1: http://docutils.sourceforge.net/" />
+
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>TRF_INTERNAL &mdash; libtrf  documentation</title>
+      <link rel="stylesheet" href="../_static/pygments.css" type="text/css" />
+      <link rel="stylesheet" href="../_static/css/theme.css" type="text/css" />
+      <link rel="stylesheet" href="../_static/graphviz.css" type="text/css" />
+  <!--[if lt IE 9]>
+    <script src="../_static/js/html5shiv.min.js"></script>
+  <![endif]-->
+  
+        <script data-url_root="../" id="documentation_options" src="../_static/documentation_options.js"></script>
+        <script src="../_static/jquery.js"></script>
+        <script src="../_static/underscore.js"></script>
+        <script src="../_static/doctools.js"></script>
+    <script src="../_static/js/theme.js"></script>
+    <link rel="index" title="Index" href="../genindex.html" />
+    <link rel="search" title="Search" href="../search.html" />
+    <link rel="next" title="TRF_MSG" href="trf_msg.html" />
+    <link rel="prev" title="TRF_INTERFACE" href="trf_interface.html" /> 
+</head>
+
+<body class="wy-body-for-nav"> 
+  <div class="wy-grid-for-nav">
+    <nav data-toggle="wy-nav-shift" class="wy-nav-side">
+      <div class="wy-side-scroll">
+        <div class="wy-side-nav-search" >
+            <a href="../index.html" class="icon icon-home"> libtrf
+          </a>
+<div role="search">
+  <form id="rtd-search-form" class="wy-form" action="../search.html" method="get">
+    <input type="text" name="q" placeholder="Search docs" />
+    <input type="hidden" name="check_keywords" value="yes" />
+    <input type="hidden" name="area" value="default" />
+  </form>
+</div>
+        </div><div class="wy-menu wy-menu-vertical" data-spy="affix" role="navigation" aria-label="Navigation menu">
+              <ul class="current">
+<li class="toctree-l1 current"><a class="reference internal" href="index.html">Libtrf Documentation</a><ul class="current">
+<li class="toctree-l2"><a class="reference internal" href="trf.html">TRF</a></li>
+<li class="toctree-l2"><a class="reference internal" href="trf_inet.html">TRF_INET</a></li>
+<li class="toctree-l2"><a class="reference internal" href="trf_interface.html">TRF_INTERFACE</a></li>
+<li class="toctree-l2 current"><a class="current reference internal" href="#">TRF_INTERNAL</a></li>
+<li class="toctree-l2"><a class="reference internal" href="trf_msg.html">TRF_MSG</a></li>
+<li class="toctree-l2"><a class="reference internal" href="trf_ncp.html">TRF_NCP</a></li>
+<li class="toctree-l2"><a class="reference internal" href="trf_preflight.html">TRF_PREFLIGHT</a></li>
+<li class="toctree-l2"><a class="reference internal" href="trf_proto.html">TRF_PROTOBUF</a></li>
+</ul>
+</li>
+</ul>
+
+        </div>
+      </div>
+    </nav>
+
+    <section data-toggle="wy-nav-shift" class="wy-nav-content-wrap"><nav class="wy-nav-top" aria-label="Mobile navigation menu" >
+          <i data-toggle="wy-nav-top" class="fa fa-bars"></i>
+          <a href="../index.html">libtrf</a>
+      </nav>
+
+      <div class="wy-nav-content">
+        <div class="rst-content">
+          <div role="navigation" aria-label="Page navigation">
+  <ul class="wy-breadcrumbs">
+      <li><a href="../index.html" class="icon icon-home"></a> &raquo;</li>
+          <li><a href="index.html">Libtrf Documentation</a> &raquo;</li>
+      <li>TRF_INTERNAL</li>
+      <li class="wy-breadcrumbs-aside">
+            <a href="../_sources/api/trf_internal.rst.txt" rel="nofollow"> View page source</a>
+      </li>
+  </ul>
+  <hr/>
+</div>
+          <div role="main" class="document" itemscope="itemscope" itemtype="http://schema.org/Article">
+           <div itemprop="articleBody">
+             
+  <section id="trf-internal">
+<span id="api-internal"></span><h1>TRF_INTERNAL<a class="headerlink" href="#trf-internal" title="Permalink to this headline"></a></h1>
+<p>Internal Functions. </p>
+<div class="breathe-sectiondef docutils container">
+<p class="breathe-sectiondef-title rubric" id="breathe-section-title-defines">Defines</p>
+<dl class="cpp macro">
+<dt class="sig sig-object cpp" id="c.LOOP_COUNT">
+<span class="target" id="trf__internal_8h_1a09002b61ad87b03f8a39b3c7f9a7296b"></span><span class="sig-name descname"><span class="n"><span class="pre">LOOP_COUNT</span></span></span><a class="headerlink" href="#c.LOOP_COUNT" title="Permalink to this definition"></a><br /></dt>
+<dd></dd></dl>
+
+</div>
+<div class="breathe-sectiondef docutils container">
+<p class="breathe-sectiondef-title rubric" id="breathe-section-title-functions">Functions</p>
+<dl class="cpp function">
+<dt class="sig sig-object cpp" id="_CPPv419trf__CheckSessionID11PTRFContext8uint64_t7uint8_t">
+<span id="_CPPv319trf__CheckSessionID11PTRFContext8uint64_t7uint8_t"></span><span id="_CPPv219trf__CheckSessionID11PTRFContext8uint64_t7uint8_t"></span><span id="trf__CheckSessionID__PTRFContext.uint64_t.uint8_t"></span><span class="target" id="trf__internal_8h_1a3e7b31a0c5b28bdf246beebddd8d991a"></span><span class="kt"><span class="pre">int</span></span><span class="w"> </span><span class="sig-name descname"><span class="n"><span class="pre">trf__CheckSessionID</span></span></span><span class="sig-paren">(</span><span class="n"><span class="pre">PTRFContext</span></span><span class="w"> </span><span class="n sig-param"><span class="pre">ctx</span></span>, <span class="n"><span class="pre">uint64_t</span></span><span class="w"> </span><span class="n sig-param"><span class="pre">session</span></span>, <span class="n"><span class="pre">uint8_t</span></span><span class="w"> </span><span class="n sig-param"><span class="pre">first</span></span><span class="sig-paren">)</span><a class="headerlink" href="#_CPPv419trf__CheckSessionID11PTRFContext8uint64_t7uint8_t" title="Permalink to this definition"></a><br /></dt>
+<dd><p>Check the number of times a session ID has been used. </p>
+<dl class="field-list simple">
+<dt class="field-odd">Parameters</dt>
+<dd class="field-odd"><ul class="simple">
+<li><p><strong>ctx</strong> – Context </p></li>
+<li><p><strong>session</strong> – Session ID </p></li>
+<li><p><strong>first</strong> – Whether to the first item or the total count </p></li>
+</ul>
+</dd>
+<dt class="field-even">Returns</dt>
+<dd class="field-even"><p>Number of times this session ID has been used, negative error code on failure. </p>
+</dd>
+</dl>
+</dd></dl>
+
+<dl class="cpp function">
+<dt class="sig sig-object cpp" id="_CPPv426trf__AllocSessionForClient11PTRFContext8uint64_tP11PTRFContext">
+<span id="_CPPv326trf__AllocSessionForClient11PTRFContext8uint64_tP11PTRFContext"></span><span id="_CPPv226trf__AllocSessionForClient11PTRFContext8uint64_tP11PTRFContext"></span><span id="trf__AllocSessionForClient__PTRFContext.uint64_t.PTRFContextP"></span><span class="target" id="trf__internal_8h_1a1b3644866fb929f1ae64d1076dd90af6"></span><span class="kt"><span class="pre">int</span></span><span class="w"> </span><span class="sig-name descname"><span class="n"><span class="pre">trf__AllocSessionForClient</span></span></span><span class="sig-paren">(</span><span class="n"><span class="pre">PTRFContext</span></span><span class="w"> </span><span class="n sig-param"><span class="pre">ctx</span></span>, <span class="n"><span class="pre">uint64_t</span></span><span class="w"> </span><span class="n sig-param"><span class="pre">session_id</span></span>, <span class="n"><span class="pre">PTRFContext</span></span><span class="w"> </span><span class="p"><span class="pre">*</span></span><span class="n sig-param"><span class="pre">ctx_out</span></span><span class="sig-paren">)</span><a class="headerlink" href="#_CPPv426trf__AllocSessionForClient11PTRFContext8uint64_tP11PTRFContext" title="Permalink to this definition"></a><br /></dt>
+<dd><p>Allocate resouces for an incoming session on ther server side with a specific cookie. </p>
+<p>Allocates a resouces for an incoming session on the server side with a specific cookie, The cookie must not be in use; use the <a class="reference internal" href="#trf__internal_8h_1a3e7b31a0c5b28bdf246beebddd8d991a"><span class="std std-ref">trf__CheckSessionID()</span></a> to verify </p>
+<dl class="field-list simple">
+<dt class="field-odd">Parameters</dt>
+<dd class="field-odd"><ul class="simple">
+<li><p><strong>ctx</strong> – Context </p></li>
+<li><p><strong>session</strong> – Session ID </p></li>
+<li><p><strong>ctx_out</strong> – Pointer to the context item inserted into ctx </p></li>
+</ul>
+</dd>
+<dt class="field-even">Returns</dt>
+<dd class="field-even"><p>0 on success, negative error code on failurey. </p>
+</dd>
+</dl>
+</dd></dl>
+
+<dl class="cpp function">
+<dt class="sig sig-object cpp" id="_CPPv411trf__Rand64v">
+<span id="_CPPv311trf__Rand64v"></span><span id="_CPPv211trf__Rand64v"></span><span id="trf__Rand64"></span><span class="target" id="trf__internal_8h_1a2bb029aba12ba85bc4799778dc899868"></span><span class="k"><span class="pre">static</span></span><span class="w"> </span><span class="k"><span class="pre">inline</span></span><span class="w"> </span><span class="n"><span class="pre">uint64_t</span></span><span class="w"> </span><span class="sig-name descname"><span class="n"><span class="pre">trf__Rand64</span></span></span><span class="sig-paren">(</span><span class="sig-paren">)</span><a class="headerlink" href="#_CPPv411trf__Rand64v" title="Permalink to this definition"></a><br /></dt>
+<dd><p>Generate an 64-bit random integer. </p>
+<dl class="field-list simple">
+<dt class="field-odd">Returns</dt>
+<dd class="field-odd"><p>A random integer. </p>
+</dd>
+</dl>
+</dd></dl>
+
+<dl class="cpp function">
+<dt class="sig sig-object cpp" id="_CPPv416trf__GetPageSizev">
+<span id="_CPPv316trf__GetPageSizev"></span><span id="_CPPv216trf__GetPageSizev"></span><span id="trf__GetPageSize"></span><span class="target" id="trf__internal_8h_1a9b6d29d97675b8403e6f0dc95a8e951f"></span><span class="k"><span class="pre">static</span></span><span class="w"> </span><span class="k"><span class="pre">inline</span></span><span class="w"> </span><span class="n"><span class="pre">size_t</span></span><span class="w"> </span><span class="sig-name descname"><span class="n"><span class="pre">trf__GetPageSize</span></span></span><span class="sig-paren">(</span><span class="sig-paren">)</span><a class="headerlink" href="#_CPPv416trf__GetPageSizev" title="Permalink to this definition"></a><br /></dt>
+<dd><p>Get the system page size. </p>
+<dl class="field-list simple">
+<dt class="field-odd">Returns</dt>
+<dd class="field-odd"><p>System page size </p>
+</dd>
+</dl>
+</dd></dl>
+
+<dl class="cpp function">
+<dt class="sig sig-object cpp" id="_CPPv420trf__HammingWeight648uint64_t">
+<span id="_CPPv320trf__HammingWeight648uint64_t"></span><span id="_CPPv220trf__HammingWeight648uint64_t"></span><span id="trf__HammingWeight64__uint64_t"></span><span class="target" id="trf__internal_8h_1adb15f738ff4aeb20abcc28aeeb228f0e"></span><span class="k"><span class="pre">static</span></span><span class="w"> </span><span class="k"><span class="pre">inline</span></span><span class="w"> </span><span class="n"><span class="pre">uint8_t</span></span><span class="w"> </span><span class="sig-name descname"><span class="n"><span class="pre">trf__HammingWeight64</span></span></span><span class="sig-paren">(</span><span class="n"><span class="pre">uint64_t</span></span><span class="w"> </span><span class="n sig-param"><span class="pre">x</span></span><span class="sig-paren">)</span><a class="headerlink" href="#_CPPv420trf__HammingWeight648uint64_t" title="Permalink to this definition"></a><br /></dt>
+<dd><p>Calculate hamming weight of a 64-bit integer. </p>
+<dl class="field-list simple">
+<dt class="field-odd">Parameters</dt>
+<dd class="field-odd"><p><strong>x</strong> – 64-bit integer to calculate the hamming weight of </p>
+</dd>
+<dt class="field-even">Returns</dt>
+<dd class="field-even"><p>Hamming weight </p>
+</dd>
+</dl>
+</dd></dl>
+
+</div>
+</section>
+
+
+           </div>
+          </div>
+          <footer><div class="rst-footer-buttons" role="navigation" aria-label="Footer">
+        <a href="trf_interface.html" class="btn btn-neutral float-left" title="TRF_INTERFACE" accesskey="p" rel="prev"><span class="fa fa-arrow-circle-left" aria-hidden="true"></span> Previous</a>
+        <a href="trf_msg.html" class="btn btn-neutral float-right" title="TRF_MSG" accesskey="n" rel="next">Next <span class="fa fa-arrow-circle-right" aria-hidden="true"></span></a>
+    </div>
+
+  <hr/>
+
+  <div role="contentinfo">
+    <p>&#169; Copyright 2022, Telescope Team.</p>
+  </div>
+
+  Built with <a href="https://www.sphinx-doc.org/">Sphinx</a> using a
+    <a href="https://github.com/readthedocs/sphinx_rtd_theme">theme</a>
+    provided by <a href="https://readthedocs.org">Read the Docs</a>.
+   
+
+</footer>
+        </div>
+      </div>
+    </section>
+  </div>
+  <script>
+      jQuery(function () {
+          SphinxRtdTheme.Navigation.enable(true);
+      });
+  </script> 
+
+</body>
+</html>

@@ -170,14 +170,15 @@ struct TRFAddrV {
     */
     struct sockaddr         * dst_addr;
     /**
-      * @brief pair speed between the int
-rface    */
+      * @brief pair speed between the interface
+    */
     int32_t                 pair_speed;
+    /**
+      * @brief next item in linked list
+    */
     struct TRFAddrV         * next;
 };
-/**
-      * @brief Next item
-in linked list    */
+
 #define TRFI_VALID (1)
 
 /**
@@ -343,6 +344,138 @@ enum TRFXAddr {
     TRFX_ADDR_MAX                  
 };
 
+enum TRFTexFormat {
+    /**
+      * @brief Invalid
+      */
+    TRF_TEX_INVALID,
+    /**
+      * @brief RGBA packed pixels, 8 bits per channel
+      */
+    TRF_TEX_RGBA_8888,
+    /**
+      * @brief RGB packed pixels, 8 bits per channel
+      */
+    TRF_TEX_RGB_888,
+    /**
+      * @brief BGRA packed pixels, 8 bits per channel
+      */
+    TRF_TEX_BGRA_8888,
+    /**
+      * @brief BGR packed pixels, 8 bits per channel
+      */
+    TRF_TEX_BGR_888,
+    /**
+      * @brief DXT1 compressed texture format
+      */
+    TRF_TEX_DXT1,
+    /**
+     * @brief DXT5 compressed texture format
+     * 
+     */
+    TRF_TEX_DXT5,
+    /**
+     * @brief ETC1 compressed texture format
+     * 
+     */
+    TRF_TEX_ETC1,
+    /**
+      * @brief ETC2 compressed texture format
+      */
+    TRF_TEX_ETC2,
+    /**
+      * @brief RGBA, 16 bits per channel HDR float
+      */
+    TRF_TEX_RGBA_16161616F,
+    /**
+      * @brief RGBA, 16 bits per channel
+      */
+    TRF_TEX_RGBA_16161616,
+    /**
+      * @brief Sentinel Value
+      */
+    TRF_TEX_MAX
+};
+
+struct TRFDisplay {
+    /**
+     * @brief Display ID
+     * 
+     * The display ID, unique within a context. This display is the actual value
+     * used in the TRF API to identify which display should be used.
+     */
+    int32_t     id;
+    /**
+     * @brief Display name
+     *
+     * The display name is a user-facing string that identifies the display via
+     * a human-readable name, which could be the monitor name or the name of the
+     * server the display is connected to.
+     */
+    char        * name;
+    /**
+     * @brief Width
+     * 
+     * Display width in pixels
+     * 
+     */
+    uint32_t     width;
+    /**
+     * @brief Height
+     * 
+     * Display height in pixels
+     */
+    uint32_t    height;
+    /**
+     * @brief Refresh rate
+     * 
+     * Display refresh rate, in Hz.
+     */
+    uint32_t    rate;
+    /**`    
+     * @brief Texture format
+     * 
+     * Currently, only one texture format is supported simultaneously.
+     */
+    uint32_t    format;
+    /**
+     * @brief Display Group
+     *
+     * A server acting as a multiplexer for multiple sources may set logical
+     * display groups to allow users to select only sources from a particular
+     * machine.
+     *
+     */
+    uint32_t    dgid;
+    /**
+     * @brief X Offset
+     * 
+     * Horizontal offset of the display, relative to the display group only.
+     */
+    uint32_t    x_offset;
+    /**
+     * @brief Y Offset
+     * 
+     * Vertical offset of the display, relative to the display group only.
+     */ 
+    uint32_t    y_offset;
+    /**
+     * @brief Memory address of the display framebuffer
+     * 
+     */
+    void        * fb_addr;
+    /**
+     * @brief Memory region object for the display framebuffer. Do not set manually.
+     * 
+     */
+    struct fid_mr       * fb_mr;
+    /**
+     * @brief Next display in the list.
+     * 
+     */
+    struct TRFDisplay   * next;
+};
+
 /**
  * @brief The Telescope Remote Framebuffer Library Context
  *
@@ -393,32 +526,31 @@ struct TRFContext {
             /**
              * @brief Out of band channel FD.
              */
-            int                 client_fd;  // OOB channel client FD
+            int                 client_fd;
         } cli;
     };
-
     /**
      * @brief Transfer layer type. @see enum TRFXType
      * 
-     */
+    */
     enum TRFXType  xfer_type;
     /**
      * @brief Pointers to transport-specific context items
      * 
-     */
+    */
     union {
         struct TRFXFabric * fabric; // Libfabric context
     } xfer;
-
     /**
-     * @brief Related context pointer, previous entry
+     * @brief Display list
      * 
-     */
-    struct TRFContext * prev;
+     * A list of displays that are available on the server.
+    */
+    struct TRFDisplay * displays;
     /**
      * @brief Related context pointer, next entry
      * 
-     */
+    */
     struct TRFContext * next;
 
 };
@@ -699,5 +831,14 @@ void trfSendDisconnectMsg(int fd, uint64_t session_id);
   * @return nothing is retured
 */
 void trfDestroyContext(PTRFContext ctx);
+
+/**
+ * @brief Allocate an aligned block of memory.
+ * 
+ * @param size        Size of the memory block to allocate.
+ * @param alignment   Alignment of the memory block.
+ * @return            Pointer to the allocated memory block, or NULL on failure.
+ */
+void * trfAllocAligned(size_t size, size_t alignment);
 
 #endif // _TRF_H_

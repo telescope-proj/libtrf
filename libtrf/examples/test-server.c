@@ -27,19 +27,24 @@
 int main(int argc, char ** argv)
 {
     char* host = "127.0.0.1";
-    char* port = "35083";
+    char* port = "35085";
 
     PTRFContext ctx = trfAllocContext();
-    if (trfNCServerInit(ctx,host,port) < 0){
+    if (trfNCServerInit(ctx,host,port) < 0)
+    {
         fflush(stdout);
         return -1;
     }
     PTRFContext client_ctx = trfAllocContext();
-    if ( trfNCAccept(ctx , client_ctx ) < 0){
+    if (trfNCAccept(ctx , client_ctx ) < 0)
+    {
         fflush(stdout);
         return -1;
     }
 
     printf("Hello!\n");
+
+    trfDestroyContext(client_ctx);
+    trfDestroyContext(ctx);
 
 }

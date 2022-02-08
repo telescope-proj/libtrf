@@ -65,6 +65,8 @@ void trfFreeAddrV(PTRFAddrV av)
     while (v)
     {
         vn = v->next;
+        free(v->src_addr);
+        free(v->dst_addr);
         free(v);
         v = vn;
     }

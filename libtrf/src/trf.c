@@ -103,7 +103,8 @@ static const uint32_t __trf_fi_enum[] = {
     0
 };
 
-PTRFContext trfAllocContext() {
+PTRFContext trfAllocContext() 
+{
     PTRFContext ctx = calloc(1, sizeof(struct TRFContext));
     return ctx;
 }
@@ -270,7 +271,7 @@ void trfSendDisconnectMsg(int fd, uint64_t session_id)
 
 void trfDestroyContext(PTRFContext ctx)
 {
-    int ret;
+
     if (!ctx)
         return;
 
@@ -705,8 +706,6 @@ int trfInsertAVSerialized(PTRFXFabric ctx, char * addr, fi_addr_t * addr_out)
 {
     void ** data = calloc(1, sizeof(void *));
 
-    trf__log_trace("data: %p, data[0]: %p", data, data[0]);
-
     int fmt, ret;
     ret = trfDeserializeAddress(addr, strlen(addr), &data[0], &fmt);
     if (ret)
@@ -714,8 +713,6 @@ int trfInsertAVSerialized(PTRFXFabric ctx, char * addr, fi_addr_t * addr_out)
         trf__log_error("Unable to deserialize address");
         return ret;
     }
-
-    trf__log_trace("data: %p, data[0]: %p", data, data[0]);
 
     char dbgav[128];
     ret = trfGetIPaddr(data[0], dbgav);
@@ -741,9 +738,6 @@ int trfInsertAVSerialized(PTRFXFabric ctx, char * addr, fi_addr_t * addr_out)
         return ret;
     }
 
-    trf__log_debug("Fi AV %s", saddr);
-    trf__log_debug("Fi AV index %lu", *addr_out);
-
     ret = fi_av_insert(ctx->av, data[0], 1, addr_out, FI_SYNC_ERR, &res);
     if (ret != 1 || res != 0)
     {
@@ -754,31 +748,7 @@ int trfInsertAVSerialized(PTRFXFabric ctx, char * addr, fi_addr_t * addr_out)
         return ret;
     }
 
-    trf__log_debug("Fi AV index2 %lu", *addr_out);
-
-    struct sockaddr_storage out;
-    ret = fi_av_lookup(ctx->av, *addr_out, &out, &addrlen);
-    if (ret < 0)
-    {
-        trf__log_error("Unable to lookup address");
-        ret = (ret == 0) ? -EINVAL : ret;
-        free(data);
-        return ret;
-    }
-
-    trf__log_debug("Family: %d", out.ss_family);
-    trf__log_debug("Address: %s", &out);
-
-    memset(dbgav, 0, INET6_ADDRSTRLEN);
-    ret = trfGetIPaddr((struct sockaddr *) &out, dbgav);
-    if (ret)
-    {
-        trf__log_error("Unable to get IP address");
-        free(data);
-        return ret;
-    }
-
-    trf__log_debug("Decoded address: %s", dbgav);
+    trf__log_trace("AV Index: %lu", *addr_out);
 
     free(data[0]);
     free(data);
@@ -887,9 +857,9 @@ int trfGetEndpointName(PTRFContext ctx, char ** sas_buf)
     if (ret)
     {
         trf_fi_error("Get name", ret);
+        free(sas_tmp);
         return -1;
     }
-
     ret = trfSerializeAddress(sas_tmp, 
         trfConvertFabricAF(ctx->xfer.fabric->addr_fmt), sas_buf);
     if (ret < 0)
@@ -898,5 +868,20 @@ int trfGetEndpointName(PTRFContext ctx, char ** sas_buf)
         free(sas_tmp);
         return ret;
     }
+    free(sas_tmp);
     return 0;
+}
+
+void * trfAllocAligned(size_t size, size_t alignment)
+{
+    void * ptr;
+    int ret;
+
+    ret = posix_memalign(&ptr, alignment, size);
+    if (ret)
+    {
+        trf__log_error("Unable to allocate aligned memory");
+        return NULL;
+    }
+    return ptr;
 }

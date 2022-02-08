@@ -1,5 +1,7 @@
 # Telescope Remote Framebuffer Library
 
+![Documentation Build](https://github.com/telescope-proj/libtrf/actions/workflows/docs.yml/badge.svg)
+
 [Documentation for Libtrf](https://telescope-proj.github.io/libtrf/)
 ## Introduction
 

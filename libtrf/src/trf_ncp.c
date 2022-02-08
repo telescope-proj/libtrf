@@ -178,159 +178,188 @@ int trfNCClientInit(PTRFContext ctx, char * host, char * port)
 
     // Send client hello message to server indicating API version
 
-    uint8_t * buff = calloc(1, 4096);
+    uint8_t * buff = trfAllocAligned(4096, trf__GetPageSize());
     if (!buff)
     {
         trf__log_error("Unable to allocate buffer!");
-        goto cleanup;
+        goto close_sock;
     }
     
-    {
-        TrfMsg__MessageWrapper msg = TRF_MSG__MESSAGE_WRAPPER__INIT;
-        TrfMsg__ClientHello hello = TRF_MSG__CLIENT_HELLO__INIT;
-        TrfMsg__APIVersion ver = TRF_MSG__APIVERSION__INIT;
-        msg.wdata_case = TRF_MSG__MESSAGE_WRAPPER__WDATA_CLIENT_HELLO;
-        hello.version = &ver;
-        msg.client_hello = &hello;
-        ver.api_major = TRF_API_MAJOR;
-        ver.api_minor = TRF_API_MINOR;
-        ver.api_patch = TRF_API_PATCH;
-        
-        ret = trfNCSendDelimited(sfd, buff, 4096, 0, &msg);
-        if (ret)
-        {
-            trf__log_error("Send API version failed");
-            goto cleanup;
-        }
+    free(res);
+    res = NULL;
 
-        trf__log_trace("Sent hello message");
+    TrfMsg__MessageWrapper * msg = malloc(sizeof(TrfMsg__MessageWrapper));
+    if (!msg)
+    {
+        trf__log_error("Unable to allocate message wrapper!");
+        goto free_buff;
+    }
+    trf_msg__message_wrapper__init(msg);
+    TrfMsg__ClientHello * ch = malloc(sizeof(TrfMsg__ClientHello));
+    if (!ch)
+    {
+        trf__log_error("Unable to allocate client hello!");
+        trf_msg__message_wrapper__free_unpacked(msg, NULL);
+        goto free_buff;
+    }
+    trf_msg__client_hello__init(ch);
+    TrfMsg__APIVersion * ver = malloc(sizeof(TrfMsg__APIVersion));
+    if (!ver)
+    {
+        trf__log_error("Unable to allocate API version!");
+        trf_msg__message_wrapper__free_unpacked(msg, NULL);
+        goto free_buff;
+    }
+    trf_msg__apiversion__init(ver);
+    
+    msg->wdata_case     = TRF_MSG__MESSAGE_WRAPPER__WDATA_CLIENT_HELLO;
+    msg->client_hello   = ch;
+    ch->version         = ver;
+    ver->api_major      = TRF_API_MAJOR;
+    ver->api_minor      = TRF_API_MINOR;
+    ver->api_patch      = TRF_API_PATCH;
+
+    ret = trfNCSendDelimited(sfd, buff, 4096, 0, msg);
+    trf_msg__message_wrapper__free_unpacked(msg, NULL);
+    if (ret < 0)
+    {
+        trf__log_error("Unable to send client hello!");
+        goto free_buff;
     }
 
     // Get session ID from server
 
+    msg = NULL;
+    ret = trfNCRecvDelimited(sfd, buff, 4096, 0, &msg);
+    if (ret < 0)
     {
-        TrfMsg__MessageWrapper * recv_msg = NULL;
-
-        ret = trfNCRecvDelimited(sfd, buff, 4096, 0, &recv_msg);
-        if (ret)
-        {
-            trf__log_error("Receive from server failed");
-            goto cleanup;
-        }
-
-        if (!recv_msg)
-        {
-            trf__log_error("Receive message handle not set");
-            goto cleanup;
-        }
-
-        switch (recv_msg->wdata_case)
-        {
-            case TRF_MSG__MESSAGE_WRAPPER__WDATA_SERVER_HELLO:
-                ctx->cli.session_id = recv_msg->server_hello->new_session_id;
-                break;
-            case TRF_MSG__MESSAGE_WRAPPER__WDATA_SERVER_REJECT:
-                TrfMsg__APIVersion * ver = recv_msg->server_reject->version;
-                trf__log_error(
-                    "API ver. mismatch! "
-                    "Client Version: %d.%d.%d; Server: %d.%d.%d",
-                    TRF_API_MAJOR, TRF_API_MINOR, TRF_API_PATCH,
-                    ver->api_major, ver->api_minor, ver->api_patch
-                );
-                goto cleanup;
-            default:
-                trf__log_error("Unexpected message type in buffer!");
-                goto cleanup;
-        }
-
-        trf__log_info("API version valid");
+        trf__log_error("Unable to receive session ID!");
+        goto free_buff;
     }
+
+    if (!msg)
+    {
+        trf__log_error("Receive message handle not set");
+        goto free_buff;
+    }
+
+    switch (msg->wdata_case)
+    {
+        case TRF_MSG__MESSAGE_WRAPPER__WDATA_SERVER_HELLO:
+            ctx->cli.session_id = msg->server_hello->new_session_id;
+            break;
+        case TRF_MSG__MESSAGE_WRAPPER__WDATA_SERVER_REJECT:
+            TrfMsg__APIVersion * ver = msg->server_reject->version;
+            trf__log_error(
+                "API ver. mismatch! "
+                "Client Version: %d.%d.%d; Server: %d.%d.%d",
+                TRF_API_MAJOR, TRF_API_MINOR, TRF_API_PATCH,
+                ver->api_major, ver->api_minor, ver->api_patch
+            );
+            goto free_buff;
+        default:
+            trf__log_error("Unexpected message type in buffer!");
+            goto free_buff;
+    }
+
+    trf_msg__message_wrapper__free_unpacked(msg, NULL);
+    msg = NULL;
+    trf__log_info("API version valid");
 
     // Send list of client interfaces
 
+    uint32_t num_ifs;
+    PTRFInterface clientIf;
+    if ((ret = trfGetInterfaceList(&clientIf, &num_ifs)) < 0)
     {
-        uint32_t num_ifs;
-        PTRFInterface clientIf;
-        if ((ret = trfGetInterfaceList(&clientIf, &num_ifs)) < 0)
-        {
-            trf__log_error("Unable to get Interface Lists");
-            goto cleanup;
-        }
+        trf__log_error("Unable to get Interface Lists");
+        goto free_buff;
+    }
 
-        trf__log_debug("Number of interfaces: %d, clientIf: %p", num_ifs, clientIf);
+    trf__log_debug("Number of interfaces: %d, clientIf: %p", num_ifs, clientIf);
 
-        TrfMsg__MessageWrapper msg = TRF_MSG__MESSAGE_WRAPPER__INIT;
-        msg.session_id = ctx->cli.session_id;
-        msg.wdata_case = TRF_MSG__MESSAGE_WRAPPER__WDATA_ADDR_PF;
-        TrfMsg__AddrPF pf = TRF_MSG__ADDR_PF__INIT;
-        msg.addr_pf = &pf;
-        msg.addr_pf->addrs = malloc(sizeof(TrfMsg__AddrCand *) * num_ifs);
-        if (!msg.addr_pf->addrs)
+    msg = malloc(sizeof(TrfMsg__MessageWrapper));
+    if (!msg)
+    {
+        trf__log_error("Unable to allocate message wrapper!");
+        goto free_ci_list;
+    }
+    trf_msg__message_wrapper__init(msg);
+    msg->session_id = ctx->cli.session_id;
+    msg->wdata_case = TRF_MSG__MESSAGE_WRAPPER__WDATA_ADDR_PF;
+    TrfMsg__AddrPF * addr_pf = malloc(sizeof(TrfMsg__AddrPF));
+    if (!addr_pf)
+    {
+        trf__log_error("Unable to allocate preflight address list");
+        goto free_ci_list;
+    }
+    trf_msg__addr_pf__init(addr_pf);
+    msg->addr_pf = addr_pf;
+    msg->addr_pf->addrs = calloc(1, sizeof(TrfMsg__AddrCand *) * num_ifs);
+    if (!msg->addr_pf->addrs)
+    {
+        trf__log_error("Unable to allocate address list");
+        goto free_ci_list;
+    }
+    msg->addr_pf->n_addrs = num_ifs;
+    
+    int i = 0;
+    for (PTRFInterface tmp_if = clientIf; tmp_if; tmp_if = tmp_if->next)
+    {
+        msg->addr_pf->addrs[i] = malloc(sizeof(TrfMsg__AddrCand));
+        if (!msg->addr_pf->addrs[i])
         {
             trf__log_error("Memory allocation failed");
-            goto cleanup;
+            goto free_ci_list;
         }
-        msg.addr_pf->n_addrs = num_ifs;
-
-        int i = 0;
-        for (PTRFInterface tmp_if = clientIf; tmp_if; tmp_if = tmp_if->next)
+        trf_msg__addr_cand__init(msg->addr_pf->addrs[i]);
+        char addr[INET6_ADDRSTRLEN];
+        if (trfGetIPaddr(tmp_if->addr, addr) < 0)
         {
-            msg.addr_pf->addrs[i] = malloc(sizeof(TrfMsg__AddrCand));
-            if (!msg.addr_pf->addrs[i])
-            {
-                trf__log_error("Memory allocation failed");
-                goto cleanup;
-            }
-            trf_msg__addr_cand__init(msg.addr_pf->addrs[i]);
-            char addr[INET6_ADDRSTRLEN];
-            if (trfGetIPaddr(tmp_if->addr, addr) < 0)
-            {
-                trf__log_error("Unable to decode ip addr");
-            }
-            // trf__log_trace("Sending Address: %s", addr);
-            msg.addr_pf->addrs[i]->addr = strdup(addr);
-            msg.addr_pf->addrs[i]->speed = tmp_if->speed;
-            msg.addr_pf->addrs[i]->netmask = tmp_if->netmask;
-            i++;
+            trf__log_error("Unable to decode ip addr");
+            continue;
         }
-        
-        if ((ret = trfNCSendDelimited(sfd, buff, 4096, 0, &msg)) < 0) 
-        {
-            trf__log_error("Unable to send Client Interfaces");
-            goto cleanup;
-        }
+        msg->addr_pf->addrs[i]->addr    = strdup(addr);
+        msg->addr_pf->addrs[i]->speed   = tmp_if->speed;
+        msg->addr_pf->addrs[i]->netmask = tmp_if->netmask;
+        i++;
     }
+    
+    if ((ret = trfNCSendDelimited(sfd, buff, 4096, 0, msg)) < 0) 
+    {
+        trf__log_error("Unable to send Client Interfaces");
+        goto free_ci_list;
+    }
+
+    free(clientIf);
+    clientIf = NULL;
+    trf_msg__message_wrapper__free_unpacked(msg, NULL);
+    msg = NULL;
 
     // Receive possibly viable address from server
-
-    struct TRFInterface * trfi = calloc(1, sizeof(*trfi));
-    if (!trfi)
-    {
-        trf__log_error("Memory allocation failed");
-        goto cleanup;
-    }
-
-    TrfMsg__MessageWrapper * msg;
+    
     ret = trfNCRecvDelimited(sfd, buff, 4096, 0, &msg);
     if (ret < 0)
     {
         trf__log_error("Unable to receive address");
-        goto cleanup;
+        goto free_ci_list;
     }
 
     if (msg->wdata_case != TRF_MSG__MESSAGE_WRAPPER__WDATA_ADDR_PF)
     {
         trf__log_error("Unexpected message type in buffer");
-        goto cleanup;
+        goto free_ci_list;
     }
 
     if (msg->addr_pf->n_addrs == 0)
     {
         trf__log_error("No addresses received!");
-        goto cleanup;
+        goto free_ci_list;
     }
 
-    trf__log_debug("Interface Addr: %s/%d, Speed: %d", 
+    //!todo multiple candidate selection
+    
+    trf__log_debug("Interface Addr: %s/%d, Speed: %d Mbps", 
         msg->addr_pf->addrs[0]->addr, msg->addr_pf->addrs[0]->netmask, 
         msg->addr_pf->addrs[0]->speed
     );
@@ -343,16 +372,11 @@ int trfNCClientInit(PTRFContext ctx, char * host, char * port)
     if (ret)
     {
         trf__log_error("Unable to get fabric providers");
-        goto cleanup;
+        goto free_ci_list;
     }
     
-    for (int i = 0; i < msg->addr_pf->n_addrs; i++)
-    {
-        free(msg->addr_pf->addrs[i]->addr);
-        free(msg->addr_pf->addrs[i]);
-    }
-    
-    free(msg->addr_pf->addrs);
+    trf_msg__addr_pf__free_unpacked(msg->addr_pf, NULL);
+    msg->addr_pf = NULL;
 
     // Convert raw Libfabric info and serialize data for network transmission
     
@@ -363,23 +387,28 @@ int trfNCClientInit(PTRFContext ctx, char * host, char * port)
         num_fabrics++;
     }
     
-    trf_msg__message_wrapper__init(msg);
-    TrfMsg__ClientCap caps = TRF_MSG__CLIENT_CAP__INIT;
-    msg->session_id = ctx->cli.session_id;
+    TrfMsg__ClientCap * ccap = malloc(sizeof(TrfMsg__ClientCap));
+    if (!ccap)
+    {
+        trf__log_error("Memory allocation failed");
+        goto free_fpl;
+    }
+    trf_msg__client_cap__init(ccap);
     msg->wdata_case = TRF_MSG__MESSAGE_WRAPPER__WDATA_CLIENT_CAP;
-    msg->client_cap = &caps;
-    msg->client_cap->n_transports = num_fabrics;
-    msg->client_cap->transports = malloc(sizeof(TrfMsg__Transport *) * num_fabrics);
+    msg->client_cap = ccap;
+    msg->client_cap->transports = calloc(1, 
+        sizeof(TrfMsg__Transport *) * num_fabrics);
     if (!msg->client_cap->transports)
     {
         trf__log_error("Memory allocation failed");
-        goto cleanup;
+        goto free_fpl;
     }
+    msg->client_cap->n_transports = num_fabrics;
 
     int cf = 0;
     for (fi_node = fi_out; fi_node; fi_node = fi_node->next)
     {
-        msg->client_cap->transports[cf] = malloc(sizeof(TrfMsg__Transport));
+        msg->client_cap->transports[cf] = calloc(1, sizeof(TrfMsg__Transport));
         trf_msg__transport__init(msg->client_cap->transports[cf]);
         msg->client_cap->transports[cf]->name = \
             strdup(fi_node->fabric_attr->prov_name);
@@ -388,7 +417,7 @@ int trfNCClientInit(PTRFContext ctx, char * host, char * port)
         if (ret)
         {
             trf__log_error("Unable to serialize wire protocol");
-            goto cleanup;
+            goto free_fpl;
         }
         int fmt = trfConvertFabricAF(fi_node->addr_format);
         if (fmt < 0)
@@ -412,11 +441,20 @@ int trfNCClientInit(PTRFContext ctx, char * host, char * port)
         cf++;
     }
 
+    if (!cf)
+    {
+        trf__log_error("No fabrics found");
+        goto free_fpl;
+    }
+
     if ((ret = trfNCSendDelimited(sfd, buff, 4096, 0, msg)) < 0)
     {
         trf__log_error("Unable to send client fabric info");
-        goto cleanup;
+        goto free_fpl;
     }
+
+    trf_msg__message_wrapper__free_unpacked(msg, NULL);
+    msg = NULL;
 
     // Wait for the server to send transport information
 
@@ -424,18 +462,18 @@ int trfNCClientInit(PTRFContext ctx, char * host, char * port)
     if (ret < 0)
     {
         trf__log_error("Unable to receive transport info");
-        goto cleanup;
+        goto free_fpl;
     }
 
     if (msg->wdata_case != TRF_MSG__MESSAGE_WRAPPER__WDATA_SERVER_CAP)
     {
         trf__log_error("Unexpected message type in buffer");
-        goto cleanup;
+        goto free_fpl;
     }
 
+    trf__log_debug("Bind address %s", msg->server_cap->bind_addr);
     trf__log_info("Candidate transport %s @ %s", 
         msg->server_cap->transport->name, msg->server_cap->transport->route);
-    trf__log_info("Binding to %s", msg->server_cap->bind_addr);
 
     // Narrow down the list of providers based on the server's capabilities
     
@@ -446,7 +484,7 @@ int trfNCClientInit(PTRFContext ctx, char * host, char * port)
     if (ret)
     {
         trf__log_error("Unable to get fabric providers");
-        goto cleanup;
+        goto free_fpl;
     }
 
     //!todo check valid before using
@@ -457,7 +495,7 @@ int trfNCClientInit(PTRFContext ctx, char * host, char * port)
     if (ret)
     {
         trf__log_error("Unable to convert bind address");
-        goto cleanup;
+        goto free_fpl;
     }
 
     ret = trfCreateChannel(ctx, fi_out, (void *) &bind_addr, 
@@ -465,21 +503,21 @@ int trfNCClientInit(PTRFContext ctx, char * host, char * port)
     if (ret)
     {
         trf__log_error("Unable to create channel");
-        goto cleanup;
+        goto free_fpl;
     }
 
-    void * regd_buf = malloc(4096);
+    void * regd_buf = trfAllocAligned(4096, 2097152);
     if (!regd_buf)
     {
         trf__log_error("Unable to allocate pinned message buffer");
-        goto cleanup;
+        goto free_fpl;
     }
 
     ret = trfRegInternalMsgBuf(ctx, regd_buf, 4096);
     if (ret)
     {
         trf_fi_error("Register internal message buffer", ret);
-        goto cleanup;
+        goto free_reg_buf;
     }
 
     * (uint64_t *) regd_buf = ctx->cli.session_id;
@@ -490,7 +528,7 @@ int trfNCClientInit(PTRFContext ctx, char * host, char * port)
     if (ret)
     {
         trf__log_error("Unable to insert AV entry");
-        goto cleanup;
+        goto close_mr;
     }
 
     trf__log_debug("Fabric Addr: %lu", addr_out);
@@ -501,34 +539,48 @@ int trfNCClientInit(PTRFContext ctx, char * host, char * port)
     if (trfGetEndpointName(ctx, &ep_name) < 0)
     {
         trf__log_error("Unable to get libfabric endpoint Name");
-        goto cleanup;
+        goto close_mr;
     }
 
     char * tpt_name = strdup(msg->server_cap->transport->name);
     if (!tpt_name)
     {
         trf__log_error("Unable to allocate transport name");
-        goto cleanup;
+        free(ep_name);
+        goto close_mr;
     }
     char * proto_name = strdup(msg->server_cap->transport->proto);
     if (!proto_name)
     {
         trf__log_error("Unable to allocate protocol name");
-        goto cleanup;
+        free(tpt_name);
+        free(ep_name);
+        goto close_mr;
     }
 
-    free(msg->server_cap->transport->name);
-    free(msg->server_cap->transport->proto);
-    free(msg->server_cap->transport->route);
-    free(msg->server_cap->transport);
-    free(msg->server_cap->bind_addr);
-    free(msg->server_cap);
-
+    trf_msg__server_cap__free_unpacked(msg->server_cap, NULL);
+    msg->server_cap = NULL;
     msg->wdata_case = TRF_MSG__MESSAGE_WRAPPER__WDATA_ENDPOINT;
-
     msg->endpoint = malloc(sizeof(TrfMsg__Endpoint));
+    if (!msg->endpoint)
+    {
+        trf__log_error("Unable to allocate endpoint");
+        free(proto_name);
+        free(tpt_name);
+        free(ep_name);
+        goto close_mr;
+    }
     trf_msg__endpoint__init(msg->endpoint);
     msg->endpoint->transport = malloc(sizeof(TrfMsg__Transport));
+    if (!msg->endpoint->transport)
+    {
+        trf__log_error("Unable to allocate transport");
+        free(proto_name);
+        free(tpt_name);
+        free(ep_name);
+        goto close_mr;
+    }
+
     trf_msg__transport__init(msg->endpoint->transport);
     msg->endpoint->transport->name = tpt_name;
     msg->endpoint->transport->route = ep_name;
@@ -538,14 +590,14 @@ int trfNCClientInit(PTRFContext ctx, char * host, char * port)
     if (ret < 0)
     {
         trf__log_error("Unable to send endpoint info");
-        goto cleanup;
+        goto close_mr;
     }
 
-    free(msg->endpoint->transport->proto);
-    free(msg->endpoint->transport->route);
-    free(msg->endpoint->transport->name);
-    free(msg->endpoint->transport);
-    free(msg->endpoint);
+    trf_msg__message_wrapper__free_unpacked(msg, NULL);
+    msg = NULL;
+
+    // After sending the endpoint info on the negotiation channel, send a
+    // message on the main channel to notify the server that we are ready
 
     do {
         ret = fi_send(ctx->xfer.fabric->ep, regd_buf, 8, 
@@ -575,24 +627,30 @@ int trfNCClientInit(PTRFContext ctx, char * host, char * port)
     trf__log_info("Sent cookie %lu", *(uint64_t *) regd_buf);
 
     fi_freeinfo(fi_out);
-    freeaddrinfo(res);
+    free(buff);
     ctx->cli.client_fd = sfd;
-    free(trfi);
     trf__log_trace("Done");
 
     return 0;
 
-cleanup:
-    if (sfd)
-    {
+close_mr:
+    if (ctx->xfer.fabric->msg_mr) {
+        fi_close((fid_t) ctx->xfer.fabric->msg_mr);
+    }
+free_reg_buf:
+    free(regd_buf);
+free_fpl:
+    fi_freeinfo(fi_out);
+free_ci_list:
+    trfFreeInterfaceList(clientIf);
+    trf_msg__message_wrapper__free_unpacked(msg, NULL);
+free_buff:
+    free(buff);
+close_sock:
+    if (sfd) {
         close(sfd);
     }
-    if (buff)
-    {
-        free(buff);
-    }
-    if (res)
-    {
+    if (res) {
         freeaddrinfo(res);
     }
     return ret;
@@ -610,32 +668,39 @@ int trfNCAccept(PTRFContext ctx, PTRFContext ctx_out)
     int client_sock = 0;
     socklen_t client_size;
     uint8_t * mbuf = calloc(1,4096);
-    int ret;
+    int ret = 0;
     if (!mbuf)
     {
         return -ENOMEM;
     }
 
     // Accept client connection on side channel
+    
     client_size = sizeof(client_addr);
     client_sock = accept(
         ctx->svr.listen_fd, (struct sockaddr *) &client_addr, &client_size
     );
+    if (!client_sock)
+    {
+        trf__log_error("Unable to accept client connection");
+        ret = -errno;
+        goto free_buf;
+    }
 
     // Receive client hello message and verify API version
     
-    TrfMsg__MessageWrapper * msg;
+    TrfMsg__MessageWrapper * msg = NULL;
     ret = trfNCRecvDelimited(client_sock, mbuf, 4096, 0, &msg);
     if (ret < 0)
     {
         trf__log_error("Delimited recv failed %s", strerror(-ret));
-        goto cleanup;
+        goto close_sock;
     }
 
     if (msg->wdata_case != TRF_MSG__MESSAGE_WRAPPER__WDATA_CLIENT_HELLO)
     {
         trf__log_error("Invalid payload type %d", msg->wdata_case);
-        goto cleanup;
+        goto free_msg;
     }
 
     TrfMsg__APIVersion * ver = msg->client_hello->version;
@@ -652,25 +717,44 @@ int trfNCAccept(PTRFContext ctx, PTRFContext ctx_out)
          || ver->api_patch != TRF_API_PATCH )
     {
         trf__log_error("Incompatible API versions!");
-        goto cleanup;
+        goto free_msg;
     }
-
+    
+    trf_msg__message_wrapper__free_unpacked(msg, NULL); // Free previous Message
+    msg = NULL;
+    
     // Generate and send a new session ID to the client
 
     uint64_t sessID = trf__Rand64();
     
-    TrfMsg__MessageWrapper hello_reply = TRF_MSG__MESSAGE_WRAPPER__INIT;
-    TrfMsg__ServerHello svr_hello = TRF_MSG__SERVER_HELLO__INIT;
-    hello_reply.wdata_case = TRF_MSG__MESSAGE_WRAPPER__WDATA_SERVER_HELLO;
-    svr_hello.new_session_id = sessID;
-    hello_reply.server_hello = &svr_hello;
+    msg = malloc(sizeof(TrfMsg__MessageWrapper));
+    if(!msg)
+    {
+        trf__log_error("Unable to initialize message wrapper");
+        goto free_msg;
+    }
+    trf_msg__message_wrapper__init(msg);
+    
+    TrfMsg__ServerHello * svr_hello = malloc(sizeof(TrfMsg__ServerHello));
+    if (!svr_hello)
+    {
+        trf__log_error("Unable to initialize server hello message");
+        goto free_msg;
+    }
+    trf_msg__server_hello__init(svr_hello);
+    msg->wdata_case = TRF_MSG__MESSAGE_WRAPPER__WDATA_SERVER_HELLO;
+    svr_hello->new_session_id = sessID;
+    msg->server_hello = svr_hello;
  
-    ret = trfNCSendDelimited(client_sock, mbuf, 4096, 0, &hello_reply);
+    ret = trfNCSendDelimited(client_sock, mbuf, 4096, 0, msg);
     if (ret)
     {
         trf__log_error("Delimited send failed");
-        goto cleanup;
+        goto free_msg;
     }
+
+    trf_msg__message_wrapper__free_unpacked(msg, NULL); // Free Previous Message
+    msg = NULL;
 
     // Receive the preflight list of client addresses
 
@@ -678,13 +762,13 @@ int trfNCAccept(PTRFContext ctx, PTRFContext ctx_out)
     if (ret < 0)
     {
         trf__log_error("Delimited recv failed %s", strerror(-ret));
-        goto cleanup;
+        goto free_msg;
     }
 
     if (msg->wdata_case != TRF_MSG__MESSAGE_WRAPPER__WDATA_ADDR_PF)
     {
         trf__log_error("Invalid payload type %d", msg->wdata_case);
-        goto cleanup;
+        goto free_msg;
     }
     trf__log_debug("Number of Addrs: %lu",msg->addr_pf->n_addrs);
     for (int i = 0; i < msg->addr_pf->n_addrs; i++)
@@ -695,38 +779,38 @@ int trfNCAccept(PTRFContext ctx, PTRFContext ctx_out)
     }
 
     // Determine viable links
-
+    
     PTRFInterface client_ifs;
     if ((ret = trf__AddrMsgToInterface(msg, &client_ifs)) < 0)
     {
         trf__log_error("Message conversion failed");
-        goto cleanup;
+        goto close_sock;
     }
-
+    
     PTRFInterface svr_ifs;
     uint32_t svr_num_ifs;
     if ((ret = trfGetInterfaceList(&svr_ifs, &svr_num_ifs)))
     {
         trf__log_error("Unable to get interface list");
-        goto cleanup;
+        goto free_ci_list;
     }
     
     PTRFAddrV av;
     if ((ret = trfCreateAddrV(svr_ifs, client_ifs, &av)) < 0)
     {
         trf__log_error("Unable to create address vector");
-        goto cleanup;
+        goto free_sv_list;
     }
 
     PTRFAddrV av_cand;
     if ((ret = trfGetFastestLink(av, &av_cand)))
     {
         trf__log_error("Unable to get fastest link");
-        goto cleanup;
+        goto free_av_list;
     }
 
     // Free the old message
-    
+
     for (int i = 0; i < msg->addr_pf->n_addrs; i++)
     {
         free(msg->addr_pf->addrs[i]->addr);
@@ -738,19 +822,39 @@ int trfNCAccept(PTRFContext ctx, PTRFContext ctx_out)
     // Create a new message with the viable links
 
     msg->addr_pf->addrs     = calloc(1, sizeof(TrfMsg__AddrCand *) * 1);
+    if (!msg->addr_pf->addrs)
+    {
+        goto free_av_cand;
+    }
     msg->addr_pf->addrs[0]  = calloc(1, sizeof(TrfMsg__AddrCand));
+    if (!msg->addr_pf->addrs[0])
+    {
+        goto free_av_cand;
+    }
+    msg->addr_pf->n_addrs = 1;
     trf_msg__addr_cand__init(msg->addr_pf->addrs[0]);
     msg->addr_pf->addrs[0]->addr = calloc(1, INET6_ADDRSTRLEN);
-    trfGetIPaddr(av_cand->src_addr, msg->addr_pf->addrs[0]->addr);
-    msg->addr_pf->n_addrs = 1;
+    if (!msg->addr_pf->addrs[0]->addr)
+    {
+        goto free_av_cand;
+    }
+    ret = trfGetIPaddr(av_cand->src_addr, msg->addr_pf->addrs[0]->addr);
+    if (ret < 0)
+    {
+        trf__log_error("Unable to get IP address");
+        goto free_av_cand;
+    }
     
     trf__log_trace("Address to Connect: %s", msg->addr_pf->addrs[0]->addr);
 
     if ((ret = trfNCSendDelimited(client_sock, mbuf, 4096, 0, msg)) < 0)
     {
         trf__log_error("Delimited send failed %s", strerror(-ret));
-        goto cleanup;
+        goto free_av_cand;
     }
+
+    trf_msg__message_wrapper__free_unpacked(msg, NULL);
+    msg = NULL;
 
     // Get the transport list from the client, and determine available routes
 
@@ -758,13 +862,13 @@ int trfNCAccept(PTRFContext ctx, PTRFContext ctx_out)
     if (ret < 0)
     {
         trf__log_error("Delimited recv failed %s", strerror(-ret));
-        goto cleanup;
+        goto free_av_cand;
     }
 
     if (msg->wdata_case != TRF_MSG__MESSAGE_WRAPPER__WDATA_CLIENT_CAP)
     {
         trf__log_error("Invalid payload type %d", msg->wdata_case);
-        goto cleanup;
+        goto free_av_cand;
     }
     int i = 0;
     int flag = 0;
@@ -782,7 +886,7 @@ int trfNCAccept(PTRFContext ctx, PTRFContext ctx_out)
         if (ret)
         {
             trf__log_error("Unable to get route");
-            goto cleanup;
+            goto free_av_cand;
         }
         else 
         {
@@ -794,7 +898,7 @@ int trfNCAccept(PTRFContext ctx, PTRFContext ctx_out)
     if (!flag)
     {
         trf__log_error("No usable transport found");
-        goto cleanup;
+        goto free_av_cand;
     }
 
     // Allocate resources and create a communication channel
@@ -803,7 +907,7 @@ int trfNCAccept(PTRFContext ctx, PTRFContext ctx_out)
     if (!cli_ctx)
     {
         trf__log_error("Unable to allocate context");
-        goto cleanup;
+        goto free_av_cand;
     }
     cli_ctx->type           = TRF_EP_CONN_ID;
     cli_ctx->cli.client_fd  = client_sock;
@@ -814,84 +918,97 @@ int trfNCAccept(PTRFContext ctx, PTRFContext ctx_out)
     if (ret < 0)
     {
         trf__log_error("Unable to create main channel");
-        goto cleanup;
+        goto destroy_ctx;
     }
 
     char * sas_buf;
     if (trfGetEndpointName(cli_ctx, &sas_buf) < 0)
     {
         trf__log_error("Unable to get libfabric endpoint name");
+        goto destroy_ctx;
     }
     
     // Allocate pinned message buffer
 
-    void * regd_buf = malloc(4096);
+    void * regd_buf = trfAllocAligned(4096, 4096);
     if (!regd_buf)
     {
         trf__log_error("Unable to allocate pinned message buffer");
-        goto cleanup;
+        free(sas_buf);
+        goto destroy_ctx;
     }
 
     ret = trfRegInternalMsgBuf(cli_ctx, regd_buf, 4096);
-    if (ret)
+    if (ret < 0)
     {
-        trf_fi_error("Register internal message buffer", ret);
-        goto cleanup;
+        trf_fi_error("Unable to register internal message buffer", ret);
+        goto free_regd_buf;
     }
 
     // Send created transport to the client
 
-    for (i = 0; i < msg->client_cap->n_transports; i++)
-    {
-        free(msg->client_cap->transports[i]->name);
-        free(msg->client_cap->transports[i]->route);
-        free(msg->client_cap->transports[i]);
-    }
+    trf_msg__client_cap__free_unpacked(msg->client_cap, NULL);
+    msg->client_cap = NULL;
 
-    free(msg->client_cap);
     char cli_bind[INET6_ADDRSTRLEN];
+    memset(cli_bind, 0, INET6_ADDRSTRLEN);
     ret = trfGetIPaddr(av_cand->dst_addr, cli_bind);
     if (ret < 0)
     {
         trf__log_error("Unable to get client bind address");
-        goto cleanup;
+        goto free_regd_buf;
     }
 
-    TrfMsg__ServerCap sc = TRF_MSG__SERVER_CAP__INIT;
-    TrfMsg__Transport st = TRF_MSG__TRANSPORT__INIT;
+    TrfMsg__ServerCap * sc = malloc(sizeof(TrfMsg__ServerCap));
+    if (!sc)
+    {
+        trf__log_error("Unable to allocate server cap message");
+        goto free_regd_buf;
+    }
+    trf_msg__server_cap__init(sc);
+    TrfMsg__Transport * st = malloc(sizeof(TrfMsg__Transport));
+    if (!st)
+    {
+        trf__log_error("Unable to allocate server transports message");
+        goto free_regd_buf;
+    }
+    trf_msg__transport__init(st);
     msg->wdata_case = TRF_MSG__MESSAGE_WRAPPER__WDATA_SERVER_CAP;
-    msg->server_cap = &sc;
-    msg->server_cap->transport = &st;
-    msg->server_cap->transport->name = fi->fabric_attr->prov_name;
+    msg->server_cap = sc;
+    msg->server_cap->transport = st;
+    msg->server_cap->transport->name = strdup(fi->fabric_attr->prov_name);
     msg->server_cap->transport->route = sas_buf;
     ret = trfSerializeWireProto(fi->ep_attr->protocol,
         &msg->server_cap->transport->proto);
     if (ret < 0)
     {
         trf__log_error("Unable to serialize wire protocol");
-        goto cleanup;
+        goto free_regd_buf;
     }
-    msg->server_cap->bind_addr = cli_bind;
+    msg->server_cap->bind_addr = strdup(cli_bind);
 
     ret = trfNCSendDelimited(cli_ctx->cli.client_fd, mbuf, 4096, 0, msg);
     if (ret < 0)
     {
         trf__log_error("Delimited send failed %s", strerror(-ret));
-        goto cleanup;
+        goto free_regd_buf;
     }
 
     // Receive the client's address
+    trf_msg__message_wrapper__free_unpacked(msg, NULL);
+    msg = NULL;
 
     ret = trfNCRecvDelimited(cli_ctx->cli.client_fd, mbuf, 4096, 0, &msg);
     if (ret < 0)
     {
         trf__log_error("Unable to receive Client Address: %s", strerror(ret));
+        goto free_regd_buf;
     }
 
     if (msg->wdata_case != TRF_MSG__MESSAGE_WRAPPER__WDATA_ENDPOINT)
     {
         trf__log_error("Invalid payload type %d", msg->wdata_case);
-        goto cleanup;
+        goto free_regd_buf;
     }
 
     fi_addr_t src_addr;
@@ -899,12 +1016,12 @@ int trfNCAccept(PTRFContext ctx, PTRFContext ctx_out)
         msg->endpoint->transport->route, &src_addr) < 0)
     {
         trf__log_error("Unable to serialize source address");
-        goto cleanup;
+        goto free_regd_buf;
     }
     trf__log_trace("Received Client Address: %s", msg->endpoint->transport->route);
+    
     // Wait on the main channel for an incoming message
 
-    // ssize_t xret = 0;
     *(uint64_t *) regd_buf = 0;
 
     do {
@@ -916,6 +1033,7 @@ int trfNCAccept(PTRFContext ctx, PTRFContext ctx_out)
     if (ret)
     {
         fprintf(stderr, "fi_cq_sread %d", ret);
+        goto free_regd_buf;
         return ret;
     }
 
@@ -929,19 +1047,39 @@ int trfNCAccept(PTRFContext ctx, PTRFContext ctx_out)
     if (ret != 1)
     {
         fprintf(stderr, "fi_cq_sread %d", ret);
+        goto free_regd_buf;
         return ret;
     }
 
     trf__log_info("Recv Cookie %lu", *(uint64_t *) regd_buf);
 
     free(mbuf);
-    return 0;
-    
-cleanup:
-    if (client_sock){
+    return ret;
+
+free_regd_buf:
+    free(regd_buf);
+destroy_ctx:
+    trfDestroyContext(cli_ctx);
+free_av_cand:
+    trfFreeAddrV(av_cand);
+free_av_list:
+    trfFreeAddrV(av);
+free_sv_list:
+    trfFreeInterfaceList(svr_ifs);
+free_ci_list:
+    trfFreeInterfaceList(client_ifs);
+close_sock:
+    if (client_sock) {
         close(client_sock);
     }
-    free(mbuf);
+free_msg:
+    if (msg) {
+        trf_msg__message_wrapper__free_unpacked(msg, NULL);
+    }
+free_buf:
+    if (mbuf) {
+        free(mbuf);
+    }
     return -1;
 }
 

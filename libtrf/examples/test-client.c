@@ -27,7 +27,7 @@
 int main(int argc, char ** argv)
 {
     char* host = "127.0.0.1";
-    char* port = "35083";
+    char* port = "35085";
     PTRFContext ctx = trfAllocContext();
     if(trfNCClientInit(ctx,host,port)<0){
         printf("unable to initiate client\n");
@@ -36,7 +36,7 @@ int main(int argc, char ** argv)
     }
 
     printf("Hello!\n");
-
+    trfDestroyContext(ctx);
 
     // info = trfGetFabricProviders(host, port, TRF_EP_SINK, &info);
     // if (!info) {

@@ -79,7 +79,7 @@ int trfNCServerInit(PTRFContext ctx, char * host, char * port);
   * @param ctx_out  Client context.
   * @return 0 on sucess, negative erro code on failure.
 */
-int trfNCAccept(PTRFContext ctx, PTRFContext ctx_out);
+int trfNCAccept(PTRFContext ctx, PTRFContext * ctx_out);
 
 /**
   * @brief Clos the negotiation channel server, disconneting the client.

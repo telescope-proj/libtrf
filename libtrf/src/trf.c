@@ -129,12 +129,9 @@ int trfAllocActiveEP(PTRFXFabric ctx, struct fi_info * fi, void * data,
     struct fi_cq_attr cq_attr;
     memset(&cq_attr, 0, sizeof(cq_attr));
     cq_attr.size                = fi->tx_attr->size;
-    cq_attr.flags               = 0;
     cq_attr.wait_obj            = FI_WAIT_UNSPEC;
-    cq_attr.format              = FI_CQ_FORMAT_MSG;
-    cq_attr.signaling_vector    = 0;
+    cq_attr.format              = FI_CQ_FORMAT_DATA;
     cq_attr.wait_cond           = FI_CQ_COND_NONE;
-    cq_attr.wait_set            = NULL;
     ret = fi_cq_open(ctx->domain, &cq_attr, &ctx->tx_cq, NULL);
     if (ret)
     {
@@ -156,6 +153,11 @@ int trfAllocActiveEP(PTRFXFabric ctx, struct fi_info * fi, void * data,
     {
         trf_fi_error("Open address vector", ret);
         goto free_rx_cq;
+    }
+    if (data)
+    {
+        fi->src_addr = data;
+        fi->src_addrlen = size;
     }
     ret = fi_endpoint(ctx->domain, fi, &ctx->ep, NULL);
     if (ret)
@@ -181,20 +183,16 @@ int trfAllocActiveEP(PTRFXFabric ctx, struct fi_info * fi, void * data,
         trf_fi_error("EP bind to RXCQ", ret);
         goto free_endpoint;
     }
-    if (data)
-    {
-        ret = fi_setname(&ctx->ep->fid, data, size);
-        if (ret)
-        {
-            trf_fi_error("Bind EP address", ret);
-            goto free_endpoint;
-        }
-    }
     ret = fi_enable(ctx->ep);
     if (ret)
     {
         trf_fi_error("Enable endpoint", ret);
         goto free_endpoint;
+    }
+    if (fi->src_addr && data)
+    {
+        fi->src_addr = NULL;
+        fi->src_addrlen = 0;
     }
     return ret;
 
@@ -222,11 +220,13 @@ free_fabric:
 
 void trfDestroyFabricContext(PTRFXFabric ctx)
 {
-    if (ctx->fb_mr) {
+    if (ctx->fb_mr)
+    {
         fi_close(&ctx->fb_mr->fid);
         ctx->fb_mr = NULL;
     }
-    if (ctx->msg_mr) {
+    if (ctx->msg_mr)
+    {
         fi_close(&ctx->msg_mr->fid);
         ctx->msg_mr = NULL;
     }
@@ -292,17 +292,13 @@ void trfDestroyContext(PTRFContext ctx)
                     cur_ctx->cli.session_id);
                 close(cur_ctx->cli.client_fd);
                 break;
-                trfSendDisconnectMsg(cur_ctx->cli.client_fd,
-                    cur_ctx->cli.session_id);
-                close(cur_ctx->cli.client_fd);
-                break;
             default:
                 break;
         }
-        switch (ctx->xfer_type)
+        switch (cur_ctx->xfer_type)
         {
             case TRFX_TYPE_LIBFABRIC:
-                trfDestroyFabricContext(ctx->xfer.fabric);
+                trfDestroyFabricContext(cur_ctx->xfer.fabric);
                 break;
             default:
                 break;
@@ -367,6 +363,7 @@ int trfDeserializeWireProto(const char * proto, uint32_t * out)
         {
             if (strcmp(tgt, __trf_fi_proto[i]) == 0)
             {
+                trf__log_trace("Wire protocol: %s", __trf_fi_proto[i]);
                 *out = __trf_fi_enum[i];
                 return 0;
             }
@@ -437,6 +434,16 @@ int trfGetRoute(const char * dst, const char * prov, const char * proto,
         case FI_ADDR_STR:
             hints->dest_addrlen = strlen((char *) dst_copy);
             break;
+        case FI_ADDR_PSMX:
+            hints->dest_addrlen = sizeof(uint64_t);
+            break;
+        case FI_ADDR_PSMX2:
+        case FI_ADDR_PSMX3:
+            hints->dest_addrlen = sizeof(uint64_t) * 2;
+            break;
+        case FI_ADDR_IB_UD:
+            hints->dest_addrlen = sizeof(uint64_t) * 4;
+            break;
         default:
             trf__log_error("Unknown address format\n");
             ret = -EINVAL;
@@ -448,11 +455,12 @@ int trfGetRoute(const char * dst, const char * prov, const char * proto,
     if (ret)
         goto free_hints;
 
-    trf__log_debug("Libfabric Format: %d", lf_fmt);
+    trf__log_trace("Libfabric Format: %d", lf_fmt);
     
     hints->ep_attr->type    = FI_EP_RDM;
     hints->caps             = FI_MSG | FI_RMA;
-    hints->mode             = FI_LOCAL_MR;
+    hints->mode             = FI_CONTEXT | FI_LOCAL_MR | FI_RX_CQ_DATA;
+    hints->domain_attr->mr_mode = FI_MR_BASIC;
     hints->addr_format      = lf_fmt;
     hints->dest_addr        = dst_copy;
     hints->ep_attr->protocol = proto_id;
@@ -460,11 +468,13 @@ int trfGetRoute(const char * dst, const char * prov, const char * proto,
 
     ret = fi_getinfo(TRF_FABRIC_VERSION, NULL, NULL, 0, hints, &info);
     if (ret) {
-        trf_fi_error("fi_getinfo", ret);
+        trf_fi_warn("fi_getinfo", ret);
         goto free_hints;
     }
 
-    trf__log_debug("info %s", fi_tostr(info, FI_TYPE_INFO));
+    trf__log_trace("---- Libfabric Information ----\n%s",
+        fi_tostr(info, FI_TYPE_INFO));
+    trf__log_trace("---- End Libfabric Information ----");
 
     ret = 0;
     *fi = info;
@@ -487,6 +497,14 @@ int trfConvertFabricAF(uint32_t fi_addr_format)
             return TRFX_ADDR_SOCKADDR_IN6;
         case FI_ADDR_STR:
             return TRFX_ADDR_FI_STR;
+        case FI_ADDR_IB_UD:
+            return TRFX_ADDR_IB_UD;
+        case FI_ADDR_PSMX:
+            return TRFX_ADDR_PSMX;
+        case FI_ADDR_PSMX2:
+            return TRFX_ADDR_PSMX2;
+        case FI_ADDR_PSMX3:
+            return TRFX_ADDR_PSMX3;
         default:
             return -1;
     }
@@ -504,6 +522,14 @@ int trfConvertInternalAF(uint32_t trf_addr_format)
             return FI_SOCKADDR_IN6;
         case TRFX_ADDR_FI_STR:
             return FI_ADDR_STR;
+        case TRFX_ADDR_IB_UD:
+            return FI_ADDR_IB_UD;
+        case TRFX_ADDR_PSMX:
+            return FI_ADDR_PSMX;
+        case TRFX_ADDR_PSMX2:
+            return FI_ADDR_PSMX2;
+        case TRFX_ADDR_PSMX3:
+            return FI_ADDR_PSMX3;
         default:
             return -1;
     }
@@ -517,6 +543,10 @@ int trfSerializeAddress(void * data, enum TRFXAddr format, char ** out)
     {
         case TRFX_ADDR_SOCKADDR:
             addr = calloc(1, TRFX_MAX_STR);
+            if (!addr)
+            {
+                return -ENOMEM;
+            }
             strcpy(addr, "trfx_sockaddr://");
             ret = trfGetNodeService((struct sockaddr *)data,
                 addr + sizeof("trfx_sockaddr://") - 1);
@@ -528,6 +558,10 @@ int trfSerializeAddress(void * data, enum TRFXAddr format, char ** out)
             break;
         case TRFX_ADDR_SOCKADDR_IN:
             addr = calloc(1, TRFX_MAX_STR);
+            if (!addr)
+            {
+                return -ENOMEM;
+            }
             strcpy(addr, "trfx_sockaddr_in://");
             ret = trfGetNodeService((struct sockaddr *)data,
                 addr + sizeof("trfx_sockaddr_in://") - 1);
@@ -539,6 +573,10 @@ int trfSerializeAddress(void * data, enum TRFXAddr format, char ** out)
             break;
         case TRFX_ADDR_SOCKADDR_IN6:
             addr = calloc(1, TRFX_MAX_STR);
+            if (!addr)
+            {
+                return -ENOMEM;
+            }
             strcpy(addr, "trfx_sockaddr_in6://");
             ret = trfGetNodeService((struct sockaddr *)data,
                 addr + sizeof("trfx_sockaddr_in6://") - 1);
@@ -550,8 +588,57 @@ int trfSerializeAddress(void * data, enum TRFXAddr format, char ** out)
             break;
         case TRFX_ADDR_FI_STR:
             addr = strdup((char *)data);
+            if (!addr)
+            {
+                return -ENOMEM;
+            }
+            break;
+        case TRFX_ADDR_IB_UD:
+            addr = calloc(1, TRFX_MAX_STR);
+            if (!addr)
+            {
+                return -ENOMEM;
+            }
+            ret = snprintf(addr, TRFX_MAX_STR,
+                "trfx_ib_ud://%016" PRIx64 "%016" PRIx64 "%016" PRIx64 "%016" PRIx64, 
+                ((uint64_t *) data)[0], ((uint64_t *) data)[1], 
+                ((uint64_t *) data)[2], ((uint64_t *) data)[3]);
+            break;
+        case TRFX_ADDR_PSMX:
+            addr = calloc(1, TRFX_MAX_STR);
+            if (!addr)
+            {
+                return -ENOMEM;
+            }
+            strcpy(addr, "trfx_psm://");
+            ret = snprintf(addr, TRFX_MAX_STR, 
+                "trfx_psm://%016" PRIx64, 
+                ((uint64_t *) data)[0]);
+            break;
+        case TRFX_ADDR_PSMX2:
+            addr = calloc(1, TRFX_MAX_STR);
+            if (!addr)
+            {
+                return -ENOMEM;
+            }
+            strcpy(addr, "trfx_psm2://");
+            ret = snprintf(addr, TRFX_MAX_STR, 
+                "trfx_psm2://%016" PRIx64 "%016" PRIx64,
+                ((uint64_t *) data)[0], ((uint64_t *) data)[1]);
+            break;
+        case TRFX_ADDR_PSMX3:
+            addr = calloc(1, TRFX_MAX_STR);
+            if (!addr)
+            {
+                return -ENOMEM;
+            }
+            strcpy(addr, "trfx_psm3://");
+            ret = snprintf(addr, TRFX_MAX_STR, 
+                "trfx_psm3://%016" PRIx64 "%016" PRIx64, 
+                ((uint64_t *) data)[0], ((uint64_t *) data)[1]);
             break;
         default:
+            trf__log_debug("invalid");
             return -EINVAL;
     }
     *out = addr;
@@ -561,51 +648,150 @@ int trfSerializeAddress(void * data, enum TRFXAddr format, char ** out)
 int trfDeserializeAddress(const char * ser_addr, int data_len, void ** data,
     int * format)
 {
-    int fmt;
+    // Compare statically defined strings
+    #define trf__len(x) (sizeof(x) - 1)
+    #define trf__cmp(tgt, val) (strncmp(tgt, val, trf__len(val)) == 0)
+    char * target = (char *) ser_addr;
+    int fmt, sal;
     void * out = NULL;
-    if (strncmp(ser_addr, "fi_", sizeof("fi_") - 1) == 0)
+    // Native libfabric-specific addressing formats which require no conversion
+    if (trf__cmp(target, "fi_"))
     {
+        trf__log_trace("Libfabric native string");
         fmt = TRFX_ADDR_FI_STR;
-        *data = strdup(ser_addr);
+        out = strdup(target);
     }
-    else if (strncmp(ser_addr, "trfx_sockaddr", sizeof("trfx_sockaddr") - 1) == 0)
+    // Several of these addresses can be converted using fi_tostr, but they are
+    // not understood by the transports in string format. TRFX addresses
+    // explicitly indicate conversion is required.
+    else if (trf__cmp(target, "trfx_"))
     {
-        const char * tgt = ser_addr + sizeof("trfx_sockaddr") - 1;
-        if (strncmp(tgt, "://", sizeof("://") - 1) == 0)
+        target += trf__len("trfx_");
+        trf__log_trace("TRF serialized string -> %s", target);
+        if (trf__cmp(target, "sockaddr://"))
         {
             fmt = TRFX_ADDR_SOCKADDR;
-            tgt += sizeof("://") - 1;
-        } 
-        else if (strncmp(tgt, "_in6://", sizeof("_in6://") - 1) == 0)
-        {
-            fmt = TRFX_ADDR_SOCKADDR_IN6;
-            tgt += sizeof("_in6://") - 1;
+            target += trf__len("sockaddr://");
+            sal = sizeof(struct sockaddr_storage);
+            goto sockaddr_dispatch;
         }
-        else if (strncmp(tgt, "_in://", sizeof("_in://") - 1) == 0)
+        else if (trf__cmp(target, "sockaddr_in://"))
         {
             fmt = TRFX_ADDR_SOCKADDR_IN;
-            tgt += sizeof("_in://") - 1;
+            target += trf__len("sockaddr_in://");
+            sal = sizeof(struct sockaddr_in);
+            goto sockaddr_dispatch;
         }
-        else
+        else if (trf__cmp(target, "sockaddr_in6://"))
         {
-            return -EINVAL;
+            fmt = TRFX_ADDR_SOCKADDR_IN6;
+            target += trf__len("sockaddr_in6://");
+            sal = sizeof(struct sockaddr_in6);
+            goto sockaddr_dispatch;
         }
-
-        struct sockaddr *sock = calloc(1, sizeof(*sock));
-        if (trfNodeServiceToAddr(tgt, sock) < 0)
+        else if (trf__cmp(target, "ib_ud://"))
+        {
+            fmt = TRFX_ADDR_IB_UD;
+            target += trf__len("ib_ud://");
+            goto tsaf_dispatch;
+        }
+        else if (trf__cmp(target, "psm://"))
+        {
+            fmt = TRFX_ADDR_PSMX;
+            target += trf__len("psm://");
+            goto tsaf_dispatch;
+        }
+        else if (trf__cmp(target, "psm2://"))
+        {
+            fmt = TRFX_ADDR_PSMX2;
+            target += trf__len("psm2://");
+            goto tsaf_dispatch;
+        }
+        else if (trf__cmp(target, "psm3://"))
+        {
+            fmt = TRFX_ADDR_PSMX3;
+            target += trf__len("psm3://");
+            goto tsaf_dispatch;
+        }
+        trf__log_debug("invalid value \"%s\"", target);
+        return -EINVAL;
+sockaddr_dispatch: ;
+        // Deserialization of sockaddr struct family
+        struct sockaddr * sock = calloc(1, sal);
+        if (trfNodeServiceToAddr(target, sock) < 0)
         {
             trf__log_error("Unable to create sockaddr from node service");
         }
         out = (void *) sock;
+        goto data_out;
+tsaf_dispatch: ;
+        // Deserialization for transport-specific address formats, in the format
+        // uint64_t[x]
+        uint64_t * ts_addr;
+        char * eptr;
+        char ts_tmp[17];
+        memset(ts_tmp, 0, sizeof(ts_tmp));
+        switch (fmt)
+        {
+            case TRFX_ADDR_PSMX:
+                ts_addr = calloc(1, sizeof(*ts_addr));
+                if (!ts_addr)
+                {
+                    return -ENOMEM;
+                }
+                memcpy(ts_tmp, target, 16);
+                ts_addr[0] = strtoull(ts_tmp, &eptr, 16);
+                out = (void *) ts_addr;
+                break;
+            case TRFX_ADDR_PSMX2:
+            case TRFX_ADDR_PSMX3:
+                ts_addr = calloc(1, sizeof(*ts_addr) * 2);
+                if (!ts_addr)
+                {
+                    return -ENOMEM;
+                }
+                memset(ts_tmp, 0, sizeof(ts_tmp));
+                memcpy(ts_tmp, target, 16);
+                ts_addr[0] = strtoull(ts_tmp, &eptr, 16);
+                memcpy(ts_tmp, target + 8, 16);
+                ts_addr[1] = strtoull(ts_tmp, &eptr, 16);
+                out = (void *) ts_addr;
+                break;
+            case TRFX_ADDR_IB_UD:
+                ts_addr = calloc(1, sizeof(*ts_addr) * 4);
+                if (!ts_addr)
+                {
+                    return -ENOMEM;
+                }
+                memset(ts_tmp, 0, sizeof(ts_tmp));
+                memcpy(ts_tmp, target, 16);
+                ts_addr[0] = strtoull(ts_tmp, &eptr, 16);
+                memcpy(ts_tmp, target + 16, 16);
+                ts_addr[1] = strtoull(ts_tmp, &eptr, 16);
+                memcpy(ts_tmp, target + 32, 16);
+                ts_addr[2] = strtoull(ts_tmp, &eptr, 16);
+                memcpy(ts_tmp, target + 48, 16);
+                ts_addr[3] = strtoull(ts_tmp, &eptr, 16);
+                out = (void *) ts_addr;
+            default:
+                return -EINVAL;
+        }
+        goto data_out;
     }
     else
     {
+        trf__log_trace("Serialized address format invalid");
         return -EINVAL;
     }
+
+data_out:
 
     *data = (void *) out;
     *format = fmt;
     return 0;
+
+    #undef trf__len
+    #undef trf__cmp
 }
 
 int trfPrintFabricProviders(struct fi_info * fi)
@@ -629,7 +815,7 @@ int trfPrintFabricProviders(struct fi_info * fi)
                 }
                 else
                 {
-                    dst = "null";
+                    dst = "-";
                 }
                 if (fi_node->src_addr)
                 {
@@ -638,12 +824,15 @@ int trfPrintFabricProviders(struct fi_info * fi)
                 }
                 else
                 {
-                    dst = "null";
+                    src = "-";
                 }
             case FI_ADDR_STR:
                 src = (char *) fi_node->src_addr;
                 dst = (char *) fi_node->dest_addr;
                 break;
+            default:
+                src = "unprintable";
+                dst = "unprintable";
         }
         trf__log_debug("(fabric) provider: %s, src: %s, dst: %s", 
             fi_node->fabric_attr->prov_name, src, dst
@@ -671,8 +860,9 @@ int trfGetFabricProviders(const char * host, const char * port,
     hints                   = fi_allocinfo();
     hints->ep_attr->type    = FI_EP_RDM;
     hints->caps             = FI_MSG | FI_RMA;
-    hints->mode             = FI_CONTEXT | FI_LOCAL_MR;
     hints->addr_format      = FI_FORMAT_UNSPEC;
+    hints->mode             = FI_CONTEXT | FI_LOCAL_MR;
+    hints->domain_attr->mr_mode = FI_MR_BASIC;
     
     /*  Search for an available fabric provider. This should return a list of
         available providers sorted by libfabric preference i.e. RDMA interfaces
@@ -682,7 +872,7 @@ int trfGetFabricProviders(const char * host, const char * port,
 
     trf__log_debug("Attempting to find fabric provider for %s:%s", host, port);
     
-    uint64_t fiflags    = (req_type == TRF_EP_SOURCE) ? FI_SOURCE : 0;
+    uint64_t fiflags    = 0;
     //const char * g_host = (req_type == TRF_EP_SOURCE) ? NULL : host;
 
     ret = fi_getinfo(TRF_FABRIC_VERSION, host, port, fiflags, hints, &fi);
@@ -763,7 +953,7 @@ int trfRegBuf(PTRFXFabric ctx, void * addr, size_t len, uint64_t flags,
     struct fid_mr * mr;
     struct fid_domain * domain = ctx->domain;
 
-    ret = fi_mr_reg(domain, addr, len, flags, 0, 0, flags, &mr, NULL);
+    ret = fi_mr_reg(domain, addr, len, flags, 0, 0, 0, &mr, NULL);
     if (ret)
     {
         trf_fi_error("fi_mr_reg", ret);
@@ -885,3 +1075,116 @@ void * trfAllocAligned(size_t size, size_t alignment)
     }
     return ptr;
 }
+
+void trfFreeDisplayList(PTRFDisplay disp, int dealloc)
+{
+    if (!disp)
+    {
+        return;
+    }
+
+    PTRFDisplay disp_itm = disp;
+    while (disp_itm)
+    {
+        PTRFDisplay disp_tmp = disp_itm->next;
+        free(disp_itm);
+        free(disp_itm->name);
+        if (dealloc)
+        {
+            free(disp_itm->fb_addr);
+            if (disp_itm->fb_mr)
+            {
+                fi_close(&disp_itm->fb_mr->fid);
+            }
+        }
+        disp_itm = disp_tmp;
+    }
+}
+
+ssize_t trfGetDisplayBytes(size_t width, size_t height, enum TRFTexFormat fmt)
+{
+    switch (fmt)
+    {
+        case TRF_TEX_BGR_888:
+        case TRF_TEX_RGB_888:
+            return width * height * 3;
+        case TRF_TEX_RGBA_8888:
+        case TRF_TEX_BGRA_8888:
+            return width * height * 4;
+        case TRF_TEX_RGBA_16161616:
+        case TRF_TEX_RGBA_16161616F:
+        case TRF_TEX_BGRA_16161616:
+        case TRF_TEX_BGRA_16161616F:
+            return width * height * 8;
+        case TRF_TEX_ETC1:
+        case TRF_TEX_DXT1:
+            if (width % 4 || height % 4) { return -ENOTSUP; }
+            return width * height / 2;
+        case TRF_TEX_ETC2:
+        case TRF_TEX_DXT5:
+            if (width % 4 || height % 4) { return -ENOTSUP; }
+            return width * height;
+        default:
+            return -EINVAL;
+    }
+}
+
+int trfBindDisplayList(PTRFContext ctx, PTRFDisplay list)
+{
+    if (!ctx || !list)
+        return -EINVAL;
+
+    ctx->displays = list;
+    return 0;
+}
+
+int trfUpdateDisplayAddr(PTRFContext ctx, PTRFDisplay disp, void * addr)
+{
+    if (!disp || !addr)
+        return -EINVAL;
+
+    int ret;
+    
+    if (ctx->type != TRF_EP_SINK || ctx->type != TRF_EP_CONN_ID)
+    {
+        trf__log_error("This context does not support display sources");
+        return -EINVAL;
+    }
+
+    struct fid_mr * tmp_mr;
+
+    disp->fb_addr = addr;
+    ssize_t fb_len = trfGetDisplayBytes(disp->width, disp->height, 
+        disp->format);
+    if (fb_len < 0)
+    {
+        trf__log_error("Unable to get display buffer length: %s", 
+            strerror(-fb_len));
+        return fb_len;
+    }
+
+    uint64_t flags = ctx->type == TRF_EP_SINK ? FI_REMOTE_WRITE : 0;
+    ret = fi_mr_reg(ctx->xfer.fabric->domain, addr, fb_len, flags, 0, 0,
+        0, &tmp_mr, NULL);
+    if (ret)
+    {
+        trf_fi_error("fi_mr_reg", ret);
+        return ret;
+    }
+
+    if (disp->fb_mr)
+    {
+        ret = fi_close(&disp->fb_mr->fid);
+        if (ret)
+        {
+            trf_fi_error("fi_close", ret);
+            fi_close(&tmp_mr->fid);
+            return ret;
+        }
+    }
+
+    disp->fb_mr = tmp_mr;
+
+    return 0;
+}
+

@@ -249,6 +249,7 @@ int trfNCClientInit(PTRFContext ctx, char * host, char * port)
             ctx->cli.session_id = msg->server_hello->new_session_id;
             break;
         case TRF_MSG__MESSAGE_WRAPPER__WDATA_SERVER_REJECT:
+        {
             TrfMsg__APIVersion * ver = msg->server_reject->version;
             trf__log_error(
                 "API ver. mismatch! "
@@ -257,6 +258,7 @@ int trfNCClientInit(PTRFContext ctx, char * host, char * port)
                 ver->api_major, ver->api_minor, ver->api_patch
             );
             goto free_buff;
+        }
         default:
             trf__log_error("Unexpected message type in buffer!");
             goto free_buff;
@@ -368,7 +370,7 @@ int trfNCClientInit(PTRFContext ctx, char * host, char * port)
 
     struct fi_info * fi_out;
     ret = trfGetFabricProviders(msg->addr_pf->addrs[0]->addr, "0",
-        TRF_EP_SOURCE, &fi_out);
+        TRF_EP_SINK, &fi_out);
     if (ret)
     {
         trf__log_error("Unable to get fabric providers");
@@ -431,14 +433,16 @@ int trfNCClientInit(PTRFContext ctx, char * host, char * port)
         if (ret < 0)
         {
             trf__log_error("Unable to serialize address");
+            trf_msg__transport__free_unpacked(msg->client_cap->transports[cf],
+                NULL);
             continue;
         }
         else
         {
             trf__log_debug("Serialized: %s", 
                 msg->client_cap->transports[cf]->route);
+            cf++;
         }
-        cf++;
     }
 
     if (!cf)
@@ -478,6 +482,7 @@ int trfNCClientInit(PTRFContext ctx, char * host, char * port)
     // Narrow down the list of providers based on the server's capabilities
     
     fi_freeinfo(fi_out);
+    fi_out = NULL;
     ret = trfGetRoute(msg->server_cap->transport->route,
         msg->server_cap->transport->name, 
         msg->server_cap->transport->proto, &fi_out);
@@ -506,7 +511,7 @@ int trfNCClientInit(PTRFContext ctx, char * host, char * port)
         goto free_fpl;
     }
 
-    void * regd_buf = trfAllocAligned(4096, 2097152);
+    void * regd_buf = trfAllocAligned(4096, 4096);
     if (!regd_buf)
     {
         trf__log_error("Unable to allocate pinned message buffer");
@@ -598,39 +603,48 @@ int trfNCClientInit(PTRFContext ctx, char * host, char * port)
 
     // After sending the endpoint info on the negotiation channel, send a
     // message on the main channel to notify the server that we are ready
-
+    int retry = 0;
     do {
         ret = fi_send(ctx->xfer.fabric->ep, regd_buf, 8, 
             fi_mr_desc(ctx->xfer.fabric->msg_mr), addr_out, NULL);
-        usleep(1000);
-    } while (ret == -FI_EAGAIN);
+        trf__log_trace("Retry sending: %d",retry);
+        trfSleep(100);
+        retry ++;
+    } while (ret == -FI_EAGAIN && retry <= 10);
     
     if (ret)
     {
-        fprintf(stderr, "fi_cq_sread %d", ret);
-        return ret;
+        if (retry > 10)
+            fprintf(stderr, "Retry limit reached\n");
+        
+        fprintf(stderr, "fi_cq_sread %d\n", ret);
+        goto close_mr;
     }
 
     struct fi_cq_data_entry cqe;
-    
+    retry = 0;
     do {
         ret = fi_cq_sread(ctx->xfer.fabric->tx_cq, &cqe, 1, 0, 0);
-        usleep(1000);
-    } while (ret == -FI_EAGAIN);
+        trfSleep(100);
+        retry ++;
+        trf__log_trace("Retry reading: %d",retry);
+    } while (ret == -FI_EAGAIN && retry <= 10);
     
     if (ret != 1)
     {
-        fprintf(stderr, "fi_cq_sread %d", ret);
-        return ret;
+        if (retry > 10)
+            fprintf(stderr, "Retry limit reached\n");
+        
+        fprintf(stderr, "fi_cq_sread %d\n", ret);
+        goto close_mr;
     }
 
     trf__log_info("Sent cookie %lu", *(uint64_t *) regd_buf);
-
     fi_freeinfo(fi_out);
     free(buff);
+    ctx->xfer.fabric->msg_ptr = regd_buf;
+    ctx->type = TRF_EP_SINK;
     ctx->cli.client_fd = sfd;
-    trf__log_trace("Done");
-
     return 0;
 
 close_mr:
@@ -640,7 +654,9 @@ close_mr:
 free_reg_buf:
     free(regd_buf);
 free_fpl:
-    fi_freeinfo(fi_out);
+    if (fi_out) {
+        fi_freeinfo(fi_out);
+    }
 free_ci_list:
     trfFreeInterfaceList(clientIf);
     trf_msg__message_wrapper__free_unpacked(msg, NULL);
@@ -656,7 +672,7 @@ close_sock:
     return ret;
 }
 
-int trfNCAccept(PTRFContext ctx, PTRFContext ctx_out)
+int trfNCAccept(PTRFContext ctx, PTRFContext * ctx_out)
 {
     // Check fd created
     if (!ctx->svr.listen_fd)
@@ -803,7 +819,7 @@ int trfNCAccept(PTRFContext ctx, PTRFContext ctx_out)
     }
 
     PTRFAddrV av_cand;
-    if ((ret = trfGetFastestLink(av, &av_cand)))
+    if ((ret = trfGetFastestLink(av, &av_cand)) < 0)
     {
         trf__log_error("Unable to get fastest link");
         goto free_av_list;
@@ -824,25 +840,25 @@ int trfNCAccept(PTRFContext ctx, PTRFContext ctx_out)
     msg->addr_pf->addrs     = calloc(1, sizeof(TrfMsg__AddrCand *) * 1);
     if (!msg->addr_pf->addrs)
     {
-        goto free_av_cand;
+        goto free_av_list;
     }
     msg->addr_pf->addrs[0]  = calloc(1, sizeof(TrfMsg__AddrCand));
     if (!msg->addr_pf->addrs[0])
     {
-        goto free_av_cand;
+        goto free_av_list;
     }
     msg->addr_pf->n_addrs = 1;
     trf_msg__addr_cand__init(msg->addr_pf->addrs[0]);
     msg->addr_pf->addrs[0]->addr = calloc(1, INET6_ADDRSTRLEN);
     if (!msg->addr_pf->addrs[0]->addr)
     {
-        goto free_av_cand;
+        goto free_av_list;
     }
     ret = trfGetIPaddr(av_cand->src_addr, msg->addr_pf->addrs[0]->addr);
     if (ret < 0)
     {
         trf__log_error("Unable to get IP address");
-        goto free_av_cand;
+        goto free_av_list;
     }
     
     trf__log_trace("Address to Connect: %s", msg->addr_pf->addrs[0]->addr);
@@ -850,7 +866,7 @@ int trfNCAccept(PTRFContext ctx, PTRFContext ctx_out)
     if ((ret = trfNCSendDelimited(client_sock, mbuf, 4096, 0, msg)) < 0)
     {
         trf__log_error("Delimited send failed %s", strerror(-ret));
-        goto free_av_cand;
+        goto free_av_list;
     }
 
     trf_msg__message_wrapper__free_unpacked(msg, NULL);
@@ -862,13 +878,13 @@ int trfNCAccept(PTRFContext ctx, PTRFContext ctx_out)
     if (ret < 0)
     {
         trf__log_error("Delimited recv failed %s", strerror(-ret));
-        goto free_av_cand;
+        goto free_av_list;
     }
 
     if (msg->wdata_case != TRF_MSG__MESSAGE_WRAPPER__WDATA_CLIENT_CAP)
     {
         trf__log_error("Invalid payload type %d", msg->wdata_case);
-        goto free_av_cand;
+        goto free_av_list;
     }
     int i = 0;
     int flag = 0;
@@ -885,8 +901,9 @@ int trfNCAccept(PTRFContext ctx, PTRFContext ctx_out)
             msg->client_cap->transports[i]->proto, &fi );
         if (ret)
         {
-            trf__log_error("Unable to get route");
-            goto free_av_cand;
+            trf__log_warn("Unable to get route for %s",
+                msg->client_cap->transports[i]->route
+            );
         }
         else 
         {
@@ -898,7 +915,7 @@ int trfNCAccept(PTRFContext ctx, PTRFContext ctx_out)
     if (!flag)
     {
         trf__log_error("No usable transport found");
-        goto free_av_cand;
+        goto free_av_list;
     }
 
     // Allocate resources and create a communication channel
@@ -907,7 +924,7 @@ int trfNCAccept(PTRFContext ctx, PTRFContext ctx_out)
     if (!cli_ctx)
     {
         trf__log_error("Unable to allocate context");
-        goto free_av_cand;
+        goto free_av_list;
     }
     cli_ctx->type           = TRF_EP_CONN_ID;
     cli_ctx->cli.client_fd  = client_sock;
@@ -1001,7 +1018,7 @@ int trfNCAccept(PTRFContext ctx, PTRFContext ctx_out)
     ret = trfNCRecvDelimited(cli_ctx->cli.client_fd, mbuf, 4096, 0, &msg);
     if (ret < 0)
     {
-        trf__log_error("Unable to receive Client Address: %s", strerror(ret));
+        trf__log_error("Unable to receive Client Address: %s", strerror(-ret));
         goto free_regd_buf;
     }
 
@@ -1020,39 +1037,55 @@ int trfNCAccept(PTRFContext ctx, PTRFContext ctx_out)
     }
     trf__log_trace("Received Client Address: %s", msg->endpoint->transport->route);
     
+    cli_ctx->xfer.fabric->msg_ptr = regd_buf;
+    cli_ctx->xfer.fabric->peer_addr = src_addr;
+
     // Wait on the main channel for an incoming message
 
     *(uint64_t *) regd_buf = 0;
-
+    int retry = 0;
     do {
         ret = fi_recv(cli_ctx->xfer.fabric->ep, regd_buf, 8, 
             fi_mr_desc(cli_ctx->xfer.fabric->msg_mr), 0, NULL);
-        usleep(1000);
-    } while (ret == -FI_EAGAIN);
+        trfSleep(100);
+        trf__log_trace("Trying to receive data: %d\n",retry);
+        retry ++;
+    } while (ret == -FI_EAGAIN && retry <= 10);
     
     if (ret)
     {
-        fprintf(stderr, "fi_cq_sread %d", ret);
+        if (retry > 10){
+            fprintf(stderr, "Receive timeout\n");
+        }
+        fprintf(stderr, "fi_cq_sread %d\n", ret);
         goto free_regd_buf;
         return ret;
     }
 
     struct fi_cq_data_entry cqe;
-
+    retry = 0;
     do {
         ret = fi_cq_sread(cli_ctx->xfer.fabric->rx_cq, &cqe, 1, 0, 0);
-        usleep(1000);
-    } while (ret == -FI_EAGAIN);
+        trfSleep(100);
+        trf__log_trace("Trying to read completion queue: %d",retry);
+        retry ++;
+
+    } while (ret == -FI_EAGAIN && retry <= 10);
     
     if (ret != 1)
     {
-        fprintf(stderr, "fi_cq_sread %d", ret);
+        if(retry > 10){
+            fprintf(stderr, "Completion Queue timeout\n");
+        }
+        fprintf(stderr, "fi_cq_sread %d\n", ret);
+        
         goto free_regd_buf;
         return ret;
     }
 
     trf__log_info("Recv Cookie %lu", *(uint64_t *) regd_buf);
-
+    trf__log_info("FD: %d", cli_ctx->cli.client_fd);
+    *ctx_out = cli_ctx;
     free(mbuf);
     return ret;
 
@@ -1060,8 +1093,6 @@ free_regd_buf:
     free(regd_buf);
 destroy_ctx:
     trfDestroyContext(cli_ctx);
-free_av_cand:
-    trfFreeAddrV(av_cand);
 free_av_list:
     trfFreeAddrV(av);
 free_sv_list:
@@ -1077,9 +1108,7 @@ free_msg:
         trf_msg__message_wrapper__free_unpacked(msg, NULL);
     }
 free_buf:
-    if (mbuf) {
-        free(mbuf);
-    }
+    free(mbuf);
     return -1;
 }
 

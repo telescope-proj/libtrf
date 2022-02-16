@@ -53,7 +53,7 @@
 // #define TRF_FABRIC_VERSION FI_VERSION(1, 0)
 
 #ifndef TRF_FABRIC_VERSION
-    #define TRF_FI_MIN_VER FI_VERSION(1, 4)
+    #define TRF_FI_MIN_VER FI_VERSION(1, 10)
     #define TRF_FI_MAX_VER FI_VERSION(1, 14)
     #define TRF_FI_CUR_VER FI_VERSION(FI_MAJOR_VERSION, FI_MINOR_VERSION)
 
@@ -92,6 +92,10 @@
 
 #define trf_fi_error(call, err) \
     trf__log_error("(fabric) %s failed (%d): %s", call, (int) -err, \
+    fi_strerror((int) -err))
+
+#define trf_fi_warn(call, err) \
+    trf__log_warn("(fabric) %s failed (%d): %s", call, (int) -err, \
     fi_strerror((int) -err))
 
 #define trf_perror(retval) trf__log_error("%s", strerror(-retval));
@@ -265,14 +269,26 @@ struct TRFXFabric {
       * LibTRF predefines a memory region for use in sending and receiving
       * messages. However, you can use your own memory region if you wish.
     */
-    struct fid_mr       * msg_mr;   
+    struct fid_mr       * msg_mr;
+    /**
+     * @brief Message virtual memory address.
+     * 
+     * This address must correspond with the memory registered under msg_mr.
+     */
+    void                * msg_ptr;
     /**
       * @brief Framebuffer memory region.
       *
       * Stores framebuffer contents. Currently, the use of only one framebuffer
       * is supported through the TRF API.
     */
-    struct fid_mr       * fb_mr;    
+    struct fid_mr       * fb_mr;
+    /**
+      * @brief Framebuffer virtual memory address.
+      *
+      * This address must correspond with the memory registered under fb_mr.
+    */
+    void                * fb_ptr;
     /**
       * @brief Interrupt vector
       *
@@ -339,6 +355,22 @@ enum TRFXAddr {
     */
     TRFX_ADDR_IB_GID,               
     /**
+     * @brief InfiniBand UD GID
+    */
+    TRFX_ADDR_IB_UD,
+    /**
+      * @brief Intel Performance Scaled Messaging 1 (True Scale Fabric)
+    */
+    TRFX_ADDR_PSMX,
+    /**
+     * @brief Intel Performance Scaled Messaging 2 (Omni-Path)
+    */
+    TRFX_ADDR_PSMX2,
+    /**
+     * @brief Intel Performance Scaled Messaging 3 (RoCE v2)
+    */
+    TRFX_ADDR_PSMX3,
+    /**
       * @brief Sentinel value
     */
     TRFX_ADDR_MAX                  
@@ -371,12 +403,10 @@ enum TRFTexFormat {
     TRF_TEX_DXT1,
     /**
      * @brief DXT5 compressed texture format
-     * 
      */
     TRF_TEX_DXT5,
     /**
      * @brief ETC1 compressed texture format
-     * 
      */
     TRF_TEX_ETC1,
     /**
@@ -391,6 +421,15 @@ enum TRFTexFormat {
       * @brief RGBA, 16 bits per channel
       */
     TRF_TEX_RGBA_16161616,
+    /**
+     * @brief BGRA, 16 bits per channel HDR float
+     * 
+     */
+    TRF_TEX_BGRA_16161616F,
+    /**
+     * @brief BGRA, 16 bits per channel
+     */
+    TRF_TEX_BGRA_16161616,
     /**
       * @brief Sentinel Value
       */
@@ -561,12 +600,13 @@ struct TRFBufferData {
     size_t len;
 };
 
-#define PTRFXFabric struct TRFXFabric *
-#define PTRFAddrV struct TRFAddrV *
+#define PTRFDisplay   struct TRFDisplay *
+#define PTRFXFabric   struct TRFXFabric *
+#define PTRFAddrV     struct TRFAddrV *
 #define PTRFInterface struct TRFInterface *
-#define PTRFSession struct TRFSession *
-#define PTRFContext struct TRFContext *
-#define TRF_MR_SIZE 64 * 1024 * 1024
+#define PTRFSession   struct TRFSession *
+#define PTRFContext   struct TRFContext *
+#define TRF_MR_SIZE   64 * 1024 * 1024
 
 /**
  * @brief Allocate an active endpoint.
@@ -680,7 +720,7 @@ int trfCreateChannel(PTRFContext ctx, struct fi_info * fi, void * data,
  * @brief Determine fabrics which might reach the specified route.
  *
  * Note: This function is designed for dynamic port allocation, and as such
- * *does not assign a source address* to the returned fi_info list.
+ * does not assign a source address to the returned fi_info list.
  *
  * @param dst   Destination address to use, in TRF Serialized format.
  *

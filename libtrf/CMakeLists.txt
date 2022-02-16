@@ -31,6 +31,7 @@ add_compile_options(
 )
 
 add_library(trf STATIC ${SOURCES})
+set_property(TARGET trf PROPERTY C_STANDARD 99)
 
 target_include_directories(trf
 	INTERFACE

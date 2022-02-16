@@ -66,26 +66,18 @@
 <h1 id="index">Index</h1>
 
 <div class="genindex-jumpbox">
- <a href="#L"><strong>L</strong></a>
- | <a href="#P"><strong>P</strong></a>
- | <a href="#R"><strong>R</strong></a>
+ <a href="#P"><strong>P</strong></a>
  | <a href="#T"><strong>T</strong></a>
  
 </div>
-<h2 id="L">L</h2>
-<table style="width: 100%" class="indextable genindextable"><tr>
-  <td style="width: 33%; vertical-align: top;"><ul>
-      <li><a href="api/trf_internal.html#c.LOOP_COUNT">LOOP_COUNT (C macro)</a>
-</li>
-  </ul></td>
-</tr></table>
-
 <h2 id="P">P</h2>
 <table style="width: 100%" class="indextable genindextable"><tr>
   <td style="width: 33%; vertical-align: top;"><ul>
       <li><a href="api/trf.html#c.PTRFAddrV">PTRFAddrV (C macro)</a>
 </li>
       <li><a href="api/trf.html#c.PTRFContext">PTRFContext (C macro)</a>
+</li>
+      <li><a href="api/trf.html#c.PTRFDisplay">PTRFDisplay (C macro)</a>
 </li>
   </ul></td>
   <td style="width: 33%; vertical-align: top;"><ul>
@@ -94,14 +86,6 @@
       <li><a href="api/trf.html#c.PTRFSession">PTRFSession (C macro)</a>
 </li>
       <li><a href="api/trf.html#c.PTRFXFabric">PTRFXFabric (C macro)</a>
-</li>
-  </ul></td>
-</tr></table>
-
-<h2 id="R">R</h2>
-<table style="width: 100%" class="indextable genindextable"><tr>
-  <td style="width: 33%; vertical-align: top;"><ul>
-      <li><a href="api/trf_inet.html#_CPPv415removeCharacterPcc">removeCharacter (C++ function)</a>
 </li>
   </ul></td>
 </tr></table>
@@ -115,9 +99,15 @@
 </li>
       <li><a href="api/trf_internal.html#_CPPv419trf__CheckSessionID11PTRFContext8uint64_t7uint8_t">trf__CheckSessionID (C++ function)</a>
 </li>
+      <li><a href="api/trf_internal.html#_CPPv413trf__GetDelayP8timespecP8timespec8uint64_t">trf__GetDelay (C++ function)</a>
+</li>
       <li><a href="api/trf_internal.html#_CPPv416trf__GetPageSizev">trf__GetPageSize (C++ function)</a>
 </li>
       <li><a href="api/trf_internal.html#_CPPv420trf__HammingWeight648uint64_t">trf__HammingWeight64 (C++ function)</a>
+</li>
+      <li><a href="api/trf_internal.html#_CPPv414trf__HasPassed9clockid_tP8timespec">trf__HasPassed (C++ function)</a>
+</li>
+      <li><a href="api/trf_internal.html#c.TRF__LOOPS">TRF__LOOPS (C macro)</a>
 </li>
       <li><a href="api/trf_internal.html#_CPPv411trf__Rand64v">trf__Rand64 (C++ function)</a>
 </li>
@@ -134,6 +124,8 @@
       <li><a href="api/trf.html#c.TRF_FI_MAX_VER">TRF_FI_MAX_VER (C macro)</a>
 </li>
       <li><a href="api/trf.html#c.TRF_FI_MIN_VER">TRF_FI_MIN_VER (C macro)</a>
+</li>
+      <li><a href="api/trf.html#c.trf_fi_warn">trf_fi_warn (C macro)</a>
 </li>
       <li><a href="api/trf.html#c.TRF_MR_SIZE">TRF_MR_SIZE (C macro)</a>
 </li>
@@ -601,12 +593,12 @@
 </li>
       <li><a href="api/trf.html#_CPPv419trfGetInterfaceListP13PTRFInterfaceP8uint32_t">trfGetInterfaceList (C++ function)</a>, <a href="api/trf_interface.html#_CPPv419trfGetInterfaceListP13PTRFInterfaceP8uint32_t">[1]</a>
 </li>
-  </ul></td>
-  <td style="width: 33%; vertical-align: top;"><ul>
       <li><a href="api/trf_inet.html#_CPPv412trfGetIPaddrP8sockaddrPc">trfGetIPaddr (C++ function)</a>
 </li>
       <li><a href="api/trf_interface.html#_CPPv415trfGetLinkSpeedPcP7int32_t">trfGetLinkSpeed (C++ function)</a>
 </li>
+  </ul></td>
+  <td style="width: 33%; vertical-align: top;"><ul>
       <li><a href="api/trf_inet.html#_CPPv420trfGetMappedIPv4addrP12sockaddr_in6Pc">trfGetMappedIPv4addr (C++ function)</a>
 </li>
       <li><a href="api/trf_inet.html#_CPPv417trfGetNodeServiceP8sockaddrPc">trfGetNodeService (C++ function)</a>
@@ -1005,7 +997,7 @@
 </li>
       <li><a href="api/trf_proto.html#_CPPv425TrfMsg__Transport_Closure">TrfMsg__Transport_Closure (C++ type)</a>
 </li>
-      <li><a href="api/trf_ncp.html#_CPPv411trfNCAccept11PTRFContext11PTRFContext">trfNCAccept (C++ function)</a>
+      <li><a href="api/trf_ncp.html#_CPPv411trfNCAccept11PTRFContextP11PTRFContext">trfNCAccept (C++ function)</a>
 </li>
       <li><a href="api/trf_ncp.html#_CPPv416trfNCClientClose11PTRFContext">trfNCClientClose (C++ function)</a>
 </li>
@@ -1057,6 +1049,10 @@
 </li>
       <li><a href="api/trf.html#_CPPv4N12TRFTexFormat15TRF_TEX_BGR_888E">TRFTexFormat::TRF_TEX_BGR_888 (C++ enumerator)</a>
 </li>
+      <li><a href="api/trf.html#_CPPv4N12TRFTexFormat21TRF_TEX_BGRA_16161616E">TRFTexFormat::TRF_TEX_BGRA_16161616 (C++ enumerator)</a>
+</li>
+      <li><a href="api/trf.html#_CPPv4N12TRFTexFormat22TRF_TEX_BGRA_16161616FE">TRFTexFormat::TRF_TEX_BGRA_16161616F (C++ enumerator)</a>
+</li>
       <li><a href="api/trf.html#_CPPv4N12TRFTexFormat17TRF_TEX_BGRA_8888E">TRFTexFormat::TRF_TEX_BGRA_8888 (C++ enumerator)</a>
 </li>
       <li><a href="api/trf.html#_CPPv4N12TRFTexFormat12TRF_TEX_DXT1E">TRFTexFormat::TRF_TEX_DXT1 (C++ enumerator)</a>
@@ -1089,9 +1085,17 @@
 </li>
       <li><a href="api/trf.html#_CPPv4N8TRFXAddr16TRFX_ADDR_IB_GIDE">TRFXAddr::TRFX_ADDR_IB_GID (C++ enumerator)</a>
 </li>
+      <li><a href="api/trf.html#_CPPv4N8TRFXAddr15TRFX_ADDR_IB_UDE">TRFXAddr::TRFX_ADDR_IB_UD (C++ enumerator)</a>
+</li>
       <li><a href="api/trf.html#_CPPv4N8TRFXAddr17TRFX_ADDR_INVALIDE">TRFXAddr::TRFX_ADDR_INVALID (C++ enumerator)</a>
 </li>
       <li><a href="api/trf.html#_CPPv4N8TRFXAddr13TRFX_ADDR_MAXE">TRFXAddr::TRFX_ADDR_MAX (C++ enumerator)</a>
+</li>
+      <li><a href="api/trf.html#_CPPv4N8TRFXAddr14TRFX_ADDR_PSMXE">TRFXAddr::TRFX_ADDR_PSMX (C++ enumerator)</a>
+</li>
+      <li><a href="api/trf.html#_CPPv4N8TRFXAddr15TRFX_ADDR_PSMX2E">TRFXAddr::TRFX_ADDR_PSMX2 (C++ enumerator)</a>
+</li>
+      <li><a href="api/trf.html#_CPPv4N8TRFXAddr15TRFX_ADDR_PSMX3E">TRFXAddr::TRFX_ADDR_PSMX3 (C++ enumerator)</a>
 </li>
       <li><a href="api/trf.html#_CPPv4N8TRFXAddr18TRFX_ADDR_SOCKADDRE">TRFXAddr::TRFX_ADDR_SOCKADDR (C++ enumerator)</a>
 </li>
@@ -1115,9 +1119,13 @@
 </li>
       <li><a href="api/trf.html#_CPPv4N10TRFXFabric5fb_mrE">TRFXFabric::fb_mr (C++ member)</a>
 </li>
+      <li><a href="api/trf.html#_CPPv4N10TRFXFabric6fb_ptrE">TRFXFabric::fb_ptr (C++ member)</a>
+</li>
       <li><a href="api/trf.html#_CPPv4N10TRFXFabric5intrvE">TRFXFabric::intrv (C++ member)</a>
 </li>
       <li><a href="api/trf.html#_CPPv4N10TRFXFabric6msg_mrE">TRFXFabric::msg_mr (C++ member)</a>
+</li>
+      <li><a href="api/trf.html#_CPPv4N10TRFXFabric7msg_ptrE">TRFXFabric::msg_ptr (C++ member)</a>
 </li>
       <li><a href="api/trf.html#_CPPv4N10TRFXFabric9peer_addrE">TRFXFabric::peer_addr (C++ member)</a>
 </li>

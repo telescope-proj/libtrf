@@ -83,8 +83,8 @@
 <div class="breathe-sectiondef docutils container">
 <p class="breathe-sectiondef-title rubric" id="breathe-section-title-defines">Defines</p>
 <dl class="cpp macro">
-<dt class="sig sig-object cpp" id="c.LOOP_COUNT">
-<span class="target" id="trf__internal_8h_1a09002b61ad87b03f8a39b3c7f9a7296b"></span><span class="sig-name descname"><span class="n"><span class="pre">LOOP_COUNT</span></span></span><a class="headerlink" href="#c.LOOP_COUNT" title="Permalink to this definition"></a><br /></dt>
+<dt class="sig sig-object cpp" id="c.TRF__LOOPS">
+<span class="target" id="trf__internal_8h_1a1f946191fb69eb877fbbb5ddb511caca"></span><span class="sig-name descname"><span class="n"><span class="pre">TRF__LOOPS</span></span></span><a class="headerlink" href="#c.TRF__LOOPS" title="Permalink to this definition"></a><br /></dt>
 <dd></dd></dl>
 
 </div>
@@ -97,9 +97,9 @@
 <dl class="field-list simple">
 <dt class="field-odd">Parameters</dt>
 <dd class="field-odd"><ul class="simple">
-<li><p><strong>ctx</strong> – Context </p></li>
-<li><p><strong>session</strong> – Session ID </p></li>
-<li><p><strong>first</strong> – Whether to the first item or the total count </p></li>
+<li><p><strong>ctx</strong> – Context</p></li>
+<li><p><strong>session</strong> – Session ID</p></li>
+<li><p><strong>first</strong> – Whether to the first item or the total count</p></li>
 </ul>
 </dd>
 <dt class="field-even">Returns</dt>
@@ -112,13 +112,13 @@
 <dt class="sig sig-object cpp" id="_CPPv426trf__AllocSessionForClient11PTRFContext8uint64_tP11PTRFContext">
 <span id="_CPPv326trf__AllocSessionForClient11PTRFContext8uint64_tP11PTRFContext"></span><span id="_CPPv226trf__AllocSessionForClient11PTRFContext8uint64_tP11PTRFContext"></span><span id="trf__AllocSessionForClient__PTRFContext.uint64_t.PTRFContextP"></span><span class="target" id="trf__internal_8h_1a1b3644866fb929f1ae64d1076dd90af6"></span><span class="kt"><span class="pre">int</span></span><span class="w"> </span><span class="sig-name descname"><span class="n"><span class="pre">trf__AllocSessionForClient</span></span></span><span class="sig-paren">(</span><span class="n"><span class="pre">PTRFContext</span></span><span class="w"> </span><span class="n sig-param"><span class="pre">ctx</span></span>, <span class="n"><span class="pre">uint64_t</span></span><span class="w"> </span><span class="n sig-param"><span class="pre">session_id</span></span>, <span class="n"><span class="pre">PTRFContext</span></span><span class="w"> </span><span class="p"><span class="pre">*</span></span><span class="n sig-param"><span class="pre">ctx_out</span></span><span class="sig-paren">)</span><a class="headerlink" href="#_CPPv426trf__AllocSessionForClient11PTRFContext8uint64_tP11PTRFContext" title="Permalink to this definition"></a><br /></dt>
 <dd><p>Allocate resouces for an incoming session on ther server side with a specific cookie. </p>
-<p>Allocates a resouces for an incoming session on the server side with a specific cookie, The cookie must not be in use; use the <a class="reference internal" href="#trf__internal_8h_1a3e7b31a0c5b28bdf246beebddd8d991a"><span class="std std-ref">trf__CheckSessionID()</span></a> to verify </p>
+<p>Allocates a resouces for an incoming session on the server side with a specific cookie, The cookie must not be in use; use the function <a class="reference internal" href="#trf__internal_8h_1a3e7b31a0c5b28bdf246beebddd8d991a"><span class="std std-ref">trf__CheckSessionID()</span></a> to verify</p>
 <dl class="field-list simple">
 <dt class="field-odd">Parameters</dt>
 <dd class="field-odd"><ul class="simple">
-<li><p><strong>ctx</strong> – Context </p></li>
-<li><p><strong>session</strong> – Session ID </p></li>
-<li><p><strong>ctx_out</strong> – Pointer to the context item inserted into ctx </p></li>
+<li><p><strong>ctx</strong> – Context</p></li>
+<li><p><strong>session</strong> – Session ID</p></li>
+<li><p><strong>ctx_out</strong> – Pointer to the context item inserted into ctx</p></li>
 </ul>
 </dd>
 <dt class="field-even">Returns</dt>
@@ -152,13 +152,45 @@
 <dl class="cpp function">
 <dt class="sig sig-object cpp" id="_CPPv420trf__HammingWeight648uint64_t">
 <span id="_CPPv320trf__HammingWeight648uint64_t"></span><span id="_CPPv220trf__HammingWeight648uint64_t"></span><span id="trf__HammingWeight64__uint64_t"></span><span class="target" id="trf__internal_8h_1adb15f738ff4aeb20abcc28aeeb228f0e"></span><span class="k"><span class="pre">static</span></span><span class="w"> </span><span class="k"><span class="pre">inline</span></span><span class="w"> </span><span class="n"><span class="pre">uint8_t</span></span><span class="w"> </span><span class="sig-name descname"><span class="n"><span class="pre">trf__HammingWeight64</span></span></span><span class="sig-paren">(</span><span class="n"><span class="pre">uint64_t</span></span><span class="w"> </span><span class="n sig-param"><span class="pre">x</span></span><span class="sig-paren">)</span><a class="headerlink" href="#_CPPv420trf__HammingWeight648uint64_t" title="Permalink to this definition"></a><br /></dt>
-<dd><p>Calculate hamming weight of a 64-bit integer. </p>
+<dd><p>Calculate the Hamming Weight (ones count) of a 64-bit integer. </p>
 <dl class="field-list simple">
 <dt class="field-odd">Parameters</dt>
-<dd class="field-odd"><p><strong>x</strong> – 64-bit integer to calculate the hamming weight of </p>
+<dd class="field-odd"><p><strong>x</strong> – 64-bit integer</p>
 </dd>
 <dt class="field-even">Returns</dt>
-<dd class="field-even"><p>Hamming weight </p>
+<dd class="field-even"><p>Hamming Weight </p>
+</dd>
+</dl>
+</dd></dl>
+
+<dl class="cpp function">
+<dt class="sig sig-object cpp" id="_CPPv413trf__GetDelayP8timespecP8timespec8uint64_t">
+<span id="_CPPv313trf__GetDelayP8timespecP8timespec8uint64_t"></span><span id="_CPPv213trf__GetDelayP8timespecP8timespec8uint64_t"></span><span id="trf__GetDelay__timespecP.timespecP.uint64_t"></span><span class="target" id="trf__internal_8h_1aa4066a2271913304bedf6b9d83f2db47"></span><span class="k"><span class="pre">static</span></span><span class="w"> </span><span class="k"><span class="pre">inline</span></span><span class="w"> </span><span class="kt"><span class="pre">void</span></span><span class="w"> </span><span class="sig-name descname"><span class="n"><span class="pre">trf__GetDelay</span></span></span><span class="sig-paren">(</span><span class="k"><span class="pre">struct</span></span><span class="w"> </span><span class="n"><span class="pre">timespec</span></span><span class="w"> </span><span class="p"><span class="pre">*</span></span><span class="n sig-param"><span class="pre">ts</span></span>, <span class="k"><span class="pre">struct</span></span><span class="w"> </span><span class="n"><span class="pre">timespec</span></span><span class="w"> </span><span class="p"><span class="pre">*</span></span><span class="n sig-param"><span class="pre">ts_out</span></span>, <span class="n"><span class="pre">uint64_t</span></span><span class="w"> </span><span class="n sig-param"><span class="pre">delay_ms</span></span><span class="sig-paren">)</span><a class="headerlink" href="#_CPPv413trf__GetDelayP8timespecP8timespec8uint64_t" title="Permalink to this definition"></a><br /></dt>
+<dd><p>Return a timespec corresponding to a delay in milliseconds after the input timespec. </p>
+<dl class="field-list simple">
+<dt class="field-odd">Parameters</dt>
+<dd class="field-odd"><ul class="simple">
+<li><p><strong>ts</strong> – Timespec to start from</p></li>
+<li><p><strong>ts_out</strong> – Output timespec</p></li>
+<li><p><strong>delay_ms</strong> – Delay in milliseconds </p></li>
+</ul>
+</dd>
+</dl>
+</dd></dl>
+
+<dl class="cpp function">
+<dt class="sig sig-object cpp" id="_CPPv414trf__HasPassed9clockid_tP8timespec">
+<span id="_CPPv314trf__HasPassed9clockid_tP8timespec"></span><span id="_CPPv214trf__HasPassed9clockid_tP8timespec"></span><span id="trf__HasPassed__clockid_t.timespecP"></span><span class="target" id="trf__internal_8h_1a71fb6060426a18921d45ee8fcf7de190"></span><span class="k"><span class="pre">static</span></span><span class="w"> </span><span class="k"><span class="pre">inline</span></span><span class="w"> </span><span class="kt"><span class="pre">int</span></span><span class="w"> </span><span class="sig-name descname"><span class="n"><span class="pre">trf__HasPassed</span></span></span><span class="sig-paren">(</span><span class="n"><span class="pre">clockid_t</span></span><span class="w"> </span><span class="n sig-param"><span class="pre">clock</span></span>, <span class="k"><span class="pre">struct</span></span><span class="w"> </span><span class="n"><span class="pre">timespec</span></span><span class="w"> </span><span class="p"><span class="pre">*</span></span><span class="n sig-param"><span class="pre">ts</span></span><span class="sig-paren">)</span><a class="headerlink" href="#_CPPv414trf__HasPassed9clockid_tP8timespec" title="Permalink to this definition"></a><br /></dt>
+<dd><p>Determine whether a timespec is in the past. </p>
+<dl class="field-list simple">
+<dt class="field-odd">Parameters</dt>
+<dd class="field-odd"><ul class="simple">
+<li><p><strong>clock</strong> – Clock to use</p></li>
+<li><p><strong>ts</strong> – Timespec to check</p></li>
+</ul>
+</dd>
+<dt class="field-even">Returns</dt>
+<dd class="field-even"><p>1 if ts in the past, 0 otherwise Negative error code on failure </p>
 </dd>
 </dl>
 </dd></dl>

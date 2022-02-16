@@ -108,6 +108,11 @@
 <dd></dd></dl>
 
 <dl class="cpp macro">
+<dt class="sig sig-object cpp" id="c.trf_fi_warn">
+<span class="target" id="trf_8h_1acd163c74853aca000fa62e8320ee6942"></span><span class="sig-name descname"><span class="n"><span class="pre">trf_fi_warn</span></span></span><span class="sig-paren">(</span><span class="n"><span class="pre">call</span></span>, <span class="n"><span class="pre">err</span></span><span class="sig-paren">)</span><a class="headerlink" href="#c.trf_fi_warn" title="Permalink to this definition"></a><br /></dt>
+<dd></dd></dl>
+
+<dl class="cpp macro">
 <dt class="sig sig-object cpp" id="c.trf_perror">
 <span class="target" id="trf_8h_1a15befc8aebfcddf4bcef94b78c2ae03f"></span><span class="sig-name descname"><span class="n"><span class="pre">trf_perror</span></span></span><span class="sig-paren">(</span><span class="n"><span class="pre">retval</span></span><span class="sig-paren">)</span><a class="headerlink" href="#c.trf_perror" title="Permalink to this definition"></a><br /></dt>
 <dd></dd></dl>
@@ -123,6 +128,11 @@
 <dd><p>Maximum serialized TRF address string size. </p>
 <p>Currently, the longest TRF address string is: trfx_sockaddr_in6://[ffff:ffff:ffff:ffff:ffff:ffff:ffff:ffff]:65535 at 67 characters, plus the terminating null byte. </p>
 </dd></dl>
+
+<dl class="cpp macro">
+<dt class="sig sig-object cpp" id="c.PTRFDisplay">
+<span class="target" id="trf_8h_1a1217710d551fba67feef5608ef905173"></span><span class="sig-name descname"><span class="n"><span class="pre">PTRFDisplay</span></span></span><a class="headerlink" href="#c.PTRFDisplay" title="Permalink to this definition"></a><br /></dt>
+<dd></dd></dl>
 
 <dl class="cpp macro">
 <dt class="sig sig-object cpp" id="c.PTRFXFabric">
@@ -269,6 +279,30 @@
 </dd></dl>
 
 <dl class="cpp enumerator">
+<dt class="sig sig-object cpp" id="_CPPv4N8TRFXAddr15TRFX_ADDR_IB_UDE">
+<span id="_CPPv3N8TRFXAddr15TRFX_ADDR_IB_UDE"></span><span id="_CPPv2N8TRFXAddr15TRFX_ADDR_IB_UDE"></span><span class="target" id="trf_8h_1a81dcc363d5ca79d793089a23fbcb88d7aaac452f960e90117c2d1ad58c5a84fb8"></span><span class="k"><span class="pre">enumerator</span></span><span class="w"> </span><span class="sig-name descname"><span class="n"><span class="pre">TRFX_ADDR_IB_UD</span></span></span><a class="headerlink" href="#_CPPv4N8TRFXAddr15TRFX_ADDR_IB_UDE" title="Permalink to this definition"></a><br /></dt>
+<dd><p>InfiniBand UD GID. </p>
+</dd></dl>
+
+<dl class="cpp enumerator">
+<dt class="sig sig-object cpp" id="_CPPv4N8TRFXAddr14TRFX_ADDR_PSMXE">
+<span id="_CPPv3N8TRFXAddr14TRFX_ADDR_PSMXE"></span><span id="_CPPv2N8TRFXAddr14TRFX_ADDR_PSMXE"></span><span class="target" id="trf_8h_1a81dcc363d5ca79d793089a23fbcb88d7a2599c967d57d97404a9ca8b76395f427"></span><span class="k"><span class="pre">enumerator</span></span><span class="w"> </span><span class="sig-name descname"><span class="n"><span class="pre">TRFX_ADDR_PSMX</span></span></span><a class="headerlink" href="#_CPPv4N8TRFXAddr14TRFX_ADDR_PSMXE" title="Permalink to this definition"></a><br /></dt>
+<dd><p>Intel Performance Scaled Messaging 1 (True Scale Fabric) </p>
+</dd></dl>
+
+<dl class="cpp enumerator">
+<dt class="sig sig-object cpp" id="_CPPv4N8TRFXAddr15TRFX_ADDR_PSMX2E">
+<span id="_CPPv3N8TRFXAddr15TRFX_ADDR_PSMX2E"></span><span id="_CPPv2N8TRFXAddr15TRFX_ADDR_PSMX2E"></span><span class="target" id="trf_8h_1a81dcc363d5ca79d793089a23fbcb88d7a50a87853b54426fa1b0178b298ce16c5"></span><span class="k"><span class="pre">enumerator</span></span><span class="w"> </span><span class="sig-name descname"><span class="n"><span class="pre">TRFX_ADDR_PSMX2</span></span></span><a class="headerlink" href="#_CPPv4N8TRFXAddr15TRFX_ADDR_PSMX2E" title="Permalink to this definition"></a><br /></dt>
+<dd><p>Intel Performance Scaled Messaging 2 (Omni-Path) </p>
+</dd></dl>
+
+<dl class="cpp enumerator">
+<dt class="sig sig-object cpp" id="_CPPv4N8TRFXAddr15TRFX_ADDR_PSMX3E">
+<span id="_CPPv3N8TRFXAddr15TRFX_ADDR_PSMX3E"></span><span id="_CPPv2N8TRFXAddr15TRFX_ADDR_PSMX3E"></span><span class="target" id="trf_8h_1a81dcc363d5ca79d793089a23fbcb88d7a25d75b5e3d1051710573e910f92c3ec0"></span><span class="k"><span class="pre">enumerator</span></span><span class="w"> </span><span class="sig-name descname"><span class="n"><span class="pre">TRFX_ADDR_PSMX3</span></span></span><a class="headerlink" href="#_CPPv4N8TRFXAddr15TRFX_ADDR_PSMX3E" title="Permalink to this definition"></a><br /></dt>
+<dd><p>Intel Performance Scaled Messaging 3 (RoCE v2) </p>
+</dd></dl>
+
+<dl class="cpp enumerator">
 <dt class="sig sig-object cpp" id="_CPPv4N8TRFXAddr13TRFX_ADDR_MAXE">
 <span id="_CPPv3N8TRFXAddr13TRFX_ADDR_MAXE"></span><span id="_CPPv2N8TRFXAddr13TRFX_ADDR_MAXE"></span><span class="target" id="trf_8h_1a81dcc363d5ca79d793089a23fbcb88d7ad3a409eaad323f6a74314dbc2579aa1c"></span><span class="k"><span class="pre">enumerator</span></span><span class="w"> </span><span class="sig-name descname"><span class="n"><span class="pre">TRFX_ADDR_MAX</span></span></span><a class="headerlink" href="#_CPPv4N8TRFXAddr13TRFX_ADDR_MAXE" title="Permalink to this definition"></a><br /></dt>
 <dd><p>Sentinel value. </p>
@@ -344,6 +378,18 @@
 <dt class="sig sig-object cpp" id="_CPPv4N12TRFTexFormat21TRF_TEX_RGBA_16161616E">
 <span id="_CPPv3N12TRFTexFormat21TRF_TEX_RGBA_16161616E"></span><span id="_CPPv2N12TRFTexFormat21TRF_TEX_RGBA_16161616E"></span><span class="target" id="trf_8h_1ae776d3218f19c8be3d21ff24f8c4553da8bee8e6c811b16a3bf1aeaf7e0aa92fa"></span><span class="k"><span class="pre">enumerator</span></span><span class="w"> </span><span class="sig-name descname"><span class="n"><span class="pre">TRF_TEX_RGBA_16161616</span></span></span><a class="headerlink" href="#_CPPv4N12TRFTexFormat21TRF_TEX_RGBA_16161616E" title="Permalink to this definition"></a><br /></dt>
 <dd><p>RGBA, 16 bits per channel. </p>
+</dd></dl>
+
+<dl class="cpp enumerator">
+<dt class="sig sig-object cpp" id="_CPPv4N12TRFTexFormat22TRF_TEX_BGRA_16161616FE">
+<span id="_CPPv3N12TRFTexFormat22TRF_TEX_BGRA_16161616FE"></span><span id="_CPPv2N12TRFTexFormat22TRF_TEX_BGRA_16161616FE"></span><span class="target" id="trf_8h_1ae776d3218f19c8be3d21ff24f8c4553da0d921b44a5367523cd25c9a20cee0a58"></span><span class="k"><span class="pre">enumerator</span></span><span class="w"> </span><span class="sig-name descname"><span class="n"><span class="pre">TRF_TEX_BGRA_16161616F</span></span></span><a class="headerlink" href="#_CPPv4N12TRFTexFormat22TRF_TEX_BGRA_16161616FE" title="Permalink to this definition"></a><br /></dt>
+<dd><p>BGRA, 16 bits per channel HDR float. </p>
+</dd></dl>
+
+<dl class="cpp enumerator">
+<dt class="sig sig-object cpp" id="_CPPv4N12TRFTexFormat21TRF_TEX_BGRA_16161616E">
+<span id="_CPPv3N12TRFTexFormat21TRF_TEX_BGRA_16161616E"></span><span id="_CPPv2N12TRFTexFormat21TRF_TEX_BGRA_16161616E"></span><span class="target" id="trf_8h_1ae776d3218f19c8be3d21ff24f8c4553dafff99e4573facf461ec19a27db4aa837"></span><span class="k"><span class="pre">enumerator</span></span><span class="w"> </span><span class="sig-name descname"><span class="n"><span class="pre">TRF_TEX_BGRA_16161616</span></span></span><a class="headerlink" href="#_CPPv4N12TRFTexFormat21TRF_TEX_BGRA_16161616E" title="Permalink to this definition"></a><br /></dt>
+<dd><p>BGRA, 16 bits per channel. </p>
 </dd></dl>
 
 <dl class="cpp enumerator">
@@ -528,7 +574,7 @@
 <dt class="sig sig-object cpp" id="_CPPv411trfGetRoutePKcPKcPKcPP7fi_info">
 <span id="_CPPv311trfGetRoutePKcPKcPKcPP7fi_info"></span><span id="_CPPv211trfGetRoutePKcPKcPKcPP7fi_info"></span><span id="trfGetRoute__cCP.cCP.cCP.fi_infoPP"></span><span class="target" id="trf_8h_1a6801d2a16ef9e345ff4a4b0b19c532ba"></span><span class="kt"><span class="pre">int</span></span><span class="w"> </span><span class="sig-name descname"><span class="n"><span class="pre">trfGetRoute</span></span></span><span class="sig-paren">(</span><span class="k"><span class="pre">const</span></span><span class="w"> </span><span class="kt"><span class="pre">char</span></span><span class="w"> </span><span class="p"><span class="pre">*</span></span><span class="n sig-param"><span class="pre">dst</span></span>, <span class="k"><span class="pre">const</span></span><span class="w"> </span><span class="kt"><span class="pre">char</span></span><span class="w"> </span><span class="p"><span class="pre">*</span></span><span class="n sig-param"><span class="pre">prov</span></span>, <span class="k"><span class="pre">const</span></span><span class="w"> </span><span class="kt"><span class="pre">char</span></span><span class="w"> </span><span class="p"><span class="pre">*</span></span><span class="n sig-param"><span class="pre">proto</span></span>, <span class="k"><span class="pre">struct</span></span><span class="w"> </span><span class="n"><span class="pre">fi_info</span></span><span class="w"> </span><span class="p"><span class="pre">*</span></span><span class="p"><span class="pre">*</span></span><span class="n sig-param"><span class="pre">fi</span></span><span class="sig-paren">)</span><a class="headerlink" href="#_CPPv411trfGetRoutePKcPKcPKcPP7fi_info" title="Permalink to this definition"></a><br /></dt>
 <dd><p>Determine fabrics which might reach the specified route. </p>
-<p>Note: This function is designed for dynamic port allocation, and as such <em>does not assign a source address</em> to the returned fi_info list.</p>
+<p>Note: This function is designed for dynamic port allocation, and as such does not assign a source address to the returned fi_info list.</p>
 <dl class="field-list simple">
 <dt class="field-odd">Parameters</dt>
 <dd class="field-odd"><ul class="simple">
@@ -921,10 +967,24 @@
 </dd></dl>
 
 <dl class="cpp var">
+<dt class="sig sig-object cpp" id="_CPPv4N10TRFXFabric7msg_ptrE">
+<span id="_CPPv3N10TRFXFabric7msg_ptrE"></span><span id="_CPPv2N10TRFXFabric7msg_ptrE"></span><span id="TRFXFabric::msg_ptr__voidP"></span><span class="target" id="struct_t_r_f_x_fabric_1abb331d3b5c2af1f8f9b7679481290013"></span><span class="kt"><span class="pre">void</span></span><span class="w"> </span><span class="p"><span class="pre">*</span></span><span class="sig-name descname"><span class="n"><span class="pre">msg_ptr</span></span></span><a class="headerlink" href="#_CPPv4N10TRFXFabric7msg_ptrE" title="Permalink to this definition"></a><br /></dt>
+<dd><p>Message virtual memory address. </p>
+<p>This address must correspond with the memory registered under msg_mr. </p>
+</dd></dl>
+
+<dl class="cpp var">
 <dt class="sig sig-object cpp" id="_CPPv4N10TRFXFabric5fb_mrE">
 <span id="_CPPv3N10TRFXFabric5fb_mrE"></span><span id="_CPPv2N10TRFXFabric5fb_mrE"></span><span id="TRFXFabric::fb_mr__fid_mrP"></span><span class="target" id="struct_t_r_f_x_fabric_1ab2da5fcbd9849ae4e6e9f557a2364cd1"></span><span class="k"><span class="pre">struct</span></span><span class="w"> </span><span class="n"><span class="pre">fid_mr</span></span><span class="w"> </span><span class="p"><span class="pre">*</span></span><span class="sig-name descname"><span class="n"><span class="pre">fb_mr</span></span></span><a class="headerlink" href="#_CPPv4N10TRFXFabric5fb_mrE" title="Permalink to this definition"></a><br /></dt>
 <dd><p>Framebuffer memory region. </p>
 <p>Stores framebuffer contents. Currently, the use of only one framebuffer is supported through the TRF API. </p>
+</dd></dl>
+
+<dl class="cpp var">
+<dt class="sig sig-object cpp" id="_CPPv4N10TRFXFabric6fb_ptrE">
+<span id="_CPPv3N10TRFXFabric6fb_ptrE"></span><span id="_CPPv2N10TRFXFabric6fb_ptrE"></span><span id="TRFXFabric::fb_ptr__voidP"></span><span class="target" id="struct_t_r_f_x_fabric_1ac442c68e0d2040f90e54d3dc92f62ebf"></span><span class="kt"><span class="pre">void</span></span><span class="w"> </span><span class="p"><span class="pre">*</span></span><span class="sig-name descname"><span class="n"><span class="pre">fb_ptr</span></span></span><a class="headerlink" href="#_CPPv4N10TRFXFabric6fb_ptrE" title="Permalink to this definition"></a><br /></dt>
+<dd><p>Framebuffer virtual memory address. </p>
+<p>This address must correspond with the memory registered under fb_mr. </p>
 </dd></dl>
 
 <dl class="cpp var">

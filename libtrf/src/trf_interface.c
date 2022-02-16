@@ -61,14 +61,13 @@ int trfRemoveInvalid(PTRFInterface ifs, PTRFInterface * out_ifs, int * n_ifs)
 void trfFreeAddrV(PTRFAddrV av)
 {
     PTRFAddrV v = av;
-    PTRFAddrV vn;
     while (v)
     {
-        vn = v->next;
+        PTRFAddrV v2 = v->next;
         free(v->src_addr);
         free(v->dst_addr);
         free(v);
-        v = vn;
+        v = v2;
     }
 }
 
@@ -91,12 +90,13 @@ int trfCreateAddrV(PTRFInterface src, PTRFInterface dest,
         return -EINVAL;
     }
 
-    PTRFAddrV av_tmp = malloc(sizeof(*av_tmp));
+    PTRFAddrV av_tmp = calloc(1, sizeof(*av_tmp));
     PTRFAddrV av_start = av_tmp;
+    PTRFAddrV av_prev = NULL;
 
     trf__log_trace("Lengths: src: %d, dest: %d",
         trf__InterfaceLength(src), trf__InterfaceLength(dest));
-
+ 
     int i = 0;
     int j = 0;
 
@@ -104,14 +104,12 @@ int trfCreateAddrV(PTRFInterface src, PTRFInterface dest,
     {
         for (PTRFInterface tmp_dest = dest; tmp_dest; tmp_dest = tmp_dest->next)
         {
-            trf__log_trace("(link) src: %d, dest: %d", tmp_src->speed, 
-                tmp_dest->speed);
             if (tmp_src->addr->sa_family != tmp_dest->addr->sa_family)
             {
-                trf__log_trace("Addr family mismatch %d - %d", 
-                    tmp_src->addr->sa_family, tmp_dest->addr->sa_family);
                 continue;
             }
+            trf__log_trace("[link %d] src: %d, dest: %d", j, tmp_src->speed, 
+                tmp_dest->speed);
             if (tmp_src->addr->sa_family == AF_INET)
             {
                 if (
@@ -121,8 +119,14 @@ int trfCreateAddrV(PTRFInterface src, PTRFInterface dest,
                     & htonl((uint32_t) -1 >> tmp_dest->netmask))
                 )
                 {
-                    av_tmp->src_addr = malloc(sizeof(struct sockaddr_in));
-                    av_tmp->dst_addr = malloc(sizeof(struct sockaddr_in));
+                    av_tmp->src_addr = calloc(1, sizeof(struct sockaddr_in));
+                    av_tmp->dst_addr = calloc(1, sizeof(struct sockaddr_in));
+                    if (!av_tmp->src_addr || !av_tmp->dst_addr)
+                    {
+                        trf__log_error("Memory allocation failed");
+                        trfFreeAddrV(av_start);
+                        return -ENOMEM;
+                    }
                     * (struct sockaddr_in *) av_tmp->src_addr = \
                         * (struct sockaddr_in *) tmp_src->addr;
                     * (struct sockaddr_in *) av_tmp->dst_addr = \
@@ -169,8 +173,14 @@ int trfCreateAddrV(PTRFInterface src, PTRFInterface dest,
 
                 if (cr1 == sr1 && cr2 == sr2)
                 {
-                    av_tmp->src_addr = malloc(sizeof(struct sockaddr_in6));
-                    av_tmp->dst_addr = malloc(sizeof(struct sockaddr_in6));
+                    av_tmp->src_addr = calloc(1, sizeof(struct sockaddr_in6));
+                    av_tmp->dst_addr = calloc(1, sizeof(struct sockaddr_in6));
+                    if (!av_tmp->src_addr || !av_tmp->dst_addr)
+                    {
+                        trf__log_error("Memory allocation failed");
+                        trfFreeAddrV(av_start);
+                        return -ENOMEM;
+                    }
                     * (struct sockaddr_in6 *) av_tmp->src_addr = \
                         * (struct sockaddr_in6 *) tmp_src->addr;
                     * (struct sockaddr_in6 *) av_tmp->dst_addr = \
@@ -192,13 +202,15 @@ int trfCreateAddrV(PTRFInterface src, PTRFInterface dest,
                 continue;
             }
             trf__log_trace("Pair speed: %d", av_tmp->pair_speed);
+            av_prev = av_tmp;
             av_tmp = av_tmp->next;
             j++;
         }
         i++;
     }
 
-    free(av_tmp->next);
+    free(av_tmp);
+    av_prev->next = NULL;
     *av_out = av_start;
     return 0;
 }

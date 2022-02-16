@@ -81,10 +81,4 @@ int trfGetNodeService(struct sockaddr * sdr, char * addr);
 */
 int trfNodeServiceToAddr(const char * addr, struct sockaddr * sdr);
 
-/**
-  * @brief Remove Character
-  * @param addr   string
-  * @param ch     Character to remove
-*/
-int removeCharacter(char *addr, char ch);
 #endif // _TRF_INET_H_

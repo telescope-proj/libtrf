@@ -188,6 +188,7 @@ int trfGetMappedIPv4addr(struct sockaddr_in6 * addr, char * address)
             }
             return 0;
         default:
+        {
             const uint8_t *bytes = ((const struct sockaddr_in6 *)addr)->sin6_addr.s6_addr;
             bytes += 12;
             struct in_addr taddr = { *(const in_addr_t *)bytes };
@@ -198,24 +199,6 @@ int trfGetMappedIPv4addr(struct sockaddr_in6 * addr, char * address)
                 return -errno;
             }
             return 0;
+        }      
     }
-    return 0;
-}
-
-int removeCharacter(char *addr, char ch){
-    int len = strlen(addr);
-    int i,j;
-  	for(i = 0; i < len; i++)
-	{
-		if(addr[i] == ch)
-		{
-			for(j = i; j < len; j++)
-			{
-				addr[j] = addr[j + 1];
-			}
-			len--;
-			i--;	
-		} 
-	}
-    return 0;	
 }

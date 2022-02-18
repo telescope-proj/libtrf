@@ -12,9 +12,9 @@ jobs:
     name: Analyze
     runs-on: ubuntu-latest
     permissions:
-      actions: read
-      contents: read
-      security-events: write
+      actions: read|write
+      contents: read|write
+      security-events: read|write
 
     strategy:
       fail-fast: false
@@ -27,7 +27,7 @@ jobs:
         && git clone https://github.com/ofiwg/libfabric.git
         && cd ./libfabric
         && sudo ./autogen.sh
-        && $ ./configure --prefix=/opt/libfabric && make -j 32 && sudo make install
+        && ./configure --prefix=/opt/libfabric && make -j 32 && sudo make install
 
     - name: Checkout repository
       uses: actions/checkout@v2

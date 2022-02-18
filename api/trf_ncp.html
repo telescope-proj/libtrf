@@ -230,6 +230,38 @@ Initializes the out of band negatiation channel for the server. Sets the listeni
 </dl>
 </dd></dl>
 
+<dl class="cpp function">
+<dt class="sig sig-object cpp" id="_CPPv420trfNCSendDisplayList11PTRFContext">
+<span id="_CPPv320trfNCSendDisplayList11PTRFContext"></span><span id="_CPPv220trfNCSendDisplayList11PTRFContext"></span><span id="trfNCSendDisplayList__PTRFContext"></span><span class="target" id="trf__ncp_8h_1a7e94a26a5afa19a855c35623950f962b"></span><span class="kt"><span class="pre">int</span></span><span class="w"> </span><span class="sig-name descname"><span class="n"><span class="pre">trfNCSendDisplayList</span></span></span><span class="sig-paren">(</span><span class="n"><span class="pre">PTRFContext</span></span><span class="w"> </span><span class="n sig-param"><span class="pre">ctx</span></span><span class="sig-paren">)</span><a class="headerlink" href="#_CPPv420trfNCSendDisplayList11PTRFContext" title="Permalink to this definition"></a><br /></dt>
+<dd><p>Send a display list to the client contained within the current context. </p>
+<p>The client should have requested display metadata from the server.</p>
+<dl class="field-list simple">
+<dt class="field-odd">Parameters</dt>
+<dd class="field-odd"><p><strong>ctx</strong> – </p>
+</dd>
+<dt class="field-even">Returns</dt>
+<dd class="field-even"><p>int </p>
+</dd>
+</dl>
+</dd></dl>
+
+<dl class="cpp function">
+<dt class="sig sig-object cpp" id="_CPPv422trfNCGetServerDisplays11PTRFContextP11PTRFDisplay">
+<span id="_CPPv322trfNCGetServerDisplays11PTRFContextP11PTRFDisplay"></span><span id="_CPPv222trfNCGetServerDisplays11PTRFContextP11PTRFDisplay"></span><span id="trfNCGetServerDisplays__PTRFContext.PTRFDisplayP"></span><span class="target" id="trf__ncp_8h_1a59031ce98fe2733d71510268833ac6b5"></span><span class="kt"><span class="pre">int</span></span><span class="w"> </span><span class="sig-name descname"><span class="n"><span class="pre">trfNCGetServerDisplays</span></span></span><span class="sig-paren">(</span><span class="n"><span class="pre">PTRFContext</span></span><span class="w"> </span><span class="n sig-param"><span class="pre">ctx</span></span>, <span class="n"><span class="pre">PTRFDisplay</span></span><span class="w"> </span><span class="p"><span class="pre">*</span></span><span class="n sig-param"><span class="pre">out</span></span><span class="sig-paren">)</span><a class="headerlink" href="#_CPPv422trfNCGetServerDisplays11PTRFContextP11PTRFDisplay" title="Permalink to this definition"></a><br /></dt>
+<dd><p>Get the list of displays available to the client from the server. </p>
+<dl class="field-list simple">
+<dt class="field-odd">Parameters</dt>
+<dd class="field-odd"><ul class="simple">
+<li><p><strong>ctx</strong> – Context </p></li>
+<li><p><strong>out</strong> – Server display list to be allocated and filled. </p></li>
+</ul>
+</dd>
+<dt class="field-even">Returns</dt>
+<dd class="field-even"><p>0 on success, negative error code on failure </p>
+</dd>
+</dl>
+</dd></dl>
+
 </div>
 </section>
 

@@ -24,8 +24,10 @@ jobs:
     steps:
     - name: Install requirements
       run: sudo apt update 
-        && sudo apt install libprotobuf-c-dev -y
-        && sudo apt install libfabric-dev -y
+        && git clone https://github.com/ofiwg/libfabric.git
+        && cd ./libfabric
+        && sudo ./autogen.sh
+        && $ ./configure --prefix=/opt/libfabric && make -j 32 && sudo make install
 
     - name: Checkout repository
       uses: actions/checkout@v2

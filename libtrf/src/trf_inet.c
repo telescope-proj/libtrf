@@ -199,6 +199,6 @@ int trfGetMappedIPv4addr(struct sockaddr_in6 * addr, char * address)
                 return -errno;
             }
             return 0;
-        }      
+        }
     }
 }

@@ -22,6 +22,7 @@
 */
 
 #include "trf.h"
+#include "trf_ncp.h"
 
 static const char * __trf_fi_proto[] = {
     "UNSPEC",
@@ -458,7 +459,7 @@ int trfGetRoute(const char * dst, const char * prov, const char * proto,
     trf__log_trace("Libfabric Format: %d", lf_fmt);
     
     hints->ep_attr->type    = FI_EP_RDM;
-    hints->caps             = FI_MSG | FI_RMA;
+    hints->caps             = FI_MSG | FI_RMA | FI_SOURCE;
     hints->mode             = FI_CONTEXT | FI_LOCAL_MR | FI_RX_CQ_DATA;
     hints->domain_attr->mr_mode = FI_MR_BASIC;
     hints->addr_format      = lf_fmt;
@@ -1188,3 +1189,148 @@ int trfUpdateDisplayAddr(PTRFContext ctx, PTRFDisplay disp, void * addr)
     return 0;
 }
 
+int trfGetMessageAuto(PTRFContext ctx, uint64_t flags, uint64_t * processed,
+    int timeout_ms, int rate_limit, void ** data_out)
+{
+    if (!ctx || !data_out || !processed)
+    {
+        return -EINVAL;
+    }
+
+
+
+    int ret = 0;
+    int timed_out = 0;
+
+    struct timespec tcur, tend;
+    TrfMsg__MessageWrapper * msg;
+
+    ret = clock_gettime(CLOCK_MONOTONIC, &tcur);
+    if (ret < 0)
+    {
+        trf__log_error("System clock error: %s", strerror(errno));
+        ret = -errno;
+        goto free_msg;
+    }
+
+    trf__GetDelay(&tcur, &tend, timeout_ms);
+
+    do {
+
+        if (timeout_ms > 0)
+        {
+            timed_out = trf__HasPassed(CLOCK_MONOTONIC, &tend);
+            if (ret < 0)
+            {
+                trf__log_error("System clock error: %s", strerror(-timed_out));
+                return timed_out;
+            }
+            else if (ret)
+            {
+                trf__log_trace("Got Delay Timedout");
+                return -ETIMEDOUT;
+            }
+        }
+
+        ret = fi_recv(ctx->xfer.fabric->ep, 
+            ctx->xfer.fabric->msg_ptr, 4096, 
+            fi_mr_desc(ctx->xfer.fabric->msg_mr), ctx->xfer.fabric->src_addr,
+            NULL
+        );
+        trf__log_trace("Trying to receive data");
+        if (ret == -FI_EAGAIN && rate_limit)
+        {
+            trfSleep(rate_limit);
+        }
+
+    } while (ret == -FI_EAGAIN);
+    
+    if (ret)
+    {
+        trf__log_error("fi_cq_sread %d\n", ret);
+        goto free_msg;
+    }
+
+    struct fi_cq_data_entry cqe;
+    do {
+        if (timeout_ms > 0)
+        {
+            timed_out = trf__HasPassed(CLOCK_MONOTONIC, &tend);
+            if (timed_out < 0)
+            {
+                trf__log_error("System clock error: %s", strerror(-timed_out));
+                return timed_out;
+            }
+            else if (timed_out)
+            {
+                trf__log_error("Timeout waiting for Completion queue");
+                return -ETIMEDOUT;
+            }
+        }
+        ret = fi_cq_read(ctx->xfer.fabric->rx_cq, &cqe, 1);
+        if (ret == -FI_EAGAIN && rate_limit)
+        {
+            trfSleep(rate_limit);
+        }
+
+    } while (ret == -FI_EAGAIN);
+    
+    if (ret != 1)
+    {
+        trf__log_error("fi_cq_sread %d\n", ret);
+        goto free_msg;
+    }
+
+    uint32_t size = * (uint32_t *) ctx->xfer.fabric->msg_ptr;
+    size = ntohl(size);
+    
+    trf__log_debug("Message length: %lu", size);
+    msg = trf_msg__message_wrapper__unpack(NULL, size, 
+        ctx->xfer.fabric->msg_ptr + sizeof(uint32_t));
+    if (!msg)
+    {
+        trf__log_error("Unknown decoding error");
+        ret = -EIO;
+        goto free_msg;
+    }
+    trf__log_trace("Message Type: %d",msg->wdata_case);
+    // Determine whether message should be processed internally
+    uint64_t ifmt = trfPBToInternal(msg->wdata_case);
+    if (ifmt & flags)
+    {
+        // Caller must process message
+        *processed = ifmt;
+        *data_out = msg;
+        return 1;
+    }
+    else
+    {
+        switch (ifmt)
+        {
+            case TRFM_CLIENT_DISP_REQ:
+            trf__log_trace("Sending Display List");
+                if (ctx->type == TRF_EP_CONN_ID)
+                {
+                    if((ret = trfNCSendDisplayList(ctx)) < 0)
+                    {
+                        trf__log_error("Unable to send display list");
+                        goto free_msg;
+                    }
+                }
+                else
+                {
+                    trf__log_debug("Invalid Message");
+                    return -EBADMSG;
+                }
+                break;
+        }
+    }
+
+    *processed = ifmt;
+    *data_out = msg;
+    return 0;
+
+free_msg:
+    trf_msg__message_wrapper__free_unpacked(msg, NULL);
+    return ret;
+}

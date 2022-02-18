@@ -154,3 +154,163 @@ int trfNCFullSend(int client_socket, ssize_t len, uint8_t * client_message)
     trf__log_trace("Send Completed");
     return cur_send;
 }
+
+int trfFabricPack(TrfMsg__MessageWrapper * handle, uint32_t size, void * buf, 
+    uint32_t * size_out)
+{
+    if (!handle)
+        return -EINVAL;
+
+    size_t to_write = trf_msg__message_wrapper__get_packed_size(handle);
+    if (!to_write)
+    {
+        trf__log_trace("Unable to get message size");
+        return -EINVAL;
+    } else if (to_write > (size - sizeof(uint32_t)))
+    {
+        trf__log_trace("Buffer too small to store message");
+        return -ENOMEM;
+    }
+    trf__log_trace("To send: %lu", to_write);
+    * (uint32_t *) buf = htonl(to_write);
+    size_t pack_sz = trf_msg__message_wrapper__pack(
+        handle, buf + sizeof(uint32_t)
+    );
+    if (pack_sz != to_write)
+    {
+        trf__log_trace("Mismatched packed size %lu/%lu", to_write, pack_sz);
+        return -EIO;
+    }
+    *size_out = to_write + sizeof(uint32_t);
+    return 0;
+}
+
+int trfMsgUnpack(PTRFContext ctx, TrfMsg__MessageWrapper **msg, uint64_t size){
+    * msg = trf_msg__message_wrapper__unpack(NULL, size, 
+        ctx->xfer.fabric->msg_ptr + sizeof(uint32_t));
+    if(!*msg){
+        return -1;
+    }
+    return 0;
+}
+
+int trfFabricSend(PTRFContext ctx, TrfMsg__MessageWrapper *msg, 
+    uint32_t buff_size){
+    if( !ctx ){
+        return -EINVAL;
+    }
+    int ret, retry = 0;
+    uint32_t size;
+    if((ret = trfFabricPack(msg, buff_size, ctx->xfer.fabric->msg_ptr, &size)))
+    {
+        trf__log_error("Unable to Pack Message: %s", strerror(ret));
+        goto close_mr;
+    }
+
+    do {
+        ret = fi_send(ctx->xfer.fabric->ep, ctx->xfer.fabric->msg_ptr, size,
+        fi_mr_desc(ctx->xfer.fabric->msg_mr), ctx->xfer.fabric->peer_addr, 
+        NULL);
+        trf__log_trace("Retry Sending: %d", retry);
+        trfSleep(100);
+        retry++;
+    } while (ret == -FI_EAGAIN && retry <= 10);
+
+    if (ret){
+        if( retry > 10){
+            trf__log_error("Retry Limit Reached");
+        }
+        trf__log_error("fi_cq_sread %d", ret);
+        goto close_mr;
+    }
+    struct fi_cq_data_entry cqe;
+    retry = 0;
+    do {
+        ret = fi_cq_read(ctx->xfer.fabric->tx_cq, &cqe, 1);
+        trfSleep(100);
+        retry++;
+        trf__log_trace("Retry Completion queue reading: %d",retry);
+    } while (ret == -FI_EAGAIN && retry <= 10);
+    
+    if (ret != 1)
+    {
+        if (retry > 10)
+            trf__log_error("Retry limit reached");
+        
+        trf__log_error("fi_cq_sread %d", ret);
+        goto close_mr;
+    }
+    return 0;
+
+close_mr:
+    if (ctx->xfer.fabric->msg_mr) {
+        fi_close((fid_t) ctx->xfer.fabric->msg_mr);
+    }
+    return -1;
+}
+
+int trfFabricRecv(PTRFContext ctx, uint32_t mem_size, 
+    TrfMsg__MessageWrapper ** msg){
+    if (!ctx){
+        return -EINVAL;
+    }
+    int ret = 0;
+    int retry = 0;
+    do{
+        ret = fi_recv(ctx->xfer.fabric->ep, ctx->xfer.fabric->msg_ptr,
+        mem_size,
+        fi_mr_desc(ctx->xfer.fabric->msg_mr),
+        ctx->xfer.fabric->peer_addr, NULL);
+        trfSleep(100);
+        trf__log_trace("Trying to receive data: %d",retry);
+        retry++;
+    } while(ret == -FI_EAGAIN && retry <= 10);
+
+    if (ret)
+    {
+        if (retry > 10)
+            {
+                trf__log_error("Receive timeout");
+            }
+        trf__log_error("fi_cq_sread %d", ret);
+        goto close_mr;
+        return ret;
+    }
+    struct fi_cq_data_entry cqe;
+    retry = 0;
+
+    do{
+        ret = fi_cq_read(ctx->xfer.fabric->rx_cq, &cqe, 1);
+        trfSleep(100);
+        retry ++;
+        trf__log_trace("Retry Completion Queue: %d", retry);
+    }while(ret == -FI_EAGAIN);
+
+    if (ret != 1)
+    {
+    if (retry > 10)
+        {
+            trf__log_error( "Completion Queue timeout");
+        }
+        trf__log_error("fi_cq_sread %d", ret);
+        goto close_mr;
+        return ret;
+    }    
+
+    uint64_t size = *( uint64_t *)ctx->xfer.fabric->msg_ptr;
+    size = ntohl(size);
+    trf__log_trace("Size of Message Received: %d",size);
+    if(trfMsgUnpack(ctx, msg, size) < 0){
+        trf__log_error("Unable to Unpack message");
+        return -1;
+    }
+
+    return 0;
+
+
+close_mr:
+    if (ctx->xfer.fabric->msg_mr) {
+        fi_close((fid_t) ctx->xfer.fabric->msg_mr);
+    }
+    return -1;
+}

@@ -27,17 +27,41 @@
 int main(int argc, char ** argv)
 {
     char* host = "127.0.0.1";
-    char* port = "35085";
+    char* port = "35096";
     PTRFContext ctx = trfAllocContext();
     if(trfNCClientInit(ctx,host,port)<0){
         printf("unable to initiate client\n");
         fflush(stdout);
         return -1;
     }
-
     printf("Hello!\n");
-    trfDestroyContext(ctx);
 
+
+    PTRFDisplay displays;
+    printf("Retrieving displays\n");
+    int ret;
+    if ((ret = trfNCGetServerDisplays(ctx, &displays)) < 0)
+    {
+        printf("Unable to get server display list: error %s\n", strerror(ret));
+        return -1;
+    }
+
+    for (PTRFDisplay tmp_disp = displays; tmp_disp != NULL; tmp_disp = tmp_disp->next)
+    {
+        printf("ID: %d\n", tmp_disp->id);
+        printf("Name: %s\n", tmp_disp->name);
+        printf("Dimensions: %dx%d\n", tmp_disp->width, tmp_disp->height);
+        printf("Rate: %d\n", tmp_disp->rate);
+        printf("Pixel Format: %d\n", tmp_disp->format);
+        printf("Group: %d\n", tmp_disp->dgid);
+        printf("Offset: X--> %d, Y--> %d\n", tmp_disp->x_offset, tmp_disp->y_offset);
+        if (tmp_disp->next == NULL)
+        {
+            break;
+        }
+    }
+    
+    trfDestroyContext(ctx);
     // info = trfGetFabricProviders(host, port, TRF_EP_SINK, &info);
     // if (!info) {
     //     trf_error("unable to get fabric providers\n");

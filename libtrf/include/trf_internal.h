@@ -29,6 +29,8 @@
 #ifndef _TRF_INTERNAL_H_
 #define _TRF_INTERNAL_H_
 
+struct TRFContext;
+
 #include "trf.h"
 #include "trf_log.h"
 
@@ -43,6 +45,7 @@
 #else
   #define TRF__LOOPS 5
 #endif
+
 
 /**
   * @brief          Check the number of times a session ID has been used.
@@ -126,6 +129,36 @@ static inline uint8_t trf__HammingWeight64(uint64_t x)
 }
 
 /**
+ * @brief Simple string duplication function for standard C.
+ * 
+ * @param str   String to duplicate
+ * @return      Pointer to the duplicated string stored in the heap.
+ */
+static inline char * trfStrdup(char * str)
+{
+    size_t len = strlen(str) + 1;
+    char * out = malloc(len);
+    memcpy(out, str, len);
+    return out;
+}
+
+/**
+ * @brief Sleep for a given number of milliseconds.
+ * 
+ * @param ms    Number of milliseconds to sleep.
+ */
+static inline void trfSleep(int ms) {
+#ifdef _WIN32
+    Sleep(ms);
+#else
+    struct timespec t;
+    t.tv_sec    = ms / 1000;
+    t.tv_nsec   = (ms % 1000) * 1000000;
+    nanosleep(&t, NULL);
+#endif
+}
+
+/**
  * @brief Return a timespec corresponding to a delay in milliseconds after the
  * input timespec.
  * 
@@ -160,12 +193,16 @@ static inline void trf__GetDelay(struct timespec * ts, struct timespec * ts_out,
 static inline int trf__HasPassed(clockid_t clock, struct timespec * ts)
 {
     struct timespec now;
+    // struct timespec diff;
     int ret = clock_gettime(clock, &now);
     if (ret != 0) {
         return -errno;
     }
-    return (now.tv_sec > ts->tv_sec) ||
-        ((now.tv_sec == ts->tv_sec) && (now.tv_nsec > ts->tv_nsec));
+    if((difftime(now.tv_sec, ts->tv_sec) > 0) || (difftime(now.tv_sec, ts->tv_sec) > 0 && difftime(now.tv_nsec,ts->tv_nsec) > 0)) {
+        trf__log_trace("Connection Timed out: %d %d", now.tv_sec, now.tv_nsec);
+        return 1;
+    }
+    return 0;
 }
 
 #endif // _TRF_INTERNAL_H_

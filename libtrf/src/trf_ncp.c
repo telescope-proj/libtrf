@@ -615,9 +615,9 @@ int trfNCClientInit(PTRFContext ctx, char * host, char * port)
     if (ret)
     {
         if (retry > 10)
-            fprintf(stderr, "Retry limit reached\n");
+            trf__log_error("Retry limit reached");
         
-        fprintf(stderr, "fi_cq_sread %d\n", ret);
+        trf__log_error("fi_cq_sread %d", ret);
         goto close_mr;
     }
 
@@ -633,15 +633,15 @@ int trfNCClientInit(PTRFContext ctx, char * host, char * port)
     if (ret != 1)
     {
         if (retry > 10)
-            fprintf(stderr, "Retry limit reached\n");
-        
-        fprintf(stderr, "fi_cq_sread %d\n", ret);
+            trf__log_error("Retry limit reached");
+        trf__log_error("fi_cq_sread %d", ret);
         goto close_mr;
     }
 
     trf__log_info("Sent cookie %lu", *(uint64_t *) regd_buf);
     fi_freeinfo(fi_out);
     free(buff);
+    ctx->xfer.fabric->peer_addr = addr_out;
     ctx->xfer.fabric->msg_ptr = regd_buf;
     ctx->type = TRF_EP_SINK;
     ctx->cli.client_fd = sfd;
@@ -1046,39 +1046,40 @@ int trfNCAccept(PTRFContext ctx, PTRFContext * ctx_out)
     int retry = 0;
     do {
         ret = fi_recv(cli_ctx->xfer.fabric->ep, regd_buf, 8, 
-            fi_mr_desc(cli_ctx->xfer.fabric->msg_mr), 0, NULL);
+            fi_mr_desc(cli_ctx->xfer.fabric->msg_mr), FI_ADDR_UNSPEC, NULL);
         trfSleep(100);
         trf__log_trace("Trying to receive data: %d\n",retry);
-        retry ++;
+        retry++;
     } while (ret == -FI_EAGAIN && retry <= 10);
     
     if (ret)
     {
-        if (retry > 10){
-            fprintf(stderr, "Receive timeout\n");
+        if (retry > 10)
+        {
+            trf__log_error("Receive timeout");
         }
-        fprintf(stderr, "fi_cq_sread %d\n", ret);
+        trf__log_error("fi_cq_sread %d", ret);
         goto free_regd_buf;
         return ret;
     }
 
+    uint64_t recvd_src;
     struct fi_cq_data_entry cqe;
     retry = 0;
     do {
-        ret = fi_cq_sread(cli_ctx->xfer.fabric->rx_cq, &cqe, 1, 0, 0);
+        ret = fi_cq_readfrom(cli_ctx->xfer.fabric->rx_cq, &cqe, 1, &recvd_src);
         trfSleep(100);
         trf__log_trace("Trying to read completion queue: %d",retry);
-        retry ++;
-
+        retry++;
     } while (ret == -FI_EAGAIN && retry <= 10);
     
     if (ret != 1)
     {
-        if(retry > 10){
-            fprintf(stderr, "Completion Queue timeout\n");
+        if (retry > 10)
+        {
+            trf__log_error( "Completion Queue timeout");
         }
-        fprintf(stderr, "fi_cq_sread %d\n", ret);
-        
+        trf__log_error("fi_cq_sread %d", ret);
         goto free_regd_buf;
         return ret;
     }
@@ -1168,7 +1169,7 @@ int trfNCServerClose(PTRFContext ctx)
     
     for (PTRFContext c = ctx->svr.clients; c; c = c->next)
     {
-        if(trfNCSendDelimited(c->cli.client_fd, buff, bufsz, 0, &msg) < 0 )
+        if (trfNCSendDelimited(c->cli.client_fd, buff, bufsz, 0, &msg) < 0)
         {
             trf__log_error("unable to disconnect client");
         }
@@ -1297,3 +1298,245 @@ free_out:
     trfFreeInterfaceList(out_tmp);
     return ret;
 }
+
+int trfNCSendDisplayList(PTRFContext ctx)
+{
+    uint8_t * mbuf = calloc(1,4096);
+    if(!mbuf) {
+        trf__log_error("Unable to allocate memory");
+        return -ENOMEM;
+    }
+    int ret = 0;
+    TrfMsg__MessageWrapper *msg = malloc(sizeof(TrfMsg__MessageWrapper));
+    if(!msg) {
+        trf__log_error("Unable to allocate memory");
+        goto free_buf;
+    }
+    trf_msg__message_wrapper__init(msg);
+    TrfMsg__ServerDisp *disp_list = malloc(sizeof(TrfMsg__ServerDisp));
+    if(!disp_list) {
+        trf__log_error("Unable to allocate memory");
+        goto free_message;
+
+    }
+    trf_msg__server_disp__init(disp_list);
+
+    msg->wdata_case = TRF_MSG__MESSAGE_WRAPPER__WDATA_SERVER_DISP;
+    msg->server_disp = disp_list;
+    msg->server_disp->n_displays = 0;
+    for (PTRFDisplay tmp_disp = ctx->displays; tmp_disp; 
+        tmp_disp = tmp_disp->next)
+    {
+        msg->server_disp->n_displays ++;
+    }
+    msg->server_disp->displays = malloc(sizeof(TrfMsg__Display) 
+        * msg->server_disp->n_displays);
+    if(!msg->server_disp->displays){
+        trf__log_error("Unable to allocate memory");
+        goto free_message;
+    }
+    int index = 0;
+    for (PTRFDisplay tmp_disp = ctx->displays; tmp_disp; 
+        tmp_disp = tmp_disp->next)
+    {
+        msg->server_disp->displays[index] = malloc(sizeof(TrfMsg__Display));
+        if(!msg->server_disp->displays[index]) {
+            trf__log_error("Unable to allocate memory");
+            goto free_message;
+        }
+        trf_msg__display__init(msg->server_disp->displays[index]);
+        
+        msg->server_disp->displays[index]->id = tmp_disp->id;
+        msg->server_disp->displays[index]->name = strdup(tmp_disp->name);
+        msg->server_disp->displays[index]->width = tmp_disp->width;
+        msg->server_disp->displays[index]->height = tmp_disp->height;
+        msg->server_disp->displays[index]->rate = tmp_disp->rate;
+        msg->server_disp->displays[index]->dgid = tmp_disp->dgid;
+        msg->server_disp->displays[index]->x_offset = tmp_disp->x_offset;
+        msg->server_disp->displays[index]->y_offset = tmp_disp->y_offset;
+
+        // Todo change to support more than one @matthewjmc
+        msg->server_disp->displays[index]->tex_fmt = malloc(sizeof(uint32_t));
+        if(!msg->server_disp->displays[index]->tex_fmt) { 
+            trf__log_error("Unable to allocate memory");
+            goto free_message;
+        }
+        msg->server_disp->displays[index]->tex_fmt[0] = tmp_disp->format;
+        msg->server_disp->displays[index]->n_tex_fmt = 1;
+        
+        index ++;
+    }
+
+    
+    // uint32_t size;
+    // if ((ret = trfFabricPack(msg, 4096, ctx->xfer.fabric->msg_ptr, &size)) < 0)
+    // {
+    //     trf__log_error("Unable to Pack Message: %s", strerror(ret));
+    //     goto close_mr;
+    // }
+    // Send Server Display Request
+    ret = trfFabricSend(ctx, msg, 4096);
+    if (ret < 0){
+        trf__log_error("Unable to send Data");
+        goto close_mr;
+    }
+
+
+    free(mbuf);
+    trf_msg__message_wrapper__free_unpacked(msg, NULL);
+    msg = NULL;
+    return 0;
+
+close_mr:
+    if (ctx->xfer.fabric->msg_mr) {
+        fi_close((fid_t) ctx->xfer.fabric->msg_mr);
+    }
+free_message:
+    trf_msg__message_wrapper__free_unpacked(msg, NULL);
+free_buf:
+    if(mbuf)
+    {
+        free(mbuf);
+    }
+    return -1; 
+}
+
+
+int trfNCGetServerDisplays(PTRFContext ctx, PTRFDisplay * out)
+{
+    int ret = 0;
+    if (!ctx || ctx->type != TRF_EP_SINK || !out)
+    {
+        trf__log_trace("Invalid usage of trfNCGetServerDisplays()");
+        trf__log_trace("ctx: %p, out: %p", ctx, out);
+        return -EINVAL;
+    }
+
+    TrfMsg__MessageWrapper * msg = calloc(1, sizeof(TrfMsg__MessageWrapper));
+    if (!msg)
+    {
+        trf__log_error("Unable to allocate memory");
+        return -ENOMEM;
+    }
+
+    TrfMsg__ClientDispReq * dr = calloc(1, sizeof(TrfMsg__ClientDispReq));
+    if (!dr)
+    {
+        trf__log_error("Unable to allocate memory");
+        ret = -ENOMEM;
+        goto free_msg;
+    }
+
+    trf_msg__message_wrapper__init(msg);
+    trf_msg__client_disp_req__init(dr);
+    msg->wdata_case = TRF_MSG__MESSAGE_WRAPPER__WDATA_CLIENT_DISP_REQ;
+    msg->client_disp_req = dr;
+    msg->session_id = ctx->cli.session_id;
+    msg->client_disp_req->info = 0;
+    
+    // uint32_t size;
+    // if ((ret = trfFabricPack(msg, 4096, ctx->xfer.fabric->msg_ptr, &size)) < 0)
+    // {
+    //     trf__log_error("Unable to Pack Message: %s", strerror(ret));
+    //     goto close_mr;
+    // }
+    // Send Server Display Request
+    ret = trfFabricSend(ctx, msg, 4096);
+    if (ret < 0){
+        trf__log_error("Unable to send Data");
+        goto close_mr;
+    }
+
+    trf__log_trace("Sent Cookie for Display Request");
+
+    trf_msg__message_wrapper__free_unpacked(msg, NULL);
+
+    //! Receive Server Display Response
+
+    if(trfFabricRecv(ctx, 4096, &msg) < 0){
+        trf__log_error("Unable to receive Message");
+        goto close_mr;
+    }
+
+    
+    if (msg->wdata_case != TRF_MSG__MESSAGE_WRAPPER__WDATA_SERVER_DISP)
+    {
+        trf__log_error("Unexpected message type");
+        trf_msg__message_wrapper__free_unpacked(msg, NULL);
+    
+        return ret;
+    }
+
+    if (msg->server_disp->n_displays == 0)
+    {
+        trf__log_error("No displays available");
+        trf_msg__message_wrapper__free_unpacked(msg, NULL);
+    
+        return -ENOENT;
+    }
+
+    PTRFDisplay tmp_out = calloc(1, sizeof(struct TRFDisplay));
+    PTRFDisplay tmp_start = tmp_out;
+    PTRFDisplay prev_disp;
+    for (int i = 0; i < msg->server_disp->n_displays; i++)
+    {
+        tmp_out->id = msg->server_disp->displays[i]->id;
+        tmp_out->name = strdup(msg->server_disp->displays[i]->name);
+        tmp_out->width = msg->server_disp->displays[i]->width;
+        tmp_out->height = msg->server_disp->displays[i]->height;
+        tmp_out->rate = msg->server_disp->displays[i]->rate;
+        tmp_out->dgid = msg->server_disp->displays[i]->dgid;
+        tmp_out->x_offset = msg->server_disp->displays[i]->x_offset;
+        tmp_out->y_offset = msg->server_disp->displays[i]->y_offset;
+        tmp_out->format = msg->server_disp->displays[i]->tex_fmt[0];
+        tmp_out->next = calloc(1, sizeof(struct TRFDisplay));
+        if (!tmp_out->next)
+        {
+            trf__log_error("Unable to allocate memory");
+            trfFreeDisplayList(tmp_start, 0);
+            trf_msg__message_wrapper__free_unpacked(msg, NULL);
+        
+            return -ENOMEM;
+        }
+        prev_disp = tmp_out;
+        tmp_out = tmp_out->next;
+    }
+
+    *out = tmp_start;
+    free(tmp_out);
+
+    prev_disp->next = NULL;
+    return 0;
+
+close_mr:
+    if (ctx->xfer.fabric->msg_mr) {
+        fi_close((fid_t) ctx->xfer.fabric->msg_mr);
+    }
+free_msg:
+    free(msg);
+    return ret;
+}
+
+// int trfGetMessage(PTRFContext ctx, int timeout_ms, int rate_limit, void ** out)
+// {
+//     if (!ctx || !out)
+//     {
+//         trf__log_trace("Invalid usage of trfGetMessage()");
+//         return -EINVAL;
+//     }
+
+//     int ret;
+//     struct timespec tcur, tend;
+//     TrfMsg__MessageWrapper * msg;
+
+//     ret = clock_gettime(CLOCK_MONOTONIC, &tcur);
+//     if (ret < 0)
+//     {
+//         trf__log_error("System clock error: %s", strerror(errno));
+//         return -errno;
+//     }
+
+//     trf__GetDelay(&tcur, &tend, timeout_ms);
+
+// }
+

@@ -31,12 +31,17 @@
 #include <stdio.h>
 #include <string.h>
 #include <stdlib.h>
+#include <time.h>
+#include <inttypes.h>
 
 #include <arpa/inet.h>
 #include <sys/types.h>
 #include <sys/socket.h>
 #include <sys/ioctl.h>
 #include <netdb.h>
+
+#include "trf_protobuf.h"
+#include "trf_msg.pb-c.h"
 
 #include <rdma/fabric.h>
 #include <rdma/fi_cm.h>
@@ -66,8 +71,6 @@
     #endif
 #endif
 
-#include "trf_log.h"
-#include "trf_inet.h"
 
 #ifdef _WIN32
 #include <windows.h>
@@ -87,6 +90,18 @@
 #include <linux/sockios.h>
 #endif
 
+#define PTRFDisplay   struct TRFDisplay *
+#define PTRFXFabric   struct TRFXFabric *
+#define PTRFAddrV     struct TRFAddrV *
+#define PTRFInterface struct TRFInterface *
+#define PTRFSession   struct TRFSession *
+#define PTRFContext   struct TRFContext *
+#define TRF_MR_SIZE   64 * 1024 * 1024
+
+#include "trf_log.h"
+#include "trf_inet.h"
+#include "trf_internal.h"
+
 #define TRF_SA_LEN(x) (((struct sockaddr *) x)->sa_family == AF_INET ? \
     sizeof(struct sockaddr_in) : sizeof(struct sockaddr_in6))
 
@@ -99,36 +114,6 @@
     fi_strerror((int) -err))
 
 #define trf_perror(retval) trf__log_error("%s", strerror(-retval));
-
-/**
- * @brief Simple string duplication function for standard C.
- * 
- * @param str   String to duplicate
- * @return      Pointer to the duplicated string stored in the heap.
- */
-static inline char * trfStrdup(char * str)
-{
-    size_t len = strlen(str) + 1;
-    char * out = malloc(len);
-    memcpy(out, str, len);
-    return out;
-}
-
-/**
- * @brief Sleep for a given number of milliseconds.
- * 
- * @param ms    Number of milliseconds to sleep.
- */
-static inline void trfSleep(int ms) {
-#ifdef _WIN32
-    Sleep(ms);
-#else
-    struct timespec t;
-    t.tv_sec    = ms / 1000;
-    t.tv_nsec   = (ms % 1000) * 1000000;
-    nanosleep(&t, NULL);
-#endif
-}
 
 /**
   * @brief Struct for Storing Interface & Address Data for transmission
@@ -600,14 +585,6 @@ struct TRFBufferData {
     size_t len;
 };
 
-#define PTRFDisplay   struct TRFDisplay *
-#define PTRFXFabric   struct TRFXFabric *
-#define PTRFAddrV     struct TRFAddrV *
-#define PTRFInterface struct TRFInterface *
-#define PTRFSession   struct TRFSession *
-#define PTRFContext   struct TRFContext *
-#define TRF_MR_SIZE   64 * 1024 * 1024
-
 /**
  * @brief Allocate an active endpoint.
  * 
@@ -881,4 +858,57 @@ void trfDestroyContext(PTRFContext ctx);
  */
 void * trfAllocAligned(size_t size, size_t alignment);
 
+/**
+ * @brief Bind list of displays to context
+ * 
+ * @param ctx   Context to bind displays to
+ * @param list  List of displays to bind
+ * @return return 0 if successful, negative error code on failure
+ */
+int trfBindDisplayList(PTRFContext ctx, PTRFDisplay list);
+
+/**
+ * @brief Update Display Address
+ * @param ctx   Context to update
+ * @param disp  Display to update
+ * @param addr  Address to update
+ * @return 0 on success, negative error code on failure
+*/
+int trfUpdateDisplayAddr(PTRFContext ctx, PTRFDisplay disp, void * addr);
+
+/**
+ * @brief Get number of bytes needed to store the contents of the display
+ * 
+ * @param width     Width of the display
+ * @param height    Height of the display
+ * @param fmt       Format of the display
+ * @return ssize_t 
+ */
+ssize_t trfGetDisplayBytes(size_t width, size_t height, enum TRFTexFormat fmt);
+
+/**
+ * @brief Free a display list.
+ *
+ * @param disp    Display list to free
+ *
+ * @param dealloc Whether to deallocate and deregister memory occupied by
+ *                framebuffer data. If this display list contains shared buffer
+ *                resources, it is advised to set this to 0.
+ */
+void trfFreeDisplayList(PTRFDisplay disp, int dealloc);
+
+/**
+ * @brief Automatically process Messages based on incoming message types
+ * 
+ * @param ctx           Context to use  
+ * @param flags         Messages you want to be processed
+ * @param processed     Message that was processed
+ * @param timeout_ms    Timeout in Miliseconds
+ * @param rate_limit    Set Rate limit
+ * @param data_out      Msg From the client, if data_out is null means message has already been processed internally.
+ * @return      0 on success, negative failure code on error
+ */
+int trfGetMessageAuto(PTRFContext ctx, uint64_t flags, uint64_t * processed,
+    int timeout_ms, int rate_limit, void ** data_out);
+  
 #endif // _TRF_H_

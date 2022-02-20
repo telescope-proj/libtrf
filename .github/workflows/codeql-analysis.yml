@@ -26,9 +26,8 @@ jobs:
         && sudo ./autogen.sh
         && ./configure --prefix=/opt/libfabric && make -j 32 && sudo make install
     - name: Cleanup
-      run: |
-      sudo chown -R $USER:$USER /home/runner/work/libtrf/libtrf/libfabric
-      rm -rf /home/runner/work/libtrf/libtrf/libfabric
+      run: sudo chown -R $USER:$USER /home/runner/work/libtrf/libtrf/libfabric
+      && sudo rm -rf /home/runner/work/libtrf/libtrf/libfabric
     - name: Checkout repository
       uses: actions/checkout@v2
 

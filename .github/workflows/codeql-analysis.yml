@@ -12,9 +12,9 @@ jobs:
     name: Analyze
     runs-on: ubuntu-latest
     permissions:
-      actions: read|write
-      contents: read|write
-      security-events: read|write
+      actions: write
+      contents: write
+      security-events: write
 
     strategy:
       fail-fast: false

@@ -196,41 +196,6 @@
 </dl>
 </dd></dl>
 
-<dl class="cpp function">
-<dt class="sig sig-object cpp" id="_CPPv413trfFabricSend11PTRFContextP22TrfMsg__MessageWrapper8uint32_t">
-<span id="_CPPv313trfFabricSend11PTRFContextP22TrfMsg__MessageWrapper8uint32_t"></span><span id="_CPPv213trfFabricSend11PTRFContextP22TrfMsg__MessageWrapper8uint32_t"></span><span id="trfFabricSend__PTRFContext.TrfMsg__MessageWrapperP.uint32_t"></span><span class="target" id="trf__msg_8h_1a4b63c28e8e21a8bd5610094416286c6b"></span><span class="kt"><span class="pre">int</span></span><span class="w"> </span><span class="sig-name descname"><span class="n"><span class="pre">trfFabricSend</span></span></span><span class="sig-paren">(</span><span class="n"><span class="pre">PTRFContext</span></span><span class="w"> </span><span class="n sig-param"><span class="pre">ctx</span></span>, <a class="reference internal" href="trf_proto.html#_CPPv422TrfMsg__MessageWrapper" title="TrfMsg__MessageWrapper"><span class="n"><span class="pre">TrfMsg__MessageWrapper</span></span></a><span class="w"> </span><span class="p"><span class="pre">*</span></span><span class="n sig-param"><span class="pre">msg</span></span>, <span class="n"><span class="pre">uint32_t</span></span><span class="w"> </span><span class="n sig-param"><span class="pre">buff_size</span></span><span class="sig-paren">)</span><a class="headerlink" href="#_CPPv413trfFabricSend11PTRFContextP22TrfMsg__MessageWrapper8uint32_t" title="Permalink to this definition"></a><br /></dt>
-<dd><p>Send Data to Peer over libfabric. </p>
-<dl class="field-list simple">
-<dt class="field-odd">Parameters</dt>
-<dd class="field-odd"><ul class="simple">
-<li><p><strong>ctx</strong> – Context containing Initialized <a class="reference internal" href="trf.html#struct_t_r_f_x_fabric"><span class="std std-ref">TRFXFabric</span></a> Struct </p></li>
-<li><p><strong>size</strong> – Size of data to be sent </p></li>
-</ul>
-</dd>
-<dt class="field-even">Returns</dt>
-<dd class="field-even"><p>0 on success, Negative error code on error </p>
-</dd>
-</dl>
-</dd></dl>
-
-<dl class="cpp function">
-<dt class="sig sig-object cpp" id="_CPPv413trfFabricRecv11PTRFContext8uint32_tPP22TrfMsg__MessageWrapper">
-<span id="_CPPv313trfFabricRecv11PTRFContext8uint32_tPP22TrfMsg__MessageWrapper"></span><span id="_CPPv213trfFabricRecv11PTRFContext8uint32_tPP22TrfMsg__MessageWrapper"></span><span id="trfFabricRecv__PTRFContext.uint32_t.TrfMsg__MessageWrapperPP"></span><span class="target" id="trf__msg_8h_1ae675ce51c5d0e0fdbd711413ad491302"></span><span class="kt"><span class="pre">int</span></span><span class="w"> </span><span class="sig-name descname"><span class="n"><span class="pre">trfFabricRecv</span></span></span><span class="sig-paren">(</span><span class="n"><span class="pre">PTRFContext</span></span><span class="w"> </span><span class="n sig-param"><span class="pre">ctx</span></span>, <span class="n"><span class="pre">uint32_t</span></span><span class="w"> </span><span class="n sig-param"><span class="pre">mem_size</span></span>, <a class="reference internal" href="trf_proto.html#_CPPv422TrfMsg__MessageWrapper" title="TrfMsg__MessageWrapper"><span class="n"><span class="pre">TrfMsg__MessageWrapper</span></span></a><span class="w"> </span><span class="p"><span class="pre">*</span></span><span class="p"><span class="pre">*</span></span><span class="n sig-param"><span class="pre">msg</span></span><span class="sig-paren">)</span><a class="headerlink" href="#_CPPv413trfFabricRecv11PTRFContext8uint32_tPP22TrfMsg__MessageWrapper" title="Permalink to this definition"></a><br /></dt>
-<dd><p>Receive Message over Libfabric and Decode into MessageWrapper. </p>
-<dl class="field-list simple">
-<dt class="field-odd">Parameters</dt>
-<dd class="field-odd"><ul class="simple">
-<li><p><strong>ctx</strong> – Context to use </p></li>
-<li><p><strong>mem_size</strong> – Size of Memory Buffer </p></li>
-<li><p><strong>msg</strong> – Pointer to Msg to be written </p></li>
-</ul>
-</dd>
-<dt class="field-even">Returns</dt>
-<dd class="field-even"><p>0 on success, Negative error code on error </p>
-</dd>
-</dl>
-</dd></dl>
-
 </div>
 </section>
 

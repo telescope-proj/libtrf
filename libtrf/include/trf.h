@@ -40,6 +40,7 @@
 #include <sys/ioctl.h>
 #include <netdb.h>
 
+#include "trf_def.h"
 #include "trf_protobuf.h"
 #include "trf_msg.pb-c.h"
 
@@ -49,6 +50,15 @@
 #include <rdma/fi_domain.h>
 #include <rdma/fi_endpoint.h>
 #include <rdma/fi_rma.h>
+
+
+#define trf_fi_error(call, err) \
+    trf__log_error("(fabric) %s failed (%d): %s", call, (int) -err, \
+    fi_strerror((int) -err))
+
+#define trf_fi_warn(call, err) \
+    trf__log_warn("(fabric) %s failed (%d): %s", call, (int) -err, \
+    fi_strerror((int) -err))
 
 // By default, libtrf will choose the highest Libfabric API version it supports.
 // Should the machines you would like to use differ in API versions, a specific
@@ -71,7 +81,6 @@
     #endif
 #endif
 
-
 #ifdef _WIN32
 #include <windows.h>
 #endif
@@ -90,500 +99,11 @@
 #include <linux/sockios.h>
 #endif
 
-#define PTRFDisplay   struct TRFDisplay *
-#define PTRFXFabric   struct TRFXFabric *
-#define PTRFAddrV     struct TRFAddrV *
-#define PTRFInterface struct TRFInterface *
-#define PTRFSession   struct TRFSession *
-#define PTRFContext   struct TRFContext *
-#define TRF_MR_SIZE   64 * 1024 * 1024
 
+#include "trf_msg.h"
 #include "trf_log.h"
 #include "trf_inet.h"
 #include "trf_internal.h"
-
-#define TRF_SA_LEN(x) (((struct sockaddr *) x)->sa_family == AF_INET ? \
-    sizeof(struct sockaddr_in) : sizeof(struct sockaddr_in6))
-
-#define trf_fi_error(call, err) \
-    trf__log_error("(fabric) %s failed (%d): %s", call, (int) -err, \
-    fi_strerror((int) -err))
-
-#define trf_fi_warn(call, err) \
-    trf__log_warn("(fabric) %s failed (%d): %s", call, (int) -err, \
-    fi_strerror((int) -err))
-
-#define trf_perror(retval) trf__log_error("%s", strerror(-retval));
-
-/**
-  * @brief Struct for Storing Interface & Address Data for transmission
-*/
-struct TRFInterface {
-    /**
-      * @brief sockaddr struct containing sa_family and IP Address
-    */
-    struct sockaddr         * addr;     
-    /**
-      * @brief Netmask of address
-    */
-    uint8_t                 netmask;   
-    /**
-      * @brief Interface speed
-    */
-    int32_t                 speed;      
-    /**
-      * @brief Port
-    */
-    int32_t                 port;       
-    /**
-      * @brief Flags set if the port and ip address are valid interfaces
-    */
-    int32_t                 flags;      
-    /**
-      * @brief Next item in linked list
-    */
-    struct TRFInterface     * next;     
-};
-
-/**
- * @brief Address vector for storing source-destination address pairs, as well
- * as their connection speeds.
- */
-struct TRFAddrV {
-    /**
-      * @brief struct sockaddr containing source address
-    */
-    struct sockaddr         * src_addr;
-    /**
-      * @brief struct sockaddr containing destination address
-    */
-    struct sockaddr         * dst_addr;
-    /**
-      * @brief pair speed between the interface
-    */
-    int32_t                 pair_speed;
-    /**
-      * @brief next item in linked list
-    */
-    struct TRFAddrV         * next;
-};
-
-#define TRFI_VALID (1)
-
-/**
- * @brief TRF endpoint types
- *
- * This endpoint type determines the behaviour of connection functions, as well
- * as how to decode data stored within a TRFContext struct.
- */
-enum TRFEPType {
-    TRF_EP_INVALID,         // Invalid
-    TRF_EP_FREE,            // Free node
-    TRF_EP_SINK,            // Receiver
-    TRF_EP_SOURCE,          // Sender
-    TRF_EP_CONN_ID,         // Sender side resources for receiver
-    TRF_EP_MAX              // Sentinel
-};
-
-/**
- * @brief Maximum serialized TRF address string size
- * 
- * Currently, the longest TRF address string is:
- * trfx_sockaddr_in6://[ffff:ffff:ffff:ffff:ffff:ffff:ffff:ffff]:65535
- * at 67 characters, plus the terminating null byte.
- */
-#define TRFX_MAX_STR 128
-
-/**
- * @brief Libfabric specific context objects
- * 
- */
-struct TRFXFabric {
-    /**
-     * @brief Source address identifier
-    */
-    fi_addr_t           src_addr;
-    /**
-     * @brief Destination address identifier
-    */
-    fi_addr_t           peer_addr;
-    /**
-     * @brief Address format, from fi->addr_format
-    */
-    uint32_t            addr_fmt;
-    /**
-      * @brief Endpoint
-    */
-    struct fid_ep   * ep;
-    /**
-      * @brief Fabric interface identifier.
-    */
-    struct fid_fabric   * fabric;
-    /**
-      * @brief Domain identifier
-      * 
-      * A domain is the root object to which connection objects should be bound.
-    */
-    struct fid_domain   * domain;
-    /**
-      * @brief Event queue
-      *
-      * An event queue is a mechanism for managing asynchronous events, such as
-      * address insertion. Currently, as all TRF operations are synchronous, it
-      * is not used.
-    */
-    struct fid_eq       * eq;
-    /**
-      * @brief Transmission Completion queue
-    */
-    struct fid_cq       * tx_cq;
-    /**
-      * @brief Receive Completion queue
-    */
-    struct fid_cq       * rx_cq;
-    /**
-      * @brief Address Vector
-      *
-      * An address vector contains translations of Libfabric addresses into
-      * fabric-specific addresses.
-    */
-    struct fid_av       * av;
-    /**
-      * @brief Message memory region.
-      * 
-      * LibTRF predefines a memory region for use in sending and receiving
-      * messages. However, you can use your own memory region if you wish.
-    */
-    struct fid_mr       * msg_mr;
-    /**
-     * @brief Message virtual memory address.
-     * 
-     * This address must correspond with the memory registered under msg_mr.
-     */
-    void                * msg_ptr;
-    /**
-      * @brief Framebuffer memory region.
-      *
-      * Stores framebuffer contents. Currently, the use of only one framebuffer
-      * is supported through the TRF API.
-    */
-    struct fid_mr       * fb_mr;
-    /**
-      * @brief Framebuffer virtual memory address.
-      *
-      * This address must correspond with the memory registered under fb_mr.
-    */
-    void                * fb_ptr;
-    /**
-      * @brief Interrupt vector
-      *
-      * Currently unused. The interrupt vector determines the CPU thread on
-      * which events are delivered. This is a "best effort" option - not all
-      * fabric types support this option.
-    */
-    uint32_t            intrv;      
-};
-
-/**
- * @brief TRF connection types
- * 
- * May be used to determine the type of transport in use.
- * Currently, only Libfabric is supported.
- * 
- */
-enum TRFXType {
-    /**
-      * @brief Invalid
-    */
-    TRFX_TYPE_INVALID,              
-    /**
-      * @brief Libfabric Auto-Selection
-    */
-    TRFX_TYPE_LIBFABRIC,            
-    /**
-      * @brief RDMA-CM
-    */
-    TRFX_TYPE_RDMACM,               
-    /**
-      * @brief Sentinel value
-    */
-    TRFX_TYPE_MAX           
-};
-
-/**
- * @brief TRF serialized address formats.
- * 
- */
-enum TRFXAddr {
-    /**
-      * @brief Invalid
-    */
-    TRFX_ADDR_INVALID,             
-    /**
-      * @brief Libfabric FI_ADDR_STR
-    */
-    TRFX_ADDR_FI_STR,               
-    /**
-      * @brief struct sockaddr
-    */
-    TRFX_ADDR_SOCKADDR,             
-    /**
-      * @brief struct sockaddr_in
-    */
-    TRFX_ADDR_SOCKADDR_IN,          
-    /**
-      * @brief struct sockaddr_in6
-    */
-    TRFX_ADDR_SOCKADDR_IN6,        
-    /**
-      * @brief InfiniBand GID (currently unused)
-    */
-    TRFX_ADDR_IB_GID,               
-    /**
-     * @brief InfiniBand UD GID
-    */
-    TRFX_ADDR_IB_UD,
-    /**
-      * @brief Intel Performance Scaled Messaging 1 (True Scale Fabric)
-    */
-    TRFX_ADDR_PSMX,
-    /**
-     * @brief Intel Performance Scaled Messaging 2 (Omni-Path)
-    */
-    TRFX_ADDR_PSMX2,
-    /**
-     * @brief Intel Performance Scaled Messaging 3 (RoCE v2)
-    */
-    TRFX_ADDR_PSMX3,
-    /**
-      * @brief Sentinel value
-    */
-    TRFX_ADDR_MAX                  
-};
-
-enum TRFTexFormat {
-    /**
-      * @brief Invalid
-      */
-    TRF_TEX_INVALID,
-    /**
-      * @brief RGBA packed pixels, 8 bits per channel
-      */
-    TRF_TEX_RGBA_8888,
-    /**
-      * @brief RGB packed pixels, 8 bits per channel
-      */
-    TRF_TEX_RGB_888,
-    /**
-      * @brief BGRA packed pixels, 8 bits per channel
-      */
-    TRF_TEX_BGRA_8888,
-    /**
-      * @brief BGR packed pixels, 8 bits per channel
-      */
-    TRF_TEX_BGR_888,
-    /**
-      * @brief DXT1 compressed texture format
-      */
-    TRF_TEX_DXT1,
-    /**
-     * @brief DXT5 compressed texture format
-     */
-    TRF_TEX_DXT5,
-    /**
-     * @brief ETC1 compressed texture format
-     */
-    TRF_TEX_ETC1,
-    /**
-      * @brief ETC2 compressed texture format
-      */
-    TRF_TEX_ETC2,
-    /**
-      * @brief RGBA, 16 bits per channel HDR float
-      */
-    TRF_TEX_RGBA_16161616F,
-    /**
-      * @brief RGBA, 16 bits per channel
-      */
-    TRF_TEX_RGBA_16161616,
-    /**
-     * @brief BGRA, 16 bits per channel HDR float
-     * 
-     */
-    TRF_TEX_BGRA_16161616F,
-    /**
-     * @brief BGRA, 16 bits per channel
-     */
-    TRF_TEX_BGRA_16161616,
-    /**
-      * @brief Sentinel Value
-      */
-    TRF_TEX_MAX
-};
-
-struct TRFDisplay {
-    /**
-     * @brief Display ID
-     * 
-     * The display ID, unique within a context. This display is the actual value
-     * used in the TRF API to identify which display should be used.
-     */
-    int32_t     id;
-    /**
-     * @brief Display name
-     *
-     * The display name is a user-facing string that identifies the display via
-     * a human-readable name, which could be the monitor name or the name of the
-     * server the display is connected to.
-     */
-    char        * name;
-    /**
-     * @brief Width
-     * 
-     * Display width in pixels
-     * 
-     */
-    uint32_t     width;
-    /**
-     * @brief Height
-     * 
-     * Display height in pixels
-     */
-    uint32_t    height;
-    /**
-     * @brief Refresh rate
-     * 
-     * Display refresh rate, in Hz.
-     */
-    uint32_t    rate;
-    /**`    
-     * @brief Texture format
-     * 
-     * Currently, only one texture format is supported simultaneously.
-     */
-    uint32_t    format;
-    /**
-     * @brief Display Group
-     *
-     * A server acting as a multiplexer for multiple sources may set logical
-     * display groups to allow users to select only sources from a particular
-     * machine.
-     *
-     */
-    uint32_t    dgid;
-    /**
-     * @brief X Offset
-     * 
-     * Horizontal offset of the display, relative to the display group only.
-     */
-    uint32_t    x_offset;
-    /**
-     * @brief Y Offset
-     * 
-     * Vertical offset of the display, relative to the display group only.
-     */ 
-    uint32_t    y_offset;
-    /**
-     * @brief Memory address of the display framebuffer
-     * 
-     */
-    void        * fb_addr;
-    /**
-     * @brief Memory region object for the display framebuffer. Do not set manually.
-     * 
-     */
-    struct fid_mr       * fb_mr;
-    /**
-     * @brief Next display in the list.
-     * 
-     */
-    struct TRFDisplay   * next;
-};
-
-/**
- * @brief The Telescope Remote Framebuffer Library Context
- *
- * This is the main context for most TRF operations. It contains all of the
- * resources necessary to establish main and side channel communications between
- * endpoints. Additionally, the TRFContext may be chained with other related
- * contexts to allow for group operations, e.g. disconnecting all clients or
- * broadcasting frames simultaneously to all clients.
- *
- */
-struct TRFContext {
-    /**
-     * @brief Endpoint type
-     *
-     * Servers and clients both use the same struct to store connection
-     * information. This field determines the type of endpoint contained within
-     * the context. @see enum TRFEPType
-     */
-    enum TRFEPType type;
-    union {
-        /**
-         * @brief Server specific context items.
-         * 
-         */
-        struct {
-            /**
-             * @brief Listen FD
-             * 
-             * Out of band channel FD.
-             */
-            int                 listen_fd;
-            /**
-             * @brief Client list
-             * 
-             * Contains a list of clients which have connected via this server.
-             */
-            struct TRFContext   * clients;
-        } svr;
-        /**
-         * @brief Client specific context items.
-         * 
-         */
-        struct {
-            /**
-             * @brief Session identifier
-             */
-            uint64_t            session_id;
-            /**
-             * @brief Out of band channel FD.
-             */
-            int                 client_fd;
-        } cli;
-    };
-    /**
-     * @brief Transfer layer type. @see enum TRFXType
-     * 
-    */
-    enum TRFXType  xfer_type;
-    /**
-     * @brief Pointers to transport-specific context items
-     * 
-    */
-    union {
-        struct TRFXFabric * fabric; // Libfabric context
-    } xfer;
-    /**
-     * @brief Display list
-     * 
-     * A list of displays that are available on the server.
-    */
-    struct TRFDisplay * displays;
-    /**
-     * @brief Related context pointer, next entry
-     * 
-    */
-    struct TRFContext * next;
-
-};
-
-struct TRFBufferData {
-    struct fid_mr * mr;
-    void * addr;
-    size_t len;
-};
 
 /**
  * @brief Allocate an active endpoint.
@@ -879,12 +399,10 @@ int trfUpdateDisplayAddr(PTRFContext ctx, PTRFDisplay disp, void * addr);
 /**
  * @brief Get number of bytes needed to store the contents of the display
  * 
- * @param width     Width of the display
- * @param height    Height of the display
- * @param fmt       Format of the display
+ * @param disp      Display
  * @return ssize_t 
  */
-ssize_t trfGetDisplayBytes(size_t width, size_t height, enum TRFTexFormat fmt);
+ssize_t trfGetDisplayBytes(PTRFDisplay disp);
 
 /**
  * @brief Free a display list.
@@ -899,16 +417,216 @@ void trfFreeDisplayList(PTRFDisplay disp, int dealloc);
 
 /**
  * @brief Automatically process Messages based on incoming message types
- * 
+ *
  * @param ctx           Context to use  
  * @param flags         Messages you want to be processed
  * @param processed     Message that was processed
  * @param timeout_ms    Timeout in Miliseconds
  * @param rate_limit    Set Rate limit
- * @param data_out      Msg From the client, if data_out is null means message has already been processed internally.
+ * @param data_out      Message data from the client.
+ *                      NULL means the message has been processed internally.
  * @return      0 on success, negative failure code on error
  */
 int trfGetMessageAuto(PTRFContext ctx, uint64_t flags, uint64_t * processed,
     int timeout_ms, int rate_limit, void ** data_out);
   
+/**
+ * @brief       Make the referenced display buffer available for use, as the
+ * source (server) buffer.
+ *
+ * @param ctx   Initialized context to make the display buffer available to.
+ *
+ * @param disp  Display to make available. Note: if this contains multiple
+ *              displays, only the first display will be made available.
+ *
+ * @return      0 on success, negative error code on failure.
+ */
+int trfRegDisplaySource(PTRFContext ctx, PTRFDisplay disp);
+
+/**
+ * @brief       Make the referenced display buffer available for use, as the
+ * sink (client) buffer.
+ *
+ * @param ctx   Initialized context to make the display buffer available to.
+ *
+ * @param disp  Display to make available. Note: if this contains multiple
+ *              displays, only the first display will be made available.
+ *
+ * @return      0 on success, negative error code on failure.
+ */
+int trfRegDisplaySink(PTRFContext ctx, PTRFDisplay disp);
+
+/**
+ * @brief       Get display by ID
+ *
+ * @param disp_list     Display list
+ * @param id            ID
+ * @return              Pointer to item in linked list with specified ID. If
+ *                      NULL, the operation failed and errno will be set to
+ *                      indicate the reason.
+ */
+PTRFDisplay trfGetDisplayByID(PTRFDisplay disp_list, int id);
+
+int trfAckClientReq(PTRFContext ctx, int disp_id);
+
+/**
+ * @brief       Send a frame to the client.
+ * 
+ * @param ctx   Initialized context to send the frame to.
+ * @param disp  Display identifier.
+ * @param rbuf  Pointer to the remote frame buffer.
+ * @param rkey  Remote access key.
+ * @return      0 on success, negative error code on failure.
+ */
+static inline ssize_t trfSendFrame(PTRFContext ctx, PTRFDisplay disp, 
+    uint64_t rbuf, uint64_t rkey)
+{
+    return fi_write(ctx->xfer.fabric->ep, disp->fb_addr, trfGetDisplayBytes(disp),
+        fi_mr_desc(disp->fb_mr), ctx->xfer.fabric->peer_addr,
+        rbuf, rkey, NULL);
+}
+
+/**
+ * @brief           Get the progress of all send operations.
+ *
+ * @param ctx       Initialized context.
+ *
+ * @param de        Pointer to a data entry where completion details will be
+ *                  stored.
+ *
+ * @param timeout   Timeout in milliseconds. If set to less than zero, the
+ *                  function will be non-blocking.
+ *
+ * @return          Number of completed operations, negative error code on
+ *                  failure.
+ */
+static inline ssize_t trfGetSendProgress(PTRFContext ctx, 
+    struct fi_cq_data_entry * de, int timeout)
+{
+    if (timeout > 0)
+    {
+        return fi_cq_sread(ctx->xfer.fabric->tx_cq, de, 1, NULL, timeout);
+    }
+    else
+    {
+        return fi_cq_read(ctx->xfer.fabric->tx_cq, de, 1);
+    }
+}
+
+/**
+ * @brief Send Data to Peer over libfabric
+ * 
+ * @param ctx     Context containing Initialized TRFXFabric Struct
+ * @param size    Size of data to be sent
+ * @return 0 on success, Negative error code on error
+ */
+int trfFabricSend(PTRFContext ctx, TrfMsg__MessageWrapper *msg, 
+    uint32_t buff_size);
+
+/**
+ * @brief Receive Message over Libfabric and Decode into MessageWrapper
+ * @param ctx         Context to use
+ * @param mem_size    Size of Memory Buffer
+ * @param msg         Pointer to Msg to be written
+ * @return 0 on success, Negative error code on error
+ */
+int trfFabricRecv(PTRFContext ctx, uint32_t mem_size, 
+        TrfMsg__MessageWrapper ** msg);
+
+/**
+ * @brief       Send a frame receive request. 
+ *              
+ *              Warning: You must call trfGetRecvProgress() to ensure the frame
+ *              is ready for use!
+ *
+ * @param ctx   Initialized context.
+ * @param disp  Display identifier.
+ * @return      0 on success, negative error code on failure.
+ */
+static inline ssize_t trfRecvFrame(PTRFContext ctx, PTRFDisplay disp)
+{
+    TrfMsg__MessageWrapper mw = TRF_MSG__MESSAGE_WRAPPER__INIT;
+    TrfMsg__ClientFReq fr = TRF_MSG__CLIENT_FREQ__INIT;
+    mw.wdata_case   = trfInternalToPB(TRFM_CLIENT_F_REQ);
+    mw.client_f_req = &fr;
+    fr.id           = disp->id;
+    fr.addr         = (uint64_t) disp->fb_addr;
+    fr.rkey         = fi_mr_key(disp->fb_mr);
+    fr.frame_cntr   = disp->frame_cntr;
+    ssize_t ret;
+    ret = trfFabricSend(ctx, &mw, 4096);
+    if (ret < 0)
+    {
+        trf__log_error("Unable to send frame request");
+    }
+    ret = fi_recv(ctx->xfer.fabric->ep, ctx->xfer.fabric->msg_ptr, 
+        4096, fi_mr_desc(ctx->xfer.fabric->msg_mr), ctx->xfer.fabric->peer_addr,
+        NULL);
+    return ret;
+}
+
+/**
+ * @brief           Get the progress of all receive operations.
+ *
+ * @param ctx       Initialized context.
+ *
+ * @param de        Pointer to a data entry where completion details will be
+ *                  stored.
+ *
+ * @param timeout   Timeout in milliseconds. If set to less than zero, the
+ *                  function will be non-blocking.
+ *
+ * @return          Number of completed operations, negative error code on
+ *                  failure. 
+ */
+static inline ssize_t trfGetRecvProgress(PTRFContext ctx, 
+    struct fi_cq_data_entry * de, int timeout)
+{
+    if (timeout > 0)
+    {
+        return fi_cq_sread(ctx->xfer.fabric->rx_cq, de, 1, NULL, timeout);
+    }
+    else
+    {
+        return fi_cq_read(ctx->xfer.fabric->rx_cq, de, 1);
+    }
+}
+
+/**
+ * @brief Get the list of displays available to the client from the server.
+ * 
+ * @param   ctx     Context
+ * @param   out     Server display list to be allocated and filled.
+ * @return          0 on success, negative error code on failure
+ */
+int trfGetServerDisplays(PTRFContext ctx, PTRFDisplay * out);
+
+/**
+ * @brief Send a display list to the client contained within the current
+ * context.
+ *
+ * The client should have requested display metadata from the server.
+ *
+ * @param ctx 
+ * @return int 
+ */
+int trfSendDisplayList(PTRFContext ctx);
+
+/**
+ * @brief       Send a display initialization request to the server.
+ * 
+ * @param ctx   Initialized context.
+ * @param disp  Display to initialize.
+ * @return      0 on success, negative error code on failure. 
+ */
+int trfSendClientReq(PTRFContext ctx, PTRFDisplay disp);
+
+/**
+ * @brief Send Acknowledgement for Client Frame
+ * @param ctx       Context to use
+ * @param display   Display the acknowledgement is for
+ * @return 0 on success, negative error code on failure
+ */
+int trfAckFrameReq(PTRFContext ctx, PTRFDisplay display);
+
 #endif // _TRF_H_

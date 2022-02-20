@@ -120,26 +120,6 @@ int trfNCNewSession(PTRFContext ctx, PTRFContext * out);
 int trf__AddrMsgToInterface(TrfMsg__MessageWrapper * msg, PTRFInterface * out);
 
 /**
- * @brief Send a display list to the client contained within the current
- * context.
- *
- * The client should have requested display metadata from the server.
- *
- * @param ctx 
- * @return int 
- */
-int trfNCSendDisplayList(PTRFContext ctx);
-
-/**
- * @brief Get the list of displays available to the client from the server.
- * 
- * @param   ctx     Context
- * @param   out     Server display list to be allocated and filled.
- * @return          0 on success, negative error code on failure
- */
-int trfNCGetServerDisplays(PTRFContext ctx, PTRFDisplay * out);
-
-/**
  * @brief Receive a message on the main channel, into the message buffer.
  * @note  This function is not thread safe.
  *

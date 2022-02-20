@@ -33,7 +33,10 @@
 #ifndef _TRF_MSG_H_
 #define _TRF_MSG_H_
 
-#include "trf.h"
+#include <sys/socket.h>
+#include <arpa/inet.h>
+
+#include "trf_def.h"
 #include "trf_msg.pb-c.h"
 
 /**
@@ -101,23 +104,4 @@ int trfFabricPack(TrfMsg__MessageWrapper * handle, uint32_t size, void * buf,
  */
 int trfMsgUnpack(PTRFContext ctx, TrfMsg__MessageWrapper **msg, uint64_t size);
 
-/**
- * @brief Send Data to Peer over libfabric
- * 
- * @param ctx     Context containing Initialized TRFXFabric Struct
- * @param size    Size of data to be sent
- * @return 0 on success, Negative error code on error
- */
-int trfFabricSend(PTRFContext ctx, TrfMsg__MessageWrapper *msg, 
-    uint32_t buff_size);
-
-/**
- * @brief Receive Message over Libfabric and Decode into MessageWrapper
- * @param ctx         Context to use
- * @param mem_size    Size of Memory Buffer
- * @param msg         Pointer to Msg to be written
- * @return 0 on success, Negative error code on error
- */
-int trfFabricRecv(PTRFContext ctx, uint32_t mem_size, 
-        TrfMsg__MessageWrapper ** msg);
 #endif

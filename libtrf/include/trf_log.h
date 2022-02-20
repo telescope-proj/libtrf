@@ -18,6 +18,7 @@
 #define _TRF_LOG_H_
 
 #include <stdio.h>
+#include <string.h>
 #include <stdarg.h>
 #include <stdbool.h>
 #include <time.h>

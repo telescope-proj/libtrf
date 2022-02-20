@@ -21,6 +21,8 @@ jobs:
     steps:
     - name: Install requirements
       run: sudo apt update 
+        && sudo apt install -y protobuf-c-compiler
+        && sudo apt-get install -y libprotobuf-c-dev
         && git clone https://github.com/ofiwg/libfabric.git
         && cd ./libfabric
         && sudo ./autogen.sh

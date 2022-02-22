@@ -23,13 +23,16 @@
 #include "trf.h"
 #include "trf_ncp.h"
 #include <signal.h>
+#include <sys/mman.h>
 
 int main(int argc, char ** argv)
 {
     char* host = "127.0.0.1";
     char* port = "35101";
+
     PTRFContext ctx = trfAllocContext();
-    if(trfNCClientInit(ctx,host,port)<0){
+    if (trfNCClientInit(ctx, host, port) < 0)
+    {
         printf("unable to initiate client\n");
         fflush(stdout);
         return -1;
@@ -65,13 +68,14 @@ int main(int argc, char ** argv)
 
     // Register buffer to store the first display's framebuffer
 
-    displays->fb_addr = calloc(1, trfGetDisplayBytes(displays));
+    displays->fb_addr = trfAllocAligned(trfGetDisplayBytes(displays), 2097152);
     ret = trfRegDisplaySink(ctx, displays);
     if (ret < 0)
     {
         printf("Unable to register display sink: error %s\n", strerror(ret));
         return -1;
     }
+    madvise(displays->fb_addr, trfGetDisplayBytes(displays), MADV_HUGEPAGE);
 
     // Indicate to the server that the client is ready to receive frames
 
@@ -85,7 +89,8 @@ int main(int argc, char ** argv)
         ((_end).tv_nsec - (_start).tv_nsec))
 
     // Request 100 frames from the first display in the list
-    printf("Requesting 100 frames\n");
+    printf( "\"Frame\",\"Size\",\"Request (ms)\",\"Frame Time (ms)\""
+            ",\"Speed (Gbit/s)\",\"Framerate (Hz)\"\n");
     struct timespec tstart, tend;
     for (int f = 0; f < 100; f++)
     {
@@ -99,7 +104,8 @@ int main(int argc, char ** argv)
         clock_gettime(CLOCK_MONOTONIC, &tend);
         double tsd1 = timespecdiff(tstart, tend) / 1000000.0;
         struct fi_cq_data_entry de;
-        ret = trfGetRecvProgress(ctx, &de, 999999);
+        struct fi_cq_err_entry err;
+        ret = trfGetRecvProgress(ctx, &de, &err);
         if (ret < 0)
         {
             printf("Unable to get receive progress: error %s\n", strerror(-ret));
@@ -107,20 +113,15 @@ int main(int argc, char ** argv)
         }
         clock_gettime(CLOCK_MONOTONIC, &tend);
         double tsd2 = timespecdiff(tstart, tend) / 1000000.0;
-        printf( "[Frame %d] Size: %ld bytes, Request: %f ms, Received: %f ms, "
-                "Rate: %f Gbit/s, Pk FPS: %f\n",
-                f, trfGetDisplayBytes(displays), tsd1, tsd2, 
+        printf("%d,%ld,%f,%f,%f,%f\n",
+            f, trfGetDisplayBytes(displays), tsd1, tsd2, 
                 ((double) trfGetDisplayBytes(displays)) / tsd2 / 1e5,
-                1000.0 / tsd2
-        );
+                1000.0 / tsd2);
         displays->frame_cntr++;
     }
     
+    // Once done, destroy the context releasing all resources and closing the
+    // connection.
     trfDestroyContext(ctx);
-    // info = trfGetFabricProviders(host, port, TRF_EP_SINK, &info);
-    // if (!info) {
-    //     trf_error("unable to get fabric providers\n");
-    //     return -1;
-    // }
    
 }

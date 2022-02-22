@@ -31,7 +31,9 @@
 
 struct TRFContext;
 
-#include "trf.h"
+#include <stdlib.h>
+
+#include "trf_def.h"
 #include "trf_log.h"
 
 #if RAND_MAX/256 >= 0xFFFFFFFFFFFFFF
@@ -96,21 +98,6 @@ static inline uint64_t trf__Rand64()
 }
 
 /**
-  * @brief      Get the system page size
-  * 
-  * @return     System page size
-*/
-static inline size_t trf__GetPageSize() {
-    #if defined(_WIN32)
-        SYSTEM_INFO si;
-        GetSystemInfo(&si);
-        return si.dwPageSize;
-    #else
-        return sysconf(_SC_PAGESIZE);
-    #endif
-}
-
-/**
   * @brief      Calculate the Hamming Weight (ones count) of a 64-bit integer
   * 
   * @param x    64-bit integer
@@ -148,6 +135,7 @@ static inline char * trfStrdup(char * str)
  * @param ms    Number of milliseconds to sleep.
  */
 static inline void trfSleep(int ms) {
+    if (ms <= 0) { return; }
 #ifdef _WIN32
     Sleep(ms);
 #else

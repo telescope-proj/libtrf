@@ -1,16 +1,30 @@
 #ifndef _TRF_DEF_H_
 #define _TRF_DEF_H_
 
+#include <string.h>
 #include <stdint.h>
 #include <rdma/fabric.h>
 
-#define PTRFDisplay   struct TRFDisplay *
-#define PTRFXFabric   struct TRFXFabric *
-#define PTRFAddrV     struct TRFAddrV *
-#define PTRFInterface struct TRFInterface *
-#define PTRFSession   struct TRFSession *
-#define PTRFContext   struct TRFContext *
-#define TRF_MR_SIZE   64 * 1024 * 1024
+#ifdef _WIN32
+    #define TRFSock SOCKET
+    #define trfSockValid(sock) (sock != INVALID_SOCKET)
+    #define TRFInvalidSock INVALID_SOCKET
+    #define trfLastSockError WSAGetLastError()
+#else
+    #include <unistd.h>
+    #define TRFSock int
+    #define trfSockValid(x) (x >= 0)
+    #define TRFInvalidSock -1
+    #define trfLastSockError errno
+#endif
+
+#define PTRFDisplay     struct TRFDisplay *
+#define PTRFXFabric     struct TRFXFabric *
+#define PTRFAddrV       struct TRFAddrV *
+#define PTRFInterface   struct TRFInterface *
+#define PTRFSession     struct TRFSession *
+#define PTRFContext     struct TRFContext *
+#define PTRFContextOpts struct TRFContextOpts *
 
 #define TRF_SA_LEN(x) (((struct sockaddr *) x)->sa_family == AF_INET ? \
     sizeof(struct sockaddr_in) : sizeof(struct sockaddr_in6))
@@ -137,10 +151,16 @@ struct TRFXFabric {
     struct fid_eq       * eq;
     /**
       * @brief Transmission Completion queue
+      *
+      * Transmit events are used to track the progress of send and RMA
+      * operations, including RMA read and write operations.
     */
     struct fid_cq       * tx_cq;
     /**
       * @brief Receive Completion queue
+      * 
+      * Receive events are used to track the progress of message receive
+      * operations only.
     */
     struct fid_cq       * rx_cq;
     /**
@@ -164,26 +184,19 @@ struct TRFXFabric {
      */
     void                * msg_ptr;
     /**
-      * @brief Framebuffer memory region.
-      *
-      * Stores framebuffer contents. Currently, the use of only one framebuffer
-      * is supported through the TRF API.
-    */
-    struct fid_mr       * fb_mr;
-    /**
-      * @brief Framebuffer virtual memory address.
-      *
-      * This address must correspond with the memory registered under fb_mr.
-    */
-    void                * fb_ptr;
+     * @brief Message buffer size.
+     * 
+     * The length of the buffer referenced by msg_ptr.
+     */
+    size_t              msg_size;
     /**
       * @brief Interrupt vector
       *
-      * Currently unused. The interrupt vector determines the CPU thread on
-      * which events are delivered. This is a "best effort" option - not all
-      * fabric types support this option.
+      * The interrupt vector determines the CPU thread on which events are
+      * delivered. This is a "best effort" option - not all fabric types support
+      * this option.
     */
-    uint32_t            intrv;      
+    uint32_t            intrv;  
 };
 
 /**
@@ -408,6 +421,65 @@ struct TRFDisplay {
 };
 
 /**
+ * @brief Context options.
+ *
+ * Default context options may be set in this struct, which modifies the
+ * behaviour of Telescope functions.
+ *
+ */
+struct TRFContextOpts {
+    /**
+     * @brief   Negotiation channel send timeout in milliseconds
+     */
+    int32_t     nc_snd_timeo;
+    /**
+     * @brief   Negotiation channel receive timeout in milliseconds
+    */
+    int32_t     nc_rcv_timeo;
+    /**
+     * @brief   Negotiation channel send buffer size in bytes
+    */
+    size_t      nc_snd_bufsize;
+    /**
+     * @brief   Negotiation channel receive buffer size in bytes
+    */
+    size_t      nc_rcv_bufsize;
+    /**
+     * @brief   Negotiation channel send timeout in milliseconds
+     */
+    int32_t     fab_snd_timeo;
+    /**
+     * @brief   Negotiation channel receive timeout in milliseconds
+     */
+    int32_t     fab_rcv_timeo;
+    /**
+     * @brief   Fabric send buffer max size in bytes
+     *
+     * Note: If set to a positive value, this must be less than or equal to the
+     * length of the fabric message buffer region.
+    */
+    size_t     fab_snd_bufsize;
+    /**
+     * @brief Fabric receive buffer max size in bytes
+     *
+     * Note: If set to a positive value, this must be less than or equal to the
+     * length of the fabric message buffer region.
+    */
+    size_t     fab_rcv_bufsize;
+    /**
+     * @brief Fabric polling rate limit (sleep time in milliseconds)
+     * 
+     * Note: For latency sensitive applications, this should be set to 0,
+     * to use busy waiting.
+     */
+    int32_t     fab_poll_rate;
+    /**
+     * @brief Synchronous CQ polling mode.
+     */
+    uint8_t     fab_cq_sync;
+};
+
+/**
  * @brief The Telescope Remote Framebuffer Library Context
  *
  * This is the main context for most TRF operations. It contains all of the
@@ -437,7 +509,7 @@ struct TRFContext {
              * 
              * Out of band channel FD.
              */
-            int                 listen_fd;
+            TRFSock             listen_fd;
             /**
              * @brief Client list
              * 
@@ -457,7 +529,7 @@ struct TRFContext {
             /**
              * @brief Out of band channel FD.
              */
-            int                 client_fd;
+            TRFSock             client_fd;
         } cli;
     };
     /**
@@ -479,11 +551,58 @@ struct TRFContext {
     */
     struct TRFDisplay * displays;
     /**
+     * @brief Context options
+     * 
+    */
+    struct TRFContextOpts * opts;
+    /**
+     * @brief Indicates that the peer has sent a disconnect message. Prevents a
+     * disconnect from being called twice.
+     */
+    uint8_t disconnected;
+    /**
      * @brief Related context pointer, next entry
      * 
     */
     struct TRFContext * next;
 
 };
+
+/**
+  * @brief      Get the system page size
+  * 
+  * @return     System page size
+*/
+static inline size_t trf__GetPageSize() {
+    #if defined(_WIN32)
+        SYSTEM_INFO si;
+        GetSystemInfo(&si);
+        return si.dwPageSize;
+    #else
+        return sysconf(_SC_PAGESIZE);
+    #endif
+}
+
+static inline void trfSetDefaultOpts(PTRFContextOpts opts)
+{
+    opts->fab_cq_sync       = 0;
+    opts->fab_poll_rate     = 0;
+    opts->fab_rcv_bufsize   = trf__GetPageSize();
+    opts->fab_snd_bufsize   = trf__GetPageSize();
+    opts->fab_rcv_timeo     = 2000;
+    opts->fab_snd_timeo     = 2000;
+    opts->nc_rcv_bufsize    = trf__GetPageSize();
+    opts->nc_snd_bufsize    = trf__GetPageSize();
+    opts->nc_rcv_timeo      = 2000;
+    opts->nc_snd_timeo      = 2000;
+}
+
+static inline void trfDuplicateOpts(PTRFContextOpts in, PTRFContextOpts out)
+{
+    if (!in || !out)
+        return;
+    
+    memcpy(out, in, sizeof(struct TRFContextOpts));
+}
 
 #endif // _TRF_DEF_H_

@@ -43,6 +43,7 @@
 #include "trf_def.h"
 #include "trf_protobuf.h"
 #include "trf_msg.pb-c.h"
+#include "trf_internal.h"
 
 #include <rdma/fabric.h>
 #include <rdma/fi_cm.h>
@@ -51,6 +52,7 @@
 #include <rdma/fi_endpoint.h>
 #include <rdma/fi_rma.h>
 
+#include <trf_def.h>
 
 #define trf_fi_error(call, err) \
     trf__log_error("(fabric) %s failed (%d): %s", call, (int) -err, \
@@ -99,7 +101,6 @@
 #include <linux/sockios.h>
 #endif
 
-
 #include "trf_msg.h"
 #include "trf_log.h"
 #include "trf_inet.h"
@@ -135,12 +136,32 @@ int trfAllocActiveEP(PTRFXFabric ctx, struct fi_info * fi, void * data,
  * @param out   If the address is successfully inserted, this parameter will
  *              be set to an address identifier.
  *
- * @return int 
+ * @return      0 on success, negative error code on failure.
  */
 int trfInsertAVSerialized(PTRFXFabric ctx, char * addr, fi_addr_t * out);
 
-
+/**
+ * @brief           Deserialize a TRF wire protocol string into a format
+ *                  understood by the fabric transport.
+ * 
+ * @param proto     Serialized protocol string
+ * 
+ * @param out       Output fabric protocol indentifier
+ * 
+ * @return          0 on success, negative error code on failure.
+ */
 int trfDeserializeWireProto(const char * proto, uint32_t * out);
+
+/**
+ * @brief           Serialize a fabric transport protocol name into a string
+ *                  for transmission over the network.
+ * 
+ * @param proto     Protocol identifier.
+ * 
+ * @param out       Output string.
+ * 
+ * @return          0 on success, negative error code on failure.
+ */
 int trfSerializeWireProto(uint32_t proto, char ** out);
 
 /**
@@ -312,47 +333,23 @@ int trfRegBuf(PTRFXFabric ctx, void * addr, size_t len, uint64_t flags,
 int trfRegInternalMsgBuf(PTRFContext ctx, void * addr, size_t len);
 
 /**
- * @brief Register a memory buffer for receiving frames.
- * 
- * @param ctx   Allocated context to store the memory region. The context
- *              must have been initialized, with a fabric and domain.
- * 
- * @param addr  Address of the memory buffer to register.
- * 
- * @param len   Length of the memory buffer.
- * 
- * @return      0 on success, negative error code on failure.
- */
-int trfRegInternalFrameRecvBuf(PTRFContext ctx, void * addr, size_t len);
-
-/**
- * @brief Register a memory buffer for sending frames.
- * 
- * @param ctx   Allocated context to store the memory region. The context
- *              must have been initialized, with a fabric and domain.
- * 
- * @param addr  Address of the memory buffer to register.
- * 
- * @param len   Length of the memory buffer.
- * 
- * @return      0 on success, negative error code on failure.
- */
-int trfRegInternalFrameSendBuf(PTRFContext ctx, void * addr, size_t len);
-
-/**
-  * @brief Get libfrabric Endpoint name
-  * @param ctx      Context to use
-  * @param sas_buf  Output buffer to store the name
-  * @return 0 on success, negative error code on failure
+  * @brief          Get Libfabric endpoint name
+  * 
+  * @param ctx      Context containing initialized fabric context.
+  * 
+  * @param sas_buf  Pointer to a buffer to be allocated and set.
+  * 
+  * @return         0 on success, negative error code on failure
 */
 int trfGetEndpointName(PTRFContext ctx, char ** sas_buf);
 
 /**
-  * @brief Destroys everything inside the fabric context
-  * @param ctx  Context containing fabric
-  * @return nothing is returned
+  * @brief      Destroys and frees all fabric context items stored within
+  *             a TRF context object.
+  * 
+  * @param ctx  Context containing an initialized fabric context.
 */
-void trfDestroyFabricContext(PTRFXFabric ctx);
+void trfDestroyFabricContext(PTRFContext ctx);
 
 /**
   * @brief Sends a disconnect Message
@@ -416,19 +413,25 @@ ssize_t trfGetDisplayBytes(PTRFDisplay disp);
 void trfFreeDisplayList(PTRFDisplay disp, int dealloc);
 
 /**
- * @brief Automatically process Messages based on incoming message types
+ * @brief               Automatically process messages internally based on the
+ *                      message type.
  *
- * @param ctx           Context to use  
- * @param flags         Messages you want to be processed
+ * @param ctx           Context to use
+ * 
+ * @param flags         Messages to process internally
+ * 
  * @param processed     Message that was processed
- * @param timeout_ms    Timeout in Miliseconds
- * @param rate_limit    Set Rate limit
- * @param data_out      Message data from the client.
- *                      NULL means the message has been processed internally.
- * @return      0 on success, negative failure code on error
+ * 
+ * @param data_out      Message data. Typically this is a pointer to a 
+ *                      TrfMsg__MessageWrapper, but can be any data. This is set
+ *                      to a non-NULL value if the message wasn't processed
+ *                      internally.
+ * 
+ * @return              Number of messages processed internally, negative error
+ *                      code if an error occurred.
  */
 int trfGetMessageAuto(PTRFContext ctx, uint64_t flags, uint64_t * processed,
-    int timeout_ms, int rate_limit, void ** data_out);
+    void ** data_out);
   
 /**
  * @brief       Make the referenced display buffer available for use, as the
@@ -487,51 +490,32 @@ static inline ssize_t trfSendFrame(PTRFContext ctx, PTRFDisplay disp,
 }
 
 /**
- * @brief           Get the progress of all send operations.
- *
- * @param ctx       Initialized context.
- *
- * @param de        Pointer to a data entry where completion details will be
- *                  stored.
- *
- * @param timeout   Timeout in milliseconds. If set to less than zero, the
- *                  function will be non-blocking.
- *
- * @return          Number of completed operations, negative error code on
- *                  failure.
- */
-static inline ssize_t trfGetSendProgress(PTRFContext ctx, 
-    struct fi_cq_data_entry * de, int timeout)
-{
-    if (timeout > 0)
-    {
-        return fi_cq_sread(ctx->xfer.fabric->tx_cq, de, 1, NULL, timeout);
-    }
-    else
-    {
-        return fi_cq_read(ctx->xfer.fabric->tx_cq, de, 1);
-    }
-}
-
-/**
- * @brief Send Data to Peer over libfabric
+ * @brief           Send a message to the peer using the fabric connection.
  * 
- * @param ctx     Context containing Initialized TRFXFabric Struct
- * @param size    Size of data to be sent
- * @return 0 on success, Negative error code on error
+ * @param ctx       Context containing initialized fabric transport.
+ * 
+ * @param msg       Message handle to be packed and sent.
+ * 
+ * @param opt_ov    Optional behaviour overrides to be used for this operation.
+ *                  If NULL, the default behaviour will be used.
+ * 
+ * @return          0 on success, negative error code on failure
  */
-int trfFabricSend(PTRFContext ctx, TrfMsg__MessageWrapper *msg, 
-    uint32_t buff_size);
+int trfFabricSend(PTRFContext ctx, TrfMsg__MessageWrapper *msg);
 
 /**
- * @brief Receive Message over Libfabric and Decode into MessageWrapper
- * @param ctx         Context to use
- * @param mem_size    Size of Memory Buffer
- * @param msg         Pointer to Msg to be written
- * @return 0 on success, Negative error code on error
+ * @brief           Receive a message from the peer using the fabric connection.
+ * 
+ * @param ctx       Context containing initialized fabric transport.
+ * 
+ * @param msg       Output handle to the received message.
+ * 
+ * @param opt_ov    Optional behaviour overrides to be used for this operation.
+ *                  If NULL, the default behaviour will be used.
+ * 
+ * @return          0 on success, negative error code on failure
  */
-int trfFabricRecv(PTRFContext ctx, uint32_t mem_size, 
-        TrfMsg__MessageWrapper ** msg);
+int trfFabricRecv(PTRFContext ctx, TrfMsg__MessageWrapper ** msg);
 
 /**
  * @brief       Send a frame receive request. 
@@ -540,7 +524,9 @@ int trfFabricRecv(PTRFContext ctx, uint32_t mem_size,
  *              is ready for use!
  *
  * @param ctx   Initialized context.
+ * 
  * @param disp  Display identifier.
+ * 
  * @return      0 on success, negative error code on failure.
  */
 static inline ssize_t trfRecvFrame(PTRFContext ctx, PTRFDisplay disp)
@@ -554,7 +540,7 @@ static inline ssize_t trfRecvFrame(PTRFContext ctx, PTRFDisplay disp)
     fr.rkey         = fi_mr_key(disp->fb_mr);
     fr.frame_cntr   = disp->frame_cntr;
     ssize_t ret;
-    ret = trfFabricSend(ctx, &mw, 4096);
+    ret = trfFabricSend(ctx, &mw);
     if (ret < 0)
     {
         trf__log_error("Unable to send frame request");
@@ -566,38 +552,13 @@ static inline ssize_t trfRecvFrame(PTRFContext ctx, PTRFDisplay disp)
 }
 
 /**
- * @brief           Get the progress of all receive operations.
- *
- * @param ctx       Initialized context.
- *
- * @param de        Pointer to a data entry where completion details will be
- *                  stored.
- *
- * @param timeout   Timeout in milliseconds. If set to less than zero, the
- *                  function will be non-blocking.
- *
- * @return          Number of completed operations, negative error code on
- *                  failure. 
- */
-static inline ssize_t trfGetRecvProgress(PTRFContext ctx, 
-    struct fi_cq_data_entry * de, int timeout)
-{
-    if (timeout > 0)
-    {
-        return fi_cq_sread(ctx->xfer.fabric->rx_cq, de, 1, NULL, timeout);
-    }
-    else
-    {
-        return fi_cq_read(ctx->xfer.fabric->rx_cq, de, 1);
-    }
-}
-
-/**
  * @brief Get the list of displays available to the client from the server.
  * 
- * @param   ctx     Context
- * @param   out     Server display list to be allocated and filled.
- * @return          0 on success, negative error code on failure
+ * @param ctx       Context
+ * 
+ * @param out       Server display list to be allocated and filled.
+ * 
+ * @return          0 on success, negative error code on failure.
  */
 int trfGetServerDisplays(PTRFContext ctx, PTRFDisplay * out);
 
@@ -607,8 +568,9 @@ int trfGetServerDisplays(PTRFContext ctx, PTRFDisplay * out);
  *
  * The client should have requested display metadata from the server.
  *
- * @param ctx 
- * @return int 
+ * @param ctx   Initialized context containing display list.
+ * 
+ * @return      0 on success, negative error code on failure.
  */
 int trfSendDisplayList(PTRFContext ctx);
 
@@ -616,17 +578,215 @@ int trfSendDisplayList(PTRFContext ctx);
  * @brief       Send a display initialization request to the server.
  * 
  * @param ctx   Initialized context.
+ * 
  * @param disp  Display to initialize.
- * @return      0 on success, negative error code on failure. 
+ * 
+ * @return      0 on success, negative error code on failure.
  */
 int trfSendClientReq(PTRFContext ctx, PTRFDisplay disp);
 
 /**
- * @brief Send Acknowledgement for Client Frame
- * @param ctx       Context to use
- * @param display   Display the acknowledgement is for
- * @return 0 on success, negative error code on failure
+ * @brief           Send an confirmation to the client that a frame has been
+ *                  updated.
+ * 
+ * @param ctx       Context to use.
+ * 
+ * @param display   Display the acknowledgement is for.
+ * 
+ * 
+ * @return          0 on success, negative error code on failure.
  */
 int trfAckFrameReq(PTRFContext ctx, PTRFDisplay display);
+
+/**
+ * @brief           Default fabric requirements used by libtrf.
+ * 
+ */
+static inline struct fi_info * trf__GetFabricHints(void)
+{
+    struct fi_info * hints;
+    
+    /*  Specify the feature set required/supported by libtrf. */
+
+    hints                       = fi_allocinfo();
+    if (!hints)
+    {
+        return NULL;
+    }
+    hints->ep_attr->type        = FI_EP_RDM;
+    hints->caps                 = FI_MSG | FI_RMA | FI_SOURCE;
+    hints->addr_format          = FI_FORMAT_UNSPEC;
+    hints->mode                 = FI_CONTEXT | FI_LOCAL_MR | FI_RX_CQ_DATA;
+    hints->domain_attr->mr_mode = FI_MR_BASIC;
+    return hints;
+}
+
+static inline ssize_t trf__FabricPostSend(PTRFContext ctx, size_t length,
+    fi_addr_t peer, struct timespec * deadline)
+{
+    if (!ctx || ctx->xfer_type != TRFX_TYPE_LIBFABRIC)
+    {
+        return -EINVAL;
+    }
+    ssize_t ret;
+    if (!deadline && ctx->opts->fab_snd_timeo)
+    {
+        struct timespec now;
+        struct timespec end;
+        clock_gettime(CLOCK_MONOTONIC, &now);
+        deadline = &end;
+        trf__GetDelay(&now, deadline, ctx->opts->fab_snd_timeo);
+    }
+    PTRFXFabric f = ctx->xfer.fabric;
+    size_t len = length ? length : f->msg_size;
+    while (1)
+    {
+        if (deadline && trf__HasPassed(CLOCK_MONOTONIC, deadline))
+        {
+            return -ETIMEDOUT;
+        }
+        ret = fi_send(f->ep, f->msg_ptr, len, fi_mr_desc(f->msg_mr),
+           peer, NULL);
+        if (ret != -FI_EAGAIN)
+        {
+            return ret;
+        }
+        trfSleep(ctx->opts->fab_poll_rate);
+    }
+}
+
+static inline ssize_t trf__FabricPostRecv(PTRFContext ctx,
+    fi_addr_t peer, struct timespec * deadline)
+{
+    if (!ctx || ctx->xfer_type != TRFX_TYPE_LIBFABRIC)
+    {
+        return -EINVAL;
+    }
+
+    ssize_t ret;
+    if (!deadline && ctx->opts->fab_rcv_timeo)
+    {
+        struct timespec now;
+        struct timespec end;
+        clock_gettime(CLOCK_MONOTONIC, &now);
+        deadline = &end;
+        trf__GetDelay(&now, deadline, ctx->opts->fab_rcv_timeo);
+    }
+    PTRFXFabric f = ctx->xfer.fabric;
+    ssize_t msize = ctx->opts->fab_rcv_bufsize ? ctx->opts->fab_rcv_bufsize : 
+        f->msg_size;
+    while (1)
+    {
+        if (deadline && trf__HasPassed(CLOCK_MONOTONIC, deadline))
+        {
+            return -ETIMEDOUT;
+        }
+        ret = fi_recv(f->ep, f->msg_ptr, msize, fi_mr_desc(f->msg_mr), 
+            peer, NULL);
+        if (ret != -FI_EAGAIN)
+        {
+            return ret;
+        }
+        trfSleep(ctx->opts->fab_poll_rate);
+    }
+}
+
+static inline const char * trf__GetCQErrString(struct fid_cq * cq, 
+    struct fi_cq_err_entry * err)
+{
+    return fi_cq_strerror(cq, err->prov_errno, err->err_data, NULL, 0);
+}
+
+static inline ssize_t trf__PollCQ(struct fid_cq *cq, 
+    struct fi_cq_data_entry * de, struct fi_cq_err_entry * err, 
+    PTRFContextOpts opts, struct timespec * deadline, uint8_t is_send_cq)
+{
+    ssize_t ret;
+    if (opts->fab_cq_sync)
+    {
+        return fi_cq_sread(cq, de, 1, NULL, 
+            is_send_cq ? opts->fab_snd_timeo : opts->fab_rcv_timeo);
+    }
+    else
+    {
+        while (1)
+        {
+            if (deadline && trf__HasPassed(CLOCK_MONOTONIC, deadline))
+            {
+                return -ETIMEDOUT;
+            }
+            ret = fi_cq_read(cq, de, 1);
+            if (ret != -FI_EAGAIN && ret != 1)
+            {
+                if (ret == -FI_EAVAIL)
+                {
+                    fi_cq_readerr(cq, err, 0);
+                }
+                return ret;
+            }
+            if (ret == 1)
+            {
+                return ret;
+            }
+            trfSleep(opts->fab_poll_rate);
+        }
+    }
+}
+
+/**
+ * @brief           Get the progress of all send operations.
+ *
+ * @param ctx       Initialized context.
+ *
+ * @param de        Pointer to a data entry where completion details will be
+ *                  stored.
+ *
+ * @param err       Pointer to an entry where error details will be stored.
+ *
+ * @return          Number of completed operations, negative error code on
+ *                  failure.
+ */
+static inline ssize_t trfGetSendProgress(PTRFContext ctx, 
+    struct fi_cq_data_entry * de, struct fi_cq_err_entry * err)
+{
+    struct timespec tstart, tend;
+    clock_gettime(CLOCK_MONOTONIC, &tstart);
+    trf__GetDelay(&tstart, &tend, ctx->opts->fab_snd_timeo);
+    ssize_t ret = trf__PollCQ(ctx->xfer.fabric->tx_cq, de, err, ctx->opts, 
+        &tend, 1);
+    if (ret == -EAGAIN)
+    {
+        return -ETIMEDOUT;
+    }
+    return ret;
+}
+
+/**
+ * @brief           Get the progress of all receive operations.
+ *
+ * @param ctx       Initialized context.
+ *
+ * @param de        Pointer to a data entry where completion details will be
+ *                  stored.
+ *
+ * @param err       Pointer to an entry where error details will be stored.
+ *
+ * @return          Number of completed operations, negative error code on
+ *                  failure. 
+ */
+static inline ssize_t trfGetRecvProgress(PTRFContext ctx, 
+    struct fi_cq_data_entry * de, struct fi_cq_err_entry * err)
+{
+    struct timespec tstart, tend;
+    clock_gettime(CLOCK_MONOTONIC, &tstart);
+    trf__GetDelay(&tstart, &tend, ctx->opts->fab_rcv_timeo);
+    ssize_t ret = trf__PollCQ(ctx->xfer.fabric->rx_cq, de, err, ctx->opts, 
+        &tend, 1);
+    if (ret == -EAGAIN)
+    {
+        return -ETIMEDOUT;
+    }
+    return ret;
+}
 
 #endif // _TRF_H_

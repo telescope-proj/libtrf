@@ -23,6 +23,7 @@
 #include "trf.h"
 #include "trf_ncp.h"
 #include <signal.h>
+#include <sys/mman.h>
 
 int main(int argc, char ** argv)
 {
@@ -82,18 +83,15 @@ int main(int argc, char ** argv)
     printf("Connection established\n");
 
     uint64_t processed;
-    int timeout = 1000;
-    int rate = 5;
     TrfMsg__MessageWrapper * msg = NULL;
     
     // This function automatically processes messages, according to the input
     // values. Specify which messages should be processed internally, and the
     // system will attempt to auto-respond to them. Certain requests, such as
-    // data requests and errors may not be processed internally, and must be
+    // data requests and errors, may not be processed internally and must be
     // handled manually, even if the flags for them are set.
 
-    ret = trfGetMessageAuto(client_ctx, TRFM_SET_DISP, &processed, timeout, rate, 
-        (void **) &msg);
+    ret = trfGetMessageAuto(client_ctx, TRFM_SET_DISP, &processed, (void **) &msg);
     if (ret < 0)
     {
         printf("unable to get poll messages: %d\n", ret);
@@ -105,13 +103,12 @@ int main(int argc, char ** argv)
         printf("Wrong Message Type 1: %lu\n", trfPBToInternal(msg->wdata_case));
         return -1;
     }
-    trf__log_trace("Requesting second message");
+    printf("Requesting second message...\n");
     
     // The client will indicate that it requires a specific display, and the
     // server should allocate the required memory.
     
-    ret = trfGetMessageAuto(client_ctx, 0, &processed, timeout, rate,
-        (void **) &msg);
+    ret = trfGetMessageAuto(client_ctx, 0, &processed, (void **) &msg);
     if (ret < 0)
     {
         printf("unable to get poll messages: %d\n", ret);
@@ -137,12 +134,13 @@ int main(int argc, char ** argv)
     // Allocate a dummy framebuffer - normally in your application this should
     // be the pointer to the capture source's buffer.
 
-    req_disp->fb_addr = calloc(1, trfGetDisplayBytes(req_disp));
+    req_disp->fb_addr = trfAllocAligned(trfGetDisplayBytes(displays), 2097152);
     if (!req_disp->fb_addr)
     {
         printf("unable to allocate framebuffer\n");
         return -1;
     }
+    madvise(req_disp->fb_addr, trfGetDisplayBytes(displays), MADV_HUGEPAGE);
 
     // Register the buffer.
 
@@ -167,7 +165,7 @@ int main(int argc, char ** argv)
     while (1)
     {
         ret = trfGetMessageAuto(client_ctx, ~TRFM_CLIENT_F_REQ, &processed, 
-            999999, rate, (void **) &msg);
+            (void **) &msg);
         if (ret < 0)
         {
             printf("unable to get poll messages: %d\n", ret);
@@ -183,30 +181,30 @@ int main(int argc, char ** argv)
                 printf("unable to send frame: %d\n", ret);
                 return -1;
             }
-            do {
-                struct fi_cq_data_entry de;
-                ret = trfGetSendProgress(client_ctx, &de, 999999);
-            } while (ret == -FI_EAGAIN || ret == 0);
-            if (ret < 0)
+
+            struct fi_cq_data_entry de;
+            struct fi_cq_err_entry err;
+
+            ret = trfGetSendProgress(client_ctx, &de, &err);
+            if (ret <= 0)
             {
-                printf("unable to get send progress: %d\n", ret);
-                struct fi_cq_err_entry err;
-                ret = fi_cq_readerr(client_ctx->xfer.fabric->tx_cq, &err, 0);
-                if (ret < 0)
-                {
-                    printf("unable to read error: %d\n", ret);
-                    return -1;
-                }
-                const char *x = fi_cq_strerror(client_ctx->xfer.fabric->tx_cq,
-                    err.prov_errno, err.err_data, err.buf, err.len);
-                printf("Error!!!!!: %s\n", x);
-                return -1;
+                printf("Error: %s\n", strerror(-ret));
+                break;
             }
-            printf("Frame sent!\n");
             req_disp->frame_cntr++;
             if((ret = trfAckFrameReq(client_ctx, req_disp)) < 0){
                 printf("Unable to send Ack: %s\n", fi_strerror(ret));
             }
+            printf("Sent frame: %d\n", req_disp->frame_cntr);
+        }
+        else if (processed == TRFM_DISCONNECT)
+        {
+            // If the peer initiates a disconnect, setting this flag will ensure
+            // that a disconnect message is not sent back to an already
+            // disconnected peer (which results in a wait until the timeout).
+            ctx->disconnected = 1;
+            printf("Client requested a disconnect\n");
+            break;
         }
         else
         {

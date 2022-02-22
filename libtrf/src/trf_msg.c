@@ -24,22 +24,26 @@
 #include "trf_msg.h"
 #include "trf_log.h"
 
-int trfNCRecvDelimited(int fd, uint8_t * buf, uint32_t size, int timeout, 
+int trfNCRecvDelimited(TRFSock sock, uint8_t * buf, uint32_t size, int timeout, 
     TrfMsg__MessageWrapper ** handle )
 {
-    if (fd < 0 || !buf || !size || !handle)
+    if (!trfSockValid(sock) || !buf || !size || !handle)
         return -EINVAL;
 
-    // Receive 4-byte delimiter and convert to host byte order
     int ret;
-    uint32_t len;
-    if ((ret = trfNCFullRecv(fd, 4, (uint8_t *) &len)) != 4)
+    int32_t len;
+
+    // Receive 4-byte delimiter and convert to host byte order
+    ret = trfNCFullRecv(sock, 4, buf, timeout);
+    if (ret != 4)
     {
-        trf__log_trace("Receive failed");
-        return ret;
+        trf__log_trace("Message header receive failed");
+        return ret < 0 ? ret : -EIO;
     }
-    len = ntohl(len);
-    if (len > size)
+
+    // Protobuf messages must not exceed 2GB in size
+    len = ntohl(* (uint32_t *) buf);
+    if (len > size || len <= 0)
     {
         trf__log_trace(
             "Message length %d invalid or exceeds buffer size %d",
@@ -49,70 +53,52 @@ int trfNCRecvDelimited(int fd, uint8_t * buf, uint32_t size, int timeout,
     }
 
     // Receive message payload
-    trf__log_debug("Message length %d", len);
-    if (trfNCFullRecv(fd, len, buf) != len)
+    ret = trfNCFullRecv(sock, len, buf, timeout);
+    if (ret != len)
     {
         trf__log_trace("Message receive failed");
-        return -EIO;
-    }
-    trf__log_trace("Received message");
-    
-    *handle = trf_msg__message_wrapper__unpack(NULL, len, buf);
-    if (!*handle)
-    {
-        trf__log_trace("Unknown decoding error");
-        return -EIO;
+        return ret < 0 ? ret : -EIO;
     }
 
-    return 0;
+    // Attempt to unpack the message
+    return trfMsgUnpack(handle, len, buf);
 }
 
-int trfNCSendDelimited(int fd, uint8_t * buf, uint32_t size, int timeout, 
-    TrfMsg__MessageWrapper * handle )
+int trfNCSendDelimited(TRFSock sock, uint8_t * buf, uint32_t size, int timeout, 
+    TrfMsg__MessageWrapper * handle)
 {
-    if (fd < 0 || !buf || !size || !handle)
+    if (!trfSockValid(sock) || !buf || !size || !handle)
         return -EINVAL;
 
-    size_t to_write = trf_msg__message_wrapper__get_packed_size(handle);
-    if (!to_write)
+    int ret;
+    
+    // Pack message to be sent. Protobuf messages must also not exceed 2GB size
+    int32_t to_write;
+    ret = trfMsgPack(handle, size, buf, (uint32_t *) &to_write);
+    if (ret < 0 || to_write <= 0)
     {
-        trf__log_trace("Unable to get message size");
-        return -EINVAL;
-    } else if (to_write > (size - sizeof(uint32_t)))
-    {
-        trf__log_trace("Buffer too small to store message");
-        return -ENOMEM;
+        return ret;
     }
-    trf__log_trace("To send: %lu", to_write);
-    * (uint32_t *) buf = htonl(to_write);
-    size_t pack_sz = trf_msg__message_wrapper__pack(
-        handle, buf + sizeof(uint32_t)
-    );
-    if (pack_sz != to_write)
+
+    // Send complete message
+    ret = trfNCFullSend(sock, to_write, buf, timeout);
+    if (ret != to_write)
     {
-        trf__log_trace("Mismatched packed size %lu/%lu", to_write, pack_sz);
-        return -EIO;
-    }
-    if (trfNCFullSend(fd, to_write + 4, buf) != to_write + 4)
-    {
-        trf__log_trace("Write failed");
-        return -EIO;
+        return ret < 0 ? ret : -EIO;
     }
 
     return 0;
 }
 
-int trfNCFullRecv(int client_socket, ssize_t len, uint8_t * client_message)
+int trfNCFullRecv(TRFSock sock, ssize_t len, uint8_t * buf, 
+    int timeout)
 {
     ssize_t cur_recv = 0;
     ssize_t loop_recv = 0;
     trf__log_trace("<< %d bytes", len);
     while (len != cur_recv)
     {
-        loop_recv = recv(
-            client_socket, client_message + cur_recv, len - cur_recv, 
-            MSG_NOSIGNAL
-        );
+        loop_recv = recv(sock, buf + cur_recv, len - cur_recv, MSG_NOSIGNAL);
         switch (loop_recv)
         {
             case 0:
@@ -129,17 +115,15 @@ int trfNCFullRecv(int client_socket, ssize_t len, uint8_t * client_message)
     return cur_recv;
 }
 
-int trfNCFullSend(int client_socket, ssize_t len, uint8_t * client_message)
+int trfNCFullSend(TRFSock sock, ssize_t len, uint8_t * buf,
+    int timeout)
 {
     ssize_t cur_send = 0;
     ssize_t loop_send = 0;
     trf__log_trace(">> %d bytes", len);
     while (len != cur_send)
     {
-        loop_send = send(
-            client_socket, client_message + cur_send, len - cur_send, 
-            MSG_NOSIGNAL
-        );
+        loop_send = send(sock, buf + cur_send, len - cur_send, MSG_NOSIGNAL);
         switch (loop_send)
         {
             case 0:
@@ -156,7 +140,7 @@ int trfNCFullSend(int client_socket, ssize_t len, uint8_t * client_message)
     return cur_send;
 }
 
-int trfFabricPack(TrfMsg__MessageWrapper * handle, uint32_t size, void * buf, 
+int trfMsgPack(TrfMsg__MessageWrapper * handle, uint32_t size, uint8_t * buf, 
     uint32_t * size_out)
 {
     if (!handle)
@@ -186,11 +170,19 @@ int trfFabricPack(TrfMsg__MessageWrapper * handle, uint32_t size, void * buf,
     return 0;
 }
 
-int trfMsgUnpack(PTRFContext ctx, TrfMsg__MessageWrapper **msg, uint64_t size){
-    * msg = trf_msg__message_wrapper__unpack(NULL, size, 
-        ctx->xfer.fabric->msg_ptr + sizeof(uint32_t));
-    if(!*msg){
-        return -1;
+int trfMsgUnpack(TrfMsg__MessageWrapper ** handle, uint32_t size, uint8_t * buf)
+{
+    trf__log_trace("Attempting to unpack message %p with size %d", buf, size);
+    if (!buf || size == 0)
+    {
+        return -EINVAL;
     }
+    *handle = trf_msg__message_wrapper__unpack(NULL, size, buf);
+    if (!*handle)
+    {
+        return -EIO;
+    }
+    trf__log_debug("Unpacked message size: %d",
+        trf_msg__message_wrapper__get_packed_size(*handle));
     return 0;
 }

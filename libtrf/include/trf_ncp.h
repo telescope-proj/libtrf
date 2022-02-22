@@ -30,6 +30,7 @@
 #define _TRF_NCP_H_
 
 #include "trf.h"
+#include "trf_def.h"
 #include "trf_msg.h"
 #include "trf_inet.h"
 #include "trf_interface.h"

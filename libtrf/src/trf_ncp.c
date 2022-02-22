@@ -34,6 +34,13 @@ int trfNCServerInit(PTRFContext ctx, char * host, char * port)
         return -EINVAL;
     }
 
+    if (!ctx->opts)
+    {
+        PTRFContextOpts opts = calloc(1, sizeof(struct TRFContextOpts));
+        trfSetDefaultOpts(opts);
+        ctx->opts = opts;
+    }
+
     if (ctx->svr.listen_fd > 0)
     {
         trf__log_error("Server init: Socket exists");
@@ -46,8 +53,9 @@ int trfNCServerInit(PTRFContext ctx, char * host, char * port)
 
     struct addrinfo hints;
     struct addrinfo * res = NULL;
-    int sfd = -1;
     int ret;
+
+    TRFSock sfd = TRFInvalidSock;
 
     memset(&hints, 0, sizeof(struct addrinfo));
     hints.ai_family     = AF_UNSPEC;
@@ -68,7 +76,7 @@ int trfNCServerInit(PTRFContext ctx, char * host, char * port)
     for (res_p = res; res_p != NULL; res_p = res_p->ai_next)
     {
         sfd = socket(res_p->ai_family, res_p->ai_socktype, res_p->ai_protocol);
-        if (sfd == -1)
+        if (!trfSockValid(sfd))
         {
             continue;
         }
@@ -80,26 +88,25 @@ int trfNCServerInit(PTRFContext ctx, char * host, char * port)
     }
 
     freeaddrinfo(res);
-    trf__log_trace("Free AddrINFO");
     res = NULL;
 
-    if (sfd == -1)
+    if (!trfSockValid(sfd))
     {
         trf__log_error("Failed to bind to %s:%s", host, port);
         return -1;
     }
-    trf__log_trace("Check Server FD");
+    trf__log_trace("Listening...");
     ret = listen(sfd, 1);
-    trf__log_trace("Listening");
     if (ret == -1)
     {   
-        trf__log_error("Listen failed");
+        trf__log_error("Listen failed: %s", strerror(trfLastSockError));
         goto cleanup_sock;
     }
     int enable = 1;
     if (setsockopt(sfd, SOL_SOCKET, SO_REUSEADDR, &enable, sizeof(int)) < 0)
     {
-        trf__log_error("Unable to set preflight socket reuse");
+        trf__log_error("Unable to set SO_REUSEADDR: %s", 
+            strerror(trfLastSockError));
     }
     ctx->svr.listen_fd = sfd;
     trf__log_trace("Assign Server FD");
@@ -121,6 +128,13 @@ int trfNCClientInit(PTRFContext ctx, char * host, char * port)
     {
         trf__log_error("Client init: Invalid connection context");
         return -EINVAL;
+    }
+
+    if (!ctx->opts)
+    {
+        PTRFContextOpts opts = calloc(1, sizeof(struct TRFContextOpts));
+        trfSetDefaultOpts(opts);
+        ctx->opts = opts;
     }
 
     if (ctx->cli.client_fd > 0)
@@ -146,7 +160,8 @@ int trfNCClientInit(PTRFContext ctx, char * host, char * port)
     ret = getaddrinfo(host, port, &hints, &res);
     if (ret != 0)
     {
-        trf__log_error("Client init: getaddrinfo() failed: %s", gai_strerror(ret));
+        trf__log_error("Client init: getaddrinfo() failed: %s",
+            gai_strerror(ret));
         return -ret;
     }
 
@@ -156,7 +171,7 @@ int trfNCClientInit(PTRFContext ctx, char * host, char * port)
     {
         trf__log_debug("Trying connection...");
         sfd = socket(res_p->ai_family, res_p->ai_socktype, res_p->ai_protocol);
-        if (sfd == -1)
+        if (!trfSockValid(sfd))
         {
             continue;
         }
@@ -168,7 +183,7 @@ int trfNCClientInit(PTRFContext ctx, char * host, char * port)
         }
     }
 
-    if (sfd == -1)
+    if (!trfSockValid(sfd))
     {
         trf__log_error("Failed to connect to %s:%s", host, port);
         return -1;
@@ -178,7 +193,9 @@ int trfNCClientInit(PTRFContext ctx, char * host, char * port)
 
     // Send client hello message to server indicating API version
 
-    uint8_t * buff = trfAllocAligned(4096, trf__GetPageSize());
+    size_t buff_size = ctx->opts->nc_snd_bufsize > ctx->opts->nc_rcv_bufsize ?
+        ctx->opts->nc_snd_bufsize : ctx->opts->nc_rcv_bufsize;
+    uint8_t * buff = trfAllocAligned(buff_size, trf__GetPageSize());
     if (!buff)
     {
         trf__log_error("Unable to allocate buffer!");
@@ -194,7 +211,6 @@ int trfNCClientInit(PTRFContext ctx, char * host, char * port)
         trf__log_error("Unable to allocate message wrapper!");
         goto free_buff;
     }
-    trf_msg__message_wrapper__init(msg);
     TrfMsg__ClientHello * ch = malloc(sizeof(TrfMsg__ClientHello));
     if (!ch)
     {
@@ -202,7 +218,6 @@ int trfNCClientInit(PTRFContext ctx, char * host, char * port)
         trf_msg__message_wrapper__free_unpacked(msg, NULL);
         goto free_buff;
     }
-    trf_msg__client_hello__init(ch);
     TrfMsg__APIVersion * ver = malloc(sizeof(TrfMsg__APIVersion));
     if (!ver)
     {
@@ -210,6 +225,9 @@ int trfNCClientInit(PTRFContext ctx, char * host, char * port)
         trf_msg__message_wrapper__free_unpacked(msg, NULL);
         goto free_buff;
     }
+
+    trf_msg__message_wrapper__init(msg);
+    trf_msg__client_hello__init(ch);
     trf_msg__apiversion__init(ver);
     
     msg->wdata_case     = TRF_MSG__MESSAGE_WRAPPER__WDATA_CLIENT_HELLO;
@@ -219,7 +237,8 @@ int trfNCClientInit(PTRFContext ctx, char * host, char * port)
     ver->api_minor      = TRF_API_MINOR;
     ver->api_patch      = TRF_API_PATCH;
 
-    ret = trfNCSendDelimited(sfd, buff, 4096, 0, msg);
+    ret = trfNCSendDelimited(sfd, buff, ctx->opts->nc_snd_bufsize,
+        ctx->opts->nc_snd_timeo, msg);
     trf_msg__message_wrapper__free_unpacked(msg, NULL);
     if (ret < 0)
     {
@@ -230,7 +249,8 @@ int trfNCClientInit(PTRFContext ctx, char * host, char * port)
     // Get session ID from server
 
     msg = NULL;
-    ret = trfNCRecvDelimited(sfd, buff, 4096, 0, &msg);
+    ret = trfNCRecvDelimited(sfd, buff, ctx->opts->nc_rcv_bufsize,
+        ctx->opts->nc_rcv_timeo, &msg);
     if (ret < 0)
     {
         trf__log_error("Unable to receive session ID!");
@@ -287,23 +307,23 @@ int trfNCClientInit(PTRFContext ctx, char * host, char * port)
         goto free_ci_list;
     }
     trf_msg__message_wrapper__init(msg);
-    msg->session_id = ctx->cli.session_id;
-    msg->wdata_case = TRF_MSG__MESSAGE_WRAPPER__WDATA_ADDR_PF;
-    TrfMsg__AddrPF * addr_pf = malloc(sizeof(TrfMsg__AddrPF));
-    if (!addr_pf)
+    msg->addr_pf = malloc(sizeof(TrfMsg__AddrPF));
+    if (!msg->addr_pf)
     {
         trf__log_error("Unable to allocate preflight address list");
         goto free_ci_list;
     }
-    trf_msg__addr_pf__init(addr_pf);
-    msg->addr_pf = addr_pf;
+    trf_msg__addr_pf__init(msg->addr_pf);
     msg->addr_pf->addrs = calloc(1, sizeof(TrfMsg__AddrCand *) * num_ifs);
+    msg->addr_pf->n_addrs = num_ifs;
     if (!msg->addr_pf->addrs)
     {
         trf__log_error("Unable to allocate address list");
         goto free_ci_list;
     }
-    msg->addr_pf->n_addrs = num_ifs;
+
+    msg->session_id = ctx->cli.session_id;
+    msg->wdata_case = TRF_MSG__MESSAGE_WRAPPER__WDATA_ADDR_PF;
     
     int i = 0;
     for (PTRFInterface tmp_if = clientIf; tmp_if; tmp_if = tmp_if->next)
@@ -327,7 +347,9 @@ int trfNCClientInit(PTRFContext ctx, char * host, char * port)
         i++;
     }
     
-    if ((ret = trfNCSendDelimited(sfd, buff, 4096, 0, msg)) < 0) 
+    ret = trfNCSendDelimited(sfd, buff, ctx->opts->nc_snd_bufsize,
+        ctx->opts->nc_snd_timeo, msg);
+    if (ret < 0)
     {
         trf__log_error("Unable to send Client Interfaces");
         goto free_ci_list;
@@ -340,7 +362,8 @@ int trfNCClientInit(PTRFContext ctx, char * host, char * port)
 
     // Receive possibly viable address from server
     
-    ret = trfNCRecvDelimited(sfd, buff, 4096, 0, &msg);
+    ret = trfNCRecvDelimited(sfd, buff, ctx->opts->nc_rcv_bufsize,
+        ctx->opts->nc_rcv_timeo, &msg);
     if (ret < 0)
     {
         trf__log_error("Unable to receive address");
@@ -451,7 +474,9 @@ int trfNCClientInit(PTRFContext ctx, char * host, char * port)
         goto free_fpl;
     }
 
-    if ((ret = trfNCSendDelimited(sfd, buff, 4096, 0, msg)) < 0)
+    ret = trfNCSendDelimited(sfd, buff, ctx->opts->nc_snd_bufsize, 
+        ctx->opts->nc_snd_timeo, msg);
+    if (ret < 0)
     {
         trf__log_error("Unable to send client fabric info");
         goto free_fpl;
@@ -462,7 +487,8 @@ int trfNCClientInit(PTRFContext ctx, char * host, char * port)
 
     // Wait for the server to send transport information
 
-    ret = trfNCRecvDelimited(sfd, buff, 4096, 0, &msg);
+    ret = trfNCRecvDelimited(sfd, buff, ctx->opts->nc_rcv_bufsize,
+        ctx->opts->nc_rcv_timeo, &msg);
     if (ret < 0)
     {
         trf__log_error("Unable to receive transport info");
@@ -511,19 +537,25 @@ int trfNCClientInit(PTRFContext ctx, char * host, char * port)
         goto free_fpl;
     }
 
-    void * regd_buf = trfAllocAligned(4096, 4096);
+    size_t regd_bufsize = \
+        ctx->opts->fab_rcv_bufsize > ctx->opts->fab_snd_bufsize ?
+        ctx->opts->fab_rcv_bufsize : ctx->opts->fab_snd_bufsize;
+    void * regd_buf = trfAllocAligned(regd_bufsize, trf__GetPageSize());
     if (!regd_buf)
     {
         trf__log_error("Unable to allocate pinned message buffer");
         goto free_fpl;
     }
 
-    ret = trfRegInternalMsgBuf(ctx, regd_buf, 4096);
+    ret = trfRegInternalMsgBuf(ctx, regd_buf, regd_bufsize);
     if (ret)
     {
         trf_fi_error("Register internal message buffer", ret);
         goto free_reg_buf;
     }
+
+    trf__log_debug("Registered internal message buffer of size %ld", 
+        regd_bufsize);
 
     * (uint64_t *) regd_buf = ctx->cli.session_id;
     fi_addr_t addr_out;
@@ -591,7 +623,8 @@ int trfNCClientInit(PTRFContext ctx, char * host, char * port)
     msg->endpoint->transport->route = ep_name;
     msg->endpoint->transport->proto = proto_name;
 
-    ret = trfNCSendDelimited(sfd, buff, 4096, 0, msg);
+    ret = trfNCSendDelimited(sfd, buff, ctx->opts->nc_snd_bufsize, 
+        ctx->opts->nc_snd_timeo, msg);
     if (ret < 0)
     {
         trf__log_error("Unable to send endpoint info");
@@ -603,48 +636,32 @@ int trfNCClientInit(PTRFContext ctx, char * host, char * port)
 
     // After sending the endpoint info on the negotiation channel, send a
     // message on the main channel to notify the server that we are ready
-    int retry = 0;
-    do {
-        ret = fi_send(ctx->xfer.fabric->ep, regd_buf, 8, 
-            fi_mr_desc(ctx->xfer.fabric->msg_mr), addr_out, NULL);
-        trf__log_trace("Retry sending: %d",retry);
-        trfSleep(100);
-        retry ++;
-    } while (ret == -FI_EAGAIN && retry <= 10);
-    
+
+    ctx->type                   = TRF_EP_SINK;
+    ctx->cli.client_fd          = sfd;
+    ctx->xfer.fabric->peer_addr = addr_out;
+    ctx->xfer.fabric->msg_ptr   = regd_buf;
+    ctx->xfer.fabric->msg_size  = regd_bufsize;
+
+    ret = trf__FabricPostSend(ctx, 8, addr_out, NULL);
     if (ret)
     {
-        if (retry > 10)
-            trf__log_error("Retry limit reached");
-        
-        trf__log_error("fi_cq_sread %d", ret);
+        trf__log_error("Unable to post send: %s", strerror(-ret));
         goto close_mr;
     }
 
     struct fi_cq_data_entry cqe;
-    retry = 0;
-    do {
-        ret = fi_cq_sread(ctx->xfer.fabric->tx_cq, &cqe, 1, 0, 0);
-        trfSleep(100);
-        retry ++;
-        trf__log_trace("Retry reading: %d",retry);
-    } while (ret == -FI_EAGAIN && retry <= 10);
-    
+    struct fi_cq_err_entry err;
+    ret = trf__PollCQ(ctx->xfer.fabric->tx_cq, &cqe, &err, ctx->opts, NULL, 1);
     if (ret != 1)
     {
-        if (retry > 10)
-            trf__log_error("Retry limit reached");
         trf__log_error("fi_cq_sread %d", ret);
         goto close_mr;
     }
 
-    trf__log_info("Sent cookie %lu", *(uint64_t *) regd_buf);
+    trf__log_info("Sent cookie %016" PRIx64, *(uint64_t *) regd_buf);
     fi_freeinfo(fi_out);
     free(buff);
-    ctx->xfer.fabric->peer_addr = addr_out;
-    ctx->xfer.fabric->msg_ptr = regd_buf;
-    ctx->type = TRF_EP_SINK;
-    ctx->cli.client_fd = sfd;
     return 0;
 
 close_mr:
@@ -674,29 +691,31 @@ close_sock:
 
 int trfNCAccept(PTRFContext ctx, PTRFContext * ctx_out)
 {
-    // Check fd created
+    // Check the socket has been created
     if (!ctx->svr.listen_fd)
     {
         return -EINVAL;
     }
 
-    struct sockaddr_in client_addr;
-    int client_sock = 0;
-    socklen_t client_size;
-    uint8_t * mbuf = calloc(1,4096);
+    // Allocate a message buffer
     int ret = 0;
+    socklen_t client_size;
+    size_t mbuf_size = ctx->opts->nc_snd_bufsize > ctx->opts->nc_rcv_bufsize ?
+        ctx->opts->nc_snd_bufsize : ctx->opts->nc_rcv_bufsize;
+    uint8_t * mbuf = calloc(1, mbuf_size);
     if (!mbuf)
     {
         return -ENOMEM;
     }
-
-    // Accept client connection on side channel
     
+    // Accept an incoming connection on the side channel
+    struct sockaddr_in6 client_addr;
+    TRFSock client_sock = TRFInvalidSock;
     client_size = sizeof(client_addr);
     client_sock = accept(
         ctx->svr.listen_fd, (struct sockaddr *) &client_addr, &client_size
     );
-    if (!client_sock)
+    if (!trfSockValid(client_sock))
     {
         trf__log_error("Unable to accept client connection");
         ret = -errno;
@@ -744,7 +763,7 @@ int trfNCAccept(PTRFContext ctx, PTRFContext * ctx_out)
     uint64_t sessID = trf__Rand64();
     
     msg = malloc(sizeof(TrfMsg__MessageWrapper));
-    if(!msg)
+    if (!msg)
     {
         trf__log_error("Unable to initialize message wrapper");
         goto free_msg;
@@ -762,7 +781,8 @@ int trfNCAccept(PTRFContext ctx, PTRFContext * ctx_out)
     svr_hello->new_session_id = sessID;
     msg->server_hello = svr_hello;
  
-    ret = trfNCSendDelimited(client_sock, mbuf, 4096, 0, msg);
+    ret = trfNCSendDelimited(client_sock, mbuf, mbuf_size, 
+        ctx->opts->nc_snd_timeo, msg);
     if (ret)
     {
         trf__log_error("Delimited send failed");
@@ -774,7 +794,8 @@ int trfNCAccept(PTRFContext ctx, PTRFContext * ctx_out)
 
     // Receive the preflight list of client addresses
 
-    ret = trfNCRecvDelimited(client_sock, mbuf, 4096, 0, &msg);
+    ret = trfNCRecvDelimited(client_sock, mbuf, mbuf_size, 
+        ctx->opts->nc_snd_timeo, &msg);
     if (ret < 0)
     {
         trf__log_error("Delimited recv failed %s", strerror(-ret));
@@ -786,7 +807,7 @@ int trfNCAccept(PTRFContext ctx, PTRFContext * ctx_out)
         trf__log_error("Invalid payload type %d", msg->wdata_case);
         goto free_msg;
     }
-    trf__log_debug("Number of Addrs: %lu",msg->addr_pf->n_addrs);
+    trf__log_debug("Address count: %lu",msg->addr_pf->n_addrs);
     for (int i = 0; i < msg->addr_pf->n_addrs; i++)
     {
         trf__log_debug("Addr: %s, Mask: %d, Speed: %d", 
@@ -863,7 +884,9 @@ int trfNCAccept(PTRFContext ctx, PTRFContext * ctx_out)
     
     trf__log_trace("Address to Connect: %s", msg->addr_pf->addrs[0]->addr);
 
-    if ((ret = trfNCSendDelimited(client_sock, mbuf, 4096, 0, msg)) < 0)
+    ret = trfNCSendDelimited(client_sock, mbuf, ctx->opts->nc_snd_bufsize,
+        ctx->opts->nc_snd_timeo, msg);
+    if (ret < 0)
     {
         trf__log_error("Delimited send failed %s", strerror(-ret));
         goto free_av_list;
@@ -874,7 +897,8 @@ int trfNCAccept(PTRFContext ctx, PTRFContext * ctx_out)
 
     // Get the transport list from the client, and determine available routes
 
-    ret = trfNCRecvDelimited(client_sock, mbuf, 4096, 0, &msg);
+    ret = trfNCRecvDelimited(client_sock, mbuf, ctx->opts->nc_rcv_bufsize,
+        ctx->opts->nc_rcv_timeo, &msg);
     if (ret < 0)
     {
         trf__log_error("Delimited recv failed %s", strerror(-ret));
@@ -926,10 +950,12 @@ int trfNCAccept(PTRFContext ctx, PTRFContext * ctx_out)
         trf__log_error("Unable to allocate context");
         goto free_av_list;
     }
+    cli_ctx->opts           = malloc(sizeof(*cli_ctx->opts));
     cli_ctx->type           = TRF_EP_CONN_ID;
     cli_ctx->cli.client_fd  = client_sock;
     cli_ctx->cli.session_id = sessID;
     cli_ctx->xfer_type      = TRFX_TYPE_LIBFABRIC;
+    trfDuplicateOpts(ctx->opts, cli_ctx->opts);
     ret = trfCreateChannel(cli_ctx, fi, av_cand->src_addr, 
         TRF_SA_LEN(av_cand->src_addr));
     if (ret < 0)
@@ -947,7 +973,10 @@ int trfNCAccept(PTRFContext ctx, PTRFContext * ctx_out)
     
     // Allocate pinned message buffer
 
-    void * regd_buf = trfAllocAligned(4096, 4096);
+    size_t regd_buf_size = \
+        ctx->opts->fab_rcv_bufsize > ctx->opts->fab_snd_bufsize ?
+        ctx->opts->fab_rcv_bufsize : ctx->opts->fab_snd_bufsize;
+    void * regd_buf = trfAllocAligned(regd_buf_size, trf__GetPageSize());
     if (!regd_buf)
     {
         trf__log_error("Unable to allocate pinned message buffer");
@@ -955,12 +984,15 @@ int trfNCAccept(PTRFContext ctx, PTRFContext * ctx_out)
         goto destroy_ctx;
     }
 
-    ret = trfRegInternalMsgBuf(cli_ctx, regd_buf, 4096);
+    ret = trfRegInternalMsgBuf(cli_ctx, regd_buf, regd_buf_size);
     if (ret < 0)
     {
         trf_fi_error("Unable to register internal message buffer", ret);
         goto free_regd_buf;
     }
+
+    trf__log_debug("Registered internal message buffer of size %ld", 
+        regd_buf_size);
 
     // Send created transport to the client
 
@@ -1004,7 +1036,8 @@ int trfNCAccept(PTRFContext ctx, PTRFContext * ctx_out)
     }
     msg->server_cap->bind_addr = strdup(cli_bind);
 
-    ret = trfNCSendDelimited(cli_ctx->cli.client_fd, mbuf, 4096, 0, msg);
+    ret = trfNCSendDelimited(cli_ctx->cli.client_fd, mbuf, 
+        ctx->opts->nc_snd_bufsize, ctx->opts->nc_snd_timeo, msg);
     if (ret < 0)
     {
         trf__log_error("Delimited send failed %s", strerror(-ret));
@@ -1015,7 +1048,8 @@ int trfNCAccept(PTRFContext ctx, PTRFContext * ctx_out)
     trf_msg__message_wrapper__free_unpacked(msg, NULL);
     msg = NULL;
 
-    ret = trfNCRecvDelimited(cli_ctx->cli.client_fd, mbuf, 4096, 0, &msg);
+    ret = trfNCRecvDelimited(cli_ctx->cli.client_fd, mbuf, 
+        ctx->opts->nc_rcv_bufsize, ctx->opts->nc_rcv_timeo, &msg);
     if (ret < 0)
     {
         trf__log_error("Unable to receive Client Address: %s", strerror(-ret));
@@ -1037,55 +1071,57 @@ int trfNCAccept(PTRFContext ctx, PTRFContext * ctx_out)
     }
     trf__log_trace("Received Client Address: %s", msg->endpoint->transport->route);
     
-    cli_ctx->xfer.fabric->msg_ptr = regd_buf;
+    cli_ctx->xfer.fabric->msg_ptr   = regd_buf;
+    cli_ctx->xfer.fabric->msg_size  = regd_buf_size;
     cli_ctx->xfer.fabric->peer_addr = src_addr;
 
     // Wait on the main channel for an incoming message
 
-    *(uint64_t *) regd_buf = 0;
-    int retry = 0;
-    do {
-        ret = fi_recv(cli_ctx->xfer.fabric->ep, regd_buf, 8, 
-            fi_mr_desc(cli_ctx->xfer.fabric->msg_mr), FI_ADDR_UNSPEC, NULL);
-        trfSleep(100);
-        trf__log_trace("Trying to receive data: %d\n",retry);
-        retry++;
-    } while (ret == -FI_EAGAIN && retry <= 10);
-    
+    struct timespec tstart, tend;
+    ret = clock_gettime(CLOCK_MONOTONIC, &tstart);
+    if (ret < 0)
+    {
+        trf__log_error("System clock error: %s", strerror(errno));
+        goto free_regd_buf;
+    }
+    trf__GetDelay(&tstart, &tend, ctx->opts->fab_rcv_timeo);
+
+    * (uint64_t *) regd_buf = 0;
+
+    ret = trf__FabricPostRecv(cli_ctx, FI_ADDR_UNSPEC, &tend);
     if (ret)
     {
-        if (retry > 10)
-        {
-            trf__log_error("Receive timeout");
-        }
-        trf__log_error("fi_cq_sread %d", ret);
+        trf__log_error("Fabric post send: %d", ret);
         goto free_regd_buf;
         return ret;
     }
-
     uint64_t recvd_src;
     struct fi_cq_data_entry cqe;
-    retry = 0;
-    do {
+    while (1)
+    {
         ret = fi_cq_readfrom(cli_ctx->xfer.fabric->rx_cq, &cqe, 1, &recvd_src);
-        trfSleep(100);
-        trf__log_trace("Trying to read completion queue: %d",retry);
-        retry++;
-    } while (ret == -FI_EAGAIN && retry <= 10);
+        if (ret == 1 || (ret != 1 && ret != -FI_EAGAIN))
+        {
+            break;
+        }
+        if (trf__HasPassed(CLOCK_MONOTONIC, &tend))
+        {
+            ret = -ETIMEDOUT;
+            break;
+        }
+    }
     
     if (ret != 1)
     {
-        if (retry > 10)
+        if (ret < 0)
         {
-            trf__log_error( "Completion Queue timeout");
+            trf__log_error("CQ read failed: %s", fi_strerror(-ret));
         }
-        trf__log_error("fi_cq_sread %d", ret);
         goto free_regd_buf;
         return ret;
     }
 
-    trf__log_info("Recv Cookie %lu", *(uint64_t *) regd_buf);
-    trf__log_info("FD: %d", cli_ctx->cli.client_fd);
+    trf__log_info("Recv Cookie %016" PRIx64, *(uint64_t *) regd_buf);
     *ctx_out = cli_ctx;
     free(mbuf);
     return ret;

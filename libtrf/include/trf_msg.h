@@ -35,73 +35,118 @@
 
 #include <sys/socket.h>
 #include <arpa/inet.h>
-
 #include "trf_def.h"
 #include "trf_msg.pb-c.h"
 
 /**
-  * @brief Receive a delimited message in TRF Protocol Buffers format.
-  * @param File descriptor to receive from.
+  * @brief          Receive a delimited message in TRF Protocol Buffers format.
+  * 
+  * @param sock     Socket descriptor to receive from.
+  * 
   * @param buf      Buffer to receive data into
+  * 
   * @param size     Buffer max size
+  * 
   * @param timeout  Receive timeout
+  * 
   * @param handle   Handle to received message (raw data stored inside buf)
+  * 
   * @return 0 on success, negative error code on failure
 */
-int trfNCRecvDelimited(int fd, uint8_t * buf, uint32_t size, int timeout, 
+int trfNCRecvDelimited(TRFSock sock, uint8_t * buf, uint32_t size, int timeout, 
     TrfMsg__MessageWrapper ** handle );
 
 /**
   * @brief Sends a delimited message in TRF Protocol Buffers format.
+  * 
   * @param fd       File descriptor to send to.
+  * 
   * @param buf      Scratch buffer for writing data to be sent
+  * 
   * @param size     Buffer max size
-  * @param timeout  Send timeout
-  * @param handle Message data handle, to be packed into buf and sent
-  * @return 0 on success, negative error code on failure.
+  * 
+  * @param timeout  Send timeout in milliseconds
+  * 
+  * @param handle   Message data handle, to be packed into buf and sent
+  * 
+  * @return         0 on success, negative error code on failure.
 */
-int trfNCSendDelimited(int fd, uint8_t * buf, uint32_t size, int timeout, 
-    TrfMsg__MessageWrapper * handle );
+int trfNCSendDelimited(TRFSock sock, uint8_t * buf, uint32_t size, int timeout, 
+    TrfMsg__MessageWrapper * handle);
 
 /**
-  * @brief Receives a message. Blocks until all bytes are received.
-  * @param client_socket        Socket to read data from
-  * @param message_length       Length of message to be received
-  * @param client message       buffer to store the message
-  * @return number of bytes transferred, -1 on error
+  * @brief        Reliably recieves messages on the socket.
+  * 
+  * Blocks until a message has been received in its entirety, or a timeout or
+  * error occurs.
+  * 
+  * @param sock     Socket to read from.
+  * 
+  * @param size     TNumber of bytes to receive.
+  * 
+  * @param buf      Pointer to buffer where message will be stored
+  * 
+  * @param timeout  Timeout in milliseconds
+  * 
+  * @return         0 on success, negative error code on failure
 */
-int trfNCFullRecv(int client_socket, ssize_t message_length, 
-  unsigned char * client_message);
+int trfNCFullRecv(TRFSock sock, ssize_t length, uint8_t * buf, int timeout);
 
 /**
-  * @brief Sends a message. Blocks until all bytes are received.
-  * @param server_socket    File descriptor to send data into
-  * @param message_length   Length of messsage to send
-  * @param message          Buffer of message to send  
-  * @return The number of bytes transferred, -1 on error   
+  * @brief          Reliably sends messages on the socket.
+  *
+  * Blocks until a message has been sent in its entirety, or a timeout or error
+  * occurs.
+  * 
+  * @param sock     Socket to send to.
+  * 
+  * @param size     Number of bytes to send.
+  * 
+  * @param buf      Buffer containing the message to be sent
+  * 
+  * @param timeout  Timeout in milliseconds
+  * 
+  * @return         0 on success, negative error code on failure
 */
-int trfNCFullSend(int server_socket, ssize_t message_length, 
-  unsigned char * message);
+int trfNCFullSend(TRFSock sock, ssize_t length, uint8_t * buf, int timeout);
 
 /**
- * @brief Pack Message into memory buffer for sending over libfabric
+ * @brief           Pack message into a buffer to be sent
  * 
- * @param handle      MessageWrapper containing data
- * @param size        Size of buffer
- * @param buf         Buffer to serialize message into
- * @param size_out    Output size of data packed
- * @return 0 on success, Negative error code on error
+ * @param handle    Handle to message wrapper containing message to be sent
+ * 
+ * @param size      Size of provided buffer
+ * 
+ * @param buf       Buffer to store packed message
+ * 
+ * @param size_out  Output size of packed data in bytes
+ * 
+ * @return          0 on success, negative error code on failure
  */
-int trfFabricPack(TrfMsg__MessageWrapper * handle, uint32_t size, void * buf, 
+int trfMsgPack(TrfMsg__MessageWrapper * handle, uint32_t size, uint8_t * buf, 
     uint32_t * size_out);
 
 /**
- * @brief Unpack Message received from libfabric
- * @param ctx   Context to use
- * @param msg   Message wrapper to decode into
- * @param size  Size of message to be decoded
- * @return 0 on success, Negative error code on error
+ * @brief         Unpack delimited message from buffer
+ * 
+ * @param handle  Handle to be set to unpacked message data
+ * 
+ * @param size    Length of the serialized message to be decoded
+ * 
+ * @param buf     Buffer containing message
+ * 
+ * @return        0 on success, negative error code on failure
  */
-int trfMsgUnpack(PTRFContext ctx, TrfMsg__MessageWrapper **msg, uint64_t size);
+int trfMsgUnpack(TrfMsg__MessageWrapper ** handle, uint32_t size, uint8_t * buf);
+
+static inline int32_t trfMsgGetPackedLength(uint8_t * buf)
+{
+   return ntohl(* (int32_t *) buf);
+}
+
+static inline uint8_t * trfMsgGetPayload(uint8_t * buf)
+{
+    return buf + sizeof(int32_t);
+}
 
 #endif

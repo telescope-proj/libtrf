@@ -84,17 +84,17 @@
 <div class="breathe-sectiondef docutils container">
 <p class="breathe-sectiondef-title rubric" id="breathe-section-title-functions">Functions</p>
 <dl class="cpp function">
-<dt class="sig sig-object cpp" id="_CPPv418trfNCRecvDelimitediP7uint8_t8uint32_tiPP22TrfMsg__MessageWrapper">
-<span id="_CPPv318trfNCRecvDelimitediP7uint8_t8uint32_tiPP22TrfMsg__MessageWrapper"></span><span id="_CPPv218trfNCRecvDelimitediP7uint8_t8uint32_tiPP22TrfMsg__MessageWrapper"></span><span id="trfNCRecvDelimited__i.uint8_tP.uint32_t.i.TrfMsg__MessageWrapperPP"></span><span class="target" id="trf__msg_8h_1afdd0fd083cd2c75f7eae3ca7842f177a"></span><span class="kt"><span class="pre">int</span></span><span class="w"> </span><span class="sig-name descname"><span class="n"><span class="pre">trfNCRecvDelimited</span></span></span><span class="sig-paren">(</span><span class="kt"><span class="pre">int</span></span><span class="w"> </span><span class="n sig-param"><span class="pre">fd</span></span>, <span class="n"><span class="pre">uint8_t</span></span><span class="w"> </span><span class="p"><span class="pre">*</span></span><span class="n sig-param"><span class="pre">buf</span></span>, <span class="n"><span class="pre">uint32_t</span></span><span class="w"> </span><span class="n sig-param"><span class="pre">size</span></span>, <span class="kt"><span class="pre">int</span></span><span class="w"> </span><span class="n sig-param"><span class="pre">timeout</span></span>, <a class="reference internal" href="trf_proto.html#_CPPv422TrfMsg__MessageWrapper" title="TrfMsg__MessageWrapper"><span class="n"><span class="pre">TrfMsg__MessageWrapper</span></span></a><span class="w"> </span><span class="p"><span class="pre">*</span></span><span class="p"><span class="pre">*</span></span><span class="n sig-param"><span class="pre">handle</span></span><span class="sig-paren">)</span><a class="headerlink" href="#_CPPv418trfNCRecvDelimitediP7uint8_t8uint32_tiPP22TrfMsg__MessageWrapper" title="Permalink to this definition"></a><br /></dt>
+<dt class="sig sig-object cpp" id="_CPPv418trfNCRecvDelimited7TRFSockP7uint8_t8uint32_tiPP22TrfMsg__MessageWrapper">
+<span id="_CPPv318trfNCRecvDelimited7TRFSockP7uint8_t8uint32_tiPP22TrfMsg__MessageWrapper"></span><span id="_CPPv218trfNCRecvDelimited7TRFSockP7uint8_t8uint32_tiPP22TrfMsg__MessageWrapper"></span><span id="trfNCRecvDelimited__TRFSock.uint8_tP.uint32_t.i.TrfMsg__MessageWrapperPP"></span><span class="target" id="trf__msg_8h_1a0926bb2a6153219a74a6e5bc1360a80c"></span><span class="kt"><span class="pre">int</span></span><span class="w"> </span><span class="sig-name descname"><span class="n"><span class="pre">trfNCRecvDelimited</span></span></span><span class="sig-paren">(</span><span class="n"><span class="pre">TRFSock</span></span><span class="w"> </span><span class="n sig-param"><span class="pre">sock</span></span>, <span class="n"><span class="pre">uint8_t</span></span><span class="w"> </span><span class="p"><span class="pre">*</span></span><span class="n sig-param"><span class="pre">buf</span></span>, <span class="n"><span class="pre">uint32_t</span></span><span class="w"> </span><span class="n sig-param"><span class="pre">size</span></span>, <span class="kt"><span class="pre">int</span></span><span class="w"> </span><span class="n sig-param"><span class="pre">timeout</span></span>, <a class="reference internal" href="trf_proto.html#_CPPv422TrfMsg__MessageWrapper" title="TrfMsg__MessageWrapper"><span class="n"><span class="pre">TrfMsg__MessageWrapper</span></span></a><span class="w"> </span><span class="p"><span class="pre">*</span></span><span class="p"><span class="pre">*</span></span><span class="n sig-param"><span class="pre">handle</span></span><span class="sig-paren">)</span><a class="headerlink" href="#_CPPv418trfNCRecvDelimited7TRFSockP7uint8_t8uint32_tiPP22TrfMsg__MessageWrapper" title="Permalink to this definition"></a><br /></dt>
 <dd><p>Receive a delimited message in TRF Protocol Buffers format. </p>
 <dl class="field-list simple">
 <dt class="field-odd">Parameters</dt>
 <dd class="field-odd"><ul class="simple">
-<li><p><strong>File</strong> – descriptor to receive from. </p></li>
-<li><p><strong>buf</strong> – Buffer to receive data into </p></li>
-<li><p><strong>size</strong> – Buffer max size </p></li>
-<li><p><strong>timeout</strong> – Receive timeout </p></li>
-<li><p><strong>handle</strong> – Handle to received message (raw data stored inside buf) </p></li>
+<li><p><strong>sock</strong> – Socket descriptor to receive from.</p></li>
+<li><p><strong>buf</strong> – Buffer to receive data into</p></li>
+<li><p><strong>size</strong> – Buffer max size</p></li>
+<li><p><strong>timeout</strong> – Receive timeout</p></li>
+<li><p><strong>handle</strong> – Handle to received message (raw data stored inside buf)</p></li>
 </ul>
 </dd>
 <dt class="field-even">Returns</dt>
@@ -104,17 +104,17 @@
 </dd></dl>
 
 <dl class="cpp function">
-<dt class="sig sig-object cpp" id="_CPPv418trfNCSendDelimitediP7uint8_t8uint32_tiP22TrfMsg__MessageWrapper">
-<span id="_CPPv318trfNCSendDelimitediP7uint8_t8uint32_tiP22TrfMsg__MessageWrapper"></span><span id="_CPPv218trfNCSendDelimitediP7uint8_t8uint32_tiP22TrfMsg__MessageWrapper"></span><span id="trfNCSendDelimited__i.uint8_tP.uint32_t.i.TrfMsg__MessageWrapperP"></span><span class="target" id="trf__msg_8h_1aab4a3fcd2d2c4d0ecedb62e06c2e5da7"></span><span class="kt"><span class="pre">int</span></span><span class="w"> </span><span class="sig-name descname"><span class="n"><span class="pre">trfNCSendDelimited</span></span></span><span class="sig-paren">(</span><span class="kt"><span class="pre">int</span></span><span class="w"> </span><span class="n sig-param"><span class="pre">fd</span></span>, <span class="n"><span class="pre">uint8_t</span></span><span class="w"> </span><span class="p"><span class="pre">*</span></span><span class="n sig-param"><span class="pre">buf</span></span>, <span class="n"><span class="pre">uint32_t</span></span><span class="w"> </span><span class="n sig-param"><span class="pre">size</span></span>, <span class="kt"><span class="pre">int</span></span><span class="w"> </span><span class="n sig-param"><span class="pre">timeout</span></span>, <a class="reference internal" href="trf_proto.html#_CPPv422TrfMsg__MessageWrapper" title="TrfMsg__MessageWrapper"><span class="n"><span class="pre">TrfMsg__MessageWrapper</span></span></a><span class="w"> </span><span class="p"><span class="pre">*</span></span><span class="n sig-param"><span class="pre">handle</span></span><span class="sig-paren">)</span><a class="headerlink" href="#_CPPv418trfNCSendDelimitediP7uint8_t8uint32_tiP22TrfMsg__MessageWrapper" title="Permalink to this definition"></a><br /></dt>
+<dt class="sig sig-object cpp" id="_CPPv418trfNCSendDelimited7TRFSockP7uint8_t8uint32_tiP22TrfMsg__MessageWrapper">
+<span id="_CPPv318trfNCSendDelimited7TRFSockP7uint8_t8uint32_tiP22TrfMsg__MessageWrapper"></span><span id="_CPPv218trfNCSendDelimited7TRFSockP7uint8_t8uint32_tiP22TrfMsg__MessageWrapper"></span><span id="trfNCSendDelimited__TRFSock.uint8_tP.uint32_t.i.TrfMsg__MessageWrapperP"></span><span class="target" id="trf__msg_8h_1a6194919d72714567cfa642da205453f2"></span><span class="kt"><span class="pre">int</span></span><span class="w"> </span><span class="sig-name descname"><span class="n"><span class="pre">trfNCSendDelimited</span></span></span><span class="sig-paren">(</span><span class="n"><span class="pre">TRFSock</span></span><span class="w"> </span><span class="n sig-param"><span class="pre">sock</span></span>, <span class="n"><span class="pre">uint8_t</span></span><span class="w"> </span><span class="p"><span class="pre">*</span></span><span class="n sig-param"><span class="pre">buf</span></span>, <span class="n"><span class="pre">uint32_t</span></span><span class="w"> </span><span class="n sig-param"><span class="pre">size</span></span>, <span class="kt"><span class="pre">int</span></span><span class="w"> </span><span class="n sig-param"><span class="pre">timeout</span></span>, <a class="reference internal" href="trf_proto.html#_CPPv422TrfMsg__MessageWrapper" title="TrfMsg__MessageWrapper"><span class="n"><span class="pre">TrfMsg__MessageWrapper</span></span></a><span class="w"> </span><span class="p"><span class="pre">*</span></span><span class="n sig-param"><span class="pre">handle</span></span><span class="sig-paren">)</span><a class="headerlink" href="#_CPPv418trfNCSendDelimited7TRFSockP7uint8_t8uint32_tiP22TrfMsg__MessageWrapper" title="Permalink to this definition"></a><br /></dt>
 <dd><p>Sends a delimited message in TRF Protocol Buffers format. </p>
 <dl class="field-list simple">
 <dt class="field-odd">Parameters</dt>
 <dd class="field-odd"><ul class="simple">
-<li><p><strong>fd</strong> – File descriptor to send to. </p></li>
-<li><p><strong>buf</strong> – Scratch buffer for writing data to be sent </p></li>
-<li><p><strong>size</strong> – Buffer max size </p></li>
-<li><p><strong>timeout</strong> – Send timeout </p></li>
-<li><p><strong>handle</strong> – Message data handle, to be packed into buf and sent </p></li>
+<li><p><strong>fd</strong> – File descriptor to send to.</p></li>
+<li><p><strong>buf</strong> – Scratch buffer for writing data to be sent</p></li>
+<li><p><strong>size</strong> – Buffer max size</p></li>
+<li><p><strong>timeout</strong> – Send timeout in milliseconds</p></li>
+<li><p><strong>handle</strong> – Message data handle, to be packed into buf and sent</p></li>
 </ul>
 </dd>
 <dt class="field-even">Returns</dt>
@@ -124,77 +124,91 @@
 </dd></dl>
 
 <dl class="cpp function">
-<dt class="sig sig-object cpp" id="_CPPv413trfNCFullRecvi7ssize_tPh">
-<span id="_CPPv313trfNCFullRecvi7ssize_tPh"></span><span id="_CPPv213trfNCFullRecvi7ssize_tPh"></span><span id="trfNCFullRecv__i.ssize_t.unsigned-cP"></span><span class="target" id="trf__msg_8h_1a70bc0e95e15d9c66f8af7fdd0006af30"></span><span class="kt"><span class="pre">int</span></span><span class="w"> </span><span class="sig-name descname"><span class="n"><span class="pre">trfNCFullRecv</span></span></span><span class="sig-paren">(</span><span class="kt"><span class="pre">int</span></span><span class="w"> </span><span class="n sig-param"><span class="pre">client_socket</span></span>, <span class="n"><span class="pre">ssize_t</span></span><span class="w"> </span><span class="n sig-param"><span class="pre">message_length</span></span>, <span class="kt"><span class="pre">unsigned</span></span><span class="w"> </span><span class="kt"><span class="pre">char</span></span><span class="w"> </span><span class="p"><span class="pre">*</span></span><span class="n sig-param"><span class="pre">client_message</span></span><span class="sig-paren">)</span><a class="headerlink" href="#_CPPv413trfNCFullRecvi7ssize_tPh" title="Permalink to this definition"></a><br /></dt>
-<dd><p>Receives a message. Blocks until all bytes are received. </p>
+<dt class="sig sig-object cpp" id="_CPPv413trfNCFullRecv7TRFSock7ssize_tP7uint8_ti">
+<span id="_CPPv313trfNCFullRecv7TRFSock7ssize_tP7uint8_ti"></span><span id="_CPPv213trfNCFullRecv7TRFSock7ssize_tP7uint8_ti"></span><span id="trfNCFullRecv__TRFSock.ssize_t.uint8_tP.i"></span><span class="target" id="trf__msg_8h_1a12daf89cbb2e8b2fa44213654c3a0474"></span><span class="kt"><span class="pre">int</span></span><span class="w"> </span><span class="sig-name descname"><span class="n"><span class="pre">trfNCFullRecv</span></span></span><span class="sig-paren">(</span><span class="n"><span class="pre">TRFSock</span></span><span class="w"> </span><span class="n sig-param"><span class="pre">sock</span></span>, <span class="n"><span class="pre">ssize_t</span></span><span class="w"> </span><span class="n sig-param"><span class="pre">length</span></span>, <span class="n"><span class="pre">uint8_t</span></span><span class="w"> </span><span class="p"><span class="pre">*</span></span><span class="n sig-param"><span class="pre">buf</span></span>, <span class="kt"><span class="pre">int</span></span><span class="w"> </span><span class="n sig-param"><span class="pre">timeout</span></span><span class="sig-paren">)</span><a class="headerlink" href="#_CPPv413trfNCFullRecv7TRFSock7ssize_tP7uint8_ti" title="Permalink to this definition"></a><br /></dt>
+<dd><p>Reliably recieves messages on the socket. </p>
+<p>Blocks until a message has been received in its entirety, or a timeout or error occurs.</p>
 <dl class="field-list simple">
 <dt class="field-odd">Parameters</dt>
 <dd class="field-odd"><ul class="simple">
-<li><p><strong>client_socket</strong> – Socket to read data from </p></li>
-<li><p><strong>message_length</strong> – Length of message to be received </p></li>
-<li><p><strong>client</strong> – message buffer to store the message </p></li>
+<li><p><strong>sock</strong> – Socket to read from.</p></li>
+<li><p><strong>size</strong> – TNumber of bytes to receive.</p></li>
+<li><p><strong>buf</strong> – Pointer to buffer where message will be stored</p></li>
+<li><p><strong>timeout</strong> – Timeout in milliseconds</p></li>
 </ul>
 </dd>
 <dt class="field-even">Returns</dt>
-<dd class="field-even"><p>number of bytes transferred, -1 on error </p>
+<dd class="field-even"><p>0 on success, negative error code on failure </p>
 </dd>
 </dl>
 </dd></dl>
 
 <dl class="cpp function">
-<dt class="sig sig-object cpp" id="_CPPv413trfNCFullSendi7ssize_tPh">
-<span id="_CPPv313trfNCFullSendi7ssize_tPh"></span><span id="_CPPv213trfNCFullSendi7ssize_tPh"></span><span id="trfNCFullSend__i.ssize_t.unsigned-cP"></span><span class="target" id="trf__msg_8h_1ad99cc0cb6dfb25a78a1689d0722f992f"></span><span class="kt"><span class="pre">int</span></span><span class="w"> </span><span class="sig-name descname"><span class="n"><span class="pre">trfNCFullSend</span></span></span><span class="sig-paren">(</span><span class="kt"><span class="pre">int</span></span><span class="w"> </span><span class="n sig-param"><span class="pre">server_socket</span></span>, <span class="n"><span class="pre">ssize_t</span></span><span class="w"> </span><span class="n sig-param"><span class="pre">message_length</span></span>, <span class="kt"><span class="pre">unsigned</span></span><span class="w"> </span><span class="kt"><span class="pre">char</span></span><span class="w"> </span><span class="p"><span class="pre">*</span></span><span class="n sig-param"><span class="pre">message</span></span><span class="sig-paren">)</span><a class="headerlink" href="#_CPPv413trfNCFullSendi7ssize_tPh" title="Permalink to this definition"></a><br /></dt>
-<dd><p>Sends a message. Blocks until all bytes are received. </p>
+<dt class="sig sig-object cpp" id="_CPPv413trfNCFullSend7TRFSock7ssize_tP7uint8_ti">
+<span id="_CPPv313trfNCFullSend7TRFSock7ssize_tP7uint8_ti"></span><span id="_CPPv213trfNCFullSend7TRFSock7ssize_tP7uint8_ti"></span><span id="trfNCFullSend__TRFSock.ssize_t.uint8_tP.i"></span><span class="target" id="trf__msg_8h_1a4c7781c1e6ff0694f536935834546a4e"></span><span class="kt"><span class="pre">int</span></span><span class="w"> </span><span class="sig-name descname"><span class="n"><span class="pre">trfNCFullSend</span></span></span><span class="sig-paren">(</span><span class="n"><span class="pre">TRFSock</span></span><span class="w"> </span><span class="n sig-param"><span class="pre">sock</span></span>, <span class="n"><span class="pre">ssize_t</span></span><span class="w"> </span><span class="n sig-param"><span class="pre">length</span></span>, <span class="n"><span class="pre">uint8_t</span></span><span class="w"> </span><span class="p"><span class="pre">*</span></span><span class="n sig-param"><span class="pre">buf</span></span>, <span class="kt"><span class="pre">int</span></span><span class="w"> </span><span class="n sig-param"><span class="pre">timeout</span></span><span class="sig-paren">)</span><a class="headerlink" href="#_CPPv413trfNCFullSend7TRFSock7ssize_tP7uint8_ti" title="Permalink to this definition"></a><br /></dt>
+<dd><p>Reliably sends messages on the socket. </p>
+<p>Blocks until a message has been sent in its entirety, or a timeout or error occurs.</p>
 <dl class="field-list simple">
 <dt class="field-odd">Parameters</dt>
 <dd class="field-odd"><ul class="simple">
-<li><p><strong>server_socket</strong> – File descriptor to send data into </p></li>
-<li><p><strong>message_length</strong> – Length of messsage to send </p></li>
-<li><p><strong>message</strong> – Buffer of message to send </p></li>
+<li><p><strong>sock</strong> – Socket to send to.</p></li>
+<li><p><strong>size</strong> – Number of bytes to send.</p></li>
+<li><p><strong>buf</strong> – Buffer containing the message to be sent</p></li>
+<li><p><strong>timeout</strong> – Timeout in milliseconds</p></li>
 </ul>
 </dd>
 <dt class="field-even">Returns</dt>
-<dd class="field-even"><p>The number of bytes transferred, -1 on error </p>
+<dd class="field-even"><p>0 on success, negative error code on failure </p>
 </dd>
 </dl>
 </dd></dl>
 
 <dl class="cpp function">
-<dt class="sig sig-object cpp" id="_CPPv413trfFabricPackP22TrfMsg__MessageWrapper8uint32_tPvP8uint32_t">
-<span id="_CPPv313trfFabricPackP22TrfMsg__MessageWrapper8uint32_tPvP8uint32_t"></span><span id="_CPPv213trfFabricPackP22TrfMsg__MessageWrapper8uint32_tPvP8uint32_t"></span><span id="trfFabricPack__TrfMsg__MessageWrapperP.uint32_t.voidP.uint32_tP"></span><span class="target" id="trf__msg_8h_1ab2505190c6185d1121e6f75ebefbd173"></span><span class="kt"><span class="pre">int</span></span><span class="w"> </span><span class="sig-name descname"><span class="n"><span class="pre">trfFabricPack</span></span></span><span class="sig-paren">(</span><a class="reference internal" href="trf_proto.html#_CPPv422TrfMsg__MessageWrapper" title="TrfMsg__MessageWrapper"><span class="n"><span class="pre">TrfMsg__MessageWrapper</span></span></a><span class="w"> </span><span class="p"><span class="pre">*</span></span><span class="n sig-param"><span class="pre">handle</span></span>, <span class="n"><span class="pre">uint32_t</span></span><span class="w"> </span><span class="n sig-param"><span class="pre">size</span></span>, <span class="kt"><span class="pre">void</span></span><span class="w"> </span><span class="p"><span class="pre">*</span></span><span class="n sig-param"><span class="pre">buf</span></span>, <span class="n"><span class="pre">uint32_t</span></span><span class="w"> </span><span class="p"><span class="pre">*</span></span><span class="n sig-param"><span class="pre">size_out</span></span><span class="sig-paren">)</span><a class="headerlink" href="#_CPPv413trfFabricPackP22TrfMsg__MessageWrapper8uint32_tPvP8uint32_t" title="Permalink to this definition"></a><br /></dt>
-<dd><p>Pack Message into memory buffer for sending over libfabric. </p>
+<dt class="sig sig-object cpp" id="_CPPv410trfMsgPackP22TrfMsg__MessageWrapper8uint32_tP7uint8_tP8uint32_t">
+<span id="_CPPv310trfMsgPackP22TrfMsg__MessageWrapper8uint32_tP7uint8_tP8uint32_t"></span><span id="_CPPv210trfMsgPackP22TrfMsg__MessageWrapper8uint32_tP7uint8_tP8uint32_t"></span><span id="trfMsgPack__TrfMsg__MessageWrapperP.uint32_t.uint8_tP.uint32_tP"></span><span class="target" id="trf__msg_8h_1a238552f3cd022af413c64648743e486c"></span><span class="kt"><span class="pre">int</span></span><span class="w"> </span><span class="sig-name descname"><span class="n"><span class="pre">trfMsgPack</span></span></span><span class="sig-paren">(</span><a class="reference internal" href="trf_proto.html#_CPPv422TrfMsg__MessageWrapper" title="TrfMsg__MessageWrapper"><span class="n"><span class="pre">TrfMsg__MessageWrapper</span></span></a><span class="w"> </span><span class="p"><span class="pre">*</span></span><span class="n sig-param"><span class="pre">handle</span></span>, <span class="n"><span class="pre">uint32_t</span></span><span class="w"> </span><span class="n sig-param"><span class="pre">size</span></span>, <span class="n"><span class="pre">uint8_t</span></span><span class="w"> </span><span class="p"><span class="pre">*</span></span><span class="n sig-param"><span class="pre">buf</span></span>, <span class="n"><span class="pre">uint32_t</span></span><span class="w"> </span><span class="p"><span class="pre">*</span></span><span class="n sig-param"><span class="pre">size_out</span></span><span class="sig-paren">)</span><a class="headerlink" href="#_CPPv410trfMsgPackP22TrfMsg__MessageWrapper8uint32_tP7uint8_tP8uint32_t" title="Permalink to this definition"></a><br /></dt>
+<dd><p>Pack message into a buffer to be sent. </p>
 <dl class="field-list simple">
 <dt class="field-odd">Parameters</dt>
 <dd class="field-odd"><ul class="simple">
-<li><p><strong>handle</strong> – MessageWrapper containing data </p></li>
-<li><p><strong>size</strong> – Size of buffer </p></li>
-<li><p><strong>buf</strong> – Buffer to serialize message into </p></li>
-<li><p><strong>size_out</strong> – Output size of data packed </p></li>
+<li><p><strong>handle</strong> – Handle to message wrapper containing message to be sent</p></li>
+<li><p><strong>size</strong> – Size of provided buffer</p></li>
+<li><p><strong>buf</strong> – Buffer to store packed message</p></li>
+<li><p><strong>size_out</strong> – Output size of packed data in bytes</p></li>
 </ul>
 </dd>
 <dt class="field-even">Returns</dt>
-<dd class="field-even"><p>0 on success, Negative error code on error </p>
+<dd class="field-even"><p>0 on success, negative error code on failure </p>
 </dd>
 </dl>
 </dd></dl>
 
 <dl class="cpp function">
-<dt class="sig sig-object cpp" id="_CPPv412trfMsgUnpack11PTRFContextPP22TrfMsg__MessageWrapper8uint64_t">
-<span id="_CPPv312trfMsgUnpack11PTRFContextPP22TrfMsg__MessageWrapper8uint64_t"></span><span id="_CPPv212trfMsgUnpack11PTRFContextPP22TrfMsg__MessageWrapper8uint64_t"></span><span id="trfMsgUnpack__PTRFContext.TrfMsg__MessageWrapperPP.uint64_t"></span><span class="target" id="trf__msg_8h_1afeee7bbddab4b272d042a9e04f72f826"></span><span class="kt"><span class="pre">int</span></span><span class="w"> </span><span class="sig-name descname"><span class="n"><span class="pre">trfMsgUnpack</span></span></span><span class="sig-paren">(</span><span class="n"><span class="pre">PTRFContext</span></span><span class="w"> </span><span class="n sig-param"><span class="pre">ctx</span></span>, <a class="reference internal" href="trf_proto.html#_CPPv422TrfMsg__MessageWrapper" title="TrfMsg__MessageWrapper"><span class="n"><span class="pre">TrfMsg__MessageWrapper</span></span></a><span class="w"> </span><span class="p"><span class="pre">*</span></span><span class="p"><span class="pre">*</span></span><span class="n sig-param"><span class="pre">msg</span></span>, <span class="n"><span class="pre">uint64_t</span></span><span class="w"> </span><span class="n sig-param"><span class="pre">size</span></span><span class="sig-paren">)</span><a class="headerlink" href="#_CPPv412trfMsgUnpack11PTRFContextPP22TrfMsg__MessageWrapper8uint64_t" title="Permalink to this definition"></a><br /></dt>
-<dd><p>Unpack Message received from libfabric. </p>
+<dt class="sig sig-object cpp" id="_CPPv412trfMsgUnpackPP22TrfMsg__MessageWrapper8uint32_tP7uint8_t">
+<span id="_CPPv312trfMsgUnpackPP22TrfMsg__MessageWrapper8uint32_tP7uint8_t"></span><span id="_CPPv212trfMsgUnpackPP22TrfMsg__MessageWrapper8uint32_tP7uint8_t"></span><span id="trfMsgUnpack__TrfMsg__MessageWrapperPP.uint32_t.uint8_tP"></span><span class="target" id="trf__msg_8h_1ae9e08510135b73dcf9e867ac9713b492"></span><span class="kt"><span class="pre">int</span></span><span class="w"> </span><span class="sig-name descname"><span class="n"><span class="pre">trfMsgUnpack</span></span></span><span class="sig-paren">(</span><a class="reference internal" href="trf_proto.html#_CPPv422TrfMsg__MessageWrapper" title="TrfMsg__MessageWrapper"><span class="n"><span class="pre">TrfMsg__MessageWrapper</span></span></a><span class="w"> </span><span class="p"><span class="pre">*</span></span><span class="p"><span class="pre">*</span></span><span class="n sig-param"><span class="pre">handle</span></span>, <span class="n"><span class="pre">uint32_t</span></span><span class="w"> </span><span class="n sig-param"><span class="pre">size</span></span>, <span class="n"><span class="pre">uint8_t</span></span><span class="w"> </span><span class="p"><span class="pre">*</span></span><span class="n sig-param"><span class="pre">buf</span></span><span class="sig-paren">)</span><a class="headerlink" href="#_CPPv412trfMsgUnpackPP22TrfMsg__MessageWrapper8uint32_tP7uint8_t" title="Permalink to this definition"></a><br /></dt>
+<dd><p>Unpack delimited message from buffer. </p>
 <dl class="field-list simple">
 <dt class="field-odd">Parameters</dt>
 <dd class="field-odd"><ul class="simple">
-<li><p><strong>ctx</strong> – Context to use </p></li>
-<li><p><strong>msg</strong> – Message wrapper to decode into </p></li>
-<li><p><strong>size</strong> – Size of message to be decoded </p></li>
+<li><p><strong>handle</strong> – Handle to be set to unpacked message data</p></li>
+<li><p><strong>size</strong> – Length of the serialized message to be decoded</p></li>
+<li><p><strong>buf</strong> – Buffer containing message</p></li>
 </ul>
 </dd>
 <dt class="field-even">Returns</dt>
-<dd class="field-even"><p>0 on success, Negative error code on error </p>
+<dd class="field-even"><p>0 on success, negative error code on failure </p>
 </dd>
 </dl>
 </dd></dl>
+
+<dl class="cpp function">
+<dt class="sig sig-object cpp" id="_CPPv421trfMsgGetPackedLengthP7uint8_t">
+<span id="_CPPv321trfMsgGetPackedLengthP7uint8_t"></span><span id="_CPPv221trfMsgGetPackedLengthP7uint8_t"></span><span id="trfMsgGetPackedLength__uint8_tP"></span><span class="target" id="trf__msg_8h_1adcc7894f494d591f1fac9563d8f23ca5"></span><span class="k"><span class="pre">static</span></span><span class="w"> </span><span class="k"><span class="pre">inline</span></span><span class="w"> </span><span class="n"><span class="pre">int32_t</span></span><span class="w"> </span><span class="sig-name descname"><span class="n"><span class="pre">trfMsgGetPackedLength</span></span></span><span class="sig-paren">(</span><span class="n"><span class="pre">uint8_t</span></span><span class="w"> </span><span class="p"><span class="pre">*</span></span><span class="n sig-param"><span class="pre">buf</span></span><span class="sig-paren">)</span><a class="headerlink" href="#_CPPv421trfMsgGetPackedLengthP7uint8_t" title="Permalink to this definition"></a><br /></dt>
+<dd></dd></dl>
+
+<dl class="cpp function">
+<dt class="sig sig-object cpp" id="_CPPv416trfMsgGetPayloadP7uint8_t">
+<span id="_CPPv316trfMsgGetPayloadP7uint8_t"></span><span id="_CPPv216trfMsgGetPayloadP7uint8_t"></span><span id="trfMsgGetPayload__uint8_tP"></span><span class="target" id="trf__msg_8h_1a04f98d78b77ae2408a7eda05a56ea9ab"></span><span class="k"><span class="pre">static</span></span><span class="w"> </span><span class="k"><span class="pre">inline</span></span><span class="w"> </span><span class="n"><span class="pre">uint8_t</span></span><span class="w"> </span><span class="p"><span class="pre">*</span></span><span class="sig-name descname"><span class="n"><span class="pre">trfMsgGetPayload</span></span></span><span class="sig-paren">(</span><span class="n"><span class="pre">uint8_t</span></span><span class="w"> </span><span class="p"><span class="pre">*</span></span><span class="n sig-param"><span class="pre">buf</span></span><span class="sig-paren">)</span><a class="headerlink" href="#_CPPv416trfMsgGetPayloadP7uint8_t" title="Permalink to this definition"></a><br /></dt>
+<dd></dd></dl>
 
 </div>
 </section>

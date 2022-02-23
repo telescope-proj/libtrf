@@ -478,9 +478,11 @@ int trfGetRoute(const char * dst, const char * prov, const char * proto,
             hints->dest_addrlen = sizeof(uint64_t);
             break;
         case FI_ADDR_PSMX2:
+#if TRF_FABRIC_VERSION >= FI_VERSION(1, 12)
         case FI_ADDR_PSMX3:
             hints->dest_addrlen = sizeof(uint64_t) * 2;
             break;
+#endif
         case FI_ADDR_IB_UD:
             hints->dest_addrlen = sizeof(uint64_t) * 4;
             break;
@@ -539,8 +541,10 @@ int trfConvertFabricAF(uint32_t fi_addr_format)
             return TRFX_ADDR_PSMX;
         case FI_ADDR_PSMX2:
             return TRFX_ADDR_PSMX2;
+#if TRF_FABRIC_VERSION >= FI_VERSION(1, 12)
         case FI_ADDR_PSMX3:
             return TRFX_ADDR_PSMX3;
+#endif
         default:
             return -1;
     }
@@ -564,8 +568,10 @@ int trfConvertInternalAF(uint32_t trf_addr_format)
             return FI_ADDR_PSMX;
         case TRFX_ADDR_PSMX2:
             return FI_ADDR_PSMX2;
+#if TRF_FABRIC_VERSION >= FI_VERSION(1, 12)
         case TRFX_ADDR_PSMX3:
             return FI_ADDR_PSMX3;
+#endif
         default:
             return -1;
     }
@@ -662,6 +668,7 @@ int trfSerializeAddress(void * data, enum TRFXAddr format, char ** out)
                 "trfx_psm2://%016" PRIx64 "%016" PRIx64,
                 ((uint64_t *) data)[0], ((uint64_t *) data)[1]);
             break;
+#if TRF_FABRIC_VERSION >= FI_VERSION(1, 12)
         case TRFX_ADDR_PSMX3:
             addr = calloc(1, TRFX_MAX_STR);
             if (!addr)
@@ -673,6 +680,7 @@ int trfSerializeAddress(void * data, enum TRFXAddr format, char ** out)
                 "trfx_psm3://%016" PRIx64 "%016" PRIx64, 
                 ((uint64_t *) data)[0], ((uint64_t *) data)[1]);
             break;
+#endif
         default:
             trf__log_debug("invalid");
             return -EINVAL;
@@ -743,12 +751,14 @@ int trfDeserializeAddress(const char * ser_addr, int data_len, void ** data,
             target += trf__len("psm2://");
             goto tsaf_dispatch;
         }
+#if TRF_FABRIC_VERSION >= FI_VERSION(1, 12)
         else if (trf__cmp(target, "psm3://"))
         {
             fmt = TRFX_ADDR_PSMX3;
             target += trf__len("psm3://");
             goto tsaf_dispatch;
         }
+#endif
         trf__log_debug("invalid value \"%s\"", target);
         return -EINVAL;
 sockaddr_dispatch: ;
@@ -780,7 +790,9 @@ tsaf_dispatch: ;
                 out = (void *) ts_addr;
                 break;
             case TRFX_ADDR_PSMX2:
+#if TRF_FABRIC_VERSION >= FI_VERSION(1, 12)
             case TRFX_ADDR_PSMX3:
+#endif
                 ts_addr = calloc(1, sizeof(*ts_addr) * 2);
                 if (!ts_addr)
                 {

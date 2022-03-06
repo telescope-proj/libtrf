@@ -276,6 +276,10 @@ void trfDestroyFabricContext(PTRFContext ctx)
         fi_close(&f->fabric->fid);
         f->fabric = NULL;
     }
+    if (f->fi)
+    {
+        fi_freeinfo(f->fi);
+    }
     free(ctx->xfer.fabric);
     ctx->xfer.fabric = NULL;
 }
@@ -1078,38 +1082,6 @@ void trfFreeDisplayList(PTRFDisplay disp, int dealloc)
     }
 }
 
-ssize_t trfGetDisplayBytes(PTRFDisplay disp)
-{
-    if (!disp)
-    {
-        return -EINVAL;
-    }
-    switch (disp->format)
-    {
-        case TRF_TEX_BGR_888:
-        case TRF_TEX_RGB_888:
-            return disp->width * disp->height * 3;
-        case TRF_TEX_RGBA_8888:
-        case TRF_TEX_BGRA_8888:
-            return disp->width * disp->height * 4;
-        case TRF_TEX_RGBA_16161616:
-        case TRF_TEX_RGBA_16161616F:
-        case TRF_TEX_BGRA_16161616:
-        case TRF_TEX_BGRA_16161616F:
-            return disp->width * disp->height * 8;
-        case TRF_TEX_ETC1:
-        case TRF_TEX_DXT1:
-            if (disp->width % 4 || disp->height % 4) { return -ENOTSUP; }
-            return disp->width * disp->height / 2;
-        case TRF_TEX_ETC2:
-        case TRF_TEX_DXT5:
-            if (disp->width % 4 || disp->height % 4) { return -ENOTSUP; }
-            return disp->width * disp->height;
-        default:
-            return -EINVAL;
-    }
-}
-
 int trfBindDisplayList(PTRFContext ctx, PTRFDisplay list)
 {
     if (!ctx || !list)
@@ -1272,7 +1244,7 @@ int trfGetMessageAuto(PTRFContext ctx, uint64_t flags, uint64_t * processed,
     struct fi_cq_data_entry cqe;
     struct fi_cq_err_entry err;
     ret = trf__PollCQ(ctx->xfer.fabric->rx_cq, &cqe, &err, ctx->opts, 
-        &tend, 0);
+                      &tend, 1, 0);
     
     if (ret != 1)
     {
@@ -1411,9 +1383,9 @@ free_message:
     return ret;
 }
 
-int trfAckClientReq(PTRFContext ctx, int disp_id)
+int trfAckClientReq(PTRFContext ctx, uint32_t * disp_ids, int n_disp_ids)
 {
-    if (!ctx || disp_id < 0)
+    if (!ctx || n_disp_ids <= 0)
     {
         return -EINVAL;
     }
@@ -1422,9 +1394,8 @@ int trfAckClientReq(PTRFContext ctx, int disp_id)
     mw.session_id = ctx->cli.session_id;
     mw.wdata_case = trfInternalToPB(TRFM_SERVER_ACK);
     mw.server_ack = &sar;
-    uint32_t did = disp_id;
-    sar.display_ids = &did;
-    sar.n_display_ids = 1;
+    sar.display_ids = disp_ids;
+    sar.n_display_ids = n_disp_ids;
     return trfFabricSend(ctx, &mw);
 }
 
@@ -1447,7 +1418,7 @@ int trfSendDisplayList(PTRFContext ctx)
 
     }
     trf_msg__server_disp__init(disp_list);
-    msg->wdata_case = TRF_MSG__MESSAGE_WRAPPER__WDATA_SERVER_DISP;
+    msg->wdata_case = trfInternalToPB(TRFM_SERVER_DISP);
     msg->server_disp = disp_list;
     msg->server_disp->n_displays = 0;
     for (PTRFDisplay tmp_disp = ctx->displays; tmp_disp; 
@@ -1644,10 +1615,10 @@ int trfFabricSend(PTRFContext ctx, TrfMsg__MessageWrapper * msg)
     
     struct fi_cq_data_entry cqe;
     struct fi_cq_err_entry err;
-    ret = trf__PollCQ(ctx->xfer.fabric->tx_cq, &cqe, &err, opts, &tend, 1);
+    ret = trf__PollCQ(ctx->xfer.fabric->tx_cq, &cqe, &err, opts, &tend, 1, 1);
     if (ret != 1)
     {
-        trf__log_error("CQ read failed: %s\n", 
+        trf__log_error("CQ read error: %s\n", 
             trf__GetCQErrString(ctx->xfer.fabric->tx_cq, &err));
         return ret == 0 ? -EIO : ret;
     }
@@ -1682,7 +1653,7 @@ int trfFabricRecv(PTRFContext ctx, TrfMsg__MessageWrapper ** msg)
     
     struct fi_cq_data_entry cqe;
     struct fi_cq_err_entry err;
-    ret = trf__PollCQ(ctx->xfer.fabric->rx_cq, &cqe, &err, opts, &tend, 0);
+    ret = trf__PollCQ(ctx->xfer.fabric->rx_cq, &cqe, &err, opts, &tend, 1, 0);
     if (ret != 1)
     {
         trf__log_error("CQ read failed: %s\n", 
@@ -1706,6 +1677,135 @@ int trfAckFrameReq(PTRFContext ctx, PTRFDisplay display)
     if ((ret = trfFabricSend(ctx, &msg)) < 0)
     {
         trf__log_error("Unable to send data");
+    }
+    return ret;
+}
+
+ssize_t trfSendFramePart(PTRFContext ctx, PTRFDisplay disp, uint64_t rbuf,
+    uint64_t rkey, struct TRFRect * rects, size_t num_rects)
+{
+    if (!ctx || !disp || !rects || num_rects == 0)
+    {
+        return -EINVAL;
+    }
+
+    // Compressed texture formats are not directly pixel addressable and require
+    // special handling - for now, we'll just ignore them
+    if (trfTextureIsCompressed(disp->format))
+    {
+        return -ENOTSUP;
+    }
+
+    // Allocate iovec for posting frame updates
+    ssize_t ret;
+    size_t max_iov = ctx->xfer.fabric->fi->tx_attr->rma_iov_limit;
+    struct iovec * iov = malloc(sizeof(struct iovec) * max_iov);
+    if (!iov)
+    {
+        return -ENOMEM;
+    }
+
+    // Since all the memory indirectly referenced by the rectangles should be in
+    // the same MR, we just need to set the MR descriptor to be the same across
+    // all items in the description array
+    void ** desc = malloc(sizeof(void *) * max_iov);
+    for (int i = 0; i < max_iov; i++)
+    {
+        desc[i] = fi_mr_desc(disp->fb_mr);
+    }
+
+    trf__log_debug("Display: %d x %d", disp->width, disp->height);
+
+    // Framebuffer line pitch
+    uint32_t lpitch = trfGetTextureBytes(disp->width, 1, disp->format);
+    // Pixel pitch in bytes
+    uint32_t ppitch = trfGetTextureBytes(1, 1, disp->format);
+    
+    size_t iter = 0;
+    for (int i = 0; i < num_rects; i++)
+    {
+        // Get offset in framebuffer to rectangle
+        size_t offset = lpitch * rects[i].y + ppitch * rects[i].x;
+        // Rectangle line pitch
+        uint32_t rpitch = ppitch * rects[i].width;
+
+        trf__log_debug("Damage update rect: %d,%d %dx%d", 
+                       rects[i].x, rects[i].y, rects[i].width, rects[i].height);
+        trf__log_debug("lpitch: %d, ppitch: %d, offset: %lu, rpitch: %d",
+                       lpitch, ppitch, offset, rpitch);
+
+        // Rectangles that span the entire width of the frame should be sent as
+        // a single operation to reduce overhead and fabric provider load
+        if (rects[i].x == 0 && rects[i].width == disp->width)
+        {
+            // Calculate contiguous region length
+            size_t rlen = trfGetTextureBytes(rects[i].width, rects[i].height, 
+                                             disp->format);
+
+            // Post RMA write
+            ret = fi_write(ctx->xfer.fabric->ep, 
+                           disp->fb_addr + offset, rlen, 
+                           disp->fb_mr, ctx->xfer.fabric->peer_addr, 
+                           rbuf + offset, rkey, (void *) iter);
+            if (ret < 0)
+            {
+                goto try_recover;
+            }
+            iter++;
+            continue;
+        }
+
+        // Otherwise, perform multiple updates to the framebuffer
+        // Number of lines to update
+        size_t total = rects[i].height;
+        while (total)
+        {
+            // Split rectangle into max_iov lines
+            size_t iov_l = total > max_iov ? max_iov : total;
+            for (int j = 0; j < iov_l; j++)
+            {
+                iov[j].iov_base = disp->fb_addr + offset;
+                iov[j].iov_len  = rpitch;
+            }
+            
+            // Perform RMA write
+            ret = fi_writev(ctx->xfer.fabric->ep, iov, desc, max_iov,
+                            ctx->xfer.fabric->peer_addr, rbuf, rkey, 
+                            (void *) iter);
+            if (ret < 0)
+            {
+                goto try_recover;
+            }
+
+            // Update total and request count
+            total -= iov_l;
+            iter++;
+        }
+    }
+
+    // Return the number of submitted events
+    free(iov);
+    free(desc);
+    return iter;
+
+try_recover:
+    trf__log_error("Unable to perform RMA write # %d. fi_writev "
+        "returned: %s. Attempting to recover", iter, fi_strerror(-ret));
+    while (iter)
+    {
+        struct fi_cq_data_entry de;
+        struct fi_cq_err_entry err;
+        ssize_t ret2 = trfGetSendProgress(ctx, &de, &err, 1);
+        if (ret2 < 0)
+        {
+            trf__log_error("Unable to recover: %s", 
+                trf__GetCQErrString(ctx->xfer.fabric->tx_cq, &err));
+            trf__log_error("Context should be considered invalid");
+            free(iov);
+            free(desc);
+            return ret2;
+        }
+        iter--;
     }
     return ret;
 }

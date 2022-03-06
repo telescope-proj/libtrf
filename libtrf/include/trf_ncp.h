@@ -36,9 +36,6 @@
 #include "trf_interface.h"
 #include "trf_protobuf.h"
 
-#include <ifaddrs.h>
-#include <sys/ioctl.h>
-#include <netinet/in.h>
 #include <string.h>
 #include <stdlib.h>
 
@@ -48,14 +45,21 @@
 #include <linux/ethtool.h>
 #endif
 
+#if defined (__unix__) || (defined (__APPLE__) && defined (__MACH__))
+#include <ifaddrs.h>
+#include <sys/ioctl.h>
+#include <netinet/in.h>
 #include <endian.h>
+#endif
 
 #define TRF_API_MAJOR    0
-#define TRF_API_MINOR    1
+#define TRF_API_MINOR    2
 #define TRF_API_PATCH    0
 
 /**
-  * @brief Initializes the out of band negatiation channel for the server. Sets the listening FD inside the context.
+  * @brief Initializes the out of band negatiation channel for the server. 
+  * Sets the listening FD inside the context.
+  * 
   * @param ctx      Context to use
   * @param host     Hostname to bind to
   * @param port     Port to bind to
@@ -65,7 +69,9 @@ int trfNCServerInit(PTRFContext ctx, char * host, char * port);
 
 
 /**
-  * @brief Initialize the out-of-band negotiation channel client. Sets the client FD inside of the context to an established connection.
+  * @brief Initialize the out-of-band negotiation channel client. Sets the
+  * client FD inside of the context to an established connection.
+  * 
   * @param ctx      Context to use.
   * @param host     Hostname to connect to
   * @param port     Port to connect to.
@@ -82,14 +88,14 @@ int trfNCServerInit(PTRFContext ctx, char * host, char * port);
 int trfNCAccept(PTRFContext ctx, PTRFContext * ctx_out);
 
 /**
-  * @brief Clos the negotiation channel server, disconneting the client.
+  * @brief Close the negotiation channel server, disconneting the client.
   * @param ctx      Context to use
   * @return 0 on success, negative error code on failure
 */
 int trfNCServerClose(PTRFContext ctx);
 
 /**
-  * @brief Initiate the client server communitation, sending API version
+  * @brief Initiate client resources and negotiate with the server.
   * @param ctx      Context to use
   * @param host     Server host
   * @param port     Server port
@@ -98,7 +104,7 @@ int trfNCServerClose(PTRFContext ctx);
 int trfNCClientInit(PTRFContext ctx, char * host, char * port);
 
 /**
-  * @brief Close the negotiation channel from client.
+  * @brief Close the negotiation channel from the client.
   * @param ctx  Context to use.
   * @return 0 on success, negative error code on failure.
 */
@@ -107,7 +113,8 @@ int trfNCClientClose(PTRFContext ctx);
 /**
   * @brief Allocate memory for a new session.
   * @param ctx  Context to store connection
-  * @param out  Pointer to the created session, also accessible via the client list in ctx
+  * @param out  Pointer to the created session, also accessible via the client
+  * list in ctx
   * @return 0 on success, negative error code on failure.
 */
 int trfNCNewSession(PTRFContext ctx, PTRFContext * out);

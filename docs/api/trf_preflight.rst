@@ -1,7 +1,7 @@
 .. _api_preflight:
 
-TRF_PREFLIGHT
-=============
+Preflight Connectivity Check Functions
+======================================
 
 .. doxygenfile:: trf_preflight.h
    :project: libtrf

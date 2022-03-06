@@ -1,7 +1,7 @@
 .. _api_trf:
 
-TRF
-========
+TRF Core Functionality
+======================
 
 .. doxygenfile:: trf.h
    :project: libtrf

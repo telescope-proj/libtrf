@@ -31,7 +31,7 @@ int trfNCRecvDelimited(TRFSock sock, uint8_t * buf, uint32_t size, int timeout,
         return -EINVAL;
 
     int ret;
-    int32_t len;
+    uint32_t len;
 
     // Receive 4-byte delimiter and convert to host byte order
     ret = trfNCFullRecv(sock, 4, buf, timeout);
@@ -43,7 +43,7 @@ int trfNCRecvDelimited(TRFSock sock, uint8_t * buf, uint32_t size, int timeout,
 
     // Protobuf messages must not exceed 2GB in size
     len = ntohl(* (uint32_t *) buf);
-    if (len > size || len <= 0)
+    if (len > size || len > (1 << 31))
     {
         trf__log_trace(
             "Message length %d invalid or exceeds buffer size %d",
@@ -72,10 +72,10 @@ int trfNCSendDelimited(TRFSock sock, uint8_t * buf, uint32_t size, int timeout,
 
     int ret;
     
-    // Pack message to be sent. Protobuf messages must also not exceed 2GB size
-    int32_t to_write;
-    ret = trfMsgPack(handle, size, buf, (uint32_t *) &to_write);
-    if (ret < 0 || to_write <= 0)
+    // Pack message to be sent.
+    uint32_t to_write;
+    ret = trfMsgPack(handle, size, buf, &to_write);
+    if (ret < 0)
     {
         return ret;
     }
@@ -151,7 +151,10 @@ int trfMsgPack(TrfMsg__MessageWrapper * handle, uint32_t size, uint8_t * buf,
     {
         trf__log_trace("Unable to get message size");
         return -EINVAL;
-    } else if (to_write > (size - sizeof(uint32_t)))
+    } 
+    // Protobuf messages must not exceed 2GB in size
+    else if (to_write > size - sizeof(uint32_t) 
+             || to_write + sizeof(uint32_t) >= (1 << 31))
     {
         trf__log_trace("Buffer too small to store message");
         return -ENOMEM;
@@ -173,8 +176,9 @@ int trfMsgPack(TrfMsg__MessageWrapper * handle, uint32_t size, uint8_t * buf,
 int trfMsgUnpack(TrfMsg__MessageWrapper ** handle, uint32_t size, uint8_t * buf)
 {
     trf__log_trace("Attempting to unpack message %p with size %d", buf, size);
-    if (!buf || size == 0)
+    if (!buf || size == 0 || size >= (1 << 31))
     {
+        trf__log_trace("Invalid buffer or size");
         return -EINVAL;
     }
     *handle = trf_msg__message_wrapper__unpack(NULL, size, buf);

@@ -385,21 +385,87 @@ void * trfAllocAligned(size_t size, size_t alignment);
 int trfBindDisplayList(PTRFContext ctx, PTRFDisplay list);
 
 /**
- * @brief Update Display Address
- * @param ctx   Context to update
+ * @brief       Update the memory address of the referenced display's
+ * framebuffer, performing memory deregistration and re-registration.
+ *
+ * Note: This only disables RMA access to the old framebuffer, and does not free
+ * the old framebuffer's memory. It is the responsibility of the caller to do so
+ * after calling this function.
+ *
+ * @param ctx   Context the display is bound to
  * @param disp  Display to update
- * @param addr  Address to update
- * @return 0 on success, negative error code on failure
+ * @param addr  New address
+ * @return      0 on success, negative error code on failure
 */
 int trfUpdateDisplayAddr(PTRFContext ctx, PTRFDisplay disp, void * addr);
 
 /**
+ * @brief Determine the number of bytes required to store a given texture.
+ * 
+ * @param width     Width
+ * @param height    Height
+ * @param fmt       Texture format.
+ * @return          Number of bytes required to store the texture.
+ *                  Negative error code on failure. 
+ */
+static inline ssize_t trfGetTextureBytes(size_t width, size_t height, 
+                                         enum TRFTexFormat fmt)
+{
+    switch (fmt)
+    {
+        case TRF_TEX_BGR_888:
+        case TRF_TEX_RGB_888:
+            return width * height * 3;
+        case TRF_TEX_RGBA_8888:
+        case TRF_TEX_BGRA_8888:
+            return width * height * 4;
+        case TRF_TEX_RGBA_16161616:
+        case TRF_TEX_RGBA_16161616F:
+        case TRF_TEX_BGRA_16161616:
+        case TRF_TEX_BGRA_16161616F:
+            return width * height * 8;
+        case TRF_TEX_ETC1:
+        case TRF_TEX_DXT1:
+            if (width % 4 || height % 4) { return -ENOTSUP; }
+            return width * height / 2;
+        case TRF_TEX_ETC2:
+        case TRF_TEX_DXT5:
+            if (width % 4 || height % 4) { return -ENOTSUP; }
+            return width * height;
+        default:
+            return -EINVAL;
+    }
+}
+
+/**
  * @brief Get number of bytes needed to store the contents of the display
  * 
- * @param disp      Display
- * @return ssize_t 
+ * @param disp  Display
+ * @return      ssize_t 
  */
-ssize_t trfGetDisplayBytes(PTRFDisplay disp);
+static inline ssize_t trfGetDisplayBytes(PTRFDisplay disp)
+{
+    return trfGetTextureBytes(disp->width, disp->height, disp->format);
+}
+
+static inline size_t trfGetCursorBytes(PTRFCursor cur)
+{
+    return trfGetTextureBytes(cur->width, cur->height, cur->format);
+}
+
+static inline uint8_t trfTextureIsCompressed(enum TRFTexFormat fmt)
+{
+    switch (fmt)
+    {
+        case TRF_TEX_ETC1:
+        case TRF_TEX_ETC2:
+        case TRF_TEX_DXT1:
+        case TRF_TEX_DXT5:
+            return 1;
+        default:
+            return 0;
+    }
+}
 
 /**
  * @brief Free a display list.
@@ -470,7 +536,37 @@ int trfRegDisplaySink(PTRFContext ctx, PTRFDisplay disp);
  */
 PTRFDisplay trfGetDisplayByID(PTRFDisplay disp_list, int id);
 
-int trfAckClientReq(PTRFContext ctx, int disp_id);
+/**
+ * @brief           Acknowledge the client's display initialization request.
+ * 
+ * @param ctx           Context to use
+ * @param disp_ids      Initialized display ID array
+ * @param n_disp_ids    Number of display IDs in the array
+ * @return              0 on success, negative error code on failure 
+ */
+int trfAckClientReq(PTRFContext ctx, uint32_t * disp_ids, int n_disp_ids);
+
+/**
+ * @brief           Send a message to the peer using the fabric connection.
+ * 
+ * @param ctx       Context containing initialized fabric transport.
+ * 
+ * @param msg       Message handle to be packed and sent.
+ * 
+ * @return          0 on success, negative error code on failure
+ */
+int trfFabricSend(PTRFContext ctx, TrfMsg__MessageWrapper *msg);
+
+/**
+ * @brief           Receive a message from the peer using the fabric connection.
+ * 
+ * @param ctx       Context containing initialized fabric transport.
+ * 
+ * @param msg       Output handle to the received message.
+ * 
+ * @return          0 on success, negative error code on failure
+ */
+int trfFabricRecv(PTRFContext ctx, TrfMsg__MessageWrapper ** msg);
 
 /**
  * @brief       Send a frame to the client.
@@ -484,41 +580,73 @@ int trfAckClientReq(PTRFContext ctx, int disp_id);
 static inline ssize_t trfSendFrame(PTRFContext ctx, PTRFDisplay disp, 
     uint64_t rbuf, uint64_t rkey)
 {
-    return fi_write(ctx->xfer.fabric->ep, disp->fb_addr, trfGetDisplayBytes(disp),
-        fi_mr_desc(disp->fb_mr), ctx->xfer.fabric->peer_addr,
-        rbuf, rkey, NULL);
+    return fi_write(ctx->xfer.fabric->ep, disp->fb_addr, 
+        trfGetDisplayBytes(disp), fi_mr_desc(disp->fb_mr), 
+        ctx->xfer.fabric->peer_addr, rbuf, rkey, NULL);
 }
 
 /**
- * @brief           Send a message to the peer using the fabric connection.
+ * @brief       Send a partial frame update.
+ *
+ * Performs a fabric RMA write operation to the destination buffer. The client
+ * is not informed of the operation status; once the operation completes, the
+ * server should send an acknowledgement.
  * 
- * @param ctx       Context containing initialized fabric transport.
- * 
- * @param msg       Message handle to be packed and sent.
- * 
- * @param opt_ov    Optional behaviour overrides to be used for this operation.
- *                  If NULL, the default behaviour will be used.
- * 
- * @return          0 on success, negative error code on failure
+ * Compressed textures are not supported.
+ *
+ * @param ctx       Initialized context to send the frame to.
+ * @param disp      Display identifier.
+ * @param rbuf      Pointer to the remote frame buffer.
+ * @param rkey      Remote access key.
+ * @param rects     Rectangles corresponding to regions of the framebuffer to be
+ * updated.
+ * @param num_rects Number of rectangles in the list.
+ * @return          0 on success, negative error code on failure. 
  */
-int trfFabricSend(PTRFContext ctx, TrfMsg__MessageWrapper *msg);
+ssize_t trfSendFramePart(PTRFContext ctx, PTRFDisplay disp, uint64_t rbuf,
+    uint64_t rkey, struct TRFRect * rects, size_t num_rects);
 
 /**
- * @brief           Receive a message from the peer using the fabric connection.
+ * @brief           Update the cursor position of a display group.
  * 
- * @param ctx       Context containing initialized fabric transport.
- * 
- * @param msg       Output handle to the received message.
- * 
- * @param opt_ov    Optional behaviour overrides to be used for this operation.
- *                  If NULL, the default behaviour will be used.
- * 
- * @return          0 on success, negative error code on failure
+ * @param ctx       Initialized context.
+ * @param dgid      Display group ID.
+ * @param cursor    Cursor data.
+ * @return          0 on success, negative error code on failure.
  */
-int trfFabricRecv(PTRFContext ctx, TrfMsg__MessageWrapper ** msg);
+static inline ssize_t trfSendCursorFullUpdate(PTRFContext ctx, int dgid, 
+    PTRFCursor cursor)
+{
+    TrfMsg__MessageWrapper msg = TRF_MSG__MESSAGE_WRAPPER__INIT;
+    TrfMsg__CursorData cd = TRF_MSG__CURSOR_DATA__INIT;
+    msg.wdata_case = trfPBToInternal(TRFM_CURSOR_DATA);
+    msg.cursor_data = &cd;
+    cd.width        = cursor->width;
+    cd.height       = cursor->height;
+    cd.tex_fmt      = cursor->format;
+    cd.x            = cursor->pos_x;
+    cd.y            = cursor->pos_y;
+    cd.hpx          = cursor->hotspot_x;
+    cd.hpy          = cursor->hotspot_y;
+    cd.data.data    = cursor->data;
+    cd.data.len     = trfGetCursorBytes(cursor);
+    return trfFabricSend(ctx, &msg);
+}
+
+static inline ssize_t trfSendCursorPosUpdate(PTRFContext ctx, int dgid, 
+    PTRFCursor cursor)
+{
+    TrfMsg__MessageWrapper msg = TRF_MSG__MESSAGE_WRAPPER__INIT;
+    TrfMsg__CursorData cd = TRF_MSG__CURSOR_DATA__INIT;
+    msg.wdata_case = trfPBToInternal(TRFM_CURSOR_DATA);
+    msg.cursor_data = &cd;
+    cd.x            = cursor->pos_x;
+    cd.y            = cursor->pos_y;
+    return trfFabricSend(ctx, &msg);
+}
 
 /**
- * @brief       Send a frame receive request. 
+ * @brief       Send a frame receive request. Non-blocking.
  *              
  *              Warning: You must call trfGetRecvProgress() to ensure the frame
  *              is ready for use!
@@ -616,7 +744,7 @@ static inline struct fi_info * trf__GetFabricHints(void)
     hints->ep_attr->type        = FI_EP_RDM;
     hints->caps                 = FI_MSG | FI_RMA | FI_SOURCE;
     hints->addr_format          = FI_FORMAT_UNSPEC;
-    hints->mode                 = FI_CONTEXT | FI_LOCAL_MR | FI_RX_CQ_DATA;
+    hints->mode                 = FI_LOCAL_MR | FI_RX_CQ_DATA;
     hints->domain_attr->mr_mode = FI_MR_BASIC;
     return hints;
 }
@@ -699,7 +827,8 @@ static inline const char * trf__GetCQErrString(struct fid_cq * cq,
 
 static inline ssize_t trf__PollCQ(struct fid_cq *cq, 
     struct fi_cq_data_entry * de, struct fi_cq_err_entry * err, 
-    PTRFContextOpts opts, struct timespec * deadline, uint8_t is_send_cq)
+    PTRFContextOpts opts, struct timespec * deadline, size_t count,
+    uint8_t is_send_cq)
 {
     ssize_t ret;
     if (opts->fab_cq_sync)
@@ -743,17 +872,23 @@ static inline ssize_t trf__PollCQ(struct fid_cq *cq,
  *
  * @param err       Pointer to an entry where error details will be stored.
  *
+ * @param count     Number of entries to read. Note: If multiple entries are
+ *                  to be read, the sizes of the buffers pointed to by de and
+ *                  err must be multiplied by count.
+ * 
  * @return          Number of completed operations, negative error code on
  *                  failure.
  */
 static inline ssize_t trfGetSendProgress(PTRFContext ctx, 
-    struct fi_cq_data_entry * de, struct fi_cq_err_entry * err)
+                                         struct fi_cq_data_entry * de, 
+                                         struct fi_cq_err_entry * err,
+                                         size_t count)
 {
     struct timespec tstart, tend;
     clock_gettime(CLOCK_MONOTONIC, &tstart);
     trf__GetDelay(&tstart, &tend, ctx->opts->fab_snd_timeo);
     ssize_t ret = trf__PollCQ(ctx->xfer.fabric->tx_cq, de, err, ctx->opts, 
-        &tend, 1);
+        &tend, 1, 1);
     if (ret == -EAGAIN)
     {
         return -ETIMEDOUT;
@@ -770,18 +905,24 @@ static inline ssize_t trfGetSendProgress(PTRFContext ctx,
  *                  stored.
  *
  * @param err       Pointer to an entry where error details will be stored.
- *
+ * 
+ * @param count     Number of entries to read. Note: If multiple entries are
+ *                  to be read, the sizes of the buffers pointed to by de and
+ *                  err must be multiplied by count.
+ * 
  * @return          Number of completed operations, negative error code on
  *                  failure. 
  */
 static inline ssize_t trfGetRecvProgress(PTRFContext ctx, 
-    struct fi_cq_data_entry * de, struct fi_cq_err_entry * err)
+                                         struct fi_cq_data_entry * de, 
+                                         struct fi_cq_err_entry * err, 
+                                         size_t count)
 {
     struct timespec tstart, tend;
     clock_gettime(CLOCK_MONOTONIC, &tstart);
     trf__GetDelay(&tstart, &tend, ctx->opts->fab_rcv_timeo);
     ssize_t ret = trf__PollCQ(ctx->xfer.fabric->rx_cq, de, err, ctx->opts, 
-        &tend, 1);
+        &tend, 1, 1);
     if (ret == -EAGAIN)
     {
         return -ETIMEDOUT;

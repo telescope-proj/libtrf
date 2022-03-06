@@ -2,12 +2,46 @@ syntax = "proto3";
 
 package trfMsg;
 
+/*  @brief API version message
+    The initial message exchanged between server and client should be the API
+    versions. In the test versions, the API is not considered stable; any
+    differences in API version from server to client, including patch versions,
+    should be considered unstable.
+*/
 message APIVersion {
-    uint32 api_major            = 1;    // API major version
-    uint32 api_minor            = 2;    // API minor version
-    uint32 api_patch            = 3;    // API patch version
+    uint32 api_major            = 1;    // Major release version
+    uint32 api_minor            = 2;    // Minor release version
+    uint32 api_patch            = 3;    // Patch version
+    /*  @brief Versions of installed transport libraries */
+    repeated LibraryVersion lv  = 4;
 }
 
+/*  @brief Library version message
+    A message containing the library name as well as the version integer and
+    minimum compatible version. A samplle version number is constructed as
+    follows:
+    
+    Major version:      ((uint16_t) MY_LIBRARY_VERSION_MAJOR) << 48
+    Minor version:      ((uint16_t) MY_LIBRARY_VERSION_MINOR) << 32
+    Patch version:      ((uint16_t) MY_LIBRARY_VERSION_PATCH) << 16
+    Library specific:   ((uint16_t) MY_LIBRARY_SPECIFIC_NUM)
+
+    The only official library supported by LibTRF is Libfabric, with a library
+    ID number of 1. Custom transport libraries should use an ID number between
+    1024-2047.
+*/
+message LibraryVersion {
+    uint32 lib                  = 1;    // Library identifier
+    uint64 version              = 2;    // Library version
+    uint64 compat               = 3;    // Minimum compatible version
+}
+
+/*  @brief Connection address candidates
+    Clients and servers exchange addressing information in order to determine
+    fabrics which can reach the link. Note that currently there is no support
+    for routing outside of a broadcast domain, although many fabric types such
+    as RoCEv1 do not support this feature as well.
+*/
 message AddrCand {
     string addr     = 1;    // Interface address
     int32 netmask   = 2;    // Netmask
@@ -15,6 +49,12 @@ message AddrCand {
     int32 speed     = 4;    // Link speed
 }
 
+/*  @brief Transport candidates
+    Transport candidates contain data obtained from the fabric provider,
+    serialized for transmission over the network. Currently, there is only
+    support for Libfabric and some of the transports which it contains, with
+    testing performed on the verbs;ofi_rxm and tcp;ofi_rxm transports only.
+*/
 message Transport {
     string name = 1;    // Transport provider name e.g. "tcp;ofi_rxm"
     string proto = 2;   // Transport wire protocol e.g. "FI_PROTO_RXM"
@@ -22,114 +62,359 @@ message Transport {
                         // e.g. fi_sockaddr_in://1.2.3.4:5678
 }
 
+/*  @brief Display/Viewport information
+    A display message is sent by the source in response to a display request,
+    indicating which displays are available to the source, as well as extra
+    metadata such as the texture formats and display group IDs.
+*/
 message Display {
-    uint32 id                   = 1;    // Display ID
-    string name                 = 2;    // Display friendly name e.g. monitor name
-    uint32 width                = 3;    // Display width
-    uint32 height               = 4;    // Display height
-    int32 rate                  = 5;    // Refresh rate
-    repeated uint32 tex_fmt     = 6;    // Native texture formats
-    uint32 dgid                 = 10;   // Display group ID
-    int32 x_offset              = 11;   // Relative display offset x
-    int32 y_offset              = 12;   // Relative display offset y
-}
+    /*  @brief Display ID
+        A display identifier uniquely identifies the monitor within a TRF
+        context. It is an opaque value, without any intrinsic meaning and as
+        such may be assigned randomly. 
+        Independent server contexts may reuse the display identifiers.
+    */
+    uint32 id                   = 1;
+    /*  @brief Display friendly name
+        This name should be presented to API and end users. It is recommended
+        that functions which set this value be predictable so as to allow for
+        automated setup. For instance, it may be set to the display name.
+    */
+    string name                 = 2;
+    /*  @brief Width in pixels */
+    uint32 width                = 3;
+    /*  @brief Height in pixels */
+    uint32 height               = 4;
+    /*  @brief Refresh rate 
+        The refresh rate is used to determine frame pacing when clients
+        request frame data updates be sent to them. If this value is not set,
+        frame requests always begin processing immediately without being
+        deferred to the next vblank, which may result in repeated frames and
+        excessive bandwidth utilization.
+    */
+    int32 rate                  = 5;
+    /*  @brief Natively supported texture formats
+        The actual definition of texture formats are stored externally.
+        This field may be repeated, in case multiple texture formats are
+        natively supported. Currently, LibTRF supports only one texture format,
+        and the API will select the first item in the list should this field be
+        repeated.
+    */
+    repeated uint32 tex_fmt     = 6;
+    /*  @brief Display Group ID (DGID)
+        Display groups are designed to allow servers to multiplex display
+        sources without the need to run multiple discrete instances of
+        LibTRF. For instance, a single LibTRF server running on a VM host
+        could act as the framebuffer source for multiple virtual machines.
 
-message DisplayReq {
-    uint32 id       = 1;    // Requested display ID
-    uint32 width    = 2;    // Requested display width
-    uint32 height   = 3;    // Requested display height
-    uint32 tex_fmt  = 4;    // Requested texture format
+        Displays within a group can be positioned in a group coordinate space,
+        allowing the client to determine positioning for a multi-monitor
+        setup.
+    */
+    uint32 dgid                 = 10;
+    /*  @brief The relative X position of the monitor. */
+    int32 x_offset              = 11;
+    /*  @brief The relative Y position of the monitor. */
+    int32 y_offset              = 12;
 }
 
 /* API Version Check Messages */
 
+/*  @brief Client hello
+    This must be the first message sent over the negotiation channel.
+    It should contain the client's LibTRF version.
+*/
 message ClientHello {
     APIVersion version = 1;     // API version
 }
 
+/*  @brief Server hello
+    Should the client hello API version match the version supported by the
+    server, this message should be sent.
+*/
 message ServerHello {
     uint64 new_session_id = 1;  // New session ID
 }
 
+/*  @brief Server rejection
+    Currently, the only reason for a server rejection is that the API version
+    has mismatched between the client and server. More reasons, such as
+    server overload are planned.
+*/
 message ServerReject {
-    APIVersion version = 1;     // Server API version
+    /*  @brief Server API version
+        This should contain the server API version to be sent to the client,
+        in order to inform the user which API version is required to allow for
+        successful communication with the server.
+    */
+    APIVersion version = 1;
 }
 
 /* Preflight */
 
+/*  @brief Address preflight candidates
+    Currently unused.
+*/
 message AddrPF {
     repeated AddrCand addrs = 1;    // Address candidates
 }
 
 /* Negotiation Messages */
 
+/*  @brief Client capabilities
+    A ClientCap message contains the available fabric transports supported by
+    the client. Currently, this information is sourced entirely from the
+    Libfabric API.
+*/
 message ClientCap {
-    repeated Transport transports   = 1;    // Client supported transports
+    /*  @brief The list of transports supported by the client. */
+    repeated Transport transports   = 1;
 }
 
+/*  @brief Server capabilities
+    The server should examine a ClientCap message, sending back the
+    best transport common between both the client and server. For instance,
+    Verbs transports should be preferred over non-accelerated TCP transports,
+    determined on the server side.
+*/
 message ServerCap {
-    string bind_addr                = 1;    // Recommended bind address
-    Transport transport             = 2;    // Server selected transport
+    /*  @brief The recommended client bind address. 
+        This may optionally be used by the client to bind to a specific
+        interface suggested by the server to be the most likely to be
+        functional.
+    */
+    string bind_addr                = 1;
+    /*  @brief Transport to use, selected by the server. */
+    Transport transport             = 2;
 }
 
+/*  @brief Created endpoint name
+    Once a client has created an endpoint, the details should be sent to the 
+    server in order to determine the address the server should listen for.
+*/
 message Endpoint {
-    Transport Transport             = 1;    // Selected endpoint transport details
+    /*  @brief Transport containing details of the endpoint which was just
+        created by the client.
+    */
+    Transport Transport             = 1;
 }
 
 /* Display messages */
 
+/*  @brief Client display list request
+    The client should send this data to determine the list of displays
+    on the server side.
+*/
 message ClientDispReq {
     uint32 info                     = 1;    // Unused
 }
 
+/*  @brief Server display list 
+    This should be sent in response to a ClientDispReq message, containing the
+    displays available for the client to use.
+*/
 message ServerDisp {
     repeated Display displays       = 1;    // List of displays on server side
 }
 
 /* Setup Messages */
 
+/*  @brief Client request
+    A client request contains the list of displays the client wishes the server
+    enable. See the DisplayReq message for more details.
+*/
 message ClientReq {
     repeated DisplayReq display = 1;    // Requested displays from server
 }
 
+/*  @brief Server request acknowledgement
+    A server request acknowledgement contains a list of displays IDs that were
+    requested by the client as well as the status of the request.
+*/
 message ServerAckReq {
-    repeated uint32 display_ids = 1;    // Display ID confirmation
+    /*  @brief Display ID list */
+    repeated uint32 display_ids = 1;
+    /*  @brief Display ID status.
+        For instance, display_ids[0] has a corresponding return code of
+        return_codes[0]. The return codes' meanings must be in line with the
+        POSIX.1-2008 standard. Most of the common POSIX error codes are also
+        available on Windows, inside errno.h.
+    */
+    repeated uint32 return_codes = 2;
+}
+
+/* Display Initialization Request */
+
+/*  @brief Display initialization request
+    This message requests the server initialize the capture source with
+    the specified parameters. This indicates that resources should be set up
+    and memory be allocated in preparation for frame requests.
+*/
+message DisplayReq {
+    /*  @brief Requested display ID */
+    uint32 id       = 1;
+    /*  @brief Requested display width
+        The width may differ from the display's native width if downscaling is
+        preferred. However, LibTRF does not support downscaling functionality,
+        and as such the implementation is up to the user's application.
+    */
+    uint32 width    = 2;
+    /*  @brief Requested display height
+        The height may differ from the display's native height if downscaling
+        is preferred. However, LibTRF does not support downscaling
+        functionality, and as such the implementation is up to the user's
+        application.
+    */
+    uint32 height   = 3;
+    /*  @brief Requested texture format
+        The texture format must be within the supported texture format list
+        sent in the initial display list message. An API for texture format
+        transcoding support is planned, but currently unsupported.
+    */
+    uint32 tex_fmt  = 4;
 }
 
 /* Frame Requests */
 
+/*  @brief Client frame update request
+    This message should be sent as soon as the client has received a frame,
+    processed it, with the supplied buffer ready to receive new data. Behaviour
+    on the server side may be controlled with the flags argument.
+*/
 message ClientFReq {
-    uint32 id                   = 1;    // Display ID to update
-    uint32 frame_cntr           = 2;    // Current frame number
-    uint64 addr                 = 3;    // Client receive virtual memory address
-    uint64 rkey                 = 4;    // Client receive rkey
+    /*  @brief Display ID to update */
+    uint32 id                   = 1;
+    /*  @brief The current frame number counter. */
+    uint32 frame_cntr           = 2;
+    /*  @brief Client receive address in virtual memory.
+        This address may not be a memory region offset.
+    */
+    uint64 addr                 = 3;
+    /*  @brief Client receive rkey.
+        The remote access key for the client.
+    */
+    uint64 rkey                 = 4;
+    /*  @brief Client receive raw key. Currently unsupported.
+        Fabrics with key sizes that exceed 64-bits may use this field. The
+        raw_rkey field takes precedence over the rkey field, so should be
+        set to a NULL value if unused.
+    */
+    bytes raw_key               = 5;
+    /*  @brief Flags used to control the operation.
+        For instance, a client may request the server return data immediately,
+        ignoring any imposed vertical sync delays, or retransmit the current
+        frame. 
+    */
+    uint64 flags                = 6;
 }
 
+/*  @brief DMA completion notification for a data chunk  
+    While a ServerAckFReq message should be sent once a frame is ready, this
+    may introduce additional latency on the receiver side due to the fact that
+    the read and write operations occur sequentially. To allow for some degree
+    of parallelization, the server may send notifications when chunks of data
+    have been sent.
+    Note that the processing of such notifications can be rather expensive on
+    both ends, and as such a reasonable chunk size should be selected in
+    accordance with the available network bandwidth as well as the total frame
+    size.
+*/
+message ServerNotifyChunk {
+    /*  @brief The display ID that was updated. */
+    uint32 id                   = 1;
+    /*  @brief The region that was updated. */
+    uint32 frame_cntr           = 2;
+    /*  @brief Mode indicator. Currently, the following modes are defined:
+        0:  The notification contains a raw offset from the start of the frame
+            buffer in bytes, as well as its length.
+        1:  The notification contains the coordinates and size of a rectangle,
+            describing the region that was updated.
+    */
+    uint32 mode                 = 3;
+    /*  @brief Raw update chunk offset */
+    uint64 offset               = 4;
+    /*  @brief Length of the data past the offset that was updated */
+    uint64 offset_len           = 5;
+    /*  @brief Rectangle X position */
+    uint32 rect_x               = 6;
+    /*  @brief Rectangle Y position */
+    uint32 rect_y               = 7;
+    /*  @brief Rectangle width */
+    uint32 rect_width           = 8;
+    /*  @brief Rectangle height */
+    uint32 rect_height          = 9;
+}
+
+/*  @brief Frame request acknowledgement  
+    The server should send a frame request acknowledgement after the frame has
+    been sent and the buffer is safe to read from. In most fabric providers,
+    such as Verbs, RMA read/write operations do not return a confirmation on
+    the target side, and if these operations do in fact return data, this
+    should not be relied on. Instead, clients should wait for this message as
+    a confirmation that the buffer is ready.
+*/
 message ServerAckFReq {
-    uint32 id                   = 1;    // Display ID that was updated
-    uint32 frame_cntr           = 2;    // New frame number
+    /*  @brief The display ID that was updated. */
+    uint32 id                   = 1;
+    /*  The identifier for the newly updated frame. */
+    uint32 frame_cntr           = 2;
+}
+
+/*  @brief Cursor data update
+    If the display source contains a cursor, the cursor position information
+    should be sent separately. To update the cursor shape, the values 
+    width and height should be set to non-zero values, with tex_fmt and
+    bytes being set to the cursor data type and data respectively.
+*/
+message CursorData {
+    uint32 dgid                 = 1;    // Display group ID
+    uint32 x                    = 2;    // Cursor X position
+    uint32 y                    = 3;    // Cursor Y position
+    uint32 hpx                  = 4;    // Cursor X hotspot
+    uint32 hpy                  = 5;    // Cursor Y hotspot
+    uint32 width                = 6;    // Cursor image width
+    uint32 height               = 7;    // Cursor image height
+    uint32 tex_fmt              = 8;    // Cursor image format
+    bytes  data                 = 9;    // Raw image data
 }
 
 /* Session Termination */
 
+/*  @brief Disconnect message
+    The server or client may send a disconnect message. The receiver should
+    then treat the connection as closed and release the resources associated
+    with the sender. Determining the client is done through the use of the 
+    session_id value inside of the parent message wrapper.
+*/
 message Disconnect {
     uint32 info                 = 1;    // Extra info e.g. error, unused
 }
 
 /* Channel management */
 
+/*  @brief Channel fast open
+    Currently reserved for future use.
+*/
 message ChannelOpen {
     uint32 type                 = 1;    // Channel type
 }
 
 /*  ----------- Message Wrapper Object ------------- */
 
+/*  @brief Message wrapper
+    All TRF messages are contained within a message wrapper, identifying the
+    client using the session_id, with one message payload contained within
+    wdata.
+*/
 message MessageWrapper {
     
     reserved 5 to 8;
+    reserved 14 to 15;
     
+    /*  @brief Session identifier */
     uint64 session_id                       = 1;
     
+    /*  @brief Wrapped data */
     oneof wdata {
         
         /* Do not modify existing stable identifier values */
@@ -137,29 +422,31 @@ message MessageWrapper {
         ClientHello client_hello            = 2;
         ServerHello server_hello            = 3;
         ServerReject server_reject          = 4;
-        
         Disconnect disconnect               = 9;
         
         /*  API-version specific identifiers below this line */
-        
-        ClientCap client_cap                = 10;
-        ServerCap server_cap                = 11;
-        Endpoint endpoint                   = 12;
 
-        ClientDispReq client_disp_req       = 13;
-        ServerDisp server_disp              = 14;
-        
-        ClientReq client_req                = 15;
-        ServerAckReq server_ack             = 16;
-        
-        ClientFReq client_f_req             = 17;
-        ServerAckFReq server_ack_f_req      = 18;
-        
-        AddrPF addr_pf                      = 19;
+        /*  1 byte identifiers for high-frequency messages (10 - 15) */
 
-        /*  Channel management messages */
+        CursorData cursor_data              = 10;
+        ClientFReq client_f_req             = 11;
+        ServerNotifyChunk server_n_chunk    = 12;
+        ServerAckFReq server_ack_f_req      = 13;
 
-        ChannelOpen ch_open                 = 20;
+        /* 2 byte identifiers for other data (16 - 2047) */
 
-    };
-};
+        ClientCap client_cap                = 20;
+        ServerCap server_cap                = 21;
+        Endpoint endpoint                   = 22;
+
+        ClientDispReq client_disp_req       = 23;
+        ServerDisp server_disp              = 24;
+        
+        ClientReq client_req                = 25;
+        ServerAckReq server_ack             = 26;
+        
+        AddrPF addr_pf                      = 29;
+
+        ChannelOpen ch_open                 = 30;
+    }
+}

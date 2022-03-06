@@ -1,7 +1,7 @@
 .. _api_internal:
 
-TRF_INTERNAL
-============
+TRF Internal System Functions
+=============================
 
 .. doxygenfile:: trf_internal.h
    :project: libtrf

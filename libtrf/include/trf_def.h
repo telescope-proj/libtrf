@@ -25,6 +25,7 @@
 #define PTRFSession     struct TRFSession *
 #define PTRFContext     struct TRFContext *
 #define PTRFContextOpts struct TRFContextOpts *
+#define PTRFCursor      struct TRFCursor *
 
 #define TRF_SA_LEN(x) (((struct sockaddr *) x)->sa_family == AF_INET ? \
     sizeof(struct sockaddr_in) : sizeof(struct sockaddr_in6))
@@ -128,9 +129,13 @@ struct TRFXFabric {
     */
     uint32_t            addr_fmt;
     /**
+      * @brief Fabric attributes
+      */
+    struct fi_info      * fi;
+    /**
       * @brief Endpoint
     */
-    struct fid_ep   * ep;
+    struct fid_ep       * ep;
     /**
       * @brief Fabric interface identifier.
     */
@@ -331,6 +336,10 @@ enum TRFTexFormat {
      */
     TRF_TEX_BGRA_16161616,
     /**
+     * @brief Monochrome, 8 bits per pixel
+     */
+    TRF_TEX_MONO_8,
+    /**
       * @brief Sentinel Value
       */
     TRF_TEX_MAX
@@ -402,12 +411,12 @@ struct TRFDisplay {
      * @brief Memory address of the display framebuffer
      * 
      */
-    void        * fb_addr;
+    uint8_t     * fb_addr;
     /**
      * @brief Memory region object for the display framebuffer. Do not set manually.
      * 
      */
-    struct fid_mr       * fb_mr;
+    struct fid_mr * fb_mr;
     /**
      * @brief Frames since the start of the capture session.
      * 
@@ -417,7 +426,7 @@ struct TRFDisplay {
      * @brief Next display in the list.
      * 
      */
-    struct TRFDisplay   * next;
+    struct TRFDisplay * next;
 };
 
 /**
@@ -569,6 +578,102 @@ struct TRFContext {
 };
 
 /**
+ * @brief Frame rectangle structure
+ *
+ * These structures are used to describe subrectangles of a full frame in the
+ * buffer, designed for delta updates.
+ *
+ */
+struct TRFRect {
+    /**
+     * @brief X offset
+     * 
+     */
+    uint32_t    x;
+    /**
+     * @brief Y offset
+     * 
+     */
+    uint32_t    y;
+    /**
+     * @brief Width
+     * 
+     */
+    uint32_t    width;
+    /**
+     * @brief Height
+     * 
+     */
+    uint32_t    height;
+};
+
+/**
+ * @brief TRF Cursor
+ */
+struct TRFCursor {
+    /**
+     * @brief Cursor width in pixels
+     */
+    uint32_t width;
+    /**
+     * @brief Cursor height in pixels
+     */
+    uint32_t height;
+    /**
+     * @brief Position, X
+     */
+    uint32_t pos_x;
+    /**
+     * @brief Position, Y
+     */
+    uint32_t pos_y;
+    /**
+     * @brief Cursor hotspot X coordinate
+     */
+    uint32_t hotspot_x;
+    /**
+     * @brief Cursor hotspot Y coordinate
+     */
+    uint32_t hotspot_y;
+    /**
+     * @brief Cursor texture format
+     */
+    uint32_t format;
+    /**
+     * @brief Cursor texture data
+     */
+    uint8_t * data;
+};
+
+/**
+ * @brief TRF Memory Access Type
+*/
+enum TRFMAType {
+    TRF_MA_INVALID  = 0,
+    /**
+     * @brief   The address refers to an actual address in virtual memory.
+     */
+    TRF_MA_VADDR    = (1 << 0),
+    /**
+     * @brief   The address is an offset relative to the start of the registered
+     *          memory region.
+     */
+    TRF_MA_OFFSET   = (1 << 1),
+    /**
+     * @brief   The address is a tag, used to identify a receive memory region.
+     */
+    TRF_MA_TAG      = (1 << 2),
+    /**
+     * @brief   The remote key fits within 64 bits.
+     */
+    TRF_MA_64B_KEY  = (1 << 3),
+    /**
+     * @brief   The remote key size exceeds 64 bits.
+     */
+    TRF_MA_RAW_KEY  = (1 << 4)
+};
+
+/**
   * @brief      Get the system page size
   * 
   * @return     System page size
@@ -585,10 +690,11 @@ static inline size_t trf__GetPageSize() {
 
 static inline void trfSetDefaultOpts(PTRFContextOpts opts)
 {
+    size_t bufsize          = (1024 * 128); // 128K
     opts->fab_cq_sync       = 0;
     opts->fab_poll_rate     = 0;
-    opts->fab_rcv_bufsize   = trf__GetPageSize();
-    opts->fab_snd_bufsize   = trf__GetPageSize();
+    opts->fab_rcv_bufsize   = bufsize;
+    opts->fab_snd_bufsize   = bufsize;
     opts->fab_rcv_timeo     = 2000;
     opts->fab_snd_timeo     = 2000;
     opts->nc_rcv_bufsize    = trf__GetPageSize();

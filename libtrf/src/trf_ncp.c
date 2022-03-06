@@ -642,6 +642,7 @@ int trfNCClientInit(PTRFContext ctx, char * host, char * port)
     ctx->xfer.fabric->peer_addr = addr_out;
     ctx->xfer.fabric->msg_ptr   = regd_buf;
     ctx->xfer.fabric->msg_size  = regd_bufsize;
+    ctx->xfer.fabric->fi        = fi_dupinfo(fi_out);
 
     ret = trf__FabricPostSend(ctx, 8, addr_out, NULL);
     if (ret)
@@ -652,7 +653,8 @@ int trfNCClientInit(PTRFContext ctx, char * host, char * port)
 
     struct fi_cq_data_entry cqe;
     struct fi_cq_err_entry err;
-    ret = trf__PollCQ(ctx->xfer.fabric->tx_cq, &cqe, &err, ctx->opts, NULL, 1);
+    ret = trf__PollCQ(ctx->xfer.fabric->tx_cq, &cqe, &err, ctx->opts, NULL, 1, 
+                      1);
     if (ret != 1)
     {
         trf__log_error("fi_cq_sread %d", ret);
@@ -939,7 +941,7 @@ int trfNCAccept(PTRFContext ctx, PTRFContext * ctx_out)
     if (!flag)
     {
         trf__log_error("No usable transport found");
-        goto free_av_list;
+        goto free_fi_info;
     }
 
     // Allocate resources and create a communication channel
@@ -948,7 +950,7 @@ int trfNCAccept(PTRFContext ctx, PTRFContext * ctx_out)
     if (!cli_ctx)
     {
         trf__log_error("Unable to allocate context");
-        goto free_av_list;
+        goto free_fi_info;
     }
     cli_ctx->opts           = malloc(sizeof(*cli_ctx->opts));
     cli_ctx->type           = TRF_EP_CONN_ID;
@@ -1074,6 +1076,7 @@ int trfNCAccept(PTRFContext ctx, PTRFContext * ctx_out)
     cli_ctx->xfer.fabric->msg_ptr   = regd_buf;
     cli_ctx->xfer.fabric->msg_size  = regd_buf_size;
     cli_ctx->xfer.fabric->peer_addr = src_addr;
+    cli_ctx->xfer.fabric->fi        = fi_dupinfo(fi);
 
     // Wait on the main channel for an incoming message
 
@@ -1123,6 +1126,7 @@ int trfNCAccept(PTRFContext ctx, PTRFContext * ctx_out)
 
     trf__log_info("Recv Cookie %016" PRIx64, *(uint64_t *) regd_buf);
     *ctx_out = cli_ctx;
+    fi_freeinfo(fi);
     free(mbuf);
     return ret;
 
@@ -1130,6 +1134,8 @@ free_regd_buf:
     free(regd_buf);
 destroy_ctx:
     trfDestroyContext(cli_ctx);
+free_fi_info:
+    fi_freeinfo(fi);
 free_av_list:
     trfFreeAddrV(av);
 free_sv_list:

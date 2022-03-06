@@ -1,7 +1,7 @@
 .. _api_interface:
 
-TRF_INTERFACE
-=============
+Interface & Address Introspection
+=================================
 
 .. doxygenfile:: trf_interface.h
    :project: libtrf

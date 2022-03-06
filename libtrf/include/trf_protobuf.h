@@ -32,23 +32,25 @@
 #include "trf_msg.pb-c.h"
 
 enum TRFM_Type {
-    TRFM_INVALID          = 0,
-    TRFM_CLIENT_HELLO     = (1 << 0),
-    TRFM_SERVER_HELLO     = (1 << 1),
-    TRFM_SERVER_REJECT    = (1 << 2),
-    TRFM_DISCONNECT       = (1 << 3),
-    TRFM_CLIENT_CAP       = (1 << 4),
-    TRFM_SERVER_CAP       = (1 << 5),
-    TRFM_ENDPOINT         = (1 << 6),
-    TRFM_CLIENT_DISP_REQ  = (1 << 7),
-    TRFM_SERVER_DISP      = (1 << 8),
-    TRFM_CLIENT_REQ       = (1 << 9),
-    TRFM_SERVER_ACK       = (1 << 10),
-    TRFM_CLIENT_F_REQ     = (1 << 11),
-    TRFM_SERVER_ACK_F_REQ = (1 << 12),
-    TRFM_ADDR_PF          = (1 << 13),
-    TRFM_CH_OPEN          = (1 << 14),
-    TRFM_MAX              = (1 << 15)
+    TRFM_INVALID                = 0,
+    TRFM_CLIENT_HELLO           = (1 << 0),
+    TRFM_SERVER_HELLO           = (1 << 1),
+    TRFM_SERVER_REJECT          = (1 << 2),
+    TRFM_DISCONNECT             = (1 << 3),
+    TRFM_CLIENT_CAP             = (1 << 4),
+    TRFM_SERVER_CAP             = (1 << 5),
+    TRFM_ENDPOINT               = (1 << 6),
+    TRFM_CLIENT_DISP_REQ        = (1 << 7),
+    TRFM_SERVER_DISP            = (1 << 8),
+    TRFM_CLIENT_REQ             = (1 << 9),
+    TRFM_SERVER_ACK             = (1 << 10),
+    TRFM_CLIENT_F_REQ           = (1 << 11),
+    TRFM_SERVER_NOTIFY_CHUNK    = (1 << 12),
+    TRFM_SERVER_ACK_F_REQ       = (1 << 12),
+    TRFM_ADDR_PF                = (1 << 13),
+    TRFM_CH_OPEN                = (1 << 14),
+    TRFM_CURSOR_DATA            = (1 << 15),
+    TRFM_MAX                    = (1 << 16)
 };
 
 /**
@@ -114,12 +116,16 @@ static inline uint64_t trfPBToInternal(int pb_type)
             return TRFM_SERVER_ACK;
         case TRF_MSG__MESSAGE_WRAPPER__WDATA_CLIENT_F_REQ:
             return TRFM_CLIENT_F_REQ;
+        case TRF_MSG__MESSAGE_WRAPPER__WDATA_SERVER_N_CHUNK:
+            return TRFM_SERVER_NOTIFY_CHUNK;
         case TRF_MSG__MESSAGE_WRAPPER__WDATA_SERVER_ACK_F_REQ:
             return TRFM_SERVER_ACK_F_REQ;
         case TRF_MSG__MESSAGE_WRAPPER__WDATA_ADDR_PF:
             return TRFM_ADDR_PF;
         case TRF_MSG__MESSAGE_WRAPPER__WDATA_CH_OPEN:
             return TRFM_CH_OPEN;
+        case TRF_MSG__MESSAGE_WRAPPER__WDATA_CURSOR_DATA:
+            return TRFM_CURSOR_DATA;
         default:
             return TRFM_INVALID;
     }
@@ -151,12 +157,16 @@ static inline uint64_t trfInternalToPB(enum TRFM_Type type)
             return TRF_MSG__MESSAGE_WRAPPER__WDATA_SERVER_ACK;
         case TRFM_CLIENT_F_REQ:
             return TRF_MSG__MESSAGE_WRAPPER__WDATA_CLIENT_F_REQ;
+        case TRFM_SERVER_NOTIFY_CHUNK:
+            return TRF_MSG__MESSAGE_WRAPPER__WDATA_SERVER_N_CHUNK;
         case TRFM_SERVER_ACK_F_REQ:
             return TRF_MSG__MESSAGE_WRAPPER__WDATA_SERVER_ACK_F_REQ;
         case TRFM_ADDR_PF:
             return TRF_MSG__MESSAGE_WRAPPER__WDATA_ADDR_PF;
         case TRFM_CH_OPEN:
             return TRF_MSG__MESSAGE_WRAPPER__WDATA_CH_OPEN;
+        case TRFM_CURSOR_DATA:
+            return TRF_MSG__MESSAGE_WRAPPER__WDATA_CURSOR_DATA;
         default:
             return TRF_MSG__MESSAGE_WRAPPER__WDATA__NOT_SET;
     }

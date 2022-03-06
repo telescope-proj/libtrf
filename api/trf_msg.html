@@ -4,7 +4,7 @@
   <meta charset="utf-8" /><meta name="generator" content="Docutils 0.17.1: http://docutils.sourceforge.net/" />
 
   <meta name="viewport" content="width=device-width, initial-scale=1.0" />
-  <title>TRF_MSG &mdash; libtrf  documentation</title>
+  <title>Message Handling Functions &mdash; libtrf  documentation</title>
       <link rel="stylesheet" href="../_static/pygments.css" type="text/css" />
       <link rel="stylesheet" href="../_static/css/theme.css" type="text/css" />
       <link rel="stylesheet" href="../_static/graphviz.css" type="text/css" />
@@ -19,8 +19,8 @@
     <script src="../_static/js/theme.js"></script>
     <link rel="index" title="Index" href="../genindex.html" />
     <link rel="search" title="Search" href="../search.html" />
-    <link rel="next" title="TRF_NCP" href="trf_ncp.html" />
-    <link rel="prev" title="TRF_INTERNAL" href="trf_internal.html" /> 
+    <link rel="next" title="Negotiation Channel Protocol - Connection Management Functions" href="trf_ncp.html" />
+    <link rel="prev" title="TRF Internal System Functions" href="trf_internal.html" /> 
 </head>
 
 <body class="wy-body-for-nav"> 
@@ -39,15 +39,15 @@
 </div>
         </div><div class="wy-menu wy-menu-vertical" data-spy="affix" role="navigation" aria-label="Navigation menu">
               <ul class="current">
-<li class="toctree-l1 current"><a class="reference internal" href="index.html">Libtrf Documentation</a><ul class="current">
-<li class="toctree-l2"><a class="reference internal" href="trf.html">TRF</a></li>
-<li class="toctree-l2"><a class="reference internal" href="trf_inet.html">TRF_INET</a></li>
-<li class="toctree-l2"><a class="reference internal" href="trf_interface.html">TRF_INTERFACE</a></li>
-<li class="toctree-l2"><a class="reference internal" href="trf_internal.html">TRF_INTERNAL</a></li>
-<li class="toctree-l2 current"><a class="current reference internal" href="#">TRF_MSG</a></li>
-<li class="toctree-l2"><a class="reference internal" href="trf_ncp.html">TRF_NCP</a></li>
-<li class="toctree-l2"><a class="reference internal" href="trf_preflight.html">TRF_PREFLIGHT</a></li>
-<li class="toctree-l2"><a class="reference internal" href="trf_proto.html">TRF_PROTOBUF</a></li>
+<li class="toctree-l1 current"><a class="reference internal" href="index.html">TRF API Function Documentation</a><ul class="current">
+<li class="toctree-l2"><a class="reference internal" href="trf.html">TRF Core Functionality</a></li>
+<li class="toctree-l2"><a class="reference internal" href="trf_def.html">System Data Structures</a></li>
+<li class="toctree-l2"><a class="reference internal" href="trf_inet.html">Address Handling Functions</a></li>
+<li class="toctree-l2"><a class="reference internal" href="trf_interface.html">Interface &amp; Address Introspection</a></li>
+<li class="toctree-l2"><a class="reference internal" href="trf_internal.html">TRF Internal System Functions</a></li>
+<li class="toctree-l2 current"><a class="current reference internal" href="#">Message Handling Functions</a></li>
+<li class="toctree-l2"><a class="reference internal" href="trf_ncp.html">Negotiation Channel Protocol - Connection Management Functions</a></li>
+<li class="toctree-l2"><a class="reference internal" href="trf_preflight.html">Preflight Connectivity Check Functions</a></li>
 </ul>
 </li>
 </ul>
@@ -66,8 +66,8 @@
           <div role="navigation" aria-label="Page navigation">
   <ul class="wy-breadcrumbs">
       <li><a href="../index.html" class="icon icon-home"></a> &raquo;</li>
-          <li><a href="index.html">Libtrf Documentation</a> &raquo;</li>
-      <li>TRF_MSG</li>
+          <li><a href="index.html">TRF API Function Documentation</a> &raquo;</li>
+      <li>Message Handling Functions</li>
       <li class="wy-breadcrumbs-aside">
             <a href="../_sources/api/trf_msg.rst.txt" rel="nofollow"> View page source</a>
       </li>
@@ -77,8 +77,8 @@
           <div role="main" class="document" itemscope="itemscope" itemtype="http://schema.org/Article">
            <div itemprop="articleBody">
              
-  <section id="trf-msg">
-<span id="api-msg"></span><h1>TRF_MSG<a class="headerlink" href="#trf-msg" title="Permalink to this headline"></a></h1>
+  <section id="message-handling-functions">
+<span id="api-msg"></span><h1>Message Handling Functions<a class="headerlink" href="#message-handling-functions" title="Permalink to this headline"></a></h1>
 <p>Main channel raw data send/receive functions. </p>
 <p>This file contains functions to send and receive delimited messages reliably over a TCP socket. You should not need to use this in your programs, as high level abstractions for TRF messages are provided. </p>
 <div class="breathe-sectiondef docutils container">
@@ -217,8 +217,8 @@
            </div>
           </div>
           <footer><div class="rst-footer-buttons" role="navigation" aria-label="Footer">
-        <a href="trf_internal.html" class="btn btn-neutral float-left" title="TRF_INTERNAL" accesskey="p" rel="prev"><span class="fa fa-arrow-circle-left" aria-hidden="true"></span> Previous</a>
-        <a href="trf_ncp.html" class="btn btn-neutral float-right" title="TRF_NCP" accesskey="n" rel="next">Next <span class="fa fa-arrow-circle-right" aria-hidden="true"></span></a>
+        <a href="trf_internal.html" class="btn btn-neutral float-left" title="TRF Internal System Functions" accesskey="p" rel="prev"><span class="fa fa-arrow-circle-left" aria-hidden="true"></span> Previous</a>
+        <a href="trf_ncp.html" class="btn btn-neutral float-right" title="Negotiation Channel Protocol - Connection Management Functions" accesskey="n" rel="next">Next <span class="fa fa-arrow-circle-right" aria-hidden="true"></span></a>
     </div>
 
   <hr/>

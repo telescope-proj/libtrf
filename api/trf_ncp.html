@@ -4,7 +4,7 @@
   <meta charset="utf-8" /><meta name="generator" content="Docutils 0.17.1: http://docutils.sourceforge.net/" />
 
   <meta name="viewport" content="width=device-width, initial-scale=1.0" />
-  <title>TRF_NCP &mdash; libtrf  documentation</title>
+  <title>Negotiation Channel Protocol - Connection Management Functions &mdash; libtrf  documentation</title>
       <link rel="stylesheet" href="../_static/pygments.css" type="text/css" />
       <link rel="stylesheet" href="../_static/css/theme.css" type="text/css" />
       <link rel="stylesheet" href="../_static/graphviz.css" type="text/css" />
@@ -19,8 +19,8 @@
     <script src="../_static/js/theme.js"></script>
     <link rel="index" title="Index" href="../genindex.html" />
     <link rel="search" title="Search" href="../search.html" />
-    <link rel="next" title="TRF_PREFLIGHT" href="trf_preflight.html" />
-    <link rel="prev" title="TRF_MSG" href="trf_msg.html" /> 
+    <link rel="next" title="Preflight Connectivity Check Functions" href="trf_preflight.html" />
+    <link rel="prev" title="Message Handling Functions" href="trf_msg.html" /> 
 </head>
 
 <body class="wy-body-for-nav"> 
@@ -39,15 +39,15 @@
 </div>
         </div><div class="wy-menu wy-menu-vertical" data-spy="affix" role="navigation" aria-label="Navigation menu">
               <ul class="current">
-<li class="toctree-l1 current"><a class="reference internal" href="index.html">Libtrf Documentation</a><ul class="current">
-<li class="toctree-l2"><a class="reference internal" href="trf.html">TRF</a></li>
-<li class="toctree-l2"><a class="reference internal" href="trf_inet.html">TRF_INET</a></li>
-<li class="toctree-l2"><a class="reference internal" href="trf_interface.html">TRF_INTERFACE</a></li>
-<li class="toctree-l2"><a class="reference internal" href="trf_internal.html">TRF_INTERNAL</a></li>
-<li class="toctree-l2"><a class="reference internal" href="trf_msg.html">TRF_MSG</a></li>
-<li class="toctree-l2 current"><a class="current reference internal" href="#">TRF_NCP</a></li>
-<li class="toctree-l2"><a class="reference internal" href="trf_preflight.html">TRF_PREFLIGHT</a></li>
-<li class="toctree-l2"><a class="reference internal" href="trf_proto.html">TRF_PROTOBUF</a></li>
+<li class="toctree-l1 current"><a class="reference internal" href="index.html">TRF API Function Documentation</a><ul class="current">
+<li class="toctree-l2"><a class="reference internal" href="trf.html">TRF Core Functionality</a></li>
+<li class="toctree-l2"><a class="reference internal" href="trf_def.html">System Data Structures</a></li>
+<li class="toctree-l2"><a class="reference internal" href="trf_inet.html">Address Handling Functions</a></li>
+<li class="toctree-l2"><a class="reference internal" href="trf_interface.html">Interface &amp; Address Introspection</a></li>
+<li class="toctree-l2"><a class="reference internal" href="trf_internal.html">TRF Internal System Functions</a></li>
+<li class="toctree-l2"><a class="reference internal" href="trf_msg.html">Message Handling Functions</a></li>
+<li class="toctree-l2 current"><a class="current reference internal" href="#">Negotiation Channel Protocol - Connection Management Functions</a></li>
+<li class="toctree-l2"><a class="reference internal" href="trf_preflight.html">Preflight Connectivity Check Functions</a></li>
 </ul>
 </li>
 </ul>
@@ -66,8 +66,8 @@
           <div role="navigation" aria-label="Page navigation">
   <ul class="wy-breadcrumbs">
       <li><a href="../index.html" class="icon icon-home"></a> &raquo;</li>
-          <li><a href="index.html">Libtrf Documentation</a> &raquo;</li>
-      <li>TRF_NCP</li>
+          <li><a href="index.html">TRF API Function Documentation</a> &raquo;</li>
+      <li>Negotiation Channel Protocol - Connection Management Functions</li>
       <li class="wy-breadcrumbs-aside">
             <a href="../_sources/api/trf_ncp.rst.txt" rel="nofollow"> View page source</a>
       </li>
@@ -77,8 +77,8 @@
           <div role="main" class="document" itemscope="itemscope" itemtype="http://schema.org/Article">
            <div itemprop="articleBody">
              
-  <section id="trf-ncp">
-<span id="api-ncp"></span><h1>TRF_NCP<a class="headerlink" href="#trf-ncp" title="Permalink to this headline"></a></h1>
+  <section id="negotiation-channel-protocol-connection-management-functions">
+<span id="api-ncp"></span><h1>Negotiation Channel Protocol - Connection Management Functions<a class="headerlink" href="#negotiation-channel-protocol-connection-management-functions" title="Permalink to this headline"></a></h1>
 <p>Negotiation Channel Protocol Messaging Functions. </p>
 <div class="breathe-sectiondef docutils container">
 <p class="breathe-sectiondef-title rubric" id="breathe-section-title-defines">Defines</p>
@@ -153,7 +153,7 @@ Initializes the out of band negatiation channel for the server. Sets the listeni
 <dl class="cpp function">
 <dt class="sig sig-object cpp" id="_CPPv416trfNCServerClose11PTRFContext">
 <span id="_CPPv316trfNCServerClose11PTRFContext"></span><span id="_CPPv216trfNCServerClose11PTRFContext"></span><span id="trfNCServerClose__PTRFContext"></span><span class="target" id="trf__ncp_8h_1ac5a2cc6c554f547627461446174758a4"></span><span class="kt"><span class="pre">int</span></span><span class="w"> </span><span class="sig-name descname"><span class="n"><span class="pre">trfNCServerClose</span></span></span><span class="sig-paren">(</span><span class="n"><span class="pre">PTRFContext</span></span><span class="w"> </span><span class="n sig-param"><span class="pre">ctx</span></span><span class="sig-paren">)</span><a class="headerlink" href="#_CPPv416trfNCServerClose11PTRFContext" title="Permalink to this definition"></a><br /></dt>
-<dd><p>Clos the negotiation channel server, disconneting the client. </p>
+<dd><p>Close the negotiation channel server, disconneting the client. </p>
 <dl class="field-list simple">
 <dt class="field-odd">Parameters</dt>
 <dd class="field-odd"><p><strong>ctx</strong> – Context to use </p>
@@ -167,7 +167,7 @@ Initializes the out of band negatiation channel for the server. Sets the listeni
 <dl class="cpp function">
 <dt class="sig sig-object cpp" id="_CPPv415trfNCClientInit11PTRFContextPcPc">
 <span id="_CPPv315trfNCClientInit11PTRFContextPcPc"></span><span id="_CPPv215trfNCClientInit11PTRFContextPcPc"></span><span id="trfNCClientInit__PTRFContext.cP.cP"></span><span class="target" id="trf__ncp_8h_1a78458248dbc305a7d3bad07931cccaa9"></span><span class="kt"><span class="pre">int</span></span><span class="w"> </span><span class="sig-name descname"><span class="n"><span class="pre">trfNCClientInit</span></span></span><span class="sig-paren">(</span><span class="n"><span class="pre">PTRFContext</span></span><span class="w"> </span><span class="n sig-param"><span class="pre">ctx</span></span>, <span class="kt"><span class="pre">char</span></span><span class="w"> </span><span class="p"><span class="pre">*</span></span><span class="n sig-param"><span class="pre">host</span></span>, <span class="kt"><span class="pre">char</span></span><span class="w"> </span><span class="p"><span class="pre">*</span></span><span class="n sig-param"><span class="pre">port</span></span><span class="sig-paren">)</span><a class="headerlink" href="#_CPPv415trfNCClientInit11PTRFContextPcPc" title="Permalink to this definition"></a><br /></dt>
-<dd><p>Initiate the client server communitation, sending API version. </p>
+<dd><p>Initiate client resources and negotiate with the server. </p>
 <dl class="field-list simple">
 <dt class="field-odd">Parameters</dt>
 <dd class="field-odd"><ul class="simple">
@@ -185,7 +185,7 @@ Initializes the out of band negatiation channel for the server. Sets the listeni
 <dl class="cpp function">
 <dt class="sig sig-object cpp" id="_CPPv416trfNCClientClose11PTRFContext">
 <span id="_CPPv316trfNCClientClose11PTRFContext"></span><span id="_CPPv216trfNCClientClose11PTRFContext"></span><span id="trfNCClientClose__PTRFContext"></span><span class="target" id="trf__ncp_8h_1ae1c54e2b5b782db6ebbf7451c630fce5"></span><span class="kt"><span class="pre">int</span></span><span class="w"> </span><span class="sig-name descname"><span class="n"><span class="pre">trfNCClientClose</span></span></span><span class="sig-paren">(</span><span class="n"><span class="pre">PTRFContext</span></span><span class="w"> </span><span class="n sig-param"><span class="pre">ctx</span></span><span class="sig-paren">)</span><a class="headerlink" href="#_CPPv416trfNCClientClose11PTRFContext" title="Permalink to this definition"></a><br /></dt>
-<dd><p>Close the negotiation channel from client. </p>
+<dd><p>Close the negotiation channel from the client. </p>
 <dl class="field-list simple">
 <dt class="field-odd">Parameters</dt>
 <dd class="field-odd"><p><strong>ctx</strong> – Context to use. </p>
@@ -237,8 +237,8 @@ Initializes the out of band negatiation channel for the server. Sets the listeni
            </div>
           </div>
           <footer><div class="rst-footer-buttons" role="navigation" aria-label="Footer">
-        <a href="trf_msg.html" class="btn btn-neutral float-left" title="TRF_MSG" accesskey="p" rel="prev"><span class="fa fa-arrow-circle-left" aria-hidden="true"></span> Previous</a>
-        <a href="trf_preflight.html" class="btn btn-neutral float-right" title="TRF_PREFLIGHT" accesskey="n" rel="next">Next <span class="fa fa-arrow-circle-right" aria-hidden="true"></span></a>
+        <a href="trf_msg.html" class="btn btn-neutral float-left" title="Message Handling Functions" accesskey="p" rel="prev"><span class="fa fa-arrow-circle-left" aria-hidden="true"></span> Previous</a>
+        <a href="trf_preflight.html" class="btn btn-neutral float-right" title="Preflight Connectivity Check Functions" accesskey="n" rel="next">Next <span class="fa fa-arrow-circle-right" aria-hidden="true"></span></a>
     </div>
 
   <hr/>

@@ -1,7 +1,7 @@
 .. _api_msg:
 
-TRF_MSG
-========
+Message Handling Functions
+==========================
 
 .. doxygenfile:: trf_msg.h
    :project: libtrf

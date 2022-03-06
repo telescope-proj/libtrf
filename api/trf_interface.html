@@ -4,7 +4,7 @@
   <meta charset="utf-8" /><meta name="generator" content="Docutils 0.17.1: http://docutils.sourceforge.net/" />
 
   <meta name="viewport" content="width=device-width, initial-scale=1.0" />
-  <title>TRF_INTERFACE &mdash; libtrf  documentation</title>
+  <title>Interface &amp; Address Introspection &mdash; libtrf  documentation</title>
       <link rel="stylesheet" href="../_static/pygments.css" type="text/css" />
       <link rel="stylesheet" href="../_static/css/theme.css" type="text/css" />
       <link rel="stylesheet" href="../_static/graphviz.css" type="text/css" />
@@ -19,8 +19,8 @@
     <script src="../_static/js/theme.js"></script>
     <link rel="index" title="Index" href="../genindex.html" />
     <link rel="search" title="Search" href="../search.html" />
-    <link rel="next" title="TRF_INTERNAL" href="trf_internal.html" />
-    <link rel="prev" title="TRF_INET" href="trf_inet.html" /> 
+    <link rel="next" title="TRF Internal System Functions" href="trf_internal.html" />
+    <link rel="prev" title="Address Handling Functions" href="trf_inet.html" /> 
 </head>
 
 <body class="wy-body-for-nav"> 
@@ -39,15 +39,15 @@
 </div>
         </div><div class="wy-menu wy-menu-vertical" data-spy="affix" role="navigation" aria-label="Navigation menu">
               <ul class="current">
-<li class="toctree-l1 current"><a class="reference internal" href="index.html">Libtrf Documentation</a><ul class="current">
-<li class="toctree-l2"><a class="reference internal" href="trf.html">TRF</a></li>
-<li class="toctree-l2"><a class="reference internal" href="trf_inet.html">TRF_INET</a></li>
-<li class="toctree-l2 current"><a class="current reference internal" href="#">TRF_INTERFACE</a></li>
-<li class="toctree-l2"><a class="reference internal" href="trf_internal.html">TRF_INTERNAL</a></li>
-<li class="toctree-l2"><a class="reference internal" href="trf_msg.html">TRF_MSG</a></li>
-<li class="toctree-l2"><a class="reference internal" href="trf_ncp.html">TRF_NCP</a></li>
-<li class="toctree-l2"><a class="reference internal" href="trf_preflight.html">TRF_PREFLIGHT</a></li>
-<li class="toctree-l2"><a class="reference internal" href="trf_proto.html">TRF_PROTOBUF</a></li>
+<li class="toctree-l1 current"><a class="reference internal" href="index.html">TRF API Function Documentation</a><ul class="current">
+<li class="toctree-l2"><a class="reference internal" href="trf.html">TRF Core Functionality</a></li>
+<li class="toctree-l2"><a class="reference internal" href="trf_def.html">System Data Structures</a></li>
+<li class="toctree-l2"><a class="reference internal" href="trf_inet.html">Address Handling Functions</a></li>
+<li class="toctree-l2 current"><a class="current reference internal" href="#">Interface &amp; Address Introspection</a></li>
+<li class="toctree-l2"><a class="reference internal" href="trf_internal.html">TRF Internal System Functions</a></li>
+<li class="toctree-l2"><a class="reference internal" href="trf_msg.html">Message Handling Functions</a></li>
+<li class="toctree-l2"><a class="reference internal" href="trf_ncp.html">Negotiation Channel Protocol - Connection Management Functions</a></li>
+<li class="toctree-l2"><a class="reference internal" href="trf_preflight.html">Preflight Connectivity Check Functions</a></li>
 </ul>
 </li>
 </ul>
@@ -66,8 +66,8 @@
           <div role="navigation" aria-label="Page navigation">
   <ul class="wy-breadcrumbs">
       <li><a href="../index.html" class="icon icon-home"></a> &raquo;</li>
-          <li><a href="index.html">Libtrf Documentation</a> &raquo;</li>
-      <li>TRF_INTERFACE</li>
+          <li><a href="index.html">TRF API Function Documentation</a> &raquo;</li>
+      <li>Interface &amp; Address Introspection</li>
       <li class="wy-breadcrumbs-aside">
             <a href="../_sources/api/trf_interface.rst.txt" rel="nofollow"> View page source</a>
       </li>
@@ -77,8 +77,8 @@
           <div role="main" class="document" itemscope="itemscope" itemtype="http://schema.org/Article">
            <div itemprop="articleBody">
              
-  <section id="trf-interface">
-<span id="api-interface"></span><h1>TRF_INTERFACE<a class="headerlink" href="#trf-interface" title="Permalink to this headline"></a></h1>
+  <section id="interface-address-introspection">
+<span id="api-interface"></span><h1>Interface &amp; Address Introspection<a class="headerlink" href="#interface-address-introspection" title="Permalink to this headline"></a></h1>
 <p>Interface &amp; Address Vector Management. </p>
 <div class="breathe-sectiondef docutils container">
 <p class="breathe-sectiondef-title rubric" id="breathe-section-title-functions">Functions</p>
@@ -154,7 +154,7 @@
 <span id="_CPPv320trfFreeInterfaceList13PTRFInterface"></span><span id="_CPPv220trfFreeInterfaceList13PTRFInterface"></span><span id="trfFreeInterfaceList__PTRFInterface"></span><span class="target" id="trf__interface_8h_1aba0d2dc92c90444a30071f38dc09d096"></span><span class="kt"><span class="pre">void</span></span><span class="w"> </span><span class="sig-name descname"><span class="n"><span class="pre">trfFreeInterfaceList</span></span></span><span class="sig-paren">(</span><span class="n"><span class="pre">PTRFInterface</span></span><span class="w"> </span><span class="n sig-param"><span class="pre">ifaces</span></span><span class="sig-paren">)</span><br /></dt>
 <dd><p>Free an interface list. </p>
 <p>
-This call frees a linked list of struct TRFInterface, typically allocated using the <a class="reference internal" href="trf.html#trf_8h_1adc45c322e168cb8d64dbfa12b544dbfb"><span class="std std-ref">trfGetInterfaceList()</span></a> call.</p>
+This call frees a linked list of struct <a class="reference internal" href="trf_def.html#struct_t_r_f_interface"><span class="std std-ref">TRFInterface</span></a>, typically allocated using the <a class="reference internal" href="trf.html#trf_8h_1adc45c322e168cb8d64dbfa12b544dbfb"><span class="std std-ref">trfGetInterfaceList()</span></a> call.</p>
 <dl class="field-list simple">
 <dt class="field-odd">Parameters</dt>
 <dd class="field-odd"><ul class="simple">
@@ -233,8 +233,8 @@ Create an interface list containing all interfaces on the system.</p>
            </div>
           </div>
           <footer><div class="rst-footer-buttons" role="navigation" aria-label="Footer">
-        <a href="trf_inet.html" class="btn btn-neutral float-left" title="TRF_INET" accesskey="p" rel="prev"><span class="fa fa-arrow-circle-left" aria-hidden="true"></span> Previous</a>
-        <a href="trf_internal.html" class="btn btn-neutral float-right" title="TRF_INTERNAL" accesskey="n" rel="next">Next <span class="fa fa-arrow-circle-right" aria-hidden="true"></span></a>
+        <a href="trf_inet.html" class="btn btn-neutral float-left" title="Address Handling Functions" accesskey="p" rel="prev"><span class="fa fa-arrow-circle-left" aria-hidden="true"></span> Previous</a>
+        <a href="trf_internal.html" class="btn btn-neutral float-right" title="TRF Internal System Functions" accesskey="n" rel="next">Next <span class="fa fa-arrow-circle-right" aria-hidden="true"></span></a>
     </div>
 
   <hr/>

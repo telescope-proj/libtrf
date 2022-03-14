@@ -23,7 +23,10 @@
 #include "trf.h"
 #include "trf_ncp.h"
 #include <signal.h>
-#include <sys/mman.h>
+
+#if defined(__linux__)
+    #include <sys/mman.h>
+#endif
 
 int main(int argc, char ** argv)
 {
@@ -75,7 +78,10 @@ int main(int argc, char ** argv)
         printf("Unable to register display sink: error %s\n", strerror(ret));
         return -1;
     }
-    madvise(displays->fb_addr, trfGetDisplayBytes(displays), MADV_HUGEPAGE);
+    
+    #if defined(__linux__)
+        madvise(displays->fb_addr, trfGetDisplayBytes(displays), MADV_HUGEPAGE);
+    #endif
 
     // Indicate to the server that the client is ready to receive frames
 

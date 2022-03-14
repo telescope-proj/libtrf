@@ -25,7 +25,17 @@
 #define _TRF_INTERFACE_H_
 
 #include "trf.h"
+#include "trf_platform.h"
 #include "trf_internal.h"
+
+#define TRF_INTERFACE_LOCAL   (1 << 1)      // Return local interfaces (e.g. loopback)
+#define TRF_INTERFACE_EXT     (1 << 2)      // Return external interfaces (e.g. Ethernet port)
+#define TRF_INTERFACE_SPD     (1 << 3)      // Only return interfaces with known link speeds
+#define TRF_INTERFACE_IP4     (1 << 10)     // Return interfaces with IPv4 addresses attached
+#define TRF_INTERFACE_IP6     (1 << 11)     // Return interfaces with IPv6 addresses attached
+
+#define TRF_INTERFACE_POLICY_IP (1 << 20)   // Use IP address to determine whether an interface is local or remote
+#define TRF_INTERFACE_POLICY_DB (1 << 21)   // Use a platform-specific database to determine whether an interface is local or remote
 
 /**
  * @file trf_interface.h
@@ -79,9 +89,10 @@ void trfFreeInterfaceList(PTRFInterface ifaces);
   * @brief Create an interface list containing all interfaces on the system.
   * @param list_out     Output interface list
   * @param length       Output interface list length
+  * @param flags        Flags used to limit interfaces returned
   * @return 0 on success, negative error code on failure
 */
-int trfGetInterfaceList(PTRFInterface * list_out, uint32_t * length);
+int trfGetInterfaceList(PTRFInterface * list_out, uint32_t * length, uint64_t flags);
 
 /**
   * @brief Determine the fastest interface in the address vector.

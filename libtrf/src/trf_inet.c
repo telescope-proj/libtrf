@@ -22,7 +22,7 @@
 */
 
 #include "trf_inet.h"
-
+#include "trf_platform.h"
 int trfCheckIPVersion(char * addr)
 {
     char buf[INET6_ADDRSTRLEN];
@@ -101,7 +101,7 @@ int trfNodeServiceToAddr(const char * addr, struct sockaddr * sdr)
 
 int trfGetNodeService(struct sockaddr * sdr, char * addr)
 {
-    if (!addr)
+    if (!sdr || !addr)
     {
         return -EINVAL;
     }
@@ -125,7 +125,7 @@ int trfGetNodeService(struct sockaddr * sdr, char * addr)
         case AF_INET6:
             addr[0] = '[';
             if(!inet_ntop(AF_INET6, 
-                &((struct sockaddr_in6 *) sdr)->sin6_addr.__in6_u, addr + 1, 
+                &((struct sockaddr_in6 *) sdr)->sin6_addr.s6_addr, addr + 1, 
                 INET6_ADDRSTRLEN))
             {
                 trf__log_error("Unable to decode IPv6 address");
@@ -144,8 +144,10 @@ int trfGetNodeService(struct sockaddr * sdr, char * addr)
 
 int trfGetIPaddr(struct sockaddr * sdr, char * addr)
 {
-    if (!addr)
+    if (!addr || !sdr)
     {
+        trf__log_error("Invalid argument to trfGetIPaddr: sdr: %p; addr: %p",
+                       sdr, addr);
         return -EINVAL;
     }
     switch (sdr->sa_family)
@@ -161,7 +163,7 @@ int trfGetIPaddr(struct sockaddr * sdr, char * addr)
             break;
         case AF_INET6:
             if(!inet_ntop(AF_INET6, 
-                &((struct sockaddr_in6 *) sdr)->sin6_addr.__in6_u, addr, 
+                &((struct sockaddr_in6 *) sdr)->sin6_addr.s6_addr, addr, 
                 INET6_ADDRSTRLEN))
             {
                 trf__log_error("Unable to decode IPv6 address");
@@ -177,28 +179,100 @@ int trfGetIPaddr(struct sockaddr * sdr, char * addr)
 
 int trfGetMappedIPv4addr(struct sockaddr_in6 * addr, char * address)
 {
-    switch (IN6_IS_ADDR_V4MAPPED(&addr->sin6_addr))
+    if (IN6_IS_ADDR_V4MAPPED(&addr->sin6_addr))
     {
-        case 0:
-            if (!inet_ntop(AF_INET6, &addr->sin6_addr, address, INET6_ADDRSTRLEN))
+        if (!inet_ntop(AF_INET6, &addr->sin6_addr, address, INET6_ADDRSTRLEN))
             {
                 trf__log_error("Failed to decode mapped address: %s",
                     strerror(errno));
                 return -errno;
             }
-            return 0;
-        default:
+        return 0;
+    }
+    const uint8_t *bytes = ((const struct sockaddr_in6 *)addr)->sin6_addr.s6_addr;
+    bytes += 12;
+    struct in_addr taddr = { *(const in_addr_t *)bytes };
+    if (!inet_ntop(AF_INET, &taddr, address, INET_ADDRSTRLEN))
+    {
+        trf__log_error("Failed to decode mapped address: %s",
+            strerror(errno));
+        return -errno;
+    }
+    return 0;
+}
+
+#define trf__Netmask4(n) ((n) == 0 ? 0 : ((n) == 32 ? 0xFFFFFFFF : (0xFFFFFFFF << (32 - (n)))))
+#define trf__Netmask6(n) ((n) == 0 ? 0 : ((n) == 128 ? 0xFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFF : (0xFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFF << (128 - (n)))))
+#define TRF__PSAI struct sockaddr_in *
+#define TRF__PSAI6 struct sockaddr_in6 *
+#define trf__RawAddr4(a) (((TRF__PSAI)a)->sin_addr.s_addr)
+#define trf__RawAddr6(a) (((TRF__PSAI6)a)->sin6_addr.s6_addr)
+
+int trfCheckNetwork(struct sockaddr * net1, int8_t net1_sn , 
+        struct sockaddr * net2, int8_t net2_sn){
+
+    if (net1->sa_family != net2->sa_family){
+        trf__log_error("Source and destination addresses must be the same type");
+        return -1;
+    }
+    switch (net1->sa_family)
+    {
+    case AF_INET:
+        if (
+            (trf__RawAddr4(net1) 
+            & trf__Netmask4(net1_sn)) ==
+            (trf__RawAddr4(net2)
+            & trf__Netmask4(net2_sn))
+        )
         {
-            const uint8_t *bytes = ((const struct sockaddr_in6 *)addr)->sin6_addr.s6_addr;
-            bytes += 12;
-            struct in_addr taddr = { *(const in_addr_t *)bytes };
-            if (!inet_ntop(AF_INET, &taddr, address, INET_ADDRSTRLEN))
-            {
-                trf__log_error("Failed to decode mapped address: %s",
-                    strerror(errno));
-                return -errno;
-            }
+            return 1;
+        }
+        else 
+        {
             return 0;
         }
+        break;
+    case AF_INET6: ;
+        uint64_t * ca1 = (uint64_t *) \
+            ((struct sockaddr_in6 *) &net1)->sin6_addr.s6_addr;
+        uint64_t * ca2 = ca1 ++;
+
+        uint64_t * da1 = (uint64_t *) \
+            ((struct sockaddr_in6 *) &net2)->sin6_addr.s6_addr;
+        uint64_t * da2 = da1 ++;
+
+        uint64_t cnm1 = net1_sn > 64 ? \
+            htobe64(INT64_MIN >> 63) : \
+            htobe64(INT64_MIN >> (net1_sn - 1));
+        uint64_t cnm2 = net1_sn > 64 ? \
+            htobe64(INT64_MIN >> (net1_sn - 65)): \
+            0;
+
+        uint64_t dnm1 = net2_sn > 64 ? \
+            htobe64(INT64_MIN >> 63): \
+            htobe64(INT64_MIN >> (net2_sn - 1));
+        uint64_t dnm2 = net2_sn > 64 ? \
+            htobe64(INT64_MIN >> (net2_sn - 65)) : \
+            0;
+
+        uint64_t cr1 = *ca1 & cnm1;
+        uint64_t cr2 = *ca2 & cnm2;
+        uint64_t sr1 = *da1 & dnm1;
+        uint64_t sr2 = *da2 & dnm2;
+
+        if (cr1 == sr1 && cr2 == sr2)
+        {
+            return 1;
+        }
+        else 
+        {
+            return 0;
+        }
+
+        break;
+    default:
+        trf__log_error("Invalid ip address family");
+        return -1;
     }
+    return 0;
 }

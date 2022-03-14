@@ -81,4 +81,15 @@ int trfGetNodeService(struct sockaddr * sdr, char * addr);
 */
 int trfNodeServiceToAddr(const char * addr, struct sockaddr * sdr);
 
+/**
+ * @brief Checks if the 2 addresses are in the same network
+ * 
+ * @param net1            First network addresses to compare
+ * @param net1_sn         Subnet of the first address
+ * @param net2            Second network address to compare to the first one
+ * @param net2_sn         Subnet of the second address
+ * @return 1 if the addresses are in the same network, 0 of they are not, negative error code on failure
+ */
+int trfCheckNetwork(struct sockaddr * net1, int8_t net1_sn , 
+        struct sockaddr * net2, int8_t net2_sn);
 #endif // _TRF_INET_H_

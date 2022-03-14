@@ -1,7 +1,7 @@
 cmake_minimum_required(VERSION 3.0.0)
 project(libtrf LANGUAGES C)
 
-include_directories(include)
+include_directories(include "/Users/matthewmcmullin/Desktop/Github/libfabric/include" "/Users/matthewmcmullin/Desktop/Github")
 add_definitions(-DTRF_LOG_USE_COLOR)
 
 set(SOURCES
@@ -14,6 +14,7 @@ set(SOURCES
   #src/trf_preflight.c
   src/trf_inet.c
   src/trf_internal.c
+  src/trf_platform.c
 )
 
 find_library(Libfabric NAMES fabric)
@@ -31,7 +32,7 @@ add_compile_options(
 )
 
 add_library(trf STATIC ${SOURCES})
-set_property(TARGET trf PROPERTY C_STANDARD 99)
+set_property(TARGET trf PROPERTY C_STANDARD 11)
 
 target_include_directories(trf
 	INTERFACE

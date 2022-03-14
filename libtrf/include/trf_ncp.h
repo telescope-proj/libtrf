@@ -35,6 +35,7 @@
 #include "trf_inet.h"
 #include "trf_interface.h"
 #include "trf_protobuf.h"
+#include "trf_platform.h"
 
 #include <string.h>
 #include <stdlib.h>
@@ -45,16 +46,9 @@
 #include <linux/ethtool.h>
 #endif
 
-#if defined (__unix__) || (defined (__APPLE__) && defined (__MACH__))
-#include <ifaddrs.h>
-#include <sys/ioctl.h>
-#include <netinet/in.h>
-#include <endian.h>
-#endif
-
 #define TRF_API_MAJOR    0
 #define TRF_API_MINOR    2
-#define TRF_API_PATCH    0
+#define TRF_API_PATCH    1
 
 /**
   * @brief Initializes the out of band negatiation channel for the server. 

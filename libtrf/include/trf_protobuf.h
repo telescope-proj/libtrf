@@ -46,11 +46,11 @@ enum TRFM_Type {
     TRFM_SERVER_ACK             = (1 << 10),
     TRFM_CLIENT_F_REQ           = (1 << 11),
     TRFM_SERVER_NOTIFY_CHUNK    = (1 << 12),
-    TRFM_SERVER_ACK_F_REQ       = (1 << 12),
-    TRFM_ADDR_PF                = (1 << 13),
-    TRFM_CH_OPEN                = (1 << 14),
-    TRFM_CURSOR_DATA            = (1 << 15),
-    TRFM_MAX                    = (1 << 16)
+    TRFM_SERVER_ACK_F_REQ       = (1 << 13),
+    TRFM_ADDR_PF                = (1 << 14),
+    TRFM_CH_OPEN                = (1 << 15),
+    TRFM_CURSOR_DATA            = (1 << 16),
+    TRFM_MAX                    = (1 << 17)
 };
 
 /**

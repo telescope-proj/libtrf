@@ -22,6 +22,7 @@
 */
 
 #include "trf_interface.h"
+#include "trf_platform.h"
 
 int trfRemoveInvalid(PTRFInterface ifs, PTRFInterface * out_ifs, int * n_ifs)
 {
@@ -104,8 +105,10 @@ int trfCreateAddrV(PTRFInterface src, PTRFInterface dest,
     {
         for (PTRFInterface tmp_dest = dest; tmp_dest; tmp_dest = tmp_dest->next)
         {
+            uint8_t flag = 0;
             if (tmp_src->addr->sa_family != tmp_dest->addr->sa_family)
             {
+                trf__log_trace("Address family mismatch");
                 continue;
             }
             trf__log_trace("[link %d] src: %d, dest: %d", j, tmp_src->speed, 
@@ -140,6 +143,7 @@ int trfCreateAddrV(PTRFInterface src, PTRFInterface dest,
                         trfFreeAddrV(av_start);
                         return -ENOMEM;
                     }
+                    flag = 1;
                 }
             }
             else if (tmp_src->addr->sa_family == AF_INET6)
@@ -154,7 +158,7 @@ int trfCreateAddrV(PTRFInterface src, PTRFInterface dest,
 
                 uint64_t cnm1 = tmp_src->netmask > 64 ? \
                     htobe64((uint64_t) -1 >> 63) : \
-                    htobe64((uint64_t) -1 >> (tmp_dest->netmask - 1));
+                    htobe64((uint64_t) -1 >> (tmp_src->netmask - 1));
                 uint64_t cnm2 = tmp_src->netmask > 64 ? \
                     htobe64((uint64_t) -1 >> (tmp_src->netmask - 65)) : \
                     0;
@@ -194,6 +198,7 @@ int trfCreateAddrV(PTRFInterface src, PTRFInterface dest,
                         trfFreeAddrV(av_start);
                         return -ENOMEM;
                     }
+                    flag = 1;
                 }
             }
             else
@@ -202,9 +207,12 @@ int trfCreateAddrV(PTRFInterface src, PTRFInterface dest,
                 continue;
             }
             trf__log_trace("Pair speed: %d", av_tmp->pair_speed);
-            av_prev = av_tmp;
-            av_tmp = av_tmp->next;
-            j++;
+            if (flag)
+            {
+                av_prev = av_tmp;
+                av_tmp = av_tmp->next;
+                j++;
+            }
         }
         i++;
     }
@@ -227,9 +235,9 @@ void trfFreeInterfaceList(PTRFInterface ifaces)
     }
 }
 
-int trfGetInterfaceList(PTRFInterface * list_out, uint32_t * length)
+int trfGetInterfaceList(PTRFInterface * list_out, uint32_t * length, uint64_t flags)
 {
-    #if defined(__linux__)
+    #ifdef _TRF_UNIX_
     
     if (!list_out || !length)
     {
@@ -238,7 +246,7 @@ int trfGetInterfaceList(PTRFInterface * list_out, uint32_t * length)
     }
     
     int len = 0;
-    int out;
+    int out, ret;
     struct ifaddrs * ifa, * ifa_tmp;
     struct TRFInterface * trfi = calloc(1, sizeof(struct TRFInterface));
     if (!trfi)
@@ -247,7 +255,7 @@ int trfGetInterfaceList(PTRFInterface * list_out, uint32_t * length)
         return -ENOMEM;
     }
 
-    struct TRFInterface * trf_tmp = trfi;
+    struct TRFInterface * trf_tmp = trfi, *prev_trf;
     if (getifaddrs(&ifa) < 0)
     {
         trf__log_error("getifaddrs() error: %s", strerror(errno));
@@ -258,60 +266,241 @@ int trfGetInterfaceList(PTRFInterface * list_out, uint32_t * length)
     {
         if (ifa_tmp->ifa_addr)
         {
-            out = trfGetLinkSpeed(ifa_tmp->ifa_name, &trf_tmp->speed);
-            if (out < 0 || trf_tmp->speed < 0)
+            char dbg[INET6_ADDRSTRLEN];
+
+            if (ifa_tmp->ifa_addr->sa_family == AF_INET
+                && (flags & TRF_INTERFACE_IP4))
             {
-                trf__log_warn("Unable to get interface speed for %s", 
-                    ifa_tmp->ifa_name);
-            }
-            switch (ifa_tmp->ifa_addr->sa_family)
-            {
-                char dbg[INET6_ADDRSTRLEN];
-                case AF_INET:
-                    trf__log_trace("Actual Mask %s", inet_ntop(AF_INET, 
-                        &((struct sockaddr_in *) ifa_tmp->ifa_netmask)->sin_addr.s_addr,
+                trf__log_trace("Actual Mask %s", inet_ntop(AF_INET, 
+                        &((struct sockaddr_in *) \
+                            ifa_tmp->ifa_netmask)->sin_addr.s_addr,
                         dbg, INET_ADDRSTRLEN
                     ));
-                    trf_tmp->netmask = trf__HammingWeight64(
+                
+                
+                if (flags & TRF_INTERFACE_EXT)
+                {
+                    uint8_t nm =  trf__HammingWeight64(
                         ((struct sockaddr_in *) \
                             ifa_tmp->ifa_netmask)->sin_addr.s_addr
-                    );
-                    trf_tmp->addr = malloc(sizeof(struct sockaddr_in));
-                    if (!trf_tmp->addr)
+                        );
+                    for (struct TRFNet *tmp = netDb; tmp; tmp = tmp->next)
                     {
-                        trf__log_error("Memory allocation failed");
-                        goto freenomem;
+                        if (tmp->type == TRF_NET_BLACKLIST 
+                            && ifa_tmp->ifa_name == tmp->ifname){
+                            break;
+                        }
+                        if (tmp->sa.ss_family == AF_INET 
+                            && tmp->type == TRF_NET_LINK_LOCAL){
+                            
+                            char test[INET6_ADDRSTRLEN], test2[INET6_ADDRSTRLEN];
+                            trfGetIPaddr(ifa_tmp->ifa_addr, test);
+                            trfGetIPaddr((struct sockaddr *) &tmp->sa, test2);
+                            trf__log_debug("Checking IP address pair %s <--> %s"
+                                    ,test,test2);
+
+                            ret = trfCheckNetwork(ifa_tmp->ifa_addr, nm, 
+                                (struct sockaddr *) &tmp->sa, tmp->subnet);
+                            trf__log_debug("Return Value from check network: %d", 
+                                    ret);
+                            if (ret == 0){
+                                trf_tmp->netmask = nm;
+                                trf_tmp->addr = \
+                                    malloc(sizeof(struct sockaddr_in));
+                                if (!trf_tmp->addr)
+                                {
+                                    trf__log_error("Memory allocation failed");
+                                    goto freenomem;
+                                }
+                                out = trfGetLinkSpeed(ifa_tmp->ifa_name, 
+                                    &trf_tmp->speed);
+                                if ((out < 0 || trf_tmp->speed < 0) 
+                                    && (flags & TRF_INTERFACE_SPD))
+                                {
+                                    trf__log_warn("Unable to get"
+                                        "interface speed for %s", 
+                                        ifa_tmp->ifa_name);
+                                    break;
+                                }
+                                
+                                char test[INET6_ADDRSTRLEN];
+                                if (trfGetIPaddr(ifa_tmp->ifa_addr, test) < 0)
+                                {
+                                    trf__log_trace("External IP address found: %s", test);
+                                }
+                                memcpy(trf_tmp->addr, ifa_tmp->ifa_addr, 
+                                    sizeof(struct sockaddr_in));
+                                break;
+                            }
+                            else if(ret == 1)
+                            {
+                                break;
+                            }
+                            else
+                            {
+                                trf__log_error("Unable to check address");
+                                return -1;
+                            }
+                        }
                     }
-                    memcpy(trf_tmp->addr, ifa_tmp->ifa_addr, 
-                        sizeof(struct sockaddr_in));
-                    break;
-                case AF_INET6:
+                }
+                if (flags & TRF_INTERFACE_LOCAL)
+                {
+                    trf__log_trace("Getting hammer weight of Subnet");
+                    uint8_t nm =  trf__HammingWeight64(
+                        ((struct sockaddr_in *) \
+                            ifa_tmp->ifa_netmask)->sin_addr.s_addr
+                        );
+                    trf__log_trace("Finished getting hammer weight");
+                    for (struct TRFNet *tmp = netDb; tmp; tmp = tmp->next)
+                    {
+                        if (tmp->type == TRF_NET_BLACKLIST //Check blacklist addresses
+                            && ifa_tmp->ifa_name == tmp->ifname){
+                            break;
+                        }
+
+                        if (tmp->sa.ss_family == AF_INET 
+                            && tmp->type == TRF_NET_LINK_LOCAL)
+                        {
+
+                            ret = trfCheckNetwork(ifa_tmp->ifa_addr, nm, 
+                                (struct sockaddr *) &tmp->sa, tmp->subnet);
+                            if (ret == 1)
+                            {
+                                trf_tmp->netmask = nm;
+                                trf_tmp->addr = \
+                                    malloc(sizeof(struct sockaddr_in));
+                                if (!trf_tmp->addr)
+                                {
+                                    trf__log_error("Memory allocation failed");
+                                    goto freenomem;
+                                }
+                                out = trfGetLinkSpeed(ifa_tmp->ifa_name, 
+                                    &trf_tmp->speed);
+                                if ((out < 0 || trf_tmp->speed < 0) 
+                                    && (flags & TRF_INTERFACE_SPD))
+                                {
+                                    trf__log_warn("Unable to get"
+                                        "interface speed for %s", 
+                                        ifa_tmp->ifa_name);
+                                    break;
+                                }
+                                trf__log_trace("linklocal ipv4 address added to interface list");
+                                memcpy(trf_tmp->addr, ifa_tmp->ifa_addr, 
+                                    sizeof(struct sockaddr_in));
+                                break;
+                            }
+                            else if(ret == 0)
+                            {
+                                break;
+                            }
+                            else
+                            {
+                                trf__log_error("Unable to check address");
+                                return -1;
+                            }
+                        }
+                    }
+                }
+            }
+            else if (ifa_tmp->ifa_addr->sa_family == AF_INET6
+                && (flags & TRF_INTERFACE_IP6))
+            {
+                if (flags & TRF_INTERFACE_EXT)
+                {
                     trf__log_trace("Actual Mask %s", inet_ntop(AF_INET6, 
-                        &((struct sockaddr_in6 *) ifa_tmp->ifa_netmask)->sin6_addr.s6_addr,
-                        dbg, INET6_ADDRSTRLEN
+                        &((struct sockaddr_in6 *) \
+                            ifa_tmp->ifa_netmask)->sin6_addr.s6_addr,
+                            dbg, INET6_ADDRSTRLEN
                     ));
-                    uint8_t tmp = 0;
+                    uint8_t v6sn = 0;
                     uint64_t * addr_ptr = (uint64_t *) &((struct sockaddr_in6 *) \
                         ifa_tmp->ifa_netmask)->sin6_addr.s6_addr;
-                    tmp += trf__HammingWeight64((uint64_t) *addr_ptr);
-                    tmp += trf__HammingWeight64((uint64_t) *++addr_ptr);
-                    trf_tmp->netmask = tmp;
-                    trf_tmp->addr = malloc(sizeof(struct sockaddr_in6));
-                    if (!trf_tmp->addr)
+                    v6sn += trf__HammingWeight64((uint64_t) *addr_ptr);
+                    v6sn += trf__HammingWeight64((uint64_t) *++addr_ptr);
+
+                    for (struct TRFNet *tmp = netDb; tmp; tmp = tmp->next)
                     {
-                        trf__log_error("Memory allocation failed");
-                        goto freenomem;
+                        if (tmp->sa.ss_family == AF_INET6 
+                                && tmp->type == TRF_NET_LINK_LOCAL)
+                        {
+                            ret = trfCheckNetwork(ifa_tmp->ifa_addr, v6sn, 
+                                (struct sockaddr *) &tmp->sa, tmp->subnet);
+                            if (ret == 0)
+                            {
+                                trf_tmp->netmask = v6sn;
+                                trf_tmp->addr = malloc(sizeof(struct sockaddr_in6));
+                                if (!trf_tmp->addr)
+                                {
+                                    trf__log_error("Memory allocation failed");
+                                    goto freenomem;
+                                }
+                                out = trfGetLinkSpeed(ifa_tmp->ifa_name, 
+                                    &trf_tmp->speed);
+                                if ((out < 0 || trf_tmp->speed < 0) 
+                                    && (flags & TRF_INTERFACE_SPD))
+                                {
+                                    trf__log_warn("Unable to get"
+                                        "interface speed for %s", 
+                                        ifa_tmp->ifa_name);
+                                    break;
+                                }
+                                trf__log_trace("External ipv6 address added to interface list");
+                                memcpy(trf_tmp->addr, ifa_tmp->ifa_addr, 
+                                    sizeof(struct sockaddr_in6));
+                                break;
+                            }
+                        }
                     }
-                    memcpy(trf_tmp->addr, ifa_tmp->ifa_addr, 
-                        sizeof(struct sockaddr_in6));
-                    break;
-                default:
-                    trf__log_warn("Unknown address family %d", 
-                        ifa_tmp->ifa_addr->sa_family);
+                }
+                if (flags & TRF_INTERFACE_LOCAL)
+                {
+                    trf__log_trace("Actual Mask %s", inet_ntop(AF_INET6, 
+                        &((struct sockaddr_in6 *) \
+                            ifa_tmp->ifa_netmask)->sin6_addr.s6_addr,
+                            dbg, INET6_ADDRSTRLEN
+                    ));
+                    uint8_t v6sn = 0;
+                    uint64_t * addr_ptr = (uint64_t *) &((struct sockaddr_in6 *) \
+                        ifa_tmp->ifa_netmask)->sin6_addr.s6_addr;
+                    v6sn += trf__HammingWeight64((uint64_t) *addr_ptr);
+                    v6sn += trf__HammingWeight64((uint64_t) *++addr_ptr);
+
+                    for (struct TRFNet *tmp = netDb; tmp; tmp = tmp->next)
+                    {
+                        if (tmp->sa.ss_family == AF_INET6 
+                                && tmp->type == TRF_NET_LINK_LOCAL)
+                        {
+                            ret = trfCheckNetwork(ifa_tmp->ifa_addr, v6sn, 
+                                (struct sockaddr *) &tmp->sa, tmp->subnet);
+                            if (ret == 1)
+                            {
+                                trf_tmp->netmask = v6sn;
+                                trf_tmp->addr = malloc(sizeof(struct sockaddr_in6));
+                                if (!trf_tmp->addr)
+                                {
+                                    trf__log_error("Memory allocation failed");
+                                    goto freenomem;
+                                }
+                                out = trfGetLinkSpeed(ifa_tmp->ifa_name, 
+                                    &trf_tmp->speed);
+                                if ((out < 0 || trf_tmp->speed < 0) 
+                                    && (flags & TRF_INTERFACE_SPD))
+                                {
+                                    trf__log_warn("Unable to get"
+                                        "interface speed for %s", 
+                                        ifa_tmp->ifa_name);
+                                    break;
+                                }
+                                trf__log_trace("linklocal ipv6 address added to interface list");
+                                memcpy(trf_tmp->addr, ifa_tmp->ifa_addr, 
+                                    sizeof(struct sockaddr_in6));
+                                break;
+                            }
+                        }
+                    }
+                }
             }
-
-            
-
             if (trf_tmp->netmask)
             {
                 trf__log_trace("Netmask: %d", trf_tmp->netmask);   
@@ -323,19 +512,21 @@ int trfGetInterfaceList(PTRFInterface * list_out, uint32_t * length)
                         trf__log_error("%s", strerror(ENOMEM));
                         goto freenomem;
                     }
+                    prev_trf = trf_tmp;
                     trf_tmp = trf_tmp->next;
                 }
                 len++;
             } else {
 
             }
-
         }
     }
+    free(trf_tmp);
+    prev_trf->next = NULL;
 
     freeifaddrs(ifa);
 
-    *length = len;  // shut up compiler waeeee
+    *length = len; 
     *list_out = trfi;
     return 0;
     
@@ -343,11 +534,13 @@ int trfGetInterfaceList(PTRFInterface * list_out, uint32_t * length)
     return -ENOSYS;
     #endif
 
+#ifdef _TRF_UNIX_
 freenomem:
     out = -ENOMEM;
     trfFreeInterfaceList(trfi);
     freeifaddrs(ifa);
     return out;
+#endif
 }
 
 int trfGetFastestLink(PTRFAddrV av, PTRFAddrV * av_out)

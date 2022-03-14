@@ -40,6 +40,15 @@ int trfNCServerInit(PTRFContext ctx, char * host, char * port)
         trfSetDefaultOpts(opts);
         ctx->opts = opts;
     }
+    #if (defined (__APPLE__) && defined (__MACH__))
+    if(trfParseConfig("conf/osx/networks.conf") < 0)
+    #else
+    if(trfParseConfig("conf/linux/networks.conf") < 0)
+    #endif
+    {
+        trf__log_error("Unable to open up config file");
+        return -EINVAL;
+    }
 
     if (ctx->svr.listen_fd > 0)
     {
@@ -141,6 +150,16 @@ int trfNCClientInit(PTRFContext ctx, char * host, char * port)
     {
         trf__log_error("Client already initialized");
         return -EALREADY;
+    }
+    
+    #if (defined (__APPLE__) && defined (__MACH__))
+    if(trfParseConfig("conf/osx/networks.conf") < 0)
+    #else
+    if(trfParseConfig("conf/linux/networks.conf") < 0)
+    #endif
+    {
+        trf__log_error("Unable to open up config file");
+        return -EINVAL;
     }
 
     trf__log_info("libtrf client %d.%d.%d initializing", 
@@ -292,9 +311,10 @@ int trfNCClientInit(PTRFContext ctx, char * host, char * port)
 
     uint32_t num_ifs;
     PTRFInterface clientIf;
-    if ((ret = trfGetInterfaceList(&clientIf, &num_ifs)) < 0)
+    if ((ret = trfGetInterfaceList(&clientIf, &num_ifs, 
+            TRF_INTERFACE_EXT | TRF_INTERFACE_IP4 )) < 0)
     {
-        trf__log_error("Unable to get Interface Lists");
+        trf__log_error("Unable to get Interface Lists: %s", strerror(ret));
         goto free_buff;
     }
 
@@ -336,9 +356,9 @@ int trfNCClientInit(PTRFContext ctx, char * host, char * port)
         }
         trf_msg__addr_cand__init(msg->addr_pf->addrs[i]);
         char addr[INET6_ADDRSTRLEN];
-        if (trfGetIPaddr(tmp_if->addr, addr) < 0)
+        if ((ret = trfGetIPaddr(tmp_if->addr, addr)) < 0)
         {
-            trf__log_error("Unable to decode ip addr");
+            trf__log_error("Unable to decode ip addr: %s", strerror(-ret));
             continue;
         }
         msg->addr_pf->addrs[i]->addr    = strdup(addr);
@@ -451,19 +471,30 @@ int trfNCClientInit(PTRFContext ctx, char * host, char * port)
                 fi_node->addr_format);
             continue;
         }
-        ret = trfSerializeAddress((void *) fi_node->src_addr, fmt, 
-            &msg->client_cap->transports[cf]->route);
-        if (ret < 0)
+        if (fi_node->src_addr)
         {
-            trf__log_error("Unable to serialize address");
-            trf_msg__transport__free_unpacked(msg->client_cap->transports[cf],
-                NULL);
-            continue;
+            ret = trfSerializeAddress((void *) fi_node->src_addr, fmt, 
+                &msg->client_cap->transports[cf]->route);
+            if (ret < 0)
+            {
+                trf__log_error("Unable to serialize address");
+                trf_msg__transport__free_unpacked(msg->client_cap->transports[cf],
+                    NULL);
+                msg->client_cap->transports[cf] = NULL;
+                continue;
+            }
+            else
+            {
+                trf__log_debug("Serialized: %s", 
+                    msg->client_cap->transports[cf]->route);
+                cf++;
+            }
         }
         else
         {
-            trf__log_debug("Serialized: %s", 
-                msg->client_cap->transports[cf]->route);
+            // If the address is dynamic, we just set it to NULL and test if
+            // the connection works manually later
+            msg->client_cap->transports[cf]->route = NULL;
             cf++;
         }
     }
@@ -828,7 +859,8 @@ int trfNCAccept(PTRFContext ctx, PTRFContext * ctx_out)
     
     PTRFInterface svr_ifs;
     uint32_t svr_num_ifs;
-    if ((ret = trfGetInterfaceList(&svr_ifs, &svr_num_ifs)))
+    if ((ret = trfGetInterfaceList(&svr_ifs, &svr_num_ifs, 
+        TRF_INTERFACE_EXT | TRF_INTERFACE_IP4 )))
     {
         trf__log_error("Unable to get interface list");
         goto free_ci_list;
@@ -914,7 +946,7 @@ int trfNCAccept(PTRFContext ctx, PTRFContext * ctx_out)
     }
     int i = 0;
     int flag = 0;
-    struct fi_info * fi;
+    struct fi_info * fi = NULL;
     for (; i < msg->client_cap->n_transports; i++)
     {
         trf__log_debug("(fabric) trying prov %d/%d (name: %s proto: %s) r: %s",

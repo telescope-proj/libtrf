@@ -23,7 +23,7 @@
 
 #include "trf.h"
 
-static const char * __trf_fi_proto[] = {
+static const char * trf__fi_proto[] = {
     "UNSPEC",
     "RDMA_CM_IB_RC",
     "IWARP",
@@ -63,7 +63,7 @@ static const char * __trf_fi_proto[] = {
     "__MAX"
 };
 
-static const uint32_t __trf_fi_enum[] = {
+static const uint32_t trf__fi_enum[] = {
     FI_PROTO_UNSPEC,
     FI_PROTO_RDMA_CM_IB_RC,
     FI_PROTO_IWARP,
@@ -112,6 +112,7 @@ PTRFContext trfAllocContext()
 int trfAllocActiveEP(PTRFXFabric ctx, struct fi_info * fi, void * data, 
     size_t size)
 {
+    void * abuf = NULL;
     ctx->addr_fmt = fi->addr_format;
     int ret;
     ret = fi_fabric(fi->fabric_attr, &ctx->fabric, NULL);
@@ -133,14 +134,14 @@ int trfAllocActiveEP(PTRFXFabric ctx, struct fi_info * fi, void * data,
     cq_attr.format              = FI_CQ_FORMAT_DATA;
     cq_attr.wait_cond           = FI_CQ_COND_NONE;
     cq_attr.signaling_vector    = ctx->intrv;
-    ret = fi_cq_open(ctx->domain, &cq_attr, &ctx->tx_cq, NULL);
+    ret = trf__CreateCQ(ctx, &ctx->tx_cq, &cq_attr, NULL);
     if (ret)
     {
         trf_fi_error("Open TX completion queue", ret);
         goto free_domain;
     }
     cq_attr.size = fi->rx_attr->size;
-    ret = fi_cq_open(ctx->domain, &cq_attr, &ctx->rx_cq, NULL);
+    ret = trf__CreateCQ(ctx, &ctx->rx_cq, &cq_attr, NULL);
     if (ret)
     {
         trf_fi_error("Open RX completion queue", ret);
@@ -148,37 +149,78 @@ int trfAllocActiveEP(PTRFXFabric ctx, struct fi_info * fi, void * data,
     }
     struct fi_av_attr av_attr;
     memset(&av_attr, 0, sizeof(av_attr));
-    av_attr.type = FI_AV_UNSPEC;
+    av_attr.type    = FI_AV_UNSPEC;
+    av_attr.count   = 4;
+    av_attr.flags   = FI_EVENT;
     ret = fi_av_open(ctx->domain, &av_attr, &ctx->av, NULL);
     if (ret)
     {
         trf_fi_error("Open address vector", ret);
         goto free_rx_cq;
     }
-    if (data)
+    struct fi_eq_attr eq_attr;
+    memset(&eq_attr, 0, sizeof(eq_attr));
+    eq_attr.size = 4;
+    eq_attr.wait_obj = FI_WAIT_UNSPEC;
+    ret = fi_eq_open(ctx->fabric, &eq_attr, &ctx->eq, NULL);
+    if (ret)
     {
-        fi->src_addr = data;
-        fi->src_addrlen = size;
+        trf_fi_error("Open event queue", ret);
+        goto free_av;
+    }
+    ret = fi_av_bind(ctx->av, &ctx->eq->fid, 0);
+    if (ret)
+    {
+        trf_fi_error("Bind event queue to address vector", ret);
+        goto free_av;
+    }
+    if (data && !(fi->src_addr))
+    {
+        // Special handling for Verbs devices
+        if (strncmp(fi->fabric_attr->prov_name, 
+                    "verbs;ofi_rxm", sizeof("verbs;ofi_rxm") - 1) == 0)
+        {
+            abuf = malloc(size);
+            if (!abuf)
+            {
+                ret = -FI_ENOMEM;
+                goto free_av;
+            }
+            memcpy(abuf, data, size);
+            fi->src_addr    = abuf;
+            fi->src_addrlen = size;
+        }
+        else
+        {
+            ret = fi_setname(&ctx->ep->fid, data, size);
+            if (ret < 0)
+            {
+                trf__log_error("Failed to set source address: %s",
+                               fi_strerror(-ret));
+                goto free_av;
+            }
+        }
     }
     ret = fi_endpoint(ctx->domain, fi, &ctx->ep, NULL);
     if (ret)
     {
         trf_fi_error("Create endpoint on domain", ret);
-        goto free_av;
+        goto free_addr_data;
     }
+
     ret = fi_ep_bind(ctx->ep, &ctx->av->fid, 0);
     if (ret)
     {
         trf_fi_error("EP bind to AV", ret);
         goto free_endpoint;
     }
-    ret = fi_ep_bind(ctx->ep, &ctx->tx_cq->fid, FI_TRANSMIT);
+    ret = fi_ep_bind(ctx->ep, &ctx->tx_cq->cq->fid, FI_TRANSMIT);
     if (ret)
     {
         trf_fi_error("EP bind to TXCQ", ret);
         goto free_endpoint;
     }
-    ret = fi_ep_bind(ctx->ep, &ctx->rx_cq->fid, FI_RECV);
+    ret = fi_ep_bind(ctx->ep, &ctx->rx_cq->cq->fid, FI_RECV);
     if (ret)
     {
         trf_fi_error("EP bind to RXCQ", ret);
@@ -195,19 +237,22 @@ int trfAllocActiveEP(PTRFXFabric ctx, struct fi_info * fi, void * data,
         fi->src_addr = NULL;
         fi->src_addrlen = 0;
     }
+    ctx->fi = fi_dupinfo(fi);
     return ret;
 
 free_endpoint:
     fi_close(&ctx->ep->fid);
     ctx->ep = NULL;
+free_addr_data:
+    free(abuf);
 free_av:
     fi_close(&ctx->av->fid);
     ctx->av = NULL;
 free_rx_cq:
-    fi_close(&ctx->rx_cq->fid);
+    trf__DestroyCQ(ctx->rx_cq);
     ctx->rx_cq = NULL;
 free_tx_cq:
-    fi_close(&ctx->tx_cq->fid);
+    trf__DestroyCQ(ctx->tx_cq);
     ctx->tx_cq = NULL;
 free_domain:
     fi_close(&ctx->domain->fid);
@@ -226,7 +271,7 @@ void trfDestroyFabricContext(PTRFContext ctx)
 
     PTRFXFabric f = ctx->xfer.fabric;
     
-    if (ctx->disconnected && f->domain && f->ep && f->msg_mr && f->msg_ptr)
+    if (!ctx->disconnected && f->domain && f->ep && f->msg_mr && f->msg_ptr)
     {
         trf__log_trace("Sending disconnect message");
         TrfMsg__MessageWrapper mw = TRF_MSG__MESSAGE_WRAPPER__INIT;
@@ -246,6 +291,11 @@ void trfDestroyFabricContext(PTRFContext ctx)
         fi_close(&f->msg_mr->fid);
         f->msg_mr = NULL;
     }
+    if (f->msg_ptr)
+    {
+        free(f->msg_ptr);
+        f->msg_ptr = NULL;
+    }
     if (f->ep)
     {
         fi_close(&f->ep->fid);
@@ -253,12 +303,12 @@ void trfDestroyFabricContext(PTRFContext ctx)
     }
     if (f->tx_cq)
     {
-        fi_close(&f->tx_cq->fid);
+        trf__DestroyCQ(f->tx_cq);
         f->tx_cq = NULL;
     }
     if (f->rx_cq)
     {
-        fi_close(&f->rx_cq->fid);
+        trf__DestroyCQ(f->rx_cq);
         f->rx_cq = NULL;
     }
     if (f->av)
@@ -394,21 +444,21 @@ int trfDeserializeWireProto(const char * proto, uint32_t * out)
     if (!proto || !out)
         return -EINVAL;
 
-    assert( (sizeof(__trf_fi_proto) / sizeof(__trf_fi_proto[0]))
-            == (sizeof(__trf_fi_enum) / sizeof(__trf_fi_enum[0])));
+    assert( (sizeof(trf__fi_proto) / sizeof(trf__fi_proto[0]))
+            == (sizeof(trf__fi_enum) / sizeof(trf__fi_enum[0])));
 
     // Libfabric protocol strings
 
     if (strncmp(proto, "FI_PROTO_", 9) == 0)
     {
         const char * tgt = proto + 9;
-        for (int i = 0; i < sizeof(__trf_fi_proto) / sizeof(__trf_fi_proto[0]); 
+        for (int i = 0; i < sizeof(trf__fi_proto) / sizeof(trf__fi_proto[0]); 
             i++)
         {
-            if (strcmp(tgt, __trf_fi_proto[i]) == 0)
+            if (strcmp(tgt, trf__fi_proto[i]) == 0)
             {
-                trf__log_trace("Wire protocol: %s", __trf_fi_proto[i]);
-                *out = __trf_fi_enum[i];
+                trf__log_trace("Wire protocol: %s", trf__fi_proto[i]);
+                *out = trf__fi_enum[i];
                 return 0;
             }
         }
@@ -421,19 +471,19 @@ int trfSerializeWireProto(uint32_t proto, char ** out)
     if (!out)
         return -EINVAL;
 
-    assert( (sizeof(__trf_fi_proto) / sizeof(__trf_fi_proto[0]))
-            == (sizeof(__trf_fi_enum) / sizeof(__trf_fi_enum[0])));
+    assert( (sizeof(trf__fi_proto) / sizeof(trf__fi_proto[0]))
+            == (sizeof(trf__fi_enum) / sizeof(trf__fi_enum[0])));
 
     // Libfabric protocol strings
 
-    for (int i = 0; i < sizeof(__trf_fi_proto) / sizeof(__trf_fi_proto[0]); 
+    for (int i = 0; i < sizeof(trf__fi_proto) / sizeof(trf__fi_proto[0]); 
         i++)
     {
-        if (proto == __trf_fi_enum[i])
+        if (proto == trf__fi_enum[i])
         {
-            *out = calloc(1, strlen(__trf_fi_proto[i]) + sizeof("FI_PROTO_"));
+            *out = calloc(1, strlen(trf__fi_proto[i]) + sizeof("FI_PROTO_"));
             strcpy(*out, "FI_PROTO_");
-            strcpy(*out + 9, __trf_fi_proto[i]);
+            strcpy(*out + 9, trf__fi_proto[i]);
             return 0;
         }
     }
@@ -514,9 +564,9 @@ int trfGetRoute(const char * dst, const char * prov, const char * proto,
         goto free_hints;
     }
 
-    trf__log_trace("---- Libfabric Information ----\n%s",
-        fi_tostr(info, FI_TYPE_INFO));
-    trf__log_trace("---- End Libfabric Information ----");
+    // trf__log_trace("---- Libfabric Information ----\n%s",
+    //     fi_tostr(info, FI_TYPE_INFO));
+    // trf__log_trace("---- End Libfabric Information ----");
 
     ret = 0;
     *fi = info;
@@ -926,6 +976,11 @@ int trfGetFabricProviders(const char * host, const char * port,
 
 int trfInsertAVSerialized(PTRFXFabric ctx, char * addr, fi_addr_t * addr_out)
 {
+    if (!ctx || !addr || !addr_out)
+    {
+        return -EINVAL;
+    }
+
     void ** data = calloc(1, sizeof(void *));
 
     int fmt, ret;
@@ -948,7 +1003,7 @@ int trfInsertAVSerialized(PTRFXFabric ctx, char * addr, fi_addr_t * addr_out)
     trf__log_debug("Inserting AV for %s", dbgav);
     trf__log_debug("Family: %d", ((struct sockaddr *) data[0])->sa_family);
 
-    int res;
+    int res = 0;
 
     size_t addrlen = sizeof(struct sockaddr_storage);
     const char * saddr = fi_av_straddr(ctx->av, data[0], dbgav, &addrlen);
@@ -960,12 +1015,38 @@ int trfInsertAVSerialized(PTRFXFabric ctx, char * addr, fi_addr_t * addr_out)
         return ret;
     }
 
-    ret = fi_av_insert(ctx->av, data[0], 1, addr_out, FI_SYNC_ERR, &res);
-    if (ret != 1 || res != 0)
+    trf__log_trace("fi_av_straddr -> %s", saddr);
+
+    ret = fi_av_insert(ctx->av, data[0], 1, addr_out, 0, &res);
+    if (ret < 0 || res != 0)
     {
-        trf__log_error("Unable to insert address");
-        trf_fi_error("fi_av_insert", -res);
+        trf__log_error("Unable to insert address: %s / %s", 
+                       fi_strerror(-ret), fi_strerror(res));
         ret = (ret == 0) ? -EINVAL : ret;
+        free(data);
+        return ret;
+    }
+
+    uint32_t evt = 0;
+    struct fi_eq_entry eqe;
+    ret = fi_eq_sread(ctx->eq, &evt, &eqe, sizeof(eqe), -1, 0);
+    if (ret <= 0)
+    {
+        if (ret == -FI_EAVAIL)
+        {
+            struct fi_eq_err_entry eqee;
+            ret = fi_eq_readerr(ctx->eq, &eqee, 0);
+            if (ret <= 0)
+            {
+                trf__log_error("Unable to read error event: %s", 
+                               fi_strerror(ret));
+                ret = (ret == 0) ? -EINVAL : ret;
+                free(data);
+                return ret;
+            }
+            trf__log_error("Error: %s", fi_strerror(eqee.err));
+        }
+        trf_fi_error("fi_eq_sread", ret);
         free(data);
         return ret;
     }
@@ -1036,7 +1117,14 @@ int trfRegInternalMsgBuf(PTRFContext ctx, void * addr, size_t len)
     }
 
     PTRFXFabric f = ctx->xfer.fabric;
-    return trf__FabricRegBuf(f, addr, len, FI_READ | FI_WRITE, &f->msg_mr);
+    size_t ret;
+    ret = trf__FabricRegBuf(f, addr, len, FI_READ | FI_WRITE, &f->msg_mr);
+    if (ret == 0)
+    {
+        f->msg_ptr = addr;
+        f->msg_size = len;
+    }
+    return ret;
 }
 
 void * trfAllocAligned(size_t size, size_t alignment)
@@ -1234,7 +1322,7 @@ int trfGetMessageAuto(PTRFContext ctx, uint64_t flags, uint64_t * processed,
 
     trf__GetDelay(&tcur, &tend, ctx->opts->fab_rcv_timeo);
 
-    ret = trf__FabricPostRecv(ctx, ctx->xfer.fabric->peer_addr, &tend);
+    ret = trf__FabricPostRecv(ctx, FI_ADDR_UNSPEC, &tend);
     if (ret < 0)
     {
         trf__log_error("Unable to post receive: %s", strerror(-ret));
@@ -1243,12 +1331,10 @@ int trfGetMessageAuto(PTRFContext ctx, uint64_t flags, uint64_t * processed,
 
     struct fi_cq_data_entry cqe;
     struct fi_cq_err_entry err;
-    ret = trf__PollCQ(ctx->xfer.fabric->rx_cq, &cqe, &err, ctx->opts, 
-                      &tend, 1, 0);
-    
+    ret = trfGetRecvProgress(ctx, &cqe, &err, 1);
     if (ret != 1)
     {
-        trf__log_error("CQ read error: %s\n", strerror(-ret));
+        trf__log_error("CQ error: %s", strerror(-ret));
         goto free_msg;
     }
 
@@ -1487,7 +1573,8 @@ int trfGetServerDisplays(PTRFContext ctx, PTRFDisplay * out)
     int ret = 0;
     if (!ctx || ctx->type != TRF_EP_SINK || !out)
     {
-        trf__log_trace("Invalid usage of trfGetServerDisplays()");
+        trf__log_trace("EINVAL trfGetServerDisplays(ctx: %p, out: %p)", 
+                       ctx, out);
         return -EINVAL;
     }
 
@@ -1615,11 +1702,13 @@ int trfFabricSend(PTRFContext ctx, TrfMsg__MessageWrapper * msg)
     
     struct fi_cq_data_entry cqe;
     struct fi_cq_err_entry err;
-    ret = trf__PollCQ(ctx->xfer.fabric->tx_cq, &cqe, &err, opts, &tend, 1, 1);
+    ret = trf__PollCQ(ctx->xfer.fabric->tx_cq, &cqe, &err, opts, &tend, 1, 
+                      TRF_SEND_CQ);
     if (ret != 1)
     {
+        memset(&err, 0, sizeof(err));
         trf__log_error("CQ read error: %s\n", 
-            trf__GetCQErrString(ctx->xfer.fabric->tx_cq, &err));
+            trf__GetCQErrString(ctx->xfer.fabric->tx_cq->cq, &err));
         return ret == 0 ? -EIO : ret;
     }
     trf__log_trace("Message payload sent over fabric");
@@ -1653,11 +1742,12 @@ int trfFabricRecv(PTRFContext ctx, TrfMsg__MessageWrapper ** msg)
     
     struct fi_cq_data_entry cqe;
     struct fi_cq_err_entry err;
-    ret = trf__PollCQ(ctx->xfer.fabric->rx_cq, &cqe, &err, opts, &tend, 1, 0);
+    ret = trf__PollCQ(ctx->xfer.fabric->rx_cq, &cqe, &err, opts, &tend, 1, 
+                      TRF_SEND_CQ);
     if (ret != 1)
     {
         trf__log_error("CQ read failed: %s\n", 
-            trf__GetCQErrString(ctx->xfer.fabric->rx_cq, &err));
+            trf__GetCQErrString(ctx->xfer.fabric->rx_cq->cq, &err));
         return ret == 0 ? -EIO : ret;
     }
 
@@ -1688,6 +1778,9 @@ ssize_t trfSendFramePart(PTRFContext ctx, PTRFDisplay disp, uint64_t rbuf,
     {
         return -EINVAL;
     }
+    
+    // Shorten access
+    PTRFXFabric f = ctx->xfer.fabric;
 
     // Compressed texture formats are not directly pixel addressable and require
     // special handling - for now, we'll just ignore them
@@ -1698,7 +1791,7 @@ ssize_t trfSendFramePart(PTRFContext ctx, PTRFDisplay disp, uint64_t rbuf,
 
     // Allocate iovec for posting frame updates
     ssize_t ret;
-    size_t max_iov = ctx->xfer.fabric->fi->tx_attr->rma_iov_limit;
+    size_t max_iov = f->fi->tx_attr->rma_iov_limit;
     struct iovec * iov = malloc(sizeof(struct iovec) * max_iov);
     if (!iov)
     {
@@ -1717,10 +1810,61 @@ ssize_t trfSendFramePart(PTRFContext ctx, PTRFDisplay disp, uint64_t rbuf,
     trf__log_debug("Display: %d x %d", disp->width, disp->height);
 
     // Framebuffer line pitch
-    uint32_t lpitch = trfGetTextureBytes(disp->width, 1, disp->format);
+    int32_t lpitch = trfGetTextureBytes(disp->width, 1, disp->format);
     // Pixel pitch in bytes
-    uint32_t ppitch = trfGetTextureBytes(1, 1, disp->format);
+    int32_t ppitch = trfGetTextureBytes(1, 1, disp->format);
+
+    if (lpitch < 0)
+    {
+        free(iov);
+        free(desc);
+        return lpitch;
+    }
+    if (ppitch < 0)
+    {
+        free(iov);
+        free(desc);
+        return ppitch;
+    }
     
+    // Determine how many CQEs we will need to use to track this operation
+    size_t num_cqe = 0;
+    for (int i = 0; i < num_rects; i++)
+    {
+        // Some rudimentary error checking
+        if (rects[i].x + rects[i].width > disp->width
+            || rects[i].y + rects[i].height > disp->height)
+        {
+            trf__log_error("Invalid rectangle! Pos: %d, %d Size: %d, %d", 
+                rects[i].x, rects[i].y, rects[i].width, rects[i].height);
+            return -EINVAL;
+        }
+        if (rects[i].x == 0 && rects[i].width == disp->width)
+        {
+            // Rectangles that span the entire width of the frame can be sent
+            // as a single RMA operation
+            num_cqe++;
+        }
+        else
+        {
+            // Otherwise we can send a vectored RMA for up to max_iov lines
+            num_cqe += rects[i].height / max_iov;
+        }
+    }
+
+    // The operation will never succeed if our max CQE count is exceeded -
+    // caller must optimize accesses before retrying
+    if (num_cqe > f->fi->tx_attr->size)
+    {
+        trf__log_error("Write operation exceeds max CQE count");
+        return -E2BIG;
+    }
+
+    // There may also be other operations in progress that have consumed CQEs
+    size_t rem_cqe = trf__DecrementCQ(f->tx_cq, num_cqe);
+    if (rem_cqe < num_cqe)
+        return -EAGAIN;
+
     size_t iter = 0;
     for (int i = 0; i < num_rects; i++)
     {
@@ -1734,13 +1878,17 @@ ssize_t trfSendFramePart(PTRFContext ctx, PTRFDisplay disp, uint64_t rbuf,
         trf__log_debug("lpitch: %d, ppitch: %d, offset: %lu, rpitch: %d",
                        lpitch, ppitch, offset, rpitch);
 
-        // Rectangles that span the entire width of the frame should be sent as
-        // a single operation to reduce overhead and fabric provider load
+        // Full-width update mode
         if (rects[i].x == 0 && rects[i].width == disp->width)
         {
             // Calculate contiguous region length
             size_t rlen = trfGetTextureBytes(rects[i].width, rects[i].height, 
                                              disp->format);
+            // The region length was invalid
+            if (rlen < 0)
+            {
+                goto try_recover;
+            }
 
             // Post RMA write
             ret = fi_write(ctx->xfer.fabric->ep, 
@@ -1755,8 +1903,7 @@ ssize_t trfSendFramePart(PTRFContext ctx, PTRFDisplay disp, uint64_t rbuf,
             continue;
         }
 
-        // Otherwise, perform multiple updates to the framebuffer
-        // Number of lines to update
+        // Vector update mode
         size_t total = rects[i].height;
         while (total)
         {
@@ -1791,6 +1938,9 @@ ssize_t trfSendFramePart(PTRFContext ctx, PTRFDisplay disp, uint64_t rbuf,
 try_recover:
     trf__log_error("Unable to perform RMA write # %d. fi_writev "
         "returned: %s. Attempting to recover", iter, fi_strerror(-ret));
+    // Release the unused CQEs immediately then try to reclaim the rest by
+    // monitoring progress.
+    trf__IncrementCQ(f->tx_cq, num_cqe - iter);
     while (iter)
     {
         struct fi_cq_data_entry de;
@@ -1799,12 +1949,13 @@ try_recover:
         if (ret2 < 0)
         {
             trf__log_error("Unable to recover: %s", 
-                trf__GetCQErrString(ctx->xfer.fabric->tx_cq, &err));
+                trf__GetCQErrString(ctx->xfer.fabric->tx_cq->cq, &err));
             trf__log_error("Context should be considered invalid");
             free(iov);
             free(desc);
             return ret2;
         }
+        trf__IncrementCQ(ctx->xfer.fabric->tx_cq, 1);
         iter--;
     }
     return ret;

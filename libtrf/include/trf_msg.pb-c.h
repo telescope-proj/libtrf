@@ -26,6 +26,7 @@ typedef struct _TrfMsg__ServerReject TrfMsg__ServerReject;
 typedef struct _TrfMsg__AddrPF TrfMsg__AddrPF;
 typedef struct _TrfMsg__ClientCap TrfMsg__ClientCap;
 typedef struct _TrfMsg__ServerCap TrfMsg__ServerCap;
+typedef struct _TrfMsg__TransportNack TrfMsg__TransportNack;
 typedef struct _TrfMsg__Endpoint TrfMsg__Endpoint;
 typedef struct _TrfMsg__ClientDispReq TrfMsg__ClientDispReq;
 typedef struct _TrfMsg__ServerDisp TrfMsg__ServerDisp;
@@ -164,13 +165,20 @@ struct  _TrfMsg__Transport
    */
   char *proto;
   /**
-   * Transport provider routing information
+   * Transport provider source address. May be NULL if
    */
-  char *route;
+  char *src;
+  /**
+   * addressing is assigned dynamically.
+   */
+  /**
+   * Destination information as returned from the AddrCand
+   */
+  char *dest;
 };
 #define TRF_MSG__TRANSPORT__INIT \
  { PROTOBUF_C_MESSAGE_INIT (&trf_msg__transport__descriptor) \
-    , (char *)protobuf_c_empty_string, (char *)protobuf_c_empty_string, (char *)protobuf_c_empty_string }
+    , (char *)protobuf_c_empty_string, (char *)protobuf_c_empty_string, (char *)protobuf_c_empty_string, (char *)protobuf_c_empty_string }
 
 
 /**
@@ -370,6 +378,26 @@ struct  _TrfMsg__ServerCap
 #define TRF_MSG__SERVER_CAP__INIT \
  { PROTOBUF_C_MESSAGE_INIT (&trf_msg__server_cap__descriptor) \
     , (char *)protobuf_c_empty_string, NULL }
+
+
+/**
+ *  @brief Transport NACK
+ *Either the server or client may send a TransportNack message to indicate
+ *that either the client's transport list is incompatible with the server's
+ *capabilities, or that the client is unable to connect to the server's
+ *transport candidate.
+ */
+struct  _TrfMsg__TransportNack
+{
+  ProtobufCMessage base;
+  /**
+   *  @brief NACK reason. 
+   */
+  uint32_t reason;
+};
+#define TRF_MSG__TRANSPORT_NACK__INIT \
+ { PROTOBUF_C_MESSAGE_INIT (&trf_msg__transport_nack__descriptor) \
+    , 0 }
 
 
 /**
@@ -751,12 +779,13 @@ typedef enum {
   TRF_MSG__MESSAGE_WRAPPER__WDATA_SERVER_ACK_F_REQ = 13,
   TRF_MSG__MESSAGE_WRAPPER__WDATA_CLIENT_CAP = 20,
   TRF_MSG__MESSAGE_WRAPPER__WDATA_SERVER_CAP = 21,
-  TRF_MSG__MESSAGE_WRAPPER__WDATA_ENDPOINT = 22,
-  TRF_MSG__MESSAGE_WRAPPER__WDATA_CLIENT_DISP_REQ = 23,
-  TRF_MSG__MESSAGE_WRAPPER__WDATA_SERVER_DISP = 24,
-  TRF_MSG__MESSAGE_WRAPPER__WDATA_CLIENT_REQ = 25,
-  TRF_MSG__MESSAGE_WRAPPER__WDATA_SERVER_ACK = 26,
-  TRF_MSG__MESSAGE_WRAPPER__WDATA_ADDR_PF = 29,
+  TRF_MSG__MESSAGE_WRAPPER__WDATA_TRANSPORT_NACK = 22,
+  TRF_MSG__MESSAGE_WRAPPER__WDATA_ENDPOINT = 23,
+  TRF_MSG__MESSAGE_WRAPPER__WDATA_CLIENT_DISP_REQ = 24,
+  TRF_MSG__MESSAGE_WRAPPER__WDATA_SERVER_DISP = 25,
+  TRF_MSG__MESSAGE_WRAPPER__WDATA_CLIENT_REQ = 26,
+  TRF_MSG__MESSAGE_WRAPPER__WDATA_SERVER_ACK = 27,
+  TRF_MSG__MESSAGE_WRAPPER__WDATA_ADDR_PF = 28,
   TRF_MSG__MESSAGE_WRAPPER__WDATA_CH_OPEN = 30
     PROTOBUF_C__FORCE_ENUM_TO_BE_INT_SIZE(TRF_MSG__MESSAGE_WRAPPER__WDATA)
 } TrfMsg__MessageWrapper__WdataCase;
@@ -786,6 +815,7 @@ struct  _TrfMsg__MessageWrapper
     TrfMsg__ServerAckFReq *server_ack_f_req;
     TrfMsg__ClientCap *client_cap;
     TrfMsg__ServerCap *server_cap;
+    TrfMsg__TransportNack *transport_nack;
     TrfMsg__Endpoint *endpoint;
     TrfMsg__ClientDispReq *client_disp_req;
     TrfMsg__ServerDisp *server_disp;
@@ -1008,6 +1038,25 @@ TrfMsg__ServerCap *
                       const uint8_t       *data);
 void   trf_msg__server_cap__free_unpacked
                      (TrfMsg__ServerCap *message,
+                      ProtobufCAllocator *allocator);
+/* TrfMsg__TransportNack methods */
+void   trf_msg__transport_nack__init
+                     (TrfMsg__TransportNack         *message);
+size_t trf_msg__transport_nack__get_packed_size
+                     (const TrfMsg__TransportNack   *message);
+size_t trf_msg__transport_nack__pack
+                     (const TrfMsg__TransportNack   *message,
+                      uint8_t             *out);
+size_t trf_msg__transport_nack__pack_to_buffer
+                     (const TrfMsg__TransportNack   *message,
+                      ProtobufCBuffer     *buffer);
+TrfMsg__TransportNack *
+       trf_msg__transport_nack__unpack
+                     (ProtobufCAllocator  *allocator,
+                      size_t               len,
+                      const uint8_t       *data);
+void   trf_msg__transport_nack__free_unpacked
+                     (TrfMsg__TransportNack *message,
                       ProtobufCAllocator *allocator);
 /* TrfMsg__Endpoint methods */
 void   trf_msg__endpoint__init
@@ -1291,6 +1340,9 @@ typedef void (*TrfMsg__ClientCap_Closure)
 typedef void (*TrfMsg__ServerCap_Closure)
                  (const TrfMsg__ServerCap *message,
                   void *closure_data);
+typedef void (*TrfMsg__TransportNack_Closure)
+                 (const TrfMsg__TransportNack *message,
+                  void *closure_data);
 typedef void (*TrfMsg__Endpoint_Closure)
                  (const TrfMsg__Endpoint *message,
                   void *closure_data);
@@ -1347,6 +1399,7 @@ extern const ProtobufCMessageDescriptor trf_msg__server_reject__descriptor;
 extern const ProtobufCMessageDescriptor trf_msg__addr_pf__descriptor;
 extern const ProtobufCMessageDescriptor trf_msg__client_cap__descriptor;
 extern const ProtobufCMessageDescriptor trf_msg__server_cap__descriptor;
+extern const ProtobufCMessageDescriptor trf_msg__transport_nack__descriptor;
 extern const ProtobufCMessageDescriptor trf_msg__endpoint__descriptor;
 extern const ProtobufCMessageDescriptor trf_msg__client_disp_req__descriptor;
 extern const ProtobufCMessageDescriptor trf_msg__server_disp__descriptor;

@@ -58,8 +58,11 @@ message AddrCand {
 message Transport {
     string name = 1;    // Transport provider name e.g. "tcp;ofi_rxm"
     string proto = 2;   // Transport wire protocol e.g. "FI_PROTO_RXM"
-    string route = 3;   // Transport provider routing information
-                        // e.g. fi_sockaddr_in://1.2.3.4:5678
+    /*  Transport provider source address. 
+        May be NULL if addressing is assigned dynamically. */
+    string src = 3;
+    /*  Destination information as returned by the AddrCand messages */
+    string dest = 4;
 }
 
 /*  @brief Display/Viewport information
@@ -186,6 +189,17 @@ message ServerCap {
     string bind_addr                = 1;
     /*  @brief Transport to use, selected by the server. */
     Transport transport             = 2;
+}
+
+/*  @brief Transport NACK
+    Either the server or client may send a TransportNack message to indicate
+    that either the client's transport list is incompatible with the server's
+    capabilities, or that the client is unable to connect to the server's
+    transport candidate.
+*/
+message TransportNack {
+    /*  @brief NACK reason. */
+    uint32 reason                   = 1;
 }
 
 /*  @brief Created endpoint name
@@ -437,15 +451,16 @@ message MessageWrapper {
 
         ClientCap client_cap                = 20;
         ServerCap server_cap                = 21;
-        Endpoint endpoint                   = 22;
+        TransportNack transport_nack        = 22;
+        Endpoint endpoint                   = 23;
 
-        ClientDispReq client_disp_req       = 23;
-        ServerDisp server_disp              = 24;
+        ClientDispReq client_disp_req       = 24;
+        ServerDisp server_disp              = 25;
         
-        ClientReq client_req                = 25;
-        ServerAckReq server_ack             = 26;
-        
-        AddrPF addr_pf                      = 29;
+        ClientReq client_req                = 26;
+        ServerAckReq server_ack             = 27;
+    
+        AddrPF addr_pf                      = 28;
 
         ChannelOpen ch_open                 = 30;
     }

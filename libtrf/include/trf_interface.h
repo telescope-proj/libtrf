@@ -25,7 +25,7 @@
 #define _TRF_INTERFACE_H_
 
 #include "trf.h"
-#include "trf_internal.h"
+#include "internal/trfi.h"
 
 /**
  * @file trf_interface.h
@@ -98,5 +98,26 @@ int trfGetFastestLink(PTRFAddrV av, PTRFAddrV * av_out);
   * @return 0 on success, negative error code on failure
 */
 int trfGetLinkSpeed(char * ifname, int32_t * speed_out);
+
+/**
+ * @brief Get the length of an interface list.
+ * 
+ * @param list 
+ * @return int 
+ */
+static inline int trfGetInterfaceListLength(PTRFInterface list)
+{
+    if (!list)
+        return -EINVAL;
+    
+    int i = 0;
+    PTRFInterface tmp = list;
+    while (tmp)
+    {
+        i++;
+        tmp = tmp->next;
+    }
+    return i;
+}
 
 #endif // _TRF_INTERFACE_H_

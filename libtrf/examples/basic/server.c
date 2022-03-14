@@ -22,6 +22,7 @@
 
 #include "trf.h"
 #include "trf_ncp.h"
+#include "trf_ncp_server.h"
 #include <signal.h>
 #include <sys/mman.h>
 
@@ -90,11 +91,16 @@ int main(int argc, char ** argv)
     // data requests and errors, may not be processed internally and must be
     // handled manually, even if the flags for them are set.
 
-    ret = trfGetMessageAuto(client_ctx, TRFM_SET_DISP, &processed, (void **) &msg);
-    if (ret < 0)
+    while (1)
     {
-        printf("unable to get poll messages: %d\n", ret);
-        return -1;
+        ret = trfGetMessageAuto(client_ctx, TRFM_SET_DISP, &processed, 
+                                (void **) &msg);
+        if (ret < 0)
+        {
+            printf("unable to get poll messages: %d\n", ret);
+            continue;
+        }
+        break;
     }
 
     if (msg && trfPBToInternal(msg->wdata_case) != TRFM_CLIENT_DISP_REQ)
@@ -102,7 +108,9 @@ int main(int argc, char ** argv)
         printf("Wrong Message Type 1: %lu\n", trfPBToInternal(msg->wdata_case));
         return -1;
     }
+
     printf("Requesting second message...\n");
+    trf__ProtoFree(msg);
     
     // The client will indicate that it requires a specific display, and the
     // server should allocate the required memory.
@@ -129,6 +137,8 @@ int main(int argc, char ** argv)
         printf("unable to get display: %s\n", strerror(errno));
         return -1;
     }
+
+    trf__ProtoFree(msg);
 
     // Allocate a dummy framebuffer - normally in your application this should
     // be the pointer to the capture source's buffer.

@@ -39,7 +39,13 @@ int trfCheckIPVersion(char * addr)
 
 int trfConvertCharToAddr(char * addr, struct sockaddr * data)
 {
-    switch (trfCheckIPVersion(addr))
+    if (!addr || !data)
+    {
+        trf__log_trace("trfConvertCharToAddr(addr: %p, data: %p)", addr, data);
+        return -EINVAL;
+    }
+    int ret;
+    switch ((ret = trfCheckIPVersion(addr)))
     {
         case 4:
             data->sa_family = AF_INET;
@@ -59,7 +65,7 @@ int trfConvertCharToAddr(char * addr, struct sockaddr * data)
             }
             break;
         default:
-            trf__log_error("Unknown address family");
+            trf__log_error("Unknown address family, %s", addr);
             return -errno;
     }
     return 0;
@@ -144,8 +150,10 @@ int trfGetNodeService(struct sockaddr * sdr, char * addr)
 
 int trfGetIPaddr(struct sockaddr * sdr, char * addr)
 {
-    if (!addr)
+    if (!addr || !sdr)
     {
+        trf__log_debug("Invalid arguments to trfGetIPaddr(sdr: %p, addr %p)", 
+                       sdr, addr);
         return -EINVAL;
     }
     switch (sdr->sa_family)

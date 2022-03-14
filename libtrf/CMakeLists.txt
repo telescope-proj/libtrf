@@ -5,15 +5,20 @@ include_directories(include)
 add_definitions(-DTRF_LOG_USE_COLOR)
 
 set(SOURCES
+  src/internal/trfi.c
+  src/internal/trfi_ncp.c
+  src/internal/trfi_ncp_client.c
+  src/internal/trfi_ncp_server.c
   src/trf_interface.c
   src/trf.c
   src/trf_msg.c
   src/trf_msg.pb-c.c
   src/trf_ncp.c
+  src/trf_ncp_server.c
+  src/trf_ncp_client.c
   src/trf_log.c
   #src/trf_preflight.c
   src/trf_inet.c
-  src/trf_internal.c
 )
 
 find_library(Libfabric NAMES fabric)
@@ -31,7 +36,7 @@ add_compile_options(
 )
 
 add_library(trf STATIC ${SOURCES})
-set_property(TARGET trf PROPERTY C_STANDARD 99)
+set_property(TARGET trf PROPERTY C_STANDARD 11)
 
 target_include_directories(trf
 	INTERFACE

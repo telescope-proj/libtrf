@@ -21,5 +21,26 @@
     Inc., 51 Franklin Street, Fifth Floor, Boston, MA 02110-1301 USA
 */
 
+#ifndef _TRF_INTERNAL_NCP_H_
+#define _TRF_INTERNAL_NCP_H_
+
 #include "trf_ncp.h"
-#include "internal/trfi_ncp.h"
+
+#define trf__Min(a, b) ((a) < (b) ? (a) : (b))
+#define trf__Max(a, b) ((a) > (b) ? (a) : (b))
+#define trf__ClientFD(ctx) ((ctx)->cli.client_fd)
+#define trf__ProtoFree(msg) \
+    trf_msg__message_wrapper__free_unpacked(msg, NULL); msg = NULL;
+
+int trf__NCSendTransportNack(PTRFContext ctx, TRFSock sock, uint32_t reason,
+                             uint8_t * buffer, size_t size);
+
+int trf__SetSockNonBlocking(TRFSock sock);
+
+int trf__SetSockBlocking(TRFSock sock);
+
+int trf__AddrMsgToInterface(TrfMsg__MessageWrapper * msg, PTRFInterface * out);
+
+
+
+#endif // _TRF_INTERNAL_NCP_H_

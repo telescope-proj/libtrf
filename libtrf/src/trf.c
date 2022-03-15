@@ -633,6 +633,10 @@ int trfConvertInternalAF(uint32_t trf_addr_format)
 
 int trfSerializeAddress(void * data, enum TRFXAddr format, char ** out)
 {
+    if (!data || !out)
+    {
+        return -EINVAL;
+    }
     int ret;
     char * addr = NULL;
     switch (format)
@@ -1186,7 +1190,7 @@ int trfUpdateDisplayAddr(PTRFContext ctx, PTRFDisplay disp, void * addr)
 
     int ret;
     
-    if (ctx->type != TRF_EP_SINK || ctx->type != TRF_EP_CONN_ID)
+    if (ctx->type != TRF_EP_SINK && ctx->type != TRF_EP_CONN_ID)
     {
         trf__log_error("This context does not support display sources");
         return -EINVAL;
@@ -1418,6 +1422,7 @@ int trfSendClientReq(PTRFContext ctx, PTRFDisplay disp)
     TrfMsg__MessageWrapper * mw = malloc(sizeof(TrfMsg__MessageWrapper));
     if (!mw)
     {
+        ret = -ENOMEM;
         goto free_message;
     }
     trf_msg__message_wrapper__init(mw);
@@ -1425,6 +1430,7 @@ int trfSendClientReq(PTRFContext ctx, PTRFDisplay disp)
     TrfMsg__ClientReq * cr = malloc(sizeof(TrfMsg__ClientReq));
     if (!cr)
     {
+        ret = -ENOMEM;
         goto free_message;
     }
     trf_msg__client_req__init(cr);

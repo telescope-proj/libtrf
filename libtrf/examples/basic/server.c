@@ -24,7 +24,10 @@
 #include "trf_ncp.h"
 #include "trf_ncp_server.h"
 #include <signal.h>
-#include <sys/mman.h>
+
+#if defined(__linux__)
+    #include <sys/mman.h>
+#endif
 
 int main(int argc, char ** argv)
 {
@@ -105,7 +108,7 @@ int main(int argc, char ** argv)
 
     if (msg && trfPBToInternal(msg->wdata_case) != TRFM_CLIENT_DISP_REQ)
     {
-        printf("Wrong Message Type 1: %lu\n", trfPBToInternal(msg->wdata_case));
+        printf("Wrong Message Type 1: %" PRIu64 "\n", trfPBToInternal(msg->wdata_case));
         return -1;
     }
 
@@ -124,7 +127,7 @@ int main(int argc, char ** argv)
 
     if (msg && trfPBToInternal(msg->wdata_case) != TRFM_CLIENT_REQ)
     {
-        printf("Wrong Message Type 2: %lu\n", trfPBToInternal(msg->wdata_case));
+        printf("Wrong Message Type 2: %" PRIu64 "\n", trfPBToInternal(msg->wdata_case));
         return -1;
     }
 
@@ -149,7 +152,10 @@ int main(int argc, char ** argv)
         printf("unable to allocate framebuffer\n");
         return -1;
     }
-    madvise(req_disp->fb_addr, trfGetDisplayBytes(displays), MADV_HUGEPAGE);
+
+    #if defined(__linux__)
+        madvise(req_disp->fb_addr, trfGetDisplayBytes(displays), MADV_HUGEPAGE);
+    #endif
 
     // Register the buffer.
 

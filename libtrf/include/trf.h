@@ -193,17 +193,6 @@ int trfGetFabricProviders(const char * host, const char * port,
     enum TRFEPType req_type, struct fi_info ** fi_out);
 
 /**
- * @brief List all system interfaces.
- * 
- * @param list_out  A linked list of interfaces on the system.
- * 
- * @param length    The length of the linked list.
- * 
- * @return 0 on success, negative error code on failure.
- */
-int trfGetInterfaceList(PTRFInterface * list_out, uint32_t * length);
-
-/**
  * @brief Free an interface list.
  *
  * This call frees a linked list of struct TRFInterface, typically allocated

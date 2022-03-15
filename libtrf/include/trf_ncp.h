@@ -46,11 +46,15 @@
 #include <linux/ethtool.h>
 #endif
 
-#if defined _TRF_UNIX_
+#if defined(_TRF_UNIX_)
     #include <ifaddrs.h>
     #include <sys/ioctl.h>
     #include <netinet/in.h>
-    #include <endian.h>
+    #if defined(_TRF_OSX_)
+        #include "osx/endian.h"
+    #else
+        #include <endian.h>
+    #endif
     #include <fcntl.h>
 #endif
 

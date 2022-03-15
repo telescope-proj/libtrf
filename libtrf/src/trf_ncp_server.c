@@ -34,6 +34,17 @@ int trfNCServerInit(PTRFContext ctx, char * host, char * port)
         return -EINVAL;
     }
 
+    // Read OS specific configurations
+    #if (defined (_TRF_OSX_))
+    if(trfParseConfig("conf/osx/networks.conf") < 0)
+    #else
+    if(trfParseConfig("conf/linux/networks.conf") < 0)
+    #endif
+    {
+        trf__log_error("Unable to open up config file");
+        return -EINVAL;
+    }
+
     if (!ctx->opts)
     {
         PTRFContextOpts opts = calloc(1, sizeof(struct TRFContextOpts));

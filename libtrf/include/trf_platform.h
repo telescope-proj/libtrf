@@ -5,7 +5,7 @@
 #include <stdlib.h>
 #include <string.h>
 #include <errno.h>
-#include "trf_internal.h"
+#include "internal/trfi.h"
 #include "trf_inet.h"
 
 #if defined (__unix__) || (defined (__APPLE__) && defined (__MACH__))
@@ -16,6 +16,7 @@
   #include <sys/ioctl.h>
   #include <netinet/in.h>
   #if (defined (__APPLE__) && defined (__MACH__))
+    #define _TRF_OSX_ 1
     #include "osx/endian.h"
   #else
     #include <endian.h>

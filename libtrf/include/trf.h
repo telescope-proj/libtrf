@@ -58,12 +58,12 @@
 #define TRF_SEND_CQ 1
 
 #define trf_fi_error(call, err) \
-    trf__log_error("(fabric) %s failed (%d): %s", call, abs(err), \
-    fi_strerror(abs(err)))
+    trf__log_error("(fabric) %s failed (%d): %s", call, abs((int) err), \
+    fi_strerror(abs((int) err)))
 
 #define trf_fi_warn(call, err) \
-    trf__log_warn("(fabric) %s failed (%d): %s", call, abs(err), \
-    fi_strerror(abs(err)))
+    trf__log_warn("(fabric) %s failed (%d): %s", call, abs((int) err), \
+    fi_strerror(abs((int) err)))
 
 // By default, libtrf will choose the highest Libfabric API version it supports.
 // Should the machines you would like to use differ in API versions, a specific

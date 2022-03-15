@@ -225,7 +225,7 @@ int trf__NCServerExchangeViableLinks(PTRFContext ctx, TRFSock client_sock,
         goto free_msg;
     }
 
-    if ((ret = trfGetInterfaceList(&server_ifs, &svr_num_ifs)) < 0)
+    if ((ret = trfGetInterfaceList(&server_ifs, &svr_num_ifs, ctx->opts->iface_flags)) < 0)
     {
         trf__log_error("Unable to get interface list");
         goto free_cli_ifs;

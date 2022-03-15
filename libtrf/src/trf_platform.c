@@ -1,7 +1,6 @@
-#include <trf_platform.h>
+#include "trf_platform.h"
 
 struct TRFNet *netDb;
-
 int trfParseConfig(char *configFile){
     if (!configFile)
     {

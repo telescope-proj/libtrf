@@ -137,11 +137,19 @@ int trf__NCSendInterfaceList(PTRFContext ctx, uint8_t * buffer, size_t size,
     int ret;
     uint32_t num_ifs;
     PTRFInterface client_ifs = NULL;
-    ret = trfGetInterfaceList(&client_ifs, &num_ifs);
+    ret = trfGetInterfaceList(&client_ifs, &num_ifs, ctx->opts->iface_flags);
     if (ret < 0)
         return ret;
     
     trf__log_debug("Interfaces found: %d", num_ifs);
+
+    char temp[TRFX_MAX_STR];
+    for (PTRFInterface tmp = client_ifs; tmp; tmp = tmp->next)
+    {
+        trfGetIPaddr(tmp->addr, temp);
+        trf__log_trace("Found Interface: %s", temp);
+    }
+
 
     TrfMsg__MessageWrapper mw   = TRF_MSG__MESSAGE_WRAPPER__INIT;
     TrfMsg__AddrPF apf          = TRF_MSG__ADDR_PF__INIT;
@@ -599,7 +607,9 @@ int trf__NCRecvAndTestCandidate(PTRFContext ctx, uint8_t * buffer, size_t size)
 
     // Construct and send the newly created endpoint details
 
-    char * ep_name, * tpt_name, * proto_name = NULL;
+    char * ep_name = NULL;
+    char * tpt_name = NULL;
+    char * proto_name = NULL;
     ret = trfGetEndpointName(ctx, &ep_name);
     if (ret < 0 || !ep_name)
     {

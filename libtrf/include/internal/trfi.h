@@ -59,7 +59,7 @@ struct TRFContext;
 
 static inline int trf__LockCQ(PTRFTCQFabric tcq)
 {
-    atomic_int_fast8_t l = 1;
+    int_fast8_t l = 1;
     while (atomic_compare_exchange_strong_explicit(&tcq->lock, &l, 0,
         memory_order_acquire, memory_order_relaxed)) {
     l = 1;
@@ -69,14 +69,14 @@ static inline int trf__LockCQ(PTRFTCQFabric tcq)
 
 static inline int trf__TryLockCQ(PTRFTCQFabric tcq)
 {
-    atomic_int_fast8_t l = 1;
+    int_fast8_t l = 1;
     return atomic_compare_exchange_strong_explicit(&tcq->lock, &l, 0,
         memory_order_acquire, memory_order_relaxed);
 }
 
 static inline int trf__UnlockCQ(PTRFTCQFabric tcq)
 {
-  atomic_int_fast8_t l = 0;
+  int_fast8_t l = 0;
   atomic_compare_exchange_strong_explicit(&tcq->lock, &l, 1,
       memory_order_release, memory_order_relaxed);
   return 0;

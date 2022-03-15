@@ -6,7 +6,16 @@
 #include <stdatomic.h>
 #include <rdma/fi_domain.h>
 
-#ifdef _WIN32
+#define TRF_INTERFACE_LOCAL   (1 << 1)      // Return local interfaces (e.g. loopback)
+#define TRF_INTERFACE_EXT     (1 << 2)      // Return external interfaces (e.g. Ethernet port)
+#define TRF_INTERFACE_SPD     (1 << 3)      // Only return interfaces with known link speeds
+#define TRF_INTERFACE_IP4     (1 << 10)     // Return interfaces with IPv4 addresses attached
+#define TRF_INTERFACE_IP6     (1 << 11)     // Return interfaces with IPv6 addresses attached
+
+#define TRF_INTERFACE_POLICY_IP (1 << 20)   // Use IP address to determine whether an interface is local or remote
+#define TRF_INTERFACE_POLICY_DB (1 << 21)   // Use a platform-specific database to determine whether an interface is local or remote
+
+#if defined(_WIN32)
     #define TRFSock SOCKET
     #define trfSockValid(sock) (sock != INVALID_SOCKET)
     #define TRFInvalidSock INVALID_SOCKET
@@ -547,6 +556,12 @@ struct TRFContextOpts {
      * @brief Libfabric API/ABI version for this session.
      */
     uint32_t    fab_api_ver;
+
+    /**
+     * @brief Flags for determining if linklocal or external addresses should be used
+     * 
+     */
+    uint64_t    iface_flags;
 };
 
 /**
@@ -762,6 +777,7 @@ static inline void trfSetDefaultOpts(PTRFContextOpts opts)
     opts->nc_snd_bufsize    = trf__GetPageSize();
     opts->nc_rcv_timeo      = 2000;
     opts->nc_snd_timeo      = 2000;
+    opts->iface_flags       = TRF_INTERFACE_EXT | TRF_INTERFACE_IP4;
 }
 
 static inline void trfDuplicateOpts(PTRFContextOpts in, PTRFContextOpts out)

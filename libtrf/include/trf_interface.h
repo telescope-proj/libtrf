@@ -25,17 +25,9 @@
 #define _TRF_INTERFACE_H_
 
 #include "trf.h"
+#include "trf_def.h"
 #include "internal/trfi.h"
 #include "trf_platform.h"
-
-#define TRF_INTERFACE_LOCAL   (1 << 1)      // Return local interfaces (e.g. loopback)
-#define TRF_INTERFACE_EXT     (1 << 2)      // Return external interfaces (e.g. Ethernet port)
-#define TRF_INTERFACE_SPD     (1 << 3)      // Only return interfaces with known link speeds
-#define TRF_INTERFACE_IP4     (1 << 10)     // Return interfaces with IPv4 addresses attached
-#define TRF_INTERFACE_IP6     (1 << 11)     // Return interfaces with IPv6 addresses attached
-
-#define TRF_INTERFACE_POLICY_IP (1 << 20)   // Use IP address to determine whether an interface is local or remote
-#define TRF_INTERFACE_POLICY_DB (1 << 21)   // Use a platform-specific database to determine whether an interface is local or remote
 
 /**
  * @file trf_interface.h

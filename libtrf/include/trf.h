@@ -43,7 +43,7 @@
 #include "trf_def.h"
 #include "trf_protobuf.h"
 #include "trf_msg.pb-c.h"
-#include "trf_internal.h"
+#include "internal/trfi.h"
 
 #include <rdma/fabric.h>
 #include <rdma/fi_cm.h>
@@ -54,13 +54,16 @@
 
 #include <trf_def.h>
 
+#define TRF_RECV_CQ 0
+#define TRF_SEND_CQ 1
+
 #define trf_fi_error(call, err) \
-    trf__log_error("(fabric) %s failed (%d): %s", call, (int) -err, \
-    fi_strerror((int) -err))
+    trf__log_error("(fabric) %s failed (%d): %s", call, abs(err), \
+    fi_strerror(abs(err)))
 
 #define trf_fi_warn(call, err) \
-    trf__log_warn("(fabric) %s failed (%d): %s", call, (int) -err, \
-    fi_strerror((int) -err))
+    trf__log_warn("(fabric) %s failed (%d): %s", call, abs(err), \
+    fi_strerror(abs(err)))
 
 // By default, libtrf will choose the highest Libfabric API version it supports.
 // Should the machines you would like to use differ in API versions, a specific
@@ -104,7 +107,6 @@
 #include "trf_msg.h"
 #include "trf_log.h"
 #include "trf_inet.h"
-#include "trf_internal.h"
 
 /**
  * @brief Allocate an active endpoint.
@@ -569,6 +571,7 @@ int trfFabricRecv(PTRFContext ctx, TrfMsg__MessageWrapper ** msg);
 static inline ssize_t trfSendFrame(PTRFContext ctx, PTRFDisplay disp, 
     uint64_t rbuf, uint64_t rkey)
 {
+    trf__DecrementCQ(ctx->xfer.fabric->tx_cq, 1);
     return fi_write(ctx->xfer.fabric->ep, disp->fb_addr, 
         trfGetDisplayBytes(disp), fi_mr_desc(disp->fb_mr), 
         ctx->xfer.fabric->peer_addr, rbuf, rkey, NULL);
@@ -731,7 +734,7 @@ static inline struct fi_info * trf__GetFabricHints(void)
         return NULL;
     }
     hints->ep_attr->type        = FI_EP_RDM;
-    hints->caps                 = FI_MSG | FI_RMA | FI_SOURCE;
+    hints->caps                 = FI_MSG | FI_RMA;
     hints->addr_format          = FI_FORMAT_UNSPEC;
     hints->mode                 = FI_LOCAL_MR | FI_RX_CQ_DATA;
     hints->domain_attr->mr_mode = FI_MR_BASIC;
@@ -762,10 +765,12 @@ static inline ssize_t trf__FabricPostSend(PTRFContext ctx, size_t length,
         {
             return -ETIMEDOUT;
         }
+        trf__DecrementCQ(f->tx_cq, 1);
         ret = fi_send(f->ep, f->msg_ptr, len, fi_mr_desc(f->msg_mr),
            peer, NULL);
         if (ret != -FI_EAGAIN)
         {
+            trf__IncrementCQ(f->tx_cq, 1);
             return ret;
         }
         trfSleep(ctx->opts->fab_poll_rate);
@@ -814,39 +819,54 @@ static inline const char * trf__GetCQErrString(struct fid_cq * cq,
     return fi_cq_strerror(cq, err->prov_errno, err->err_data, NULL, 0);
 }
 
-static inline ssize_t trf__PollCQ(struct fid_cq *cq, 
-    struct fi_cq_data_entry * de, struct fi_cq_err_entry * err, 
-    PTRFContextOpts opts, struct timespec * deadline, size_t count,
-    uint8_t is_send_cq)
+static inline ssize_t trf__PollCQ(struct TRFTCQFabric * tcq,
+                                  struct fi_cq_data_entry * de,
+                                  struct fi_cq_err_entry * err, 
+                                  PTRFContextOpts opts, 
+                                  struct timespec * deadline, size_t count,
+                                  uint8_t is_send_cq)
 {
     ssize_t ret;
     if (opts->fab_cq_sync)
     {
-        return fi_cq_sread(cq, de, 1, NULL, 
+        ret = fi_cq_sread(tcq->cq, de, count, NULL, 
             is_send_cq ? opts->fab_snd_timeo : opts->fab_rcv_timeo);
+        if (ret > 0)
+        {
+            trf__IncrementCQ(tcq, ret);
+        }
+        return ret;
     }
     else
     {
+        size_t to_read = count;
         while (1)
         {
             if (deadline && trf__HasPassed(CLOCK_MONOTONIC, deadline))
             {
                 return -ETIMEDOUT;
             }
-            ret = fi_cq_read(cq, de, 1);
-            if (ret != -FI_EAGAIN && ret != 1)
+            ret = fi_cq_read(tcq->cq, de, to_read);
+            if (ret > 0)
             {
-                if (ret == -FI_EAVAIL)
+                trf__IncrementCQ(tcq, ret);
+                return ret;
+            }
+            else
+            {
+                switch (ret)
                 {
-                    fi_cq_readerr(cq, err, 0);
+                    case -FI_EAGAIN:
+                        trfSleep(opts->fab_poll_rate);
+                        continue;
+                    case -FI_EAVAIL:
+                        ;
+                        ssize_t ret2 = fi_cq_readerr(tcq->cq, err, 0);
+                        trf__RetIfNeg(ret2);
+                    default:
+                        return ret;
                 }
-                return ret;
             }
-            if (ret == 1)
-            {
-                return ret;
-            }
-            trfSleep(opts->fab_poll_rate);
         }
     }
 }
@@ -861,10 +881,14 @@ static inline ssize_t trf__PollCQ(struct fid_cq *cq,
  *
  * @param err       Pointer to an entry where error details will be stored.
  *
- * @param count     Number of entries to read. Note: If multiple entries are
- *                  to be read, the sizes of the buffers pointed to by de and
- *                  err must be multiplied by count.
- * 
+ * @param count     Number of entries to read. Note: If multiple entries are to
+ *                  be read, the sizes of the buffers pointed to by de and err
+ *                  must be multiplied by count. 
+ *
+ *                  Warning: Be aware of short counts- if the CQ contains less
+ *                  than count entries, the function will only return the number
+ *                  of entries in the CQ.
+ *
  * @return          Number of completed operations, negative error code on
  *                  failure.
  */
@@ -877,7 +901,7 @@ static inline ssize_t trfGetSendProgress(PTRFContext ctx,
     clock_gettime(CLOCK_MONOTONIC, &tstart);
     trf__GetDelay(&tstart, &tend, ctx->opts->fab_snd_timeo);
     ssize_t ret = trf__PollCQ(ctx->xfer.fabric->tx_cq, de, err, ctx->opts, 
-        &tend, 1, 1);
+                              &tend, count, TRF_SEND_CQ);
     if (ret == -EAGAIN)
     {
         return -ETIMEDOUT;
@@ -899,6 +923,10 @@ static inline ssize_t trfGetSendProgress(PTRFContext ctx,
  *                  to be read, the sizes of the buffers pointed to by de and
  *                  err must be multiplied by count.
  * 
+ *                  Warning: Be aware of short counts- if the CQ contains less
+ *                  than count entries, the function will only return the number
+ *                  of entries in the CQ.
+ * 
  * @return          Number of completed operations, negative error code on
  *                  failure. 
  */
@@ -911,7 +939,7 @@ static inline ssize_t trfGetRecvProgress(PTRFContext ctx,
     clock_gettime(CLOCK_MONOTONIC, &tstart);
     trf__GetDelay(&tstart, &tend, ctx->opts->fab_rcv_timeo);
     ssize_t ret = trf__PollCQ(ctx->xfer.fabric->rx_cq, de, err, ctx->opts, 
-        &tend, 1, 1);
+                              &tend, count, TRF_RECV_CQ);
     if (ret == -EAGAIN)
     {
         return -ETIMEDOUT;

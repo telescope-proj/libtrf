@@ -22,6 +22,7 @@
 
 #include "trf.h"
 #include "trf_ncp.h"
+#include "trf_ncp_client.h"
 #include <signal.h>
 
 #if defined(__linux__)
@@ -41,7 +42,6 @@ int main(int argc, char ** argv)
         return -1;
     }
     printf("Hello!\n");
-
 
     PTRFDisplay displays;
     printf("Retrieving displays\n");

@@ -21,49 +21,26 @@
     Inc., 51 Franklin Street, Fifth Floor, Boston, MA 02110-1301 USA
 */
 
-/**
- * @file    trf_ncp.h
- * @brief   Negotiation Channel Protocol Messaging Functions
- */
+#ifndef _TRF_INTERNAL_NCP_H_
+#define _TRF_INTERNAL_NCP_H_
 
-#ifndef _TRF_NCP_H_
-#define _TRF_NCP_H_
+#include "trf_ncp.h"
 
-#include "trf.h"
-#include "trf_def.h"
-#include "trf_msg.h"
-#include "trf_inet.h"
-#include "trf_interface.h"
-#include "trf_protobuf.h"
-#include "trf_platform.h"
+#define trf__Min(a, b) ((a) < (b) ? (a) : (b))
+#define trf__Max(a, b) ((a) > (b) ? (a) : (b))
+#define trf__ClientFD(ctx) ((ctx)->cli.client_fd)
+#define trf__ProtoFree(msg) \
+    trf_msg__message_wrapper__free_unpacked(msg, NULL); msg = NULL;
 
-#include <string.h>
-#include <stdlib.h>
+int trf__NCSendTransportNack(PTRFContext ctx, TRFSock sock, uint32_t reason,
+                             uint8_t * buffer, size_t size);
 
-#if defined(__linux__)
-#include <linux/sockios.h>
-#include <linux/if.h>
-#include <linux/ethtool.h>
-#endif
+int trf__SetSockNonBlocking(TRFSock sock);
 
-#if defined _TRF_UNIX_
-    #include <ifaddrs.h>
-    #include <sys/ioctl.h>
-    #include <netinet/in.h>
-    #include <endian.h>
-    #include <fcntl.h>
-#endif
+int trf__SetSockBlocking(TRFSock sock);
 
-#define TRF_API_MAJOR    0
-#define TRF_API_MINOR    2
-#define TRF_API_PATCH    2
-
-/**
-  * @brief Add Protobuf message to PTRFInterface
-  * @param msg      Protobuf message wrapper
-  * @param out      PTRFInterface to message to be decoded into
-  * @return 0 on success, negative error code on failure
-*/
 int trf__AddrMsgToInterface(TrfMsg__MessageWrapper * msg, PTRFInterface * out);
 
-#endif
+
+
+#endif // _TRF_INTERNAL_NCP_H_

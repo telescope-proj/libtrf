@@ -21,7 +21,7 @@
     Inc., 51 Franklin Street, Fifth Floor, Boston, MA 02110-1301 USA
 */
 
-#include "trf_internal.h"
+#include "internal/trfi.h"
 
 int trf__AllocSessionForClient(PTRFContext ctx, uint64_t session_id, 
     PTRFContext * ctx_out)

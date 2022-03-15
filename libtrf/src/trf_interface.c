@@ -72,6 +72,57 @@ void trfFreeAddrV(PTRFAddrV av)
     }
 }
 
+PTRFAddrV trfDuplicateAddrV(PTRFAddrV av)
+{
+    PTRFAddrV out = calloc(1, sizeof(*out));
+    if (!out)
+    {
+        trf__log_error("Memory allocation failed");
+        return NULL;
+    }
+    PTRFAddrV out_start = out;
+    PTRFAddrV out_prev = NULL;
+    PTRFAddrV v = av;
+    while (v)
+    {
+        out->src_addr = calloc(1, sizeof(*out->src_addr));
+        if (!out->src_addr)
+        {
+            trf__log_error("Memory allocation failed");
+            trfFreeAddrV(out_start);
+            return NULL;
+        }
+        memcpy(out->src_addr, v->src_addr, sizeof(*out->src_addr));
+        out->dst_addr = calloc(1, sizeof(*out->dst_addr));
+        if (!out->dst_addr)
+        {
+            trf__log_error("Memory allocation failed");
+            trfFreeAddrV(out_start);
+            return NULL;
+        }
+        memcpy(out->dst_addr, v->dst_addr, sizeof(*out->dst_addr));
+        out->next = calloc(1, sizeof(*out->next));
+        if (!out->next)
+        {
+            trf__log_error("Memory allocation failed");
+            trfFreeAddrV(out_start);
+            return NULL;
+        }
+        out->pair_speed = v->pair_speed;
+        out_prev = out;
+        out = out->next;
+        v = v->next;
+    }
+
+    if (out_prev)
+    {
+        trfFreeAddrV(out_prev->next);
+        out_prev->next = NULL;
+    }
+
+    return out_start;
+}
+
 static int trf__InterfaceLength(PTRFInterface iface)
 {
     int count = 0;
@@ -81,6 +132,13 @@ static int trf__InterfaceLength(PTRFInterface iface)
     }
     return count;
 }
+
+#define trf__Netmask4(n) ((n) == 0 ? 0 : ((n) == 32 ? 0xFFFFFFFF : (0xFFFFFFFF << (32 - (n)))))
+#define trf__Netmask6(n) ((n) == 0 ? 0 : ((n) == 128 ? 0xFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFF : (0xFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFF << (128 - (n)))))
+#define TRF__PSAI struct sockaddr_in *
+#define TRF__PSAI6 struct sockaddr_in6 *
+#define trf__RawAddr4(a) (((TRF__PSAI)a)->sin_addr.s_addr)
+#define trf__RawAddr6(a) (((TRF__PSAI6)a)->sin6_addr.s6_addr)
 
 int trfCreateAddrV(PTRFInterface src, PTRFInterface dest,
     PTRFAddrV * av_out)
@@ -116,12 +174,13 @@ int trfCreateAddrV(PTRFInterface src, PTRFInterface dest,
             if (tmp_src->addr->sa_family == AF_INET)
             {
                 if (
-                    (((struct sockaddr_in *) &tmp_src->addr)->sin_addr.s_addr 
-                    & htonl((uint32_t) -1 >> tmp_src->netmask)) ==
-                    (((struct sockaddr_in *) &tmp_dest->addr)->sin_addr.s_addr 
-                    & htonl((uint32_t) -1 >> tmp_dest->netmask))
+                    (trf__RawAddr4(tmp_src->addr) 
+                    & trf__Netmask4(tmp_src->netmask)) ==
+                    (trf__RawAddr4(tmp_dest->addr)
+                    & trf__Netmask4(tmp_dest->netmask))
                 )
                 {
+                    trf__log_debug("Netmask matched");
                     av_tmp->src_addr = calloc(1, sizeof(struct sockaddr_in));
                     av_tmp->dst_addr = calloc(1, sizeof(struct sockaddr_in));
                     if (!av_tmp->src_addr || !av_tmp->dst_addr)
@@ -130,10 +189,10 @@ int trfCreateAddrV(PTRFInterface src, PTRFInterface dest,
                         trfFreeAddrV(av_start);
                         return -ENOMEM;
                     }
-                    * (struct sockaddr_in *) av_tmp->src_addr = \
-                        * (struct sockaddr_in *) tmp_src->addr;
-                    * (struct sockaddr_in *) av_tmp->dst_addr = \
-                        * (struct sockaddr_in *) tmp_dest->addr;
+                    * (TRF__PSAI) av_tmp->src_addr = \
+                        * (TRF__PSAI) tmp_src->addr;
+                    * (TRF__PSAI) av_tmp->dst_addr = \
+                        * (TRF__PSAI) tmp_dest->addr;
                     av_tmp->pair_speed = tmp_src->speed >= tmp_dest->speed ?
                         tmp_dest->speed : tmp_src->speed;
                     av_tmp->next = calloc(1, sizeof(*av_tmp));
@@ -145,9 +204,17 @@ int trfCreateAddrV(PTRFInterface src, PTRFInterface dest,
                     }
                     flag = 1;
                 }
+                else
+                {
+                    trf__log_trace("Netmask not matched");
+                    continue;
+                }
             }
             else if (tmp_src->addr->sa_family == AF_INET6)
             {
+                trf__log_debug("Skipping IPv6 interfaces");
+                continue;
+                /*
                 uint64_t * ca1 = (uint64_t *) \
                     ((struct sockaddr_in6 *) &tmp_src->addr)->sin6_addr.s6_addr;
                 uint64_t * ca2 = ca1++;
@@ -157,17 +224,17 @@ int trfCreateAddrV(PTRFInterface src, PTRFInterface dest,
                 uint64_t * da2 = da1++;
 
                 uint64_t cnm1 = tmp_src->netmask > 64 ? \
-                    htobe64((uint64_t) -1 >> 63) : \
-                    htobe64((uint64_t) -1 >> (tmp_src->netmask - 1));
+                    htobe64((uint64_t) INT64_MIN >> 63) : \
+                    htobe64((uint64_t) INT64_MIN >> (tmp_src->netmask - 1));
                 uint64_t cnm2 = tmp_src->netmask > 64 ? \
-                    htobe64((uint64_t) -1 >> (tmp_src->netmask - 65)) : \
+                    htobe64((uint64_t) INT64_MIN >> (tmp_src->netmask - 65)) : \
                     0;
 
                 uint64_t dnm1 = tmp_dest->netmask > 64 ? \
-                    htobe64((uint64_t) -1 >> 63) : \
-                    htobe64((uint64_t) -1 >> (tmp_dest->netmask - 1));
+                    htobe64((uint64_t) INT64_MIN >> 63) : \
+                    htobe64((uint64_t) INT64_MIN >> (tmp_dest->netmask - 1));
                 uint64_t dnm2 = tmp_dest->netmask > 64 ? \
-                    htobe64((uint64_t) -1 >> (tmp_dest->netmask - 65)) : \
+                    htobe64((uint64_t) INT64_MIN >> (tmp_dest->netmask - 65)) :\
                     0;
                     
                 uint64_t cr1 = *ca1 & cnm1;
@@ -200,6 +267,7 @@ int trfCreateAddrV(PTRFInterface src, PTRFInterface dest,
                     }
                     flag = 1;
                 }
+                */
             }
             else
             {
@@ -218,7 +286,10 @@ int trfCreateAddrV(PTRFInterface src, PTRFInterface dest,
     }
 
     free(av_tmp);
-    av_prev->next = NULL;
+    if (av_prev)
+    {
+        av_prev->next = NULL;
+    }
     *av_out = av_start;
     return 0;
 }

@@ -67,8 +67,12 @@ int trfNCRecvDelimited(TRFSock sock, uint8_t * buf, uint32_t size, int timeout,
 int trfNCSendDelimited(TRFSock sock, uint8_t * buf, uint32_t size, int timeout, 
     TrfMsg__MessageWrapper * handle)
 {
+    trf__log_trace("trfNCSendDelimited(sock: %d, buf: %p, size: %d, timeout: %d, handle: %p)",
+        sock, buf, size, timeout, handle);
     if (!trfSockValid(sock) || !buf || !size || !handle)
+    {
         return -EINVAL;
+    }
 
     int ret;
     

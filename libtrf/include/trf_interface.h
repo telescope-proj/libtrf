@@ -25,8 +25,8 @@
 #define _TRF_INTERFACE_H_
 
 #include "trf.h"
+#include "internal/trfi.h"
 #include "trf_platform.h"
-#include "trf_internal.h"
 
 #define TRF_INTERFACE_LOCAL   (1 << 1)      // Return local interfaces (e.g. loopback)
 #define TRF_INTERFACE_EXT     (1 << 2)      // Return external interfaces (e.g. Ethernet port)
@@ -109,5 +109,26 @@ int trfGetFastestLink(PTRFAddrV av, PTRFAddrV * av_out);
   * @return 0 on success, negative error code on failure
 */
 int trfGetLinkSpeed(char * ifname, int32_t * speed_out);
+
+/**
+ * @brief Get the length of an interface list.
+ * 
+ * @param list 
+ * @return int 
+ */
+static inline int trfGetInterfaceListLength(PTRFInterface list)
+{
+    if (!list)
+        return -EINVAL;
+    
+    int i = 0;
+    PTRFInterface tmp = list;
+    while (tmp)
+    {
+        i++;
+        tmp = tmp->next;
+    }
+    return i;
+}
 
 #endif // _TRF_INTERFACE_H_

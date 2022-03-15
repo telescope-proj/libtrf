@@ -1,7 +1,6 @@
 cmake_minimum_required(VERSION 3.0.0)
 project(libtrf LANGUAGES C)
 
-include_directories(include "/Users/matthewmcmullin/Desktop/Github/libfabric/include" "/Users/matthewmcmullin/Desktop/Github")
 add_definitions(-DTRF_LOG_USE_COLOR)
 
 set(SOURCES

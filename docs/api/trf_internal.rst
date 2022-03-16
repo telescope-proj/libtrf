@@ -3,5 +3,5 @@
 TRF Internal System Functions
 =============================
 
-.. doxygenfile:: trf_internal.h
+.. doxygenfile:: internal/trfi.h
    :project: libtrf

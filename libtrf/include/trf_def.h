@@ -3,9 +3,19 @@
 
 #include <string.h>
 #include <stdint.h>
-#include <rdma/fabric.h>
+#include <stdatomic.h>
+#include <rdma/fi_domain.h>
 
-#ifdef _WIN32
+#define TRF_INTERFACE_LOCAL   (1 << 1)      // Return local interfaces (e.g. loopback)
+#define TRF_INTERFACE_EXT     (1 << 2)      // Return external interfaces (e.g. Ethernet port)
+#define TRF_INTERFACE_SPD     (1 << 3)      // Only return interfaces with known link speeds
+#define TRF_INTERFACE_IP4     (1 << 10)     // Return interfaces with IPv4 addresses attached
+#define TRF_INTERFACE_IP6     (1 << 11)     // Return interfaces with IPv6 addresses attached
+
+#define TRF_INTERFACE_POLICY_IP (1 << 20)   // Use IP address to determine whether an interface is local or remote
+#define TRF_INTERFACE_POLICY_DB (1 << 21)   // Use a platform-specific database to determine whether an interface is local or remote
+
+#if defined(_WIN32)
     #define TRFSock SOCKET
     #define trfSockValid(sock) (sock != INVALID_SOCKET)
     #define TRFInvalidSock INVALID_SOCKET
@@ -31,6 +41,62 @@
     sizeof(struct sockaddr_in) : sizeof(struct sockaddr_in6))
 
 #define trf_perror(retval) trf__log_error("%s", strerror(-retval));
+
+/**
+ * @brief Tracked CQ (Libfabric)
+ *
+ * This structure is used to track the number of in-flight operations, in order
+ * to prevent CQ overruns.
+ */
+struct TRFTCQFabric {
+    struct fid_cq         * cq;       // Completion queue
+    atomic_int_fast8_t    lock;       // Whether lock is available
+    atomic_uint_fast64_t  entries;    // Number of remaining entries
+};
+
+#define PTRFTCQFabric struct TRFTCQFabric *
+
+/**
+ * @brief Remote access key object.
+ *
+ * Remote keys (rkeys) are required for access to data in remote memory, both
+ * read and write. Most fabric providers are able to encode their keys within a
+ * 64-bit region, though some providers like the multi-rail Libfabric provider
+ * require keysizes that exceed 64-bits. Additionally, this allows custom API
+ * implementations to use key sizes which exceed 64 bits.
+ */
+struct TRFRKey {
+  /**
+   * @brief Remote access key
+   */
+  uint64_t  rkey;
+  /**
+   * @brief Raw remote access key
+   *
+   * If the fabric provider supports regular sized rkeys it is recommended that
+   * this field be set to NULL.
+   */
+  uint8_t   * raw_key;
+  /**
+   * @brief Raw remote access key length
+   *
+   * If the fabric provider supports regular sized rkeys it is necessary to set
+   * this field to a negative number to indicate this.
+   */
+  ssize_t   raw_key_len;
+  /**
+   * @brief Whether the raw key mapping has been cached
+   * 
+   *  0: Raw key mapping exists but is not cached
+   *  1: Raw key mapping exists and is cached
+   * -1: Raw key does not exist, or mapping it is not supported
+   *
+   * Once a raw key has been mapped, it may be reused in the future. This value
+   * should be set to 1 to indicate that the raw key has already been mapped.
+   * Then the rkey field should be set to indicate the mapped value.
+   */
+  int8_t   raw_key_mapped;
+};
 
 /**
   * @brief Struct for Storing Interface & Address Data for transmission
@@ -160,14 +226,14 @@ struct TRFXFabric {
       * Transmit events are used to track the progress of send and RMA
       * operations, including RMA read and write operations.
     */
-    struct fid_cq       * tx_cq;
+    struct TRFTCQFabric     * tx_cq;
     /**
       * @brief Receive Completion queue
       * 
       * Receive events are used to track the progress of message receive
       * operations only.
     */
-    struct fid_cq       * rx_cq;
+    struct TRFTCQFabric     * rx_cq;
     /**
       * @brief Address Vector
       *
@@ -454,11 +520,11 @@ struct TRFContextOpts {
     */
     size_t      nc_rcv_bufsize;
     /**
-     * @brief   Negotiation channel send timeout in milliseconds
+     * @brief   Fabric send timeout in milliseconds
      */
     int32_t     fab_snd_timeo;
     /**
-     * @brief   Negotiation channel receive timeout in milliseconds
+     * @brief   Fabric receive timeout in milliseconds
      */
     int32_t     fab_rcv_timeo;
     /**
@@ -486,6 +552,16 @@ struct TRFContextOpts {
      * @brief Synchronous CQ polling mode.
      */
     uint8_t     fab_cq_sync;
+    /**
+     * @brief Libfabric API/ABI version for this session.
+     */
+    uint32_t    fab_api_ver;
+
+    /**
+     * @brief Flags for determining if linklocal or external addresses should be used
+     * 
+     */
+    uint64_t    iface_flags;
 };
 
 /**
@@ -701,6 +777,7 @@ static inline void trfSetDefaultOpts(PTRFContextOpts opts)
     opts->nc_snd_bufsize    = trf__GetPageSize();
     opts->nc_rcv_timeo      = 2000;
     opts->nc_snd_timeo      = 2000;
+    opts->iface_flags       = TRF_INTERFACE_EXT | TRF_INTERFACE_IP4;
 }
 
 static inline void trfDuplicateOpts(PTRFContextOpts in, PTRFContextOpts out)
@@ -710,5 +787,7 @@ static inline void trfDuplicateOpts(PTRFContextOpts in, PTRFContextOpts out)
     
     memcpy(out, in, sizeof(struct TRFContextOpts));
 }
+
+PTRFAddrV trfDuplicateAddrV(PTRFAddrV av);
 
 #endif // _TRF_DEF_H_

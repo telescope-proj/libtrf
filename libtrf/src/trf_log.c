@@ -131,7 +131,8 @@ int trf__log_add_fp(FILE *fp, int level) {
 static void init_event(trf__log_Event *ev, void *udata) {
   if (!ev->time) {
     time_t t = time(NULL);
-    ev->time = localtime(&t);
+    struct tm now;
+    ev->time = localtime_r(&t, &now);
   }
   ev->udata = udata;
 }

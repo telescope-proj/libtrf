@@ -6,6 +6,7 @@ on:
   pull_request:
     # The branches below must be a subset of the branches above
     branches: [ main ]
+  workflow_dispatch:
 
 jobs:
   analyze:
@@ -16,37 +17,36 @@ jobs:
     strategy:
       fail-fast: false
       matrix:
-        language: [ 'c' ]
+        language: [ 'cpp' ]
 
     steps:
     - name: Install requirements
       run: sudo apt update 
         && sudo apt install -y protobuf-c-compiler
-        && sudo apt-get install -y libprotobuf-c-dev
+        && sudo apt install -y libprotobuf-c-dev
         && git clone https://github.com/ofiwg/libfabric.git
         && cd ./libfabric
         && sudo ./autogen.sh
-        && ./configure --prefix=/opt/libfabric && make -j 32 && sudo make install
+        && ./configure --prefix=/opt/libfabric && make -j $(nproc) && sudo make install
+        && sudo cp -r include/. /usr/include
+
     - name: Cleanup
-      run: sudo chown -R $USER:$USER /home/runner/work/libtrf/libtrf/libfabric
-        && sudo rm -rf /home/runner/work/libtrf/libtrf/libfabric
+      run: sudo chown -R $USER:$USER $(pwd)
+        && sudo rm -rf $(pwd)/libfabric
+
     - name: Checkout repository
       uses: actions/checkout@v2
 
-    # Initializes the CodeQL tools for scanning.
     - name: Initialize CodeQL
       uses: github/codeql-action/init@v1
       with:
         languages: ${{ matrix.language }}
+        queries: security-and-quality
 
     - name: Build
       run: cd libtrf
         && cmake .
         && make
-
-    # - name: Autobuild
-    #   uses: github/codeql-action/autobuild@v1
-
 
     - name: Perform CodeQL Analysis
       uses: github/codeql-action/analyze@v1

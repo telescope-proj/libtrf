@@ -25,7 +25,9 @@
 #define _TRF_INTERFACE_H_
 
 #include "trf.h"
-#include "trf_internal.h"
+#include "trf_def.h"
+#include "internal/trfi.h"
+#include "trf_platform.h"
 
 /**
  * @file trf_interface.h
@@ -79,9 +81,10 @@ void trfFreeInterfaceList(PTRFInterface ifaces);
   * @brief Create an interface list containing all interfaces on the system.
   * @param list_out     Output interface list
   * @param length       Output interface list length
+  * @param flags        Flags used to limit interfaces returned
   * @return 0 on success, negative error code on failure
 */
-int trfGetInterfaceList(PTRFInterface * list_out, uint32_t * length);
+int trfGetInterfaceList(PTRFInterface * list_out, uint32_t * length, uint64_t flags);
 
 /**
   * @brief Determine the fastest interface in the address vector.
@@ -98,5 +101,26 @@ int trfGetFastestLink(PTRFAddrV av, PTRFAddrV * av_out);
   * @return 0 on success, negative error code on failure
 */
 int trfGetLinkSpeed(char * ifname, int32_t * speed_out);
+
+/**
+ * @brief Get the length of an interface list.
+ * 
+ * @param list 
+ * @return int 
+ */
+static inline int trfGetInterfaceListLength(PTRFInterface list)
+{
+    if (!list)
+        return -EINVAL;
+    
+    int i = 0;
+    PTRFInterface tmp = list;
+    while (tmp)
+    {
+        i++;
+        tmp = tmp->next;
+    }
+    return i;
+}
 
 #endif // _TRF_INTERFACE_H_

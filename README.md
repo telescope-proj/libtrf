@@ -1,5 +1,6 @@
 # Telescope Remote Framebuffer Library
 
+![CodeQL Analysis](https://github.com/telescope-proj/libtrf/actions/workflows/codeql-analysis.yml/badge.svg?branch=main)
 ![Documentation Build](https://github.com/telescope-proj/libtrf/actions/workflows/docs.yml/badge.svg)
 
 [Documentation for Libtrf](https://telescope-proj.github.io/libtrf/)

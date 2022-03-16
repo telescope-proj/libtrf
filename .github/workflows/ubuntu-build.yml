@@ -1,4 +1,4 @@
-name: "CodeQL"
+name: "UbuntuBuild"
 
 on:
   push:
@@ -9,16 +9,14 @@ on:
   workflow_dispatch:
 
 jobs:
-  analyze:
-    name: Analyze Code
+  build:
+    name: Build for Ubuntu
     runs-on: ubuntu-latest
     permissions: write-all
 
     strategy:
       fail-fast: false
-      matrix:
-        language: [ 'cpp' ]
-
+  
     steps:
     - name: Install requirements
       run: sudo apt update 
@@ -37,16 +35,7 @@ jobs:
     - name: Checkout repository
       uses: actions/checkout@v2
 
-    - name: Initialize CodeQL
-      uses: github/codeql-action/init@v1
-      with:
-        languages: ${{ matrix.language }}
-        queries: security-and-quality
-
     - name: Build
       run: cd libtrf
         && cmake .
         && make -j $(nproc)
-
-    - name: Perform CodeQL Analysis
-      uses: github/codeql-action/analyze@v1

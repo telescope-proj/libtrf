@@ -79,20 +79,91 @@
              
   <section id="trf-internal-system-functions">
 <span id="api-internal"></span><h1>TRF Internal System Functions<a class="headerlink" href="#trf-internal-system-functions" title="Permalink to this headline"></a></h1>
-<p>Internal Functions. </p>
 <div class="breathe-sectiondef docutils container">
 <p class="breathe-sectiondef-title rubric" id="breathe-section-title-defines">Defines</p>
 <dl class="cpp macro">
 <dt class="sig sig-object cpp" id="c.TRF__LOOPS">
-<span class="target" id="trf__internal_8h_1a1f946191fb69eb877fbbb5ddb511caca"></span><span class="sig-name descname"><span class="n"><span class="pre">TRF__LOOPS</span></span></span><a class="headerlink" href="#c.TRF__LOOPS" title="Permalink to this definition"></a><br /></dt>
+<span class="target" id="trfi_8h_1a1f946191fb69eb877fbbb5ddb511caca"></span><span class="sig-name descname"><span class="n"><span class="pre">TRF__LOOPS</span></span></span><a class="headerlink" href="#c.TRF__LOOPS" title="Permalink to this definition"></a><br /></dt>
+<dd></dd></dl>
+
+<dl class="cpp macro">
+<dt class="sig sig-object cpp" id="c.trfPBMaxSize">
+<span class="target" id="trfi_8h_1a1bfdcfb7b189029be572b4ff8d30de33"></span><span class="sig-name descname"><span class="n"><span class="pre">trfPBMaxSize</span></span></span><a class="headerlink" href="#c.trfPBMaxSize" title="Permalink to this definition"></a><br /></dt>
+<dd></dd></dl>
+
+<dl class="cpp macro">
+<dt class="sig sig-object cpp" id="c.trf__RetIfNeg">
+<span class="target" id="trfi_8h_1a6de4a521ba9f5cb048712611be5d5f11"></span><span class="sig-name descname"><span class="n"><span class="pre">trf__RetIfNeg</span></span></span><span class="sig-paren">(</span><span class="n"><span class="pre">x</span></span><span class="sig-paren">)</span><a class="headerlink" href="#c.trf__RetIfNeg" title="Permalink to this definition"></a><br /></dt>
+<dd><p>Returns the error code if negative. </p>
+</dd></dl>
+
+<dl class="cpp macro">
+<dt class="sig sig-object cpp" id="c.trf__ProtoStringValid">
+<span class="target" id="trfi_8h_1a1736465ab1a797b3568863fd660a4238"></span><span class="sig-name descname"><span class="n"><span class="pre">trf__ProtoStringValid</span></span></span><span class="sig-paren">(</span><span class="n"><span class="pre">ptr</span></span><span class="sig-paren">)</span><a class="headerlink" href="#c.trf__ProtoStringValid" title="Permalink to this definition"></a><br /></dt>
 <dd></dd></dl>
 
 </div>
 <div class="breathe-sectiondef docutils container">
 <p class="breathe-sectiondef-title rubric" id="breathe-section-title-functions">Functions</p>
 <dl class="cpp function">
+<dt class="sig sig-object cpp" id="_CPPv411trf__LockCQ13PTRFTCQFabric">
+<span id="_CPPv311trf__LockCQ13PTRFTCQFabric"></span><span id="_CPPv211trf__LockCQ13PTRFTCQFabric"></span><span id="trf__LockCQ__PTRFTCQFabric"></span><span class="target" id="trfi_8h_1a8a653ae46ba3f39f403b3fcfea3b71be"></span><span class="k"><span class="pre">static</span></span><span class="w"> </span><span class="k"><span class="pre">inline</span></span><span class="w"> </span><span class="kt"><span class="pre">int</span></span><span class="w"> </span><span class="sig-name descname"><span class="n"><span class="pre">trf__LockCQ</span></span></span><span class="sig-paren">(</span><span class="n"><span class="pre">PTRFTCQFabric</span></span><span class="w"> </span><span class="n sig-param"><span class="pre">tcq</span></span><span class="sig-paren">)</span><a class="headerlink" href="#_CPPv411trf__LockCQ13PTRFTCQFabric" title="Permalink to this definition"></a><br /></dt>
+<dd></dd></dl>
+
+<dl class="cpp function">
+<dt class="sig sig-object cpp" id="_CPPv414trf__TryLockCQ13PTRFTCQFabric">
+<span id="_CPPv314trf__TryLockCQ13PTRFTCQFabric"></span><span id="_CPPv214trf__TryLockCQ13PTRFTCQFabric"></span><span id="trf__TryLockCQ__PTRFTCQFabric"></span><span class="target" id="trfi_8h_1a455813404d58bfc025c8b7b5bc68676b"></span><span class="k"><span class="pre">static</span></span><span class="w"> </span><span class="k"><span class="pre">inline</span></span><span class="w"> </span><span class="kt"><span class="pre">int</span></span><span class="w"> </span><span class="sig-name descname"><span class="n"><span class="pre">trf__TryLockCQ</span></span></span><span class="sig-paren">(</span><span class="n"><span class="pre">PTRFTCQFabric</span></span><span class="w"> </span><span class="n sig-param"><span class="pre">tcq</span></span><span class="sig-paren">)</span><a class="headerlink" href="#_CPPv414trf__TryLockCQ13PTRFTCQFabric" title="Permalink to this definition"></a><br /></dt>
+<dd></dd></dl>
+
+<dl class="cpp function">
+<dt class="sig sig-object cpp" id="_CPPv413trf__UnlockCQ13PTRFTCQFabric">
+<span id="_CPPv313trf__UnlockCQ13PTRFTCQFabric"></span><span id="_CPPv213trf__UnlockCQ13PTRFTCQFabric"></span><span id="trf__UnlockCQ__PTRFTCQFabric"></span><span class="target" id="trfi_8h_1a23c64179df0ccb7d048fcf08142dc3d6"></span><span class="k"><span class="pre">static</span></span><span class="w"> </span><span class="k"><span class="pre">inline</span></span><span class="w"> </span><span class="kt"><span class="pre">int</span></span><span class="w"> </span><span class="sig-name descname"><span class="n"><span class="pre">trf__UnlockCQ</span></span></span><span class="sig-paren">(</span><span class="n"><span class="pre">PTRFTCQFabric</span></span><span class="w"> </span><span class="n sig-param"><span class="pre">tcq</span></span><span class="sig-paren">)</span><a class="headerlink" href="#_CPPv413trf__UnlockCQ13PTRFTCQFabric" title="Permalink to this definition"></a><br /></dt>
+<dd></dd></dl>
+
+<dl class="cpp function">
+<dt class="sig sig-object cpp" id="_CPPv413trf__CreateCQ11PTRFXFabricP13PTRFTCQFabricP10fi_cq_attrPv">
+<span id="_CPPv313trf__CreateCQ11PTRFXFabricP13PTRFTCQFabricP10fi_cq_attrPv"></span><span id="_CPPv213trf__CreateCQ11PTRFXFabricP13PTRFTCQFabricP10fi_cq_attrPv"></span><span id="trf__CreateCQ__PTRFXFabric.PTRFTCQFabricP.fi_cq_attrP.voidP"></span><span class="target" id="trfi_8h_1a86229f4c20f382a33dbdf0b602f00e9b"></span><span class="k"><span class="pre">static</span></span><span class="w"> </span><span class="k"><span class="pre">inline</span></span><span class="w"> </span><span class="kt"><span class="pre">int</span></span><span class="w"> </span><span class="sig-name descname"><span class="n"><span class="pre">trf__CreateCQ</span></span></span><span class="sig-paren">(</span><span class="n"><span class="pre">PTRFXFabric</span></span><span class="w"> </span><span class="n sig-param"><span class="pre">ctx</span></span>, <span class="n"><span class="pre">PTRFTCQFabric</span></span><span class="w"> </span><span class="p"><span class="pre">*</span></span><span class="n sig-param"><span class="pre">tcq</span></span>, <span class="k"><span class="pre">struct</span></span><span class="w"> </span><span class="n"><span class="pre">fi_cq_attr</span></span><span class="w"> </span><span class="p"><span class="pre">*</span></span><span class="n sig-param"><span class="pre">attr</span></span>, <span class="kt"><span class="pre">void</span></span><span class="w"> </span><span class="p"><span class="pre">*</span></span><span class="n sig-param"><span class="pre">context</span></span><span class="sig-paren">)</span><a class="headerlink" href="#_CPPv413trf__CreateCQ11PTRFXFabricP13PTRFTCQFabricP10fi_cq_attrPv" title="Permalink to this definition"></a><br /></dt>
+<dd></dd></dl>
+
+<dl class="cpp function">
+<dt class="sig sig-object cpp" id="_CPPv414trf__DestroyCQ13PTRFTCQFabric">
+<span id="_CPPv314trf__DestroyCQ13PTRFTCQFabric"></span><span id="_CPPv214trf__DestroyCQ13PTRFTCQFabric"></span><span id="trf__DestroyCQ__PTRFTCQFabric"></span><span class="target" id="trfi_8h_1a6fedc76b6823fcf8fcfb794c4aebb357"></span><span class="k"><span class="pre">static</span></span><span class="w"> </span><span class="k"><span class="pre">inline</span></span><span class="w"> </span><span class="kt"><span class="pre">int</span></span><span class="w"> </span><span class="sig-name descname"><span class="n"><span class="pre">trf__DestroyCQ</span></span></span><span class="sig-paren">(</span><span class="n"><span class="pre">PTRFTCQFabric</span></span><span class="w"> </span><span class="n sig-param"><span class="pre">tcq</span></span><span class="sig-paren">)</span><a class="headerlink" href="#_CPPv414trf__DestroyCQ13PTRFTCQFabric" title="Permalink to this definition"></a><br /></dt>
+<dd></dd></dl>
+
+<dl class="cpp function">
+<dt class="sig sig-object cpp" id="_CPPv416trf__DecrementCQ13PTRFTCQFabric8uint64_t">
+<span id="_CPPv316trf__DecrementCQ13PTRFTCQFabric8uint64_t"></span><span id="_CPPv216trf__DecrementCQ13PTRFTCQFabric8uint64_t"></span><span id="trf__DecrementCQ__PTRFTCQFabric.uint64_t"></span><span class="target" id="trfi_8h_1a0cb74a0369d98ef3c8f61ddf40eb7353"></span><span class="k"><span class="pre">static</span></span><span class="w"> </span><span class="k"><span class="pre">inline</span></span><span class="w"> </span><span class="n"><span class="pre">uint_fast64_t</span></span><span class="w"> </span><span class="sig-name descname"><span class="n"><span class="pre">trf__DecrementCQ</span></span></span><span class="sig-paren">(</span><span class="n"><span class="pre">PTRFTCQFabric</span></span><span class="w"> </span><span class="n sig-param"><span class="pre">tcq</span></span>, <span class="n"><span class="pre">uint64_t</span></span><span class="w"> </span><span class="n sig-param"><span class="pre">n</span></span><span class="sig-paren">)</span><a class="headerlink" href="#_CPPv416trf__DecrementCQ13PTRFTCQFabric8uint64_t" title="Permalink to this definition"></a><br /></dt>
+<dd><p>Decrement number of available CQ entries. </p>
+<dl class="field-list simple">
+<dt class="field-odd">Parameters</dt>
+<dd class="field-odd"><ul class="simple">
+<li><p><strong>tcq</strong> – Pointer to the CQ </p></li>
+<li><p><strong>n</strong> – Number of entries to decrement </p></li>
+</ul>
+</dd>
+<dt class="field-even">Returns</dt>
+<dd class="field-even"><p>Number of remaining entries </p>
+</dd>
+</dl>
+</dd></dl>
+
+<dl class="cpp function">
+<dt class="sig sig-object cpp" id="_CPPv416trf__IncrementCQ13PTRFTCQFabric8uint64_t">
+<span id="_CPPv316trf__IncrementCQ13PTRFTCQFabric8uint64_t"></span><span id="_CPPv216trf__IncrementCQ13PTRFTCQFabric8uint64_t"></span><span id="trf__IncrementCQ__PTRFTCQFabric.uint64_t"></span><span class="target" id="trfi_8h_1a663bb18e775b83de99ce6323013d1c19"></span><span class="k"><span class="pre">static</span></span><span class="w"> </span><span class="k"><span class="pre">inline</span></span><span class="w"> </span><span class="n"><span class="pre">uint_fast64_t</span></span><span class="w"> </span><span class="sig-name descname"><span class="n"><span class="pre">trf__IncrementCQ</span></span></span><span class="sig-paren">(</span><span class="n"><span class="pre">PTRFTCQFabric</span></span><span class="w"> </span><span class="n sig-param"><span class="pre">tcq</span></span>, <span class="n"><span class="pre">uint64_t</span></span><span class="w"> </span><span class="n sig-param"><span class="pre">n</span></span><span class="sig-paren">)</span><a class="headerlink" href="#_CPPv416trf__IncrementCQ13PTRFTCQFabric8uint64_t" title="Permalink to this definition"></a><br /></dt>
+<dd><p>Increment number of available CQ entries. </p>
+<dl class="field-list simple">
+<dt class="field-odd">Parameters</dt>
+<dd class="field-odd"><ul class="simple">
+<li><p><strong>tcq</strong> – Pointer to the CQ </p></li>
+<li><p><strong>n</strong> – Number of entries to increment </p></li>
+</ul>
+</dd>
+</dl>
+</dd></dl>
+
+<dl class="cpp function">
 <dt class="sig sig-object cpp" id="_CPPv419trf__CheckSessionID11PTRFContext8uint64_t7uint8_t">
-<span id="_CPPv319trf__CheckSessionID11PTRFContext8uint64_t7uint8_t"></span><span id="_CPPv219trf__CheckSessionID11PTRFContext8uint64_t7uint8_t"></span><span id="trf__CheckSessionID__PTRFContext.uint64_t.uint8_t"></span><span class="target" id="trf__internal_8h_1a3e7b31a0c5b28bdf246beebddd8d991a"></span><span class="kt"><span class="pre">int</span></span><span class="w"> </span><span class="sig-name descname"><span class="n"><span class="pre">trf__CheckSessionID</span></span></span><span class="sig-paren">(</span><span class="n"><span class="pre">PTRFContext</span></span><span class="w"> </span><span class="n sig-param"><span class="pre">ctx</span></span>, <span class="n"><span class="pre">uint64_t</span></span><span class="w"> </span><span class="n sig-param"><span class="pre">session</span></span>, <span class="n"><span class="pre">uint8_t</span></span><span class="w"> </span><span class="n sig-param"><span class="pre">first</span></span><span class="sig-paren">)</span><a class="headerlink" href="#_CPPv419trf__CheckSessionID11PTRFContext8uint64_t7uint8_t" title="Permalink to this definition"></a><br /></dt>
+<span id="_CPPv319trf__CheckSessionID11PTRFContext8uint64_t7uint8_t"></span><span id="_CPPv219trf__CheckSessionID11PTRFContext8uint64_t7uint8_t"></span><span id="trf__CheckSessionID__PTRFContext.uint64_t.uint8_t"></span><span class="target" id="trfi_8h_1a3e7b31a0c5b28bdf246beebddd8d991a"></span><span class="kt"><span class="pre">int</span></span><span class="w"> </span><span class="sig-name descname"><span class="n"><span class="pre">trf__CheckSessionID</span></span></span><span class="sig-paren">(</span><span class="n"><span class="pre">PTRFContext</span></span><span class="w"> </span><span class="n sig-param"><span class="pre">ctx</span></span>, <span class="n"><span class="pre">uint64_t</span></span><span class="w"> </span><span class="n sig-param"><span class="pre">session</span></span>, <span class="n"><span class="pre">uint8_t</span></span><span class="w"> </span><span class="n sig-param"><span class="pre">first</span></span><span class="sig-paren">)</span><a class="headerlink" href="#_CPPv419trf__CheckSessionID11PTRFContext8uint64_t7uint8_t" title="Permalink to this definition"></a><br /></dt>
 <dd><p>Check the number of times a session ID has been used. </p>
 <dl class="field-list simple">
 <dt class="field-odd">Parameters</dt>
@@ -110,9 +181,9 @@
 
 <dl class="cpp function">
 <dt class="sig sig-object cpp" id="_CPPv426trf__AllocSessionForClient11PTRFContext8uint64_tP11PTRFContext">
-<span id="_CPPv326trf__AllocSessionForClient11PTRFContext8uint64_tP11PTRFContext"></span><span id="_CPPv226trf__AllocSessionForClient11PTRFContext8uint64_tP11PTRFContext"></span><span id="trf__AllocSessionForClient__PTRFContext.uint64_t.PTRFContextP"></span><span class="target" id="trf__internal_8h_1a1b3644866fb929f1ae64d1076dd90af6"></span><span class="kt"><span class="pre">int</span></span><span class="w"> </span><span class="sig-name descname"><span class="n"><span class="pre">trf__AllocSessionForClient</span></span></span><span class="sig-paren">(</span><span class="n"><span class="pre">PTRFContext</span></span><span class="w"> </span><span class="n sig-param"><span class="pre">ctx</span></span>, <span class="n"><span class="pre">uint64_t</span></span><span class="w"> </span><span class="n sig-param"><span class="pre">session_id</span></span>, <span class="n"><span class="pre">PTRFContext</span></span><span class="w"> </span><span class="p"><span class="pre">*</span></span><span class="n sig-param"><span class="pre">ctx_out</span></span><span class="sig-paren">)</span><a class="headerlink" href="#_CPPv426trf__AllocSessionForClient11PTRFContext8uint64_tP11PTRFContext" title="Permalink to this definition"></a><br /></dt>
+<span id="_CPPv326trf__AllocSessionForClient11PTRFContext8uint64_tP11PTRFContext"></span><span id="_CPPv226trf__AllocSessionForClient11PTRFContext8uint64_tP11PTRFContext"></span><span id="trf__AllocSessionForClient__PTRFContext.uint64_t.PTRFContextP"></span><span class="target" id="trfi_8h_1a1b3644866fb929f1ae64d1076dd90af6"></span><span class="kt"><span class="pre">int</span></span><span class="w"> </span><span class="sig-name descname"><span class="n"><span class="pre">trf__AllocSessionForClient</span></span></span><span class="sig-paren">(</span><span class="n"><span class="pre">PTRFContext</span></span><span class="w"> </span><span class="n sig-param"><span class="pre">ctx</span></span>, <span class="n"><span class="pre">uint64_t</span></span><span class="w"> </span><span class="n sig-param"><span class="pre">session_id</span></span>, <span class="n"><span class="pre">PTRFContext</span></span><span class="w"> </span><span class="p"><span class="pre">*</span></span><span class="n sig-param"><span class="pre">ctx_out</span></span><span class="sig-paren">)</span><a class="headerlink" href="#_CPPv426trf__AllocSessionForClient11PTRFContext8uint64_tP11PTRFContext" title="Permalink to this definition"></a><br /></dt>
 <dd><p>Allocate resouces for an incoming session on ther server side with a specific cookie. </p>
-<p>Allocates a resouces for an incoming session on the server side with a specific cookie, The cookie must not be in use; use the function <a class="reference internal" href="#trf__internal_8h_1a3e7b31a0c5b28bdf246beebddd8d991a"><span class="std std-ref">trf__CheckSessionID()</span></a> to verify</p>
+<p>Allocates a resouces for an incoming session on the server side with a specific cookie, The cookie must not be in use; use the function trf__CheckSessionID() to verify</p>
 <dl class="field-list simple">
 <dt class="field-odd">Parameters</dt>
 <dd class="field-odd"><ul class="simple">
@@ -129,7 +200,7 @@
 
 <dl class="cpp function">
 <dt class="sig sig-object cpp" id="_CPPv411trf__Rand64v">
-<span id="_CPPv311trf__Rand64v"></span><span id="_CPPv211trf__Rand64v"></span><span id="trf__Rand64"></span><span class="target" id="trf__internal_8h_1a2bb029aba12ba85bc4799778dc899868"></span><span class="k"><span class="pre">static</span></span><span class="w"> </span><span class="k"><span class="pre">inline</span></span><span class="w"> </span><span class="n"><span class="pre">uint64_t</span></span><span class="w"> </span><span class="sig-name descname"><span class="n"><span class="pre">trf__Rand64</span></span></span><span class="sig-paren">(</span><span class="sig-paren">)</span><a class="headerlink" href="#_CPPv411trf__Rand64v" title="Permalink to this definition"></a><br /></dt>
+<span id="_CPPv311trf__Rand64v"></span><span id="_CPPv211trf__Rand64v"></span><span id="trf__Rand64"></span><span class="target" id="trfi_8h_1a2bb029aba12ba85bc4799778dc899868"></span><span class="k"><span class="pre">static</span></span><span class="w"> </span><span class="k"><span class="pre">inline</span></span><span class="w"> </span><span class="n"><span class="pre">uint64_t</span></span><span class="w"> </span><span class="sig-name descname"><span class="n"><span class="pre">trf__Rand64</span></span></span><span class="sig-paren">(</span><span class="sig-paren">)</span><a class="headerlink" href="#_CPPv411trf__Rand64v" title="Permalink to this definition"></a><br /></dt>
 <dd><p>Generate an 64-bit random integer. </p>
 <dl class="field-list simple">
 <dt class="field-odd">Returns</dt>
@@ -140,7 +211,7 @@
 
 <dl class="cpp function">
 <dt class="sig sig-object cpp" id="_CPPv420trf__HammingWeight648uint64_t">
-<span id="_CPPv320trf__HammingWeight648uint64_t"></span><span id="_CPPv220trf__HammingWeight648uint64_t"></span><span id="trf__HammingWeight64__uint64_t"></span><span class="target" id="trf__internal_8h_1adb15f738ff4aeb20abcc28aeeb228f0e"></span><span class="k"><span class="pre">static</span></span><span class="w"> </span><span class="k"><span class="pre">inline</span></span><span class="w"> </span><span class="n"><span class="pre">uint8_t</span></span><span class="w"> </span><span class="sig-name descname"><span class="n"><span class="pre">trf__HammingWeight64</span></span></span><span class="sig-paren">(</span><span class="n"><span class="pre">uint64_t</span></span><span class="w"> </span><span class="n sig-param"><span class="pre">x</span></span><span class="sig-paren">)</span><a class="headerlink" href="#_CPPv420trf__HammingWeight648uint64_t" title="Permalink to this definition"></a><br /></dt>
+<span id="_CPPv320trf__HammingWeight648uint64_t"></span><span id="_CPPv220trf__HammingWeight648uint64_t"></span><span id="trf__HammingWeight64__uint64_t"></span><span class="target" id="trfi_8h_1adb15f738ff4aeb20abcc28aeeb228f0e"></span><span class="k"><span class="pre">static</span></span><span class="w"> </span><span class="k"><span class="pre">inline</span></span><span class="w"> </span><span class="n"><span class="pre">uint8_t</span></span><span class="w"> </span><span class="sig-name descname"><span class="n"><span class="pre">trf__HammingWeight64</span></span></span><span class="sig-paren">(</span><span class="n"><span class="pre">uint64_t</span></span><span class="w"> </span><span class="n sig-param"><span class="pre">x</span></span><span class="sig-paren">)</span><a class="headerlink" href="#_CPPv420trf__HammingWeight648uint64_t" title="Permalink to this definition"></a><br /></dt>
 <dd><p>Calculate the Hamming Weight (ones count) of a 64-bit integer. </p>
 <dl class="field-list simple">
 <dt class="field-odd">Parameters</dt>
@@ -154,7 +225,7 @@
 
 <dl class="cpp function">
 <dt class="sig sig-object cpp" id="_CPPv49trfStrdupPc">
-<span id="_CPPv39trfStrdupPc"></span><span id="_CPPv29trfStrdupPc"></span><span id="trfStrdup__cP"></span><span class="target" id="trf__internal_8h_1a9ad8eb6a770e133922aef54c80739587"></span><span class="k"><span class="pre">static</span></span><span class="w"> </span><span class="k"><span class="pre">inline</span></span><span class="w"> </span><span class="kt"><span class="pre">char</span></span><span class="w"> </span><span class="p"><span class="pre">*</span></span><span class="sig-name descname"><span class="n"><span class="pre">trfStrdup</span></span></span><span class="sig-paren">(</span><span class="kt"><span class="pre">char</span></span><span class="w"> </span><span class="p"><span class="pre">*</span></span><span class="n sig-param"><span class="pre">str</span></span><span class="sig-paren">)</span><a class="headerlink" href="#_CPPv49trfStrdupPc" title="Permalink to this definition"></a><br /></dt>
+<span id="_CPPv39trfStrdupPc"></span><span id="_CPPv29trfStrdupPc"></span><span id="trfStrdup__cP"></span><span class="target" id="trfi_8h_1a9ad8eb6a770e133922aef54c80739587"></span><span class="k"><span class="pre">static</span></span><span class="w"> </span><span class="k"><span class="pre">inline</span></span><span class="w"> </span><span class="kt"><span class="pre">char</span></span><span class="w"> </span><span class="p"><span class="pre">*</span></span><span class="sig-name descname"><span class="n"><span class="pre">trfStrdup</span></span></span><span class="sig-paren">(</span><span class="kt"><span class="pre">char</span></span><span class="w"> </span><span class="p"><span class="pre">*</span></span><span class="n sig-param"><span class="pre">str</span></span><span class="sig-paren">)</span><a class="headerlink" href="#_CPPv49trfStrdupPc" title="Permalink to this definition"></a><br /></dt>
 <dd><p>Simple string duplication function for standard C. </p>
 <dl class="field-list simple">
 <dt class="field-odd">Parameters</dt>
@@ -168,7 +239,7 @@
 
 <dl class="cpp function">
 <dt class="sig sig-object cpp" id="_CPPv48trfSleepi">
-<span id="_CPPv38trfSleepi"></span><span id="_CPPv28trfSleepi"></span><span id="trfSleep__i"></span><span class="target" id="trf__internal_8h_1a10f317f5891b5c1c6851b37ef43a6e76"></span><span class="k"><span class="pre">static</span></span><span class="w"> </span><span class="k"><span class="pre">inline</span></span><span class="w"> </span><span class="kt"><span class="pre">void</span></span><span class="w"> </span><span class="sig-name descname"><span class="n"><span class="pre">trfSleep</span></span></span><span class="sig-paren">(</span><span class="kt"><span class="pre">int</span></span><span class="w"> </span><span class="n sig-param"><span class="pre">ms</span></span><span class="sig-paren">)</span><a class="headerlink" href="#_CPPv48trfSleepi" title="Permalink to this definition"></a><br /></dt>
+<span id="_CPPv38trfSleepi"></span><span id="_CPPv28trfSleepi"></span><span id="trfSleep__i"></span><span class="target" id="trfi_8h_1a10f317f5891b5c1c6851b37ef43a6e76"></span><span class="k"><span class="pre">static</span></span><span class="w"> </span><span class="k"><span class="pre">inline</span></span><span class="w"> </span><span class="kt"><span class="pre">void</span></span><span class="w"> </span><span class="sig-name descname"><span class="n"><span class="pre">trfSleep</span></span></span><span class="sig-paren">(</span><span class="kt"><span class="pre">int</span></span><span class="w"> </span><span class="n sig-param"><span class="pre">ms</span></span><span class="sig-paren">)</span><a class="headerlink" href="#_CPPv48trfSleepi" title="Permalink to this definition"></a><br /></dt>
 <dd><p>Sleep for a given number of milliseconds. </p>
 <dl class="field-list simple">
 <dt class="field-odd">Parameters</dt>
@@ -179,7 +250,7 @@
 
 <dl class="cpp function">
 <dt class="sig sig-object cpp" id="_CPPv413trf__GetDelayP8timespecP8timespec8uint64_t">
-<span id="_CPPv313trf__GetDelayP8timespecP8timespec8uint64_t"></span><span id="_CPPv213trf__GetDelayP8timespecP8timespec8uint64_t"></span><span id="trf__GetDelay__timespecP.timespecP.uint64_t"></span><span class="target" id="trf__internal_8h_1aa4066a2271913304bedf6b9d83f2db47"></span><span class="k"><span class="pre">static</span></span><span class="w"> </span><span class="k"><span class="pre">inline</span></span><span class="w"> </span><span class="kt"><span class="pre">void</span></span><span class="w"> </span><span class="sig-name descname"><span class="n"><span class="pre">trf__GetDelay</span></span></span><span class="sig-paren">(</span><span class="k"><span class="pre">struct</span></span><span class="w"> </span><span class="n"><span class="pre">timespec</span></span><span class="w"> </span><span class="p"><span class="pre">*</span></span><span class="n sig-param"><span class="pre">ts</span></span>, <span class="k"><span class="pre">struct</span></span><span class="w"> </span><span class="n"><span class="pre">timespec</span></span><span class="w"> </span><span class="p"><span class="pre">*</span></span><span class="n sig-param"><span class="pre">ts_out</span></span>, <span class="n"><span class="pre">uint64_t</span></span><span class="w"> </span><span class="n sig-param"><span class="pre">delay_ms</span></span><span class="sig-paren">)</span><a class="headerlink" href="#_CPPv413trf__GetDelayP8timespecP8timespec8uint64_t" title="Permalink to this definition"></a><br /></dt>
+<span id="_CPPv313trf__GetDelayP8timespecP8timespec8uint64_t"></span><span id="_CPPv213trf__GetDelayP8timespecP8timespec8uint64_t"></span><span id="trf__GetDelay__timespecP.timespecP.uint64_t"></span><span class="target" id="trfi_8h_1aa4066a2271913304bedf6b9d83f2db47"></span><span class="k"><span class="pre">static</span></span><span class="w"> </span><span class="k"><span class="pre">inline</span></span><span class="w"> </span><span class="kt"><span class="pre">void</span></span><span class="w"> </span><span class="sig-name descname"><span class="n"><span class="pre">trf__GetDelay</span></span></span><span class="sig-paren">(</span><span class="k"><span class="pre">struct</span></span><span class="w"> </span><span class="n"><span class="pre">timespec</span></span><span class="w"> </span><span class="p"><span class="pre">*</span></span><span class="n sig-param"><span class="pre">ts</span></span>, <span class="k"><span class="pre">struct</span></span><span class="w"> </span><span class="n"><span class="pre">timespec</span></span><span class="w"> </span><span class="p"><span class="pre">*</span></span><span class="n sig-param"><span class="pre">ts_out</span></span>, <span class="n"><span class="pre">uint64_t</span></span><span class="w"> </span><span class="n sig-param"><span class="pre">delay_ms</span></span><span class="sig-paren">)</span><a class="headerlink" href="#_CPPv413trf__GetDelayP8timespecP8timespec8uint64_t" title="Permalink to this definition"></a><br /></dt>
 <dd><p>Return a timespec corresponding to a delay in milliseconds after the input timespec. </p>
 <dl class="field-list simple">
 <dt class="field-odd">Parameters</dt>
@@ -194,7 +265,7 @@
 
 <dl class="cpp function">
 <dt class="sig sig-object cpp" id="_CPPv414trf__HasPassed9clockid_tP8timespec">
-<span id="_CPPv314trf__HasPassed9clockid_tP8timespec"></span><span id="_CPPv214trf__HasPassed9clockid_tP8timespec"></span><span id="trf__HasPassed__clockid_t.timespecP"></span><span class="target" id="trf__internal_8h_1a71fb6060426a18921d45ee8fcf7de190"></span><span class="k"><span class="pre">static</span></span><span class="w"> </span><span class="k"><span class="pre">inline</span></span><span class="w"> </span><span class="kt"><span class="pre">int</span></span><span class="w"> </span><span class="sig-name descname"><span class="n"><span class="pre">trf__HasPassed</span></span></span><span class="sig-paren">(</span><span class="n"><span class="pre">clockid_t</span></span><span class="w"> </span><span class="n sig-param"><span class="pre">clock</span></span>, <span class="k"><span class="pre">struct</span></span><span class="w"> </span><span class="n"><span class="pre">timespec</span></span><span class="w"> </span><span class="p"><span class="pre">*</span></span><span class="n sig-param"><span class="pre">ts</span></span><span class="sig-paren">)</span><a class="headerlink" href="#_CPPv414trf__HasPassed9clockid_tP8timespec" title="Permalink to this definition"></a><br /></dt>
+<span id="_CPPv314trf__HasPassed9clockid_tP8timespec"></span><span id="_CPPv214trf__HasPassed9clockid_tP8timespec"></span><span id="trf__HasPassed__clockid_t.timespecP"></span><span class="target" id="trfi_8h_1a71fb6060426a18921d45ee8fcf7de190"></span><span class="k"><span class="pre">static</span></span><span class="w"> </span><span class="k"><span class="pre">inline</span></span><span class="w"> </span><span class="kt"><span class="pre">int</span></span><span class="w"> </span><span class="sig-name descname"><span class="n"><span class="pre">trf__HasPassed</span></span></span><span class="sig-paren">(</span><span class="n"><span class="pre">clockid_t</span></span><span class="w"> </span><span class="n sig-param"><span class="pre">clock</span></span>, <span class="k"><span class="pre">struct</span></span><span class="w"> </span><span class="n"><span class="pre">timespec</span></span><span class="w"> </span><span class="p"><span class="pre">*</span></span><span class="n sig-param"><span class="pre">ts</span></span><span class="sig-paren">)</span><a class="headerlink" href="#_CPPv414trf__HasPassed9clockid_tP8timespec" title="Permalink to this definition"></a><br /></dt>
 <dd><p>Determine whether a timespec is in the past. </p>
 <dl class="field-list simple">
 <dt class="field-odd">Parameters</dt>

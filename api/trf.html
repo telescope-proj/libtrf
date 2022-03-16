@@ -83,6 +83,16 @@
 <div class="breathe-sectiondef docutils container">
 <p class="breathe-sectiondef-title rubric" id="breathe-section-title-defines">Defines</p>
 <dl class="cpp macro">
+<dt class="sig sig-object cpp" id="c.TRF_RECV_CQ">
+<span class="target" id="trf_8h_1a431e96a44140b9f78ad8a5147bd9a798"></span><span class="sig-name descname"><span class="n"><span class="pre">TRF_RECV_CQ</span></span></span><a class="headerlink" href="#c.TRF_RECV_CQ" title="Permalink to this definition"></a><br /></dt>
+<dd></dd></dl>
+
+<dl class="cpp macro">
+<dt class="sig sig-object cpp" id="c.TRF_SEND_CQ">
+<span class="target" id="trf_8h_1ae2b97cd1140bff6d4a51ae0a3918191f"></span><span class="sig-name descname"><span class="n"><span class="pre">TRF_SEND_CQ</span></span></span><a class="headerlink" href="#c.TRF_SEND_CQ" title="Permalink to this definition"></a><br /></dt>
+<dd></dd></dl>
+
+<dl class="cpp macro">
 <dt class="sig sig-object cpp" id="c.trf_fi_error">
 <span class="target" id="trf_8h_1a97fe53c8b045864e507ab95b7179fa68"></span><span class="sig-name descname"><span class="n"><span class="pre">trf_fi_error</span></span></span><span class="sig-paren">(</span><span class="n"><span class="pre">call</span></span>, <span class="n"><span class="pre">err</span></span><span class="sig-paren">)</span><a class="headerlink" href="#c.trf_fi_error" title="Permalink to this definition"></a><br /></dt>
 <dd></dd></dl>
@@ -190,7 +200,7 @@
 <dt class="sig sig-object cpp" id="_CPPv415trfAllocContextv">
 <span id="_CPPv315trfAllocContextv"></span><span id="_CPPv215trfAllocContextv"></span><span id="trfAllocContext"></span><span class="target" id="trf_8h_1af11acdebab1c5f2b86ad6fa3ddb76458"></span><span class="n"><span class="pre">PTRFContext</span></span><span class="w"> </span><span class="sig-name descname"><span class="n"><span class="pre">trfAllocContext</span></span></span><span class="sig-paren">(</span><span class="sig-paren">)</span><a class="headerlink" href="#_CPPv415trfAllocContextv" title="Permalink to this definition"></a><br /></dt>
 <dd><p>Allocate a <a class="reference internal" href="trf_def.html#struct_t_r_f_context"><span class="std std-ref">TRFContext</span></a>. </p>
-<p>This does not allocate any resources within the context; you must use other libtrf functions such as <a class="reference internal" href="trf_ncp.html#trf__ncp_8h_1a78458248dbc305a7d3bad07931cccaa9"><span class="std std-ref">trfNCClientInit()</span></a> to allocate resources.</p>
+<p>This does not allocate any resources within the context; you must use other libtrf functions such as trfNCClientInit() to allocate resources.</p>
 <dl class="field-list simple">
 <dt class="field-odd">Returns</dt>
 <dd class="field-odd"><p>PTRFContext </p>
@@ -223,27 +233,10 @@
 </dd></dl>
 
 <dl class="cpp function">
-<dt class="sig sig-object cpp" id="_CPPv419trfGetInterfaceListP13PTRFInterfaceP8uint32_t">
-<span id="_CPPv319trfGetInterfaceListP13PTRFInterfaceP8uint32_t"></span><span id="_CPPv219trfGetInterfaceListP13PTRFInterfaceP8uint32_t"></span><span id="trfGetInterfaceList__PTRFInterfaceP.uint32_tP"></span><span class="target" id="trf_8h_1adc45c322e168cb8d64dbfa12b544dbfb"></span><span class="kt"><span class="pre">int</span></span><span class="w"> </span><span class="sig-name descname"><span class="n"><span class="pre">trfGetInterfaceList</span></span></span><span class="sig-paren">(</span><span class="n"><span class="pre">PTRFInterface</span></span><span class="w"> </span><span class="p"><span class="pre">*</span></span><span class="n sig-param"><span class="pre">list_out</span></span>, <span class="n"><span class="pre">uint32_t</span></span><span class="w"> </span><span class="p"><span class="pre">*</span></span><span class="n sig-param"><span class="pre">length</span></span><span class="sig-paren">)</span><a class="headerlink" href="#_CPPv419trfGetInterfaceListP13PTRFInterfaceP8uint32_t" title="Permalink to this definition"></a><br /></dt>
-<dd><p>List all system interfaces. </p>
-<dl class="field-list simple">
-<dt class="field-odd">Parameters</dt>
-<dd class="field-odd"><ul class="simple">
-<li><p><strong>list_out</strong> – A linked list of interfaces on the system.</p></li>
-<li><p><strong>length</strong> – The length of the linked list.</p></li>
-</ul>
-</dd>
-<dt class="field-even">Returns</dt>
-<dd class="field-even"><p>0 on success, negative error code on failure. </p>
-</dd>
-</dl>
-</dd></dl>
-
-<dl class="cpp function">
 <dt class="sig sig-object cpp" id="_CPPv420trfFreeInterfaceList13PTRFInterface">
 <span id="_CPPv320trfFreeInterfaceList13PTRFInterface"></span><span id="_CPPv220trfFreeInterfaceList13PTRFInterface"></span><span id="trfFreeInterfaceList__PTRFInterface"></span><span class="target" id="trf_8h_1aba0d2dc92c90444a30071f38dc09d096"></span><span class="kt"><span class="pre">void</span></span><span class="w"> </span><span class="sig-name descname"><span class="n"><span class="pre">trfFreeInterfaceList</span></span></span><span class="sig-paren">(</span><span class="n"><span class="pre">PTRFInterface</span></span><span class="w"> </span><span class="n sig-param"><span class="pre">ifaces</span></span><span class="sig-paren">)</span><a class="headerlink" href="#_CPPv420trfFreeInterfaceList13PTRFInterface" title="Permalink to this definition"></a><br /></dt>
 <dd><p>Free an interface list. </p>
-<p>This call frees a linked list of struct <a class="reference internal" href="trf_def.html#struct_t_r_f_interface"><span class="std std-ref">TRFInterface</span></a>, typically allocated using the <a class="reference internal" href="#trf_8h_1adc45c322e168cb8d64dbfa12b544dbfb"><span class="std std-ref">trfGetInterfaceList()</span></a> call.</p>
+<p>This call frees a linked list of struct <a class="reference internal" href="trf_def.html#struct_t_r_f_interface"><span class="std std-ref">TRFInterface</span></a>, typically allocated using the <a class="reference internal" href="trf_interface.html#trf__interface_8h_1a2d99afc873112937d8e7ff77075b2d91"><span class="std std-ref">trfGetInterfaceList()</span></a> call.</p>
 <dl class="field-list simple">
 <dt class="field-odd">Parameters</dt>
 <dd class="field-odd"><p><strong>ifaces</strong> – Interface list to free. </p>
@@ -861,14 +854,16 @@
 <dd></dd></dl>
 
 <dl class="cpp function">
-<dt class="sig sig-object cpp" id="_CPPv411trf__PollCQP6fid_cqP16fi_cq_data_entryP15fi_cq_err_entry15PTRFContextOptsP8timespec6size_t7uint8_t">
-<span id="_CPPv311trf__PollCQP6fid_cqP16fi_cq_data_entryP15fi_cq_err_entry15PTRFContextOptsP8timespec6size_t7uint8_t"></span><span id="_CPPv211trf__PollCQP6fid_cqP16fi_cq_data_entryP15fi_cq_err_entry15PTRFContextOptsP8timespec6size_t7uint8_t"></span><span id="trf__PollCQ__fid_cqP.fi_cq_data_entryP.fi_cq_err_entryP.PTRFContextOpts.timespecP.s.uint8_t"></span><span class="target" id="trf_8h_1a1ab95899003f4a0f97a8d19e07db2f0f"></span><span class="k"><span class="pre">static</span></span><span class="w"> </span><span class="k"><span class="pre">inline</span></span><span class="w"> </span><span class="n"><span class="pre">ssize_t</span></span><span class="w"> </span><span class="sig-name descname"><span class="n"><span class="pre">trf__PollCQ</span></span></span><span class="sig-paren">(</span><span class="k"><span class="pre">struct</span></span><span class="w"> </span><span class="n"><span class="pre">fid_cq</span></span><span class="w"> </span><span class="p"><span class="pre">*</span></span><span class="n sig-param"><span class="pre">cq</span></span>, <span class="k"><span class="pre">struct</span></span><span class="w"> </span><span class="n"><span class="pre">fi_cq_data_entry</span></span><span class="w"> </span><span class="p"><span class="pre">*</span></span><span class="n sig-param"><span class="pre">de</span></span>, <span class="k"><span class="pre">struct</span></span><span class="w"> </span><span class="n"><span class="pre">fi_cq_err_entry</span></span><span class="w"> </span><span class="p"><span class="pre">*</span></span><span class="n sig-param"><span class="pre">err</span></span>, <span class="n"><span class="pre">PTRFContextOpts</span></span><span class="w"> </span><span class="n sig-param"><span class="pre">opts</span></span>, <span class="k"><span class="pre">struct</span></span><span class="w"> </span><span class="n"><span class="pre">timespec</span></span><span class="w"> </span><span class="p"><span class="pre">*</span></span><span class="n sig-param"><span class="pre">deadline</span></span>, <span class="n"><span class="pre">size_t</span></span><span class="w"> </span><span class="n sig-param"><span class="pre">count</span></span>, <span class="n"><span class="pre">uint8_t</span></span><span class="w"> </span><span class="n sig-param"><span class="pre">is_send_cq</span></span><span class="sig-paren">)</span><a class="headerlink" href="#_CPPv411trf__PollCQP6fid_cqP16fi_cq_data_entryP15fi_cq_err_entry15PTRFContextOptsP8timespec6size_t7uint8_t" title="Permalink to this definition"></a><br /></dt>
+<dt class="sig sig-object cpp" id="_CPPv411trf__PollCQP12TRFTCQFabricP16fi_cq_data_entryP15fi_cq_err_entry15PTRFContextOptsP8timespec6size_t7uint8_t">
+<span id="_CPPv311trf__PollCQP12TRFTCQFabricP16fi_cq_data_entryP15fi_cq_err_entry15PTRFContextOptsP8timespec6size_t7uint8_t"></span><span id="_CPPv211trf__PollCQP12TRFTCQFabricP16fi_cq_data_entryP15fi_cq_err_entry15PTRFContextOptsP8timespec6size_t7uint8_t"></span><span id="trf__PollCQ__TRFTCQFabricP.fi_cq_data_entryP.fi_cq_err_entryP.PTRFContextOpts.timespecP.s.uint8_t"></span><span class="target" id="trf_8h_1a5c50587f89a5e94d84303c7eb3813095"></span><span class="k"><span class="pre">static</span></span><span class="w"> </span><span class="k"><span class="pre">inline</span></span><span class="w"> </span><span class="n"><span class="pre">ssize_t</span></span><span class="w"> </span><span class="sig-name descname"><span class="n"><span class="pre">trf__PollCQ</span></span></span><span class="sig-paren">(</span><span class="k"><span class="pre">struct</span></span><span class="w"> </span><a class="reference internal" href="trf_def.html#_CPPv412TRFTCQFabric" title="TRFTCQFabric"><span class="n"><span class="pre">TRFTCQFabric</span></span></a><span class="w"> </span><span class="p"><span class="pre">*</span></span><span class="n sig-param"><span class="pre">tcq</span></span>, <span class="k"><span class="pre">struct</span></span><span class="w"> </span><span class="n"><span class="pre">fi_cq_data_entry</span></span><span class="w"> </span><span class="p"><span class="pre">*</span></span><span class="n sig-param"><span class="pre">de</span></span>, <span class="k"><span class="pre">struct</span></span><span class="w"> </span><span class="n"><span class="pre">fi_cq_err_entry</span></span><span class="w"> </span><span class="p"><span class="pre">*</span></span><span class="n sig-param"><span class="pre">err</span></span>, <span class="n"><span class="pre">PTRFContextOpts</span></span><span class="w"> </span><span class="n sig-param"><span class="pre">opts</span></span>, <span class="k"><span class="pre">struct</span></span><span class="w"> </span><span class="n"><span class="pre">timespec</span></span><span class="w"> </span><span class="p"><span class="pre">*</span></span><span class="n sig-param"><span class="pre">deadline</span></span>, <span class="n"><span class="pre">size_t</span></span><span class="w"> </span><span class="n sig-param"><span class="pre">count</span></span>, <span class="n"><span class="pre">uint8_t</span></span><span class="w"> </span><span class="n sig-param"><span class="pre">is_send_cq</span></span><span class="sig-paren">)</span><a class="headerlink" href="#_CPPv411trf__PollCQP12TRFTCQFabricP16fi_cq_data_entryP15fi_cq_err_entry15PTRFContextOptsP8timespec6size_t7uint8_t" title="Permalink to this definition"></a><br /></dt>
 <dd></dd></dl>
 
 <dl class="cpp function">
 <dt class="sig sig-object cpp" id="_CPPv418trfGetSendProgress11PTRFContextP16fi_cq_data_entryP15fi_cq_err_entry6size_t">
 <span id="_CPPv318trfGetSendProgress11PTRFContextP16fi_cq_data_entryP15fi_cq_err_entry6size_t"></span><span id="_CPPv218trfGetSendProgress11PTRFContextP16fi_cq_data_entryP15fi_cq_err_entry6size_t"></span><span id="trfGetSendProgress__PTRFContext.fi_cq_data_entryP.fi_cq_err_entryP.s"></span><span class="target" id="trf_8h_1afe8cfcf19093d40d1c082776919233f0"></span><span class="k"><span class="pre">static</span></span><span class="w"> </span><span class="k"><span class="pre">inline</span></span><span class="w"> </span><span class="n"><span class="pre">ssize_t</span></span><span class="w"> </span><span class="sig-name descname"><span class="n"><span class="pre">trfGetSendProgress</span></span></span><span class="sig-paren">(</span><span class="n"><span class="pre">PTRFContext</span></span><span class="w"> </span><span class="n sig-param"><span class="pre">ctx</span></span>, <span class="k"><span class="pre">struct</span></span><span class="w"> </span><span class="n"><span class="pre">fi_cq_data_entry</span></span><span class="w"> </span><span class="p"><span class="pre">*</span></span><span class="n sig-param"><span class="pre">de</span></span>, <span class="k"><span class="pre">struct</span></span><span class="w"> </span><span class="n"><span class="pre">fi_cq_err_entry</span></span><span class="w"> </span><span class="p"><span class="pre">*</span></span><span class="n sig-param"><span class="pre">err</span></span>, <span class="n"><span class="pre">size_t</span></span><span class="w"> </span><span class="n sig-param"><span class="pre">count</span></span><span class="sig-paren">)</span><a class="headerlink" href="#_CPPv418trfGetSendProgress11PTRFContextP16fi_cq_data_entryP15fi_cq_err_entry6size_t" title="Permalink to this definition"></a><br /></dt>
 <dd><p>Get the progress of all send operations. </p>
+<p>
+Warning: Be aware of short counts- if the CQ contains less than count entries, the function will only return the number of entries in the CQ.</p>
 <dl class="field-list simple">
 <dt class="field-odd">Parameters</dt>
 <dd class="field-odd"><ul class="simple">
@@ -888,6 +883,8 @@
 <dt class="sig sig-object cpp" id="_CPPv418trfGetRecvProgress11PTRFContextP16fi_cq_data_entryP15fi_cq_err_entry6size_t">
 <span id="_CPPv318trfGetRecvProgress11PTRFContextP16fi_cq_data_entryP15fi_cq_err_entry6size_t"></span><span id="_CPPv218trfGetRecvProgress11PTRFContextP16fi_cq_data_entryP15fi_cq_err_entry6size_t"></span><span id="trfGetRecvProgress__PTRFContext.fi_cq_data_entryP.fi_cq_err_entryP.s"></span><span class="target" id="trf_8h_1a4da4cb6a7ed46b0afcb9a5af40615e6f"></span><span class="k"><span class="pre">static</span></span><span class="w"> </span><span class="k"><span class="pre">inline</span></span><span class="w"> </span><span class="n"><span class="pre">ssize_t</span></span><span class="w"> </span><span class="sig-name descname"><span class="n"><span class="pre">trfGetRecvProgress</span></span></span><span class="sig-paren">(</span><span class="n"><span class="pre">PTRFContext</span></span><span class="w"> </span><span class="n sig-param"><span class="pre">ctx</span></span>, <span class="k"><span class="pre">struct</span></span><span class="w"> </span><span class="n"><span class="pre">fi_cq_data_entry</span></span><span class="w"> </span><span class="p"><span class="pre">*</span></span><span class="n sig-param"><span class="pre">de</span></span>, <span class="k"><span class="pre">struct</span></span><span class="w"> </span><span class="n"><span class="pre">fi_cq_err_entry</span></span><span class="w"> </span><span class="p"><span class="pre">*</span></span><span class="n sig-param"><span class="pre">err</span></span>, <span class="n"><span class="pre">size_t</span></span><span class="w"> </span><span class="n sig-param"><span class="pre">count</span></span><span class="sig-paren">)</span><a class="headerlink" href="#_CPPv418trfGetRecvProgress11PTRFContextP16fi_cq_data_entryP15fi_cq_err_entry6size_t" title="Permalink to this definition"></a><br /></dt>
 <dd><p>Get the progress of all receive operations. </p>
+<p>
+Warning: Be aware of short counts- if the CQ contains less than count entries, the function will only return the number of entries in the CQ.</p>
 <dl class="field-list simple">
 <dt class="field-odd">Parameters</dt>
 <dd class="field-odd"><ul class="simple">

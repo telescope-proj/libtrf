@@ -181,6 +181,25 @@
 </dl>
 </dd></dl>
 
+<dl class="cpp function">
+<dt class="sig sig-object cpp" id="_CPPv415trfCheckNetworkP8sockaddr6int8_tP8sockaddr6int8_t">
+<span id="_CPPv315trfCheckNetworkP8sockaddr6int8_tP8sockaddr6int8_t"></span><span id="_CPPv215trfCheckNetworkP8sockaddr6int8_tP8sockaddr6int8_t"></span><span id="trfCheckNetwork__sockaddrP.int8_t.sockaddrP.int8_t"></span><span class="target" id="trf__inet_8h_1a462f39a62abcb59188b758ca4f19f370"></span><span class="kt"><span class="pre">int</span></span><span class="w"> </span><span class="sig-name descname"><span class="n"><span class="pre">trfCheckNetwork</span></span></span><span class="sig-paren">(</span><span class="k"><span class="pre">struct</span></span><span class="w"> </span><span class="n"><span class="pre">sockaddr</span></span><span class="w"> </span><span class="p"><span class="pre">*</span></span><span class="n sig-param"><span class="pre">net1</span></span>, <span class="n"><span class="pre">int8_t</span></span><span class="w"> </span><span class="n sig-param"><span class="pre">net1_sn</span></span>, <span class="k"><span class="pre">struct</span></span><span class="w"> </span><span class="n"><span class="pre">sockaddr</span></span><span class="w"> </span><span class="p"><span class="pre">*</span></span><span class="n sig-param"><span class="pre">net2</span></span>, <span class="n"><span class="pre">int8_t</span></span><span class="w"> </span><span class="n sig-param"><span class="pre">net2_sn</span></span><span class="sig-paren">)</span><a class="headerlink" href="#_CPPv415trfCheckNetworkP8sockaddr6int8_tP8sockaddr6int8_t" title="Permalink to this definition"></a><br /></dt>
+<dd><p>Checks if the 2 addresses are in the same network. </p>
+<dl class="field-list simple">
+<dt class="field-odd">Parameters</dt>
+<dd class="field-odd"><ul class="simple">
+<li><p><strong>net1</strong> – First network addresses to compare </p></li>
+<li><p><strong>net1_sn</strong> – Subnet of the first address </p></li>
+<li><p><strong>net2</strong> – Second network address to compare to the first one </p></li>
+<li><p><strong>net2_sn</strong> – Subnet of the second address </p></li>
+</ul>
+</dd>
+<dt class="field-even">Returns</dt>
+<dd class="field-even"><p>1 if the addresses are in the same network, 0 of they are not, negative error code on failure </p>
+</dd>
+</dl>
+</dd></dl>
+
 </div>
 </section>
 

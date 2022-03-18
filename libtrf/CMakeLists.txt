@@ -42,6 +42,8 @@ include_directories(
     ./libs/libfabric/include
     ./libs/protobuf-c
 )
+
+target_link_libraries(trf fabric protobuf-c)
 target_include_directories(trf
 	PUBLIC
 		include

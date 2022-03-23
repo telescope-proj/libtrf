@@ -6,14 +6,43 @@
 #include <stdatomic.h>
 #include <rdma/fi_domain.h>
 
-#define TRF_INTERFACE_LOCAL   (1 << 1)      // Return local interfaces (e.g. loopback)
-#define TRF_INTERFACE_EXT     (1 << 2)      // Return external interfaces (e.g. Ethernet port)
-#define TRF_INTERFACE_SPD     (1 << 3)      // Only return interfaces with known link speeds
-#define TRF_INTERFACE_IP4     (1 << 10)     // Return interfaces with IPv4 addresses attached
-#define TRF_INTERFACE_IP6     (1 << 11)     // Return interfaces with IPv6 addresses attached
+/**
+ * @brief Return local interfaces, e.g. the loopback interface
+ */
+#define TRF_INTERFACE_LOCAL   (1 << 1)
 
-#define TRF_INTERFACE_POLICY_IP (1 << 20)   // Use IP address to determine whether an interface is local or remote
-#define TRF_INTERFACE_POLICY_DB (1 << 21)   // Use a platform-specific database to determine whether an interface is local or remote
+/**
+ * @brief Return externally facing interfaces, e.g. the Ethernet port.
+ */
+#define TRF_INTERFACE_EXT     (1 << 2)
+
+/**
+ * @brief Only return interfaces with known link rates.
+ */
+#define TRF_INTERFACE_SPD     (1 << 3)
+
+/**
+ * @brief Return interfaces with IPv4 addresses attached. 
+ */
+#define TRF_INTERFACE_IP4     (1 << 10)
+
+/**
+ * @brief Return interfaces with IPv6 addresses attached.
+ * Note that LibTRF does not currently support IPv6.
+ */
+#define TRF_INTERFACE_IP6     (1 << 11)
+
+/**
+ * @brief Use the interface IP address to determine whether an interface is
+ * local or external.
+ */
+#define TRF_INTERFACE_POLICY_IP (1 << 20)
+
+/**
+ * @brief Use a platform specific database to determine whether an interface is
+ * local or external.
+ */
+#define TRF_INTERFACE_POLICY_DB (1 << 21)
 
 #if defined(_WIN32)
     #define TRFSock SOCKET
@@ -484,6 +513,16 @@ struct TRFDisplay {
      */
     struct fid_mr * fb_mr;
     /**
+     * @brief Framebuffer length. This is used if the memory region is larger
+     *        than the actual number of bytes needed to store the frame.
+     */
+    size_t fb_len;
+    /**
+     * @brief Offset from the start of the framebuffer address to the start of
+     *        the actual frame data, excluding any header information.
+     */
+    size_t fb_offset;
+    /**
      * @brief Frames since the start of the capture session.
      * 
      */
@@ -771,8 +810,8 @@ static inline void trfSetDefaultOpts(PTRFContextOpts opts)
     opts->fab_poll_rate     = 0;
     opts->fab_rcv_bufsize   = bufsize;
     opts->fab_snd_bufsize   = bufsize;
-    opts->fab_rcv_timeo     = 2000;
-    opts->fab_snd_timeo     = 2000;
+    opts->fab_rcv_timeo     = 3000;
+    opts->fab_snd_timeo     = 3000;
     opts->nc_rcv_bufsize    = trf__GetPageSize();
     opts->nc_snd_bufsize    = trf__GetPageSize();
     opts->nc_rcv_timeo      = 2000;

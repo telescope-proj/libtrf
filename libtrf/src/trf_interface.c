@@ -133,8 +133,7 @@ static int trf__InterfaceLength(PTRFInterface iface)
     return count;
 }
 
-#define trf__Netmask4(n) ((n) == 0 ? 0 : ((n) == 32 ? 0xFFFFFFFF : (0xFFFFFFFF << (32 - (n)))))
-#define trf__Netmask6(n) ((n) == 0 ? 0 : ((n) == 128 ? 0xFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFF : (0xFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFF << (128 - (n)))))
+#define trf__Netmask4(n) ((n) == 0 ? 0 : htonl((n) == 32 ? 0xFFFFFFFF : (0xFFFFFFFF << (32 - (n)))))
 #define TRF__PSAI struct sockaddr_in *
 #define TRF__PSAI6 struct sockaddr_in6 *
 #define trf__RawAddr4(a) (((TRF__PSAI)a)->sin_addr.s_addr)
@@ -563,6 +562,74 @@ freenomem:
     freeifaddrs(ifa);
     return out;
 #endif
+}
+
+int trfSortAddrV(PTRFAddrV av)
+{
+    // This is very inefficient, but it should work for now
+
+    if (!av)
+    {
+        trf__log_error("Invalid address vector passed to trfSortAddrV()");
+        return -EINVAL;
+    }
+
+    int len = 0;
+    PTRFAddrV av_tmp = av;
+    while (av_tmp)
+    {
+        len++;
+        av_tmp = av_tmp->next;
+    }
+
+    if (len > UINT16_MAX)
+        return -ENOBUFS;
+
+    uint16_t * idx_list = calloc(len, sizeof(uint16_t));
+    if (!idx_list)
+    {
+        return -ENOMEM;
+    }
+
+    PTRFAddrV * ptr_list = calloc(len + 1, sizeof(PTRFAddrV));
+    if (!ptr_list)
+    {
+        free(idx_list);
+        return -ENOMEM;
+    }
+
+    int rem = len;
+    while (rem)
+    {
+        PTRFAddrV av_max = NULL;
+        int max_spd = -100;
+        int idx = 0;
+        int av_max_idx = 0;
+        for (av_tmp = av; av_tmp; av_tmp = av_tmp->next)
+        {
+            if (!idx_list[idx] && av_tmp->pair_speed > max_spd)
+            {
+                trf__log_debug("Fastest pair speed: %d", av_tmp->pair_speed);
+                av_max = av_tmp;
+                max_spd = av_tmp->pair_speed;
+                av_max_idx = idx;
+            }
+            idx++;
+        }
+        idx_list[av_max_idx] = rem;
+        ptr_list[len - rem] = av_max;
+        rem--;
+    }
+
+    for (; rem < len; rem++)
+    {
+        assert(ptr_list[rem]);
+        ptr_list[rem]->next = ptr_list[rem + 1];
+    }
+
+    free(ptr_list);
+    free(idx_list);
+    return 0;
 }
 
 int trfGetFastestLink(PTRFAddrV av, PTRFAddrV * av_out)

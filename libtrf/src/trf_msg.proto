@@ -413,6 +413,16 @@ message ChannelOpen {
     uint32 type                 = 1;    // Channel type
 }
 
+/*  @brief Keep alive message
+    Keeps the connection alive to avoid timeouts. This is used, for example,
+    if either side would like to keep the connection open if they are either
+    paused or waiting for new frame data.
+*/
+message KeepAlive {
+    uint32 info                 = 1;    // Info (currently unused)
+}
+    
+
 /*  ----------- Message Wrapper Object ------------- */
 
 /*  @brief Message wrapper
@@ -463,5 +473,6 @@ message MessageWrapper {
         AddrPF addr_pf                      = 28;
 
         ChannelOpen ch_open                 = 30;
+        KeepAlive ka                        = 31;
     }
 }

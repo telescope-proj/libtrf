@@ -58,6 +58,13 @@ int trfRemoveInvalid(PTRFInterface ifs, PTRFInterface * out_ifs, int * n_ifs);
 */
 void trfFreeAddrV(PTRFAddrV av);
 
+/**
+ * @brief Sort an address vector.
+ * 
+ * @param av  Address vector to sort
+ * @return    int 
+ */
+int trfSortAddrV(PTRFAddrV av);
 
 /**
   * @brief Create an address vector list containing viable links between two

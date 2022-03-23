@@ -22,13 +22,17 @@ jobs:
     steps:
     - name: Install dependencies
       run: sudo apt update 
-        && sudo apt install -y protobuf-c-compiler libprotobuf-c-dev libnuma-dev
+        && sudo apt install -y protobuf-c-compiler libprotobuf-c-dev
         
     - name: Install Libfabric
       run: git clone https://github.com/ofiwg/libfabric.git
         && cd ./libfabric
         && sudo ./autogen.sh
-        && ./configure --prefix=/opt/libfabric && make -j $(nproc) && sudo make install
+        && ./configure --prefix=/opt/libfabric
+            --enable-only
+            --enable-tcp=yes
+            --enable-rxm=yes
+        && make -j $(nproc) && sudo make install
         && sudo cp -r include/. /usr/include
 
     - name: Cleanup

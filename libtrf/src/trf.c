@@ -1083,14 +1083,59 @@ int trf__FabricRegBuf(PTRFXFabric ctx, void * addr, size_t len, uint64_t flags,
 
 int trfRegDisplaySource(PTRFContext ctx, PTRFDisplay disp)
 {
-    return trf__FabricRegBuf(ctx->xfer.fabric, disp->fb_addr, 
-        trfGetDisplayBytes(disp), FI_READ, &disp->fb_mr);
+    int ret;
+    ret = trf__FabricRegBuf(ctx->xfer.fabric, disp->fb_addr, 
+                            trfGetDisplayBytes(disp), FI_READ,
+                            &disp->fb_mr);
+    if (ret < 0)
+        return ret;
+
+    disp->fb_len    = trfGetDisplayBytes(disp);
+    disp->fb_offset = 0;
+    return ret;
 }
 
 int trfRegDisplaySink(PTRFContext ctx, PTRFDisplay disp)
 {
-    return trf__FabricRegBuf(ctx->xfer.fabric, disp->fb_addr, 
-        trfGetDisplayBytes(disp), FI_WRITE | FI_REMOTE_WRITE, &disp->fb_mr);
+    int ret;
+    ret = trf__FabricRegBuf(ctx->xfer.fabric, disp->fb_addr, 
+                            trfGetDisplayBytes(disp), 
+                            FI_WRITE | FI_REMOTE_WRITE, &disp->fb_mr);
+    if (ret < 0)
+        return ret;
+
+    disp->fb_len    = trfGetDisplayBytes(disp);
+    disp->fb_offset = 0;
+    return ret;
+}
+
+int trfRegDisplayCustom(PTRFContext ctx, PTRFDisplay disp, size_t size, 
+                        size_t offset, uint64_t flags)
+{
+    if (!ctx || !disp || !size)
+    {
+        trf__log_debug("EINVAL trfRegDisplayCustom(ctx: %p, disp: %p, "
+                       "size: %lu, offset: %lu, flags: %lu)");
+        return -EINVAL;
+    }
+    if (disp->fb_addr + (offset + trfGetDisplayBytes(disp)) > 
+        (disp->fb_addr + size))
+    {
+        trf__log_debug("Frame data would overflow buffer!");
+        trf__log_debug("Data ends at: %p, Maximum: %p", 
+                       (disp->fb_addr + (offset + trfGetDisplayBytes(disp))),
+                       (disp->fb_addr + size));
+        return -ENOSPC;
+    }
+    size_t ret;
+    ret = trf__FabricRegBuf(ctx->xfer.fabric, disp->fb_addr, size, flags,
+                            &disp->fb_mr);
+    if (ret < 0)
+        return ret;
+
+    disp->fb_len    = size;
+    disp->fb_offset = offset;
+    return ret;
 }
 
 int trfDeregDisplay(PTRFContext ctx, PTRFDisplay disp)
@@ -1300,6 +1345,20 @@ int trfGetEndpointName(PTRFContext ctx, char ** sas_buf)
     return 0;
 }
 
+int trfSendKeepAlive(PTRFContext ctx)
+{
+    if (!ctx || ((ctx->type != TRF_EP_CONN_ID) && (ctx->type != TRF_EP_SINK)))
+    {
+        return -EINVAL;
+    }
+    trf__log_trace("Keeping connection alive...");
+    TrfMsg__MessageWrapper mw = TRF_MSG__MESSAGE_WRAPPER__INIT;
+    TrfMsg__KeepAlive ka = TRF_MSG__KEEP_ALIVE__INIT;
+    mw.wdata_case = TRF_MSG__MESSAGE_WRAPPER__WDATA_KA;
+    mw.ka = &ka;
+    ka.info = 0;
+    return trfFabricSend(ctx, &mw);
+}
 
 int trfGetMessageAuto(PTRFContext ctx, uint64_t flags, uint64_t * processed,
     void ** data_out)
@@ -1354,14 +1413,22 @@ int trfGetMessageAuto(PTRFContext ctx, uint64_t flags, uint64_t * processed,
     if (ifmt & ~flags)
     {
         // Caller must process message
-        trf__log_trace("Message returned to user");
+        trf__log_trace("Message %d returned to user", ifmt);
         *processed = ifmt;
         *data_out = msg;
         return 1;
     }
     else
     {
-        if (ifmt == TRFM_CLIENT_DISP_REQ)
+        if (ifmt == TRFM_KEEP_ALIVE)
+        {
+            trf__log_trace("Got keep alive message...");
+            trf_msg__message_wrapper__free_unpacked(msg, NULL);
+            *data_out = NULL;
+            *processed = ifmt;
+            return -EAGAIN;
+        }
+        else if (ifmt == TRFM_CLIENT_DISP_REQ)
         {
             trf__log_trace("Sending display list");
             if (ctx->type == TRF_EP_CONN_ID)
@@ -1706,7 +1773,7 @@ int trfFabricSend(PTRFContext ctx, TrfMsg__MessageWrapper * msg)
     ret = trf__FabricPostSend(ctx, size, ctx->xfer.fabric->peer_addr, &tend);
     if (ret < 0)
     {
-        trf__log_error("Unable to post send");
+        trf_fi_error("FabricPostSend", ret);
         return ret;
     }
     
@@ -1967,6 +2034,48 @@ try_recover:
         }
         trf__IncrementCQ(ctx->xfer.fabric->tx_cq, 1);
         iter--;
+    }
+    return ret;
+}
+
+ssize_t trfSendFrameChunk(PTRFContext ctx, PTRFDisplay disp, size_t start, 
+                          size_t end, uint64_t rbuf, uint64_t rkey)
+{
+    if (!ctx || !disp || !rbuf || !rkey)
+    {
+        trf__log_debug("Invalid argument - trfSendFrameChunk(ctx: %p, "
+                       "disp: %p, start: %lu, end: %lu, rbuf: %lu, rkey: %lu)",
+                       ctx, disp, start, end, rbuf, rkey);
+        return -EINVAL;
+    }
+
+    if (end > start || (end - start) > trfGetDisplayBytes(disp))
+    {
+        trf__log_debug("Invalid display range - trfSendFrameChunk(ctx: %p, "
+                       "disp: %p, start: %lu, end: %lu, rbuf: %lu, rkey: %lu)",
+                       ctx, disp, start, end, rbuf, rkey);
+        return -EINVAL;
+    }
+    
+    // Shorten access
+    PTRFXFabric f = ctx->xfer.fabric;
+
+    // Compressed texture formats are not directly pixel addressable and require
+    // special handling - for now, we'll just ignore them
+    if (trfTextureIsCompressed(disp->format))
+    {
+        return -ENOTSUP;
+    }
+
+    trf__DecrementCQ(f->tx_cq, 1);
+    ssize_t ret;
+    ret = fi_write(f->ep, 
+                   trfGetFBPtr(disp), end - start,
+                   fi_mr_desc(disp->fb_mr), f->peer_addr, 
+                   rbuf, rkey, NULL);
+    if (ret < 0)
+    {
+        trf__IncrementCQ(f->tx_cq, 1);
     }
     return ret;
 }

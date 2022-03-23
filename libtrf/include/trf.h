@@ -633,7 +633,23 @@ static inline ssize_t trfSendFrame(PTRFContext ctx, PTRFDisplay disp,
  * @return          0 on success, negative error code on failure. 
  */
 ssize_t trfSendFramePart(PTRFContext ctx, PTRFDisplay disp, uint64_t rbuf,
-    uint64_t rkey, struct TRFRect * rects, size_t num_rects);
+                         uint64_t rkey, struct TRFRect * rects, 
+                         size_t num_rects);
+
+/**
+ * @brief       Send a partial frame update, based on byte offsets.
+ * 
+ * Performs a fabric RMA write operation to the destination buffer. The client
+ * is not informed of the operation status; once the operation completes, the
+ * server should send an acknowledgement.
+ * 
+ * Compressed textures are not supported.
+ * 
+ * @param ctx       Initialized context to send the frame to.
+ * 
+ */
+ssize_t trfSendFrameChunk(PTRFContext ctx, PTRFDisplay disp, size_t start, 
+                          size_t end, uint64_t rbuf, uint64_t rkey);
 
 /**
  * @brief           Update the cursor position of a display group.

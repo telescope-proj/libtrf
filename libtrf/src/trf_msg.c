@@ -163,7 +163,7 @@ int trfMsgPack(TrfMsg__MessageWrapper * handle, uint32_t size, uint8_t * buf,
         trf__log_trace("Buffer too small to store message");
         return -ENOMEM;
     }
-    trf__log_trace("To send: %lu", to_write);
+    trf__log_trace("To send: %lu, type: %d", to_write, handle->wdata_case);
     * (uint32_t *) buf = htonl(to_write);
     size_t pack_sz = trf_msg__message_wrapper__pack(
         handle, buf + sizeof(uint32_t)

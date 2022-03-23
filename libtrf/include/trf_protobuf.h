@@ -50,7 +50,9 @@ enum TRFM_Type {
     TRFM_ADDR_PF                = (1 << 14),
     TRFM_CH_OPEN                = (1 << 15),
     TRFM_CURSOR_DATA            = (1 << 16),
-    TRFM_MAX                    = (1 << 17)
+    TRFM_KEEP_ALIVE             = (1 << 17),
+    TRFM_TRANSPORT_NACK         = (1 << 18),
+    TRFM_MAX                    = (1 << 19)
 };
 
 /**
@@ -126,6 +128,10 @@ static inline uint64_t trfPBToInternal(int pb_type)
             return TRFM_CH_OPEN;
         case TRF_MSG__MESSAGE_WRAPPER__WDATA_CURSOR_DATA:
             return TRFM_CURSOR_DATA;
+        case TRF_MSG__MESSAGE_WRAPPER__WDATA_KA:
+            return TRFM_KEEP_ALIVE;
+        case TRF_MSG__MESSAGE_WRAPPER__WDATA_TRANSPORT_NACK:
+            return TRFM_TRANSPORT_NACK;
         default:
             return TRFM_INVALID;
     }
@@ -167,6 +173,10 @@ static inline uint64_t trfInternalToPB(enum TRFM_Type type)
             return TRF_MSG__MESSAGE_WRAPPER__WDATA_CH_OPEN;
         case TRFM_CURSOR_DATA:
             return TRF_MSG__MESSAGE_WRAPPER__WDATA_CURSOR_DATA;
+        case TRFM_KEEP_ALIVE:
+            return TRF_MSG__MESSAGE_WRAPPER__WDATA_KA;
+        case TRFM_TRANSPORT_NACK:
+            return TRF_MSG__MESSAGE_WRAPPER__WDATA_TRANSPORT_NACK;
         default:
             return TRF_MSG__MESSAGE_WRAPPER__WDATA__NOT_SET;
     }

@@ -517,6 +517,21 @@ int trfRegDisplaySource(PTRFContext ctx, PTRFDisplay disp);
 int trfRegDisplaySink(PTRFContext ctx, PTRFDisplay disp);
 
 /**
+ * @brief       Custom registration routine. This is used when the framebuffer 
+ *              memory region contains other data.
+ * 
+ * @param ctx   Initialized context to make the display buffer available to.
+ * 
+ * @param disp  Display to make available.
+ * 
+ * @param size  Size of the display buffer.
+ * 
+ * @param offset Offset between the start of the MR and the start of the frame data.
+ */
+int trfRegDisplayCustom(PTRFContext ctx, PTRFDisplay disp, size_t size, 
+                        size_t offset, uint64_t flags);
+
+/**
  * @brief       Get display by ID
  *
  * @param disp_list     Display list
@@ -560,6 +575,21 @@ int trfFabricSend(PTRFContext ctx, TrfMsg__MessageWrapper *msg);
 int trfFabricRecv(PTRFContext ctx, TrfMsg__MessageWrapper ** msg);
 
 /**
+ * @brief Get the actual framebuffer data pointer after offsets.
+ * 
+ * @param disp      Display to use.
+ * @return          void *
+ */
+static inline void * trfGetFBPtr(PTRFDisplay disp)
+{
+    if (disp->fb_addr)
+    {
+        return (void *) ((uintptr_t) disp->fb_addr + disp->fb_offset);
+    }
+    return NULL;
+}
+
+/**
  * @brief       Send a frame to the client.
  * 
  * @param ctx   Initialized context to send the frame to.
@@ -572,9 +602,16 @@ static inline ssize_t trfSendFrame(PTRFContext ctx, PTRFDisplay disp,
     uint64_t rbuf, uint64_t rkey)
 {
     trf__DecrementCQ(ctx->xfer.fabric->tx_cq, 1);
-    return fi_write(ctx->xfer.fabric->ep, disp->fb_addr, 
-        trfGetDisplayBytes(disp), fi_mr_desc(disp->fb_mr), 
-        ctx->xfer.fabric->peer_addr, rbuf, rkey, NULL);
+    ssize_t ret;
+    ret = fi_write(ctx->xfer.fabric->ep, 
+                   trfGetFBPtr(disp), trfGetDisplayBytes(disp), 
+                   fi_mr_desc(disp->fb_mr), ctx->xfer.fabric->peer_addr, 
+                   rbuf, rkey, NULL);
+    if (ret < 0)
+    {
+        trf__IncrementCQ(ctx->xfer.fabric->tx_cq, 1);
+    }
+    return ret;
 }
 
 /**
@@ -656,7 +693,7 @@ static inline ssize_t trfRecvFrame(PTRFContext ctx, PTRFDisplay disp)
     mw.wdata_case   = trfInternalToPB(TRFM_CLIENT_F_REQ);
     mw.client_f_req = &fr;
     fr.id           = disp->id;
-    fr.addr         = (uint64_t) disp->fb_addr;
+    fr.addr         = (uint64_t) trfGetFBPtr(disp);
     fr.rkey         = fi_mr_key(disp->fb_mr);
     fr.frame_cntr   = disp->frame_cntr;
     ssize_t ret;
@@ -666,8 +703,9 @@ static inline ssize_t trfRecvFrame(PTRFContext ctx, PTRFDisplay disp)
         trf__log_error("Unable to send frame request");
     }
     ret = fi_recv(ctx->xfer.fabric->ep, ctx->xfer.fabric->msg_ptr, 
-        4096, fi_mr_desc(ctx->xfer.fabric->msg_mr), ctx->xfer.fabric->peer_addr,
-        NULL);
+                  ctx->opts->fab_rcv_bufsize,
+                  fi_mr_desc(ctx->xfer.fabric->msg_mr), 
+                  ctx->xfer.fabric->peer_addr, NULL);
     return ret;
 }
 
@@ -746,6 +784,12 @@ static inline ssize_t trf__FabricPostSend(PTRFContext ctx, size_t length,
 {
     if (!ctx || ctx->xfer_type != TRFX_TYPE_LIBFABRIC)
     {
+        trf__log_debug("EINVAL trf__FabricPostSend"
+                       "(ctx: %p, len: %lu, peer: %lu, deadline: %p)", 
+                       ctx, length, peer, deadline);
+        if (ctx) {
+            trf__log_debug("ctx->xfer_type: %d", ctx->xfer_type);
+        }
         return -EINVAL;
     }
     ssize_t ret;
@@ -946,5 +990,13 @@ static inline ssize_t trfGetRecvProgress(PTRFContext ctx,
     }
     return ret;
 }
+
+/**
+ * @brief           Send Keep alive message
+ * 
+ * @param ctx       Context to use
+ * @return 0 on success, negative error code
+ */
+int trfSendKeepAlive(PTRFContext ctx);
 
 #endif // _TRF_H_

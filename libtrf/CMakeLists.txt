@@ -48,7 +48,6 @@ target_include_directories(trf
 	PUBLIC
 		include
 	PRIVATE
-
 		src
 )
 

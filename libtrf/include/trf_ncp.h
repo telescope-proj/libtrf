@@ -60,7 +60,7 @@
 
 #define TRF_API_MAJOR    0
 #define TRF_API_MINOR    2
-#define TRF_API_PATCH    2
+#define TRF_API_PATCH    3
 
 /**
   * @brief Add Protobuf message to PTRFInterface

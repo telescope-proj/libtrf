@@ -84,37 +84,44 @@
 <dl class="cpp macro">
 <dt class="sig sig-object cpp" id="c.TRF_INTERFACE_LOCAL">
 <span class="target" id="trf__def_8h_1abcc7740bc86b06cd82a7eee2fedf5752"></span><span class="sig-name descname"><span class="n"><span class="pre">TRF_INTERFACE_LOCAL</span></span></span><a class="headerlink" href="#c.TRF_INTERFACE_LOCAL" title="Permalink to this definition"></a><br /></dt>
-<dd></dd></dl>
+<dd><p>Return local interfaces, e.g. the loopback interface. </p>
+</dd></dl>
 
 <dl class="cpp macro">
 <dt class="sig sig-object cpp" id="c.TRF_INTERFACE_EXT">
 <span class="target" id="trf__def_8h_1a7ddf080fa7f063551d74291c75912ef8"></span><span class="sig-name descname"><span class="n"><span class="pre">TRF_INTERFACE_EXT</span></span></span><a class="headerlink" href="#c.TRF_INTERFACE_EXT" title="Permalink to this definition"></a><br /></dt>
-<dd></dd></dl>
+<dd><p>Return externally facing interfaces, e.g. the Ethernet port. </p>
+</dd></dl>
 
 <dl class="cpp macro">
 <dt class="sig sig-object cpp" id="c.TRF_INTERFACE_SPD">
 <span class="target" id="trf__def_8h_1a919e4d6b297cabd8c680edcf3796962a"></span><span class="sig-name descname"><span class="n"><span class="pre">TRF_INTERFACE_SPD</span></span></span><a class="headerlink" href="#c.TRF_INTERFACE_SPD" title="Permalink to this definition"></a><br /></dt>
-<dd></dd></dl>
+<dd><p>Only return interfaces with known link rates. </p>
+</dd></dl>
 
 <dl class="cpp macro">
 <dt class="sig sig-object cpp" id="c.TRF_INTERFACE_IP4">
 <span class="target" id="trf__def_8h_1a53aa3103ec61429cf4a79c7b434b26a9"></span><span class="sig-name descname"><span class="n"><span class="pre">TRF_INTERFACE_IP4</span></span></span><a class="headerlink" href="#c.TRF_INTERFACE_IP4" title="Permalink to this definition"></a><br /></dt>
-<dd></dd></dl>
+<dd><p>Return interfaces with IPv4 addresses attached. </p>
+</dd></dl>
 
 <dl class="cpp macro">
 <dt class="sig sig-object cpp" id="c.TRF_INTERFACE_IP6">
 <span class="target" id="trf__def_8h_1a3aef20ed1489d0dea4eaa7ad625bfd0a"></span><span class="sig-name descname"><span class="n"><span class="pre">TRF_INTERFACE_IP6</span></span></span><a class="headerlink" href="#c.TRF_INTERFACE_IP6" title="Permalink to this definition"></a><br /></dt>
-<dd></dd></dl>
+<dd><p>Return interfaces with IPv6 addresses attached. Note that LibTRF does not currently support IPv6. </p>
+</dd></dl>
 
 <dl class="cpp macro">
 <dt class="sig sig-object cpp" id="c.TRF_INTERFACE_POLICY_IP">
 <span class="target" id="trf__def_8h_1a5a71519b529a3f2126d5658daa2e6a00"></span><span class="sig-name descname"><span class="n"><span class="pre">TRF_INTERFACE_POLICY_IP</span></span></span><a class="headerlink" href="#c.TRF_INTERFACE_POLICY_IP" title="Permalink to this definition"></a><br /></dt>
-<dd></dd></dl>
+<dd><p>Use the interface IP address to determine whether an interface is local or external. </p>
+</dd></dl>
 
 <dl class="cpp macro">
 <dt class="sig sig-object cpp" id="c.TRF_INTERFACE_POLICY_DB">
 <span class="target" id="trf__def_8h_1a30e274da8f51eaf3c3e294442f529c0a"></span><span class="sig-name descname"><span class="n"><span class="pre">TRF_INTERFACE_POLICY_DB</span></span></span><a class="headerlink" href="#c.TRF_INTERFACE_POLICY_DB" title="Permalink to this definition"></a><br /></dt>
-<dd></dd></dl>
+<dd><p>Use a platform specific database to determine whether an interface is local or external. </p>
+</dd></dl>
 
 <dl class="cpp macro">
 <dt class="sig sig-object cpp" id="c.TRFSock">
@@ -856,6 +863,18 @@
 <dt class="sig sig-object cpp" id="_CPPv4N10TRFDisplay5fb_mrE">
 <span id="_CPPv3N10TRFDisplay5fb_mrE"></span><span id="_CPPv2N10TRFDisplay5fb_mrE"></span><span id="TRFDisplay::fb_mr__fid_mrP"></span><span class="target" id="struct_t_r_f_display_1af76be7f290509c07fd3e33612c39e505"></span><span class="k"><span class="pre">struct</span></span><span class="w"> </span><span class="n"><span class="pre">fid_mr</span></span><span class="w"> </span><span class="p"><span class="pre">*</span></span><span class="sig-name descname"><span class="n"><span class="pre">fb_mr</span></span></span><a class="headerlink" href="#_CPPv4N10TRFDisplay5fb_mrE" title="Permalink to this definition"></a><br /></dt>
 <dd><p>Memory region object for the display framebuffer. Do not set manually. </p>
+</dd></dl>
+
+<dl class="cpp var">
+<dt class="sig sig-object cpp" id="_CPPv4N10TRFDisplay6fb_lenE">
+<span id="_CPPv3N10TRFDisplay6fb_lenE"></span><span id="_CPPv2N10TRFDisplay6fb_lenE"></span><span id="TRFDisplay::fb_len__s"></span><span class="target" id="struct_t_r_f_display_1ae13fc67ca4638fc6574371d99f79273e"></span><span class="n"><span class="pre">size_t</span></span><span class="w"> </span><span class="sig-name descname"><span class="n"><span class="pre">fb_len</span></span></span><a class="headerlink" href="#_CPPv4N10TRFDisplay6fb_lenE" title="Permalink to this definition"></a><br /></dt>
+<dd><p>Framebuffer length. This is used if the memory region is larger than the actual number of bytes needed to store the frame. </p>
+</dd></dl>
+
+<dl class="cpp var">
+<dt class="sig sig-object cpp" id="_CPPv4N10TRFDisplay9fb_offsetE">
+<span id="_CPPv3N10TRFDisplay9fb_offsetE"></span><span id="_CPPv2N10TRFDisplay9fb_offsetE"></span><span id="TRFDisplay::fb_offset__s"></span><span class="target" id="struct_t_r_f_display_1a1be22d0d975a0bbb65d11510a503cbac"></span><span class="n"><span class="pre">size_t</span></span><span class="w"> </span><span class="sig-name descname"><span class="n"><span class="pre">fb_offset</span></span></span><a class="headerlink" href="#_CPPv4N10TRFDisplay9fb_offsetE" title="Permalink to this definition"></a><br /></dt>
+<dd><p>Offset from the start of the framebuffer address to the start of the actual frame data, excluding any header information. </p>
 </dd></dl>
 
 <dl class="cpp var">

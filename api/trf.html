@@ -567,7 +567,7 @@
 <li><p><strong>ctx</strong> – Context to use</p></li>
 <li><p><strong>flags</strong> – Messages to process internally</p></li>
 <li><p><strong>processed</strong> – Message that was processed</p></li>
-<li><p><strong>data_out</strong> – Message data. Typically this is a pointer to a TrfMsg__MessageWrapper, but can be any data. This is set to a non-NULL value if the message wasn’t processed internally.</p></li>
+<li><p><strong>data_out</strong> – Message data. Typically this is a pointer to a <a class="reference internal" href="trf_proto.html#struct_trf_msg_____message_wrapper"><span class="std std-ref">TrfMsg__MessageWrapper</span></a>, but can be any data. This is set to a non-NULL value if the message wasn’t processed internally.</p></li>
 </ul>
 </dd>
 <dt class="field-even">Returns</dt>
@@ -606,6 +606,22 @@
 </dd>
 <dt class="field-even">Returns</dt>
 <dd class="field-even"><p>0 on success, negative error code on failure. </p>
+</dd>
+</dl>
+</dd></dl>
+
+<dl class="cpp function">
+<dt class="sig sig-object cpp" id="_CPPv419trfRegDisplayCustom11PTRFContext11PTRFDisplay6size_t6size_t8uint64_t">
+<span id="_CPPv319trfRegDisplayCustom11PTRFContext11PTRFDisplay6size_t6size_t8uint64_t"></span><span id="_CPPv219trfRegDisplayCustom11PTRFContext11PTRFDisplay6size_t6size_t8uint64_t"></span><span id="trfRegDisplayCustom__PTRFContext.PTRFDisplay.s.s.uint64_t"></span><span class="target" id="trf_8h_1a8b40a8044a6feb939e00f4825a84c58d"></span><span class="kt"><span class="pre">int</span></span><span class="w"> </span><span class="sig-name descname"><span class="n"><span class="pre">trfRegDisplayCustom</span></span></span><span class="sig-paren">(</span><span class="n"><span class="pre">PTRFContext</span></span><span class="w"> </span><span class="n sig-param"><span class="pre">ctx</span></span>, <span class="n"><span class="pre">PTRFDisplay</span></span><span class="w"> </span><span class="n sig-param"><span class="pre">disp</span></span>, <span class="n"><span class="pre">size_t</span></span><span class="w"> </span><span class="n sig-param"><span class="pre">size</span></span>, <span class="n"><span class="pre">size_t</span></span><span class="w"> </span><span class="n sig-param"><span class="pre">offset</span></span>, <span class="n"><span class="pre">uint64_t</span></span><span class="w"> </span><span class="n sig-param"><span class="pre">flags</span></span><span class="sig-paren">)</span><a class="headerlink" href="#_CPPv419trfRegDisplayCustom11PTRFContext11PTRFDisplay6size_t6size_t8uint64_t" title="Permalink to this definition"></a><br /></dt>
+<dd><p>Custom registration routine. This is used when the framebuffer memory region contains other data. </p>
+<dl class="field-list simple">
+<dt class="field-odd">Parameters</dt>
+<dd class="field-odd"><ul class="simple">
+<li><p><strong>ctx</strong> – Initialized context to make the display buffer available to.</p></li>
+<li><p><strong>disp</strong> – Display to make available.</p></li>
+<li><p><strong>size</strong> – Size of the display buffer.</p></li>
+<li><p><strong>offset</strong> – Offset between the start of the MR and the start of the frame data. </p></li>
+</ul>
 </dd>
 </dl>
 </dd></dl>
@@ -675,6 +691,20 @@
 </dd>
 <dt class="field-even">Returns</dt>
 <dd class="field-even"><p>0 on success, negative error code on failure </p>
+</dd>
+</dl>
+</dd></dl>
+
+<dl class="cpp function">
+<dt class="sig sig-object cpp" id="_CPPv411trfGetFBPtr11PTRFDisplay">
+<span id="_CPPv311trfGetFBPtr11PTRFDisplay"></span><span id="_CPPv211trfGetFBPtr11PTRFDisplay"></span><span id="trfGetFBPtr__PTRFDisplay"></span><span class="target" id="trf_8h_1a58d144aec185dd73904be7be5055897b"></span><span class="k"><span class="pre">static</span></span><span class="w"> </span><span class="k"><span class="pre">inline</span></span><span class="w"> </span><span class="kt"><span class="pre">void</span></span><span class="w"> </span><span class="p"><span class="pre">*</span></span><span class="sig-name descname"><span class="n"><span class="pre">trfGetFBPtr</span></span></span><span class="sig-paren">(</span><span class="n"><span class="pre">PTRFDisplay</span></span><span class="w"> </span><span class="n sig-param"><span class="pre">disp</span></span><span class="sig-paren">)</span><a class="headerlink" href="#_CPPv411trfGetFBPtr11PTRFDisplay" title="Permalink to this definition"></a><br /></dt>
+<dd><p>Get the actual framebuffer data pointer after offsets. </p>
+<dl class="field-list simple">
+<dt class="field-odd">Parameters</dt>
+<dd class="field-odd"><p><strong>disp</strong> – Display to use. </p>
+</dd>
+<dt class="field-even">Returns</dt>
+<dd class="field-even"><p>void * </p>
 </dd>
 </dl>
 </dd></dl>
@@ -896,6 +926,20 @@ Warning: Be aware of short counts- if the CQ contains less than count entries, t
 </dd>
 <dt class="field-even">Returns</dt>
 <dd class="field-even"><p>Number of completed operations, negative error code on failure. </p>
+</dd>
+</dl>
+</dd></dl>
+
+<dl class="cpp function">
+<dt class="sig sig-object cpp" id="_CPPv416trfSendKeepAlive11PTRFContext">
+<span id="_CPPv316trfSendKeepAlive11PTRFContext"></span><span id="_CPPv216trfSendKeepAlive11PTRFContext"></span><span id="trfSendKeepAlive__PTRFContext"></span><span class="target" id="trf_8h_1a0d93048b2c1977ca48c76f2c820b9bb0"></span><span class="kt"><span class="pre">int</span></span><span class="w"> </span><span class="sig-name descname"><span class="n"><span class="pre">trfSendKeepAlive</span></span></span><span class="sig-paren">(</span><span class="n"><span class="pre">PTRFContext</span></span><span class="w"> </span><span class="n sig-param"><span class="pre">ctx</span></span><span class="sig-paren">)</span><a class="headerlink" href="#_CPPv416trfSendKeepAlive11PTRFContext" title="Permalink to this definition"></a><br /></dt>
+<dd><p>Send Keep alive message. </p>
+<dl class="field-list simple">
+<dt class="field-odd">Parameters</dt>
+<dd class="field-odd"><p><strong>ctx</strong> – Context to use </p>
+</dd>
+<dt class="field-even">Returns</dt>
+<dd class="field-even"><p>0 on success, negative error code </p>
 </dd>
 </dl>
 </dd></dl>

@@ -752,6 +752,19 @@
 </dd></dl>
 
 <dl class="cpp function">
+<dt class="sig sig-object cpp" id="_CPPv417trfSendFrameChunk11PTRFContext11PTRFDisplay6size_t6size_t8uint64_t8uint64_t">
+<span id="_CPPv317trfSendFrameChunk11PTRFContext11PTRFDisplay6size_t6size_t8uint64_t8uint64_t"></span><span id="_CPPv217trfSendFrameChunk11PTRFContext11PTRFDisplay6size_t6size_t8uint64_t8uint64_t"></span><span id="trfSendFrameChunk__PTRFContext.PTRFDisplay.s.s.uint64_t.uint64_t"></span><span class="target" id="trf_8h_1a6a10271d8da991c614914eeb632395ef"></span><span class="n"><span class="pre">ssize_t</span></span><span class="w"> </span><span class="sig-name descname"><span class="n"><span class="pre">trfSendFrameChunk</span></span></span><span class="sig-paren">(</span><span class="n"><span class="pre">PTRFContext</span></span><span class="w"> </span><span class="n sig-param"><span class="pre">ctx</span></span>, <span class="n"><span class="pre">PTRFDisplay</span></span><span class="w"> </span><span class="n sig-param"><span class="pre">disp</span></span>, <span class="n"><span class="pre">size_t</span></span><span class="w"> </span><span class="n sig-param"><span class="pre">start</span></span>, <span class="n"><span class="pre">size_t</span></span><span class="w"> </span><span class="n sig-param"><span class="pre">end</span></span>, <span class="n"><span class="pre">uint64_t</span></span><span class="w"> </span><span class="n sig-param"><span class="pre">rbuf</span></span>, <span class="n"><span class="pre">uint64_t</span></span><span class="w"> </span><span class="n sig-param"><span class="pre">rkey</span></span><span class="sig-paren">)</span><a class="headerlink" href="#_CPPv417trfSendFrameChunk11PTRFContext11PTRFDisplay6size_t6size_t8uint64_t8uint64_t" title="Permalink to this definition"></a><br /></dt>
+<dd><p>Send a partial frame update, based on byte offsets. </p>
+<p>Performs a fabric RMA write operation to the destination buffer. The client is not informed of the operation status; once the operation completes, the server should send an acknowledgement.</p>
+<p>Compressed textures are not supported.</p>
+<dl class="field-list simple">
+<dt class="field-odd">Parameters</dt>
+<dd class="field-odd"><p><strong>ctx</strong> – Initialized context to send the frame to. </p>
+</dd>
+</dl>
+</dd></dl>
+
+<dl class="cpp function">
 <dt class="sig sig-object cpp" id="_CPPv423trfSendCursorFullUpdate11PTRFContexti10PTRFCursor">
 <span id="_CPPv323trfSendCursorFullUpdate11PTRFContexti10PTRFCursor"></span><span id="_CPPv223trfSendCursorFullUpdate11PTRFContexti10PTRFCursor"></span><span id="trfSendCursorFullUpdate__PTRFContext.i.PTRFCursor"></span><span class="target" id="trf_8h_1a35822985f1a495952c56b3a9b8d2d37f"></span><span class="k"><span class="pre">static</span></span><span class="w"> </span><span class="k"><span class="pre">inline</span></span><span class="w"> </span><span class="n"><span class="pre">ssize_t</span></span><span class="w"> </span><span class="sig-name descname"><span class="n"><span class="pre">trfSendCursorFullUpdate</span></span></span><span class="sig-paren">(</span><span class="n"><span class="pre">PTRFContext</span></span><span class="w"> </span><span class="n sig-param"><span class="pre">ctx</span></span>, <span class="kt"><span class="pre">int</span></span><span class="w"> </span><span class="n sig-param"><span class="pre">dgid</span></span>, <span class="n"><span class="pre">PTRFCursor</span></span><span class="w"> </span><span class="n sig-param"><span class="pre">cursor</span></span><span class="sig-paren">)</span><a class="headerlink" href="#_CPPv423trfSendCursorFullUpdate11PTRFContexti10PTRFCursor" title="Permalink to this definition"></a><br /></dt>
 <dd><p>Update the cursor position of a display group. </p>

@@ -1127,7 +1127,7 @@ int trfRegDisplayCustom(PTRFContext ctx, PTRFDisplay disp, size_t size,
                        (disp->fb_addr + size));
         return -ENOSPC;
     }
-    size_t ret;
+    int ret;
     ret = trf__FabricRegBuf(ctx->xfer.fabric, disp->fb_addr, size, flags,
                             &disp->fb_mr);
     if (ret < 0)
@@ -1162,7 +1162,7 @@ int trfRegInternalMsgBuf(PTRFContext ctx, void * addr, size_t len)
     }
 
     PTRFXFabric f = ctx->xfer.fabric;
-    size_t ret;
+    int ret;
     ret = trf__FabricRegBuf(f, addr, len, FI_READ | FI_WRITE, &f->msg_mr);
     if (ret == 0)
     {

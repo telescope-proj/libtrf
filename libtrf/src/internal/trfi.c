@@ -26,48 +26,48 @@
 int trf__AllocSessionForClient(PTRFContext ctx, uint64_t session_id, 
     PTRFContext * ctx_out)
 {
-    int allocd_mem = 0;
     if (!ctx || !ctx_out)
     {
         return -EINVAL;
     }
+
     *ctx_out = NULL;
-    // If this is the first client allocate memory in the client list
-    if (!ctx->svr.clients)
+
+    // If this is the first client, allocate memory in the client list
+    struct TRFContext ** client_list = ctx->svr.clients;
+    if (!client_list)
     {
-        ctx->svr.clients = calloc(1, sizeof(struct TRFContext));
-        if (!ctx->svr.clients)
-        {
-            free(ctx->svr.clients);
-        }
-        allocd_mem = 1;
+        client_list = calloc(ctx->opts->max_clients, sizeof(void *));
+        if (!client_list)
+            return -ENOMEM;
+
+        ctx->svr.max_clients = ctx->opts->max_clients;
     }
 
-    PTRFContext cli_node = ctx->svr.clients;
+    // Find a free node in the client list
 
-    while (1)
+    for (int i = 0; i < ctx->svr.max_clients; i++)
     {
-        if (cli_node->type == TRF_EP_FREE)
+        if (!client_list[i])
         {
-            cli_node->type = TRF_EP_CONN_ID;
-            cli_node->cli.session_id = session_id;
-        }
-        if (cli_node->next == NULL)
-        {
-            cli_node->next = calloc(1, sizeof(struct TRFContext));
-            if (!cli_node->next)
-            {
-                trf__log_error("Failed to allocate client context memory");
-                if (allocd_mem) {
-                    free(ctx->svr.clients);
-                }
+            // Allocate memory for the client context
+            struct TRFContext * client = calloc(1, sizeof(struct TRFContext));
+            if (!client)
                 return -ENOMEM;
-            }
-            cli_node->next->type = TRF_EP_CONN_ID;
-            cli_node->next->cli.session_id = session_id;
-            *ctx_out = cli_node->next;
+
+            // Initialize the client context
+            client->type            = TRF_EP_CONN_ID;
+            client->cli.session_id  = session_id;
+
+            // Set the client context
+            *ctx_out = client;
+            client_list[i] = client;
             return 0;
         }
-        cli_node = cli_node->next;
     }
+
+    // No free node was found
+
+    return -ENOSPC;
+
 }

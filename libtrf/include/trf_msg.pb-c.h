@@ -39,6 +39,7 @@ typedef struct TrfMsg__ServerAckFReq TrfMsg__ServerAckFReq;
 typedef struct TrfMsg__CursorData TrfMsg__CursorData;
 typedef struct TrfMsg__Disconnect TrfMsg__Disconnect;
 typedef struct TrfMsg__ChannelOpen TrfMsg__ChannelOpen;
+typedef struct TrfMsg__ChannelHello TrfMsg__ChannelHello;
 typedef struct TrfMsg__KeepAlive TrfMsg__KeepAlive;
 typedef struct TrfMsg__MessageWrapper TrfMsg__MessageWrapper;
 
@@ -750,20 +751,51 @@ struct  TrfMsg__Disconnect
 
 
 /**
- *  @brief Channel fast open
- *Currently reserved for future use.
+ *  @brief Subchannel open.
  */
 struct  TrfMsg__ChannelOpen
 {
   ProtobufCMessage base;
   /**
-   * Channel type
+   * Channel ID
    */
-  uint32_t type;
+  uint32_t id;
+  /**
+   * Transport details
+   */
+  TrfMsg__Transport *transport;
+  /**
+   * Indicates the message is a reply to a previous ChannelOpen message.
+   */
+  protobuf_c_boolean reply;
 };
 #define TRF_MSG__CHANNEL_OPEN__INIT \
  { PROTOBUF_C_MESSAGE_INIT (&trf_msg__channel_open__descriptor) \
-    , 0 }
+    , 0, NULL, 0 }
+
+
+/**
+ *  @brief Hello message.
+ */
+struct  TrfMsg__ChannelHello
+{
+  ProtobufCMessage base;
+  /**
+   * Session identifier
+   */
+  uint64_t session_id;
+  /**
+   * Channel identifier
+   */
+  uint32_t channel_id;
+  /**
+   * Reply flag
+   */
+  protobuf_c_boolean reply;
+};
+#define TRF_MSG__CHANNEL_HELLO__INIT \
+ { PROTOBUF_C_MESSAGE_INIT (&trf_msg__channel_hello__descriptor) \
+    , 0, 0, 0 }
 
 
 /**
@@ -805,7 +837,8 @@ typedef enum {
   TRF_MSG__MESSAGE_WRAPPER__WDATA_SERVER_ACK = 27,
   TRF_MSG__MESSAGE_WRAPPER__WDATA_ADDR_PF = 28,
   TRF_MSG__MESSAGE_WRAPPER__WDATA_CH_OPEN = 30,
-  TRF_MSG__MESSAGE_WRAPPER__WDATA_KA = 31
+  TRF_MSG__MESSAGE_WRAPPER__WDATA_CH_HELLO = 31,
+  TRF_MSG__MESSAGE_WRAPPER__WDATA_KA = 32
     PROTOBUF_C__FORCE_ENUM_TO_BE_INT_SIZE(TRF_MSG__MESSAGE_WRAPPER__WDATA__CASE)
 } TrfMsg__MessageWrapper__WdataCase;
 
@@ -842,6 +875,7 @@ struct  TrfMsg__MessageWrapper
     TrfMsg__ServerAckReq *server_ack;
     TrfMsg__AddrPF *addr_pf;
     TrfMsg__ChannelOpen *ch_open;
+    TrfMsg__ChannelHello *ch_hello;
     TrfMsg__KeepAlive *ka;
   };
 };
@@ -1306,6 +1340,25 @@ TrfMsg__ChannelOpen *
 void   trf_msg__channel_open__free_unpacked
                      (TrfMsg__ChannelOpen *message,
                       ProtobufCAllocator *allocator);
+/* TrfMsg__ChannelHello methods */
+void   trf_msg__channel_hello__init
+                     (TrfMsg__ChannelHello         *message);
+size_t trf_msg__channel_hello__get_packed_size
+                     (const TrfMsg__ChannelHello   *message);
+size_t trf_msg__channel_hello__pack
+                     (const TrfMsg__ChannelHello   *message,
+                      uint8_t             *out);
+size_t trf_msg__channel_hello__pack_to_buffer
+                     (const TrfMsg__ChannelHello   *message,
+                      ProtobufCBuffer     *buffer);
+TrfMsg__ChannelHello *
+       trf_msg__channel_hello__unpack
+                     (ProtobufCAllocator  *allocator,
+                      size_t               len,
+                      const uint8_t       *data);
+void   trf_msg__channel_hello__free_unpacked
+                     (TrfMsg__ChannelHello *message,
+                      ProtobufCAllocator *allocator);
 /* TrfMsg__KeepAlive methods */
 void   trf_msg__keep_alive__init
                      (TrfMsg__KeepAlive         *message);
@@ -1418,6 +1471,9 @@ typedef void (*TrfMsg__Disconnect_Closure)
 typedef void (*TrfMsg__ChannelOpen_Closure)
                  (const TrfMsg__ChannelOpen *message,
                   void *closure_data);
+typedef void (*TrfMsg__ChannelHello_Closure)
+                 (const TrfMsg__ChannelHello *message,
+                  void *closure_data);
 typedef void (*TrfMsg__KeepAlive_Closure)
                  (const TrfMsg__KeepAlive *message,
                   void *closure_data);
@@ -1454,6 +1510,7 @@ extern const ProtobufCMessageDescriptor trf_msg__server_ack_freq__descriptor;
 extern const ProtobufCMessageDescriptor trf_msg__cursor_data__descriptor;
 extern const ProtobufCMessageDescriptor trf_msg__disconnect__descriptor;
 extern const ProtobufCMessageDescriptor trf_msg__channel_open__descriptor;
+extern const ProtobufCMessageDescriptor trf_msg__channel_hello__descriptor;
 extern const ProtobufCMessageDescriptor trf_msg__keep_alive__descriptor;
 extern const ProtobufCMessageDescriptor trf_msg__message_wrapper__descriptor;
 

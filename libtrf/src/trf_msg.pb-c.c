@@ -1087,6 +1087,51 @@ void   trf_msg__channel_open__free_unpacked
   assert(message->base.descriptor == &trf_msg__channel_open__descriptor);
   protobuf_c_message_free_unpacked ((ProtobufCMessage*)message, allocator);
 }
+void   trf_msg__channel_hello__init
+                     (TrfMsg__ChannelHello         *message)
+{
+  static const TrfMsg__ChannelHello init_value = TRF_MSG__CHANNEL_HELLO__INIT;
+  *message = init_value;
+}
+size_t trf_msg__channel_hello__get_packed_size
+                     (const TrfMsg__ChannelHello *message)
+{
+  assert(message->base.descriptor == &trf_msg__channel_hello__descriptor);
+  return protobuf_c_message_get_packed_size ((const ProtobufCMessage*)(message));
+}
+size_t trf_msg__channel_hello__pack
+                     (const TrfMsg__ChannelHello *message,
+                      uint8_t       *out)
+{
+  assert(message->base.descriptor == &trf_msg__channel_hello__descriptor);
+  return protobuf_c_message_pack ((const ProtobufCMessage*)message, out);
+}
+size_t trf_msg__channel_hello__pack_to_buffer
+                     (const TrfMsg__ChannelHello *message,
+                      ProtobufCBuffer *buffer)
+{
+  assert(message->base.descriptor == &trf_msg__channel_hello__descriptor);
+  return protobuf_c_message_pack_to_buffer ((const ProtobufCMessage*)message, buffer);
+}
+TrfMsg__ChannelHello *
+       trf_msg__channel_hello__unpack
+                     (ProtobufCAllocator  *allocator,
+                      size_t               len,
+                      const uint8_t       *data)
+{
+  return (TrfMsg__ChannelHello *)
+     protobuf_c_message_unpack (&trf_msg__channel_hello__descriptor,
+                                allocator, len, data);
+}
+void   trf_msg__channel_hello__free_unpacked
+                     (TrfMsg__ChannelHello *message,
+                      ProtobufCAllocator *allocator)
+{
+  if(!message)
+    return;
+  assert(message->base.descriptor == &trf_msg__channel_hello__descriptor);
+  protobuf_c_message_free_unpacked ((ProtobufCMessage*)message, allocator);
+}
 void   trf_msg__keep_alive__init
                      (TrfMsg__KeepAlive         *message)
 {
@@ -2650,15 +2695,39 @@ const ProtobufCMessageDescriptor trf_msg__disconnect__descriptor =
   (ProtobufCMessageInit) trf_msg__disconnect__init,
   NULL,NULL,NULL    /* reserved[123] */
 };
-static const ProtobufCFieldDescriptor trf_msg__channel_open__field_descriptors[1] =
+static const ProtobufCFieldDescriptor trf_msg__channel_open__field_descriptors[3] =
 {
   {
-    "type",
+    "id",
     1,
     PROTOBUF_C_LABEL_NONE,
     PROTOBUF_C_TYPE_UINT32,
     0,   /* quantifier_offset */
-    offsetof(TrfMsg__ChannelOpen, type),
+    offsetof(TrfMsg__ChannelOpen, id),
+    NULL,
+    NULL,
+    0,             /* flags */
+    0,NULL,NULL    /* reserved1,reserved2, etc */
+  },
+  {
+    "transport",
+    2,
+    PROTOBUF_C_LABEL_NONE,
+    PROTOBUF_C_TYPE_MESSAGE,
+    0,   /* quantifier_offset */
+    offsetof(TrfMsg__ChannelOpen, transport),
+    &trf_msg__transport__descriptor,
+    NULL,
+    0,             /* flags */
+    0,NULL,NULL    /* reserved1,reserved2, etc */
+  },
+  {
+    "reply",
+    3,
+    PROTOBUF_C_LABEL_NONE,
+    PROTOBUF_C_TYPE_BOOL,
+    0,   /* quantifier_offset */
+    offsetof(TrfMsg__ChannelOpen, reply),
     NULL,
     NULL,
     0,             /* flags */
@@ -2666,12 +2735,14 @@ static const ProtobufCFieldDescriptor trf_msg__channel_open__field_descriptors[1
   },
 };
 static const unsigned trf_msg__channel_open__field_indices_by_name[] = {
-  0,   /* field[0] = type */
+  0,   /* field[0] = id */
+  2,   /* field[2] = reply */
+  1,   /* field[1] = transport */
 };
 static const ProtobufCIntRange trf_msg__channel_open__number_ranges[1 + 1] =
 {
   { 1, 0 },
-  { 0, 1 }
+  { 0, 3 }
 };
 const ProtobufCMessageDescriptor trf_msg__channel_open__descriptor =
 {
@@ -2681,11 +2752,75 @@ const ProtobufCMessageDescriptor trf_msg__channel_open__descriptor =
   "TrfMsg__ChannelOpen",
   "trfMsg",
   sizeof(TrfMsg__ChannelOpen),
-  1,
+  3,
   trf_msg__channel_open__field_descriptors,
   trf_msg__channel_open__field_indices_by_name,
   1,  trf_msg__channel_open__number_ranges,
   (ProtobufCMessageInit) trf_msg__channel_open__init,
+  NULL,NULL,NULL    /* reserved[123] */
+};
+static const ProtobufCFieldDescriptor trf_msg__channel_hello__field_descriptors[3] =
+{
+  {
+    "session_id",
+    1,
+    PROTOBUF_C_LABEL_NONE,
+    PROTOBUF_C_TYPE_UINT64,
+    0,   /* quantifier_offset */
+    offsetof(TrfMsg__ChannelHello, session_id),
+    NULL,
+    NULL,
+    0,             /* flags */
+    0,NULL,NULL    /* reserved1,reserved2, etc */
+  },
+  {
+    "channel_id",
+    2,
+    PROTOBUF_C_LABEL_NONE,
+    PROTOBUF_C_TYPE_UINT32,
+    0,   /* quantifier_offset */
+    offsetof(TrfMsg__ChannelHello, channel_id),
+    NULL,
+    NULL,
+    0,             /* flags */
+    0,NULL,NULL    /* reserved1,reserved2, etc */
+  },
+  {
+    "reply",
+    3,
+    PROTOBUF_C_LABEL_NONE,
+    PROTOBUF_C_TYPE_BOOL,
+    0,   /* quantifier_offset */
+    offsetof(TrfMsg__ChannelHello, reply),
+    NULL,
+    NULL,
+    0,             /* flags */
+    0,NULL,NULL    /* reserved1,reserved2, etc */
+  },
+};
+static const unsigned trf_msg__channel_hello__field_indices_by_name[] = {
+  1,   /* field[1] = channel_id */
+  2,   /* field[2] = reply */
+  0,   /* field[0] = session_id */
+};
+static const ProtobufCIntRange trf_msg__channel_hello__number_ranges[1 + 1] =
+{
+  { 1, 0 },
+  { 0, 3 }
+};
+const ProtobufCMessageDescriptor trf_msg__channel_hello__descriptor =
+{
+  PROTOBUF_C__MESSAGE_DESCRIPTOR_MAGIC,
+  "trfMsg.ChannelHello",
+  "ChannelHello",
+  "TrfMsg__ChannelHello",
+  "trfMsg",
+  sizeof(TrfMsg__ChannelHello),
+  3,
+  trf_msg__channel_hello__field_descriptors,
+  trf_msg__channel_hello__field_indices_by_name,
+  1,  trf_msg__channel_hello__number_ranges,
+  (ProtobufCMessageInit) trf_msg__channel_hello__init,
   NULL,NULL,NULL    /* reserved[123] */
 };
 static const ProtobufCFieldDescriptor trf_msg__keep_alive__field_descriptors[1] =
@@ -2726,7 +2861,7 @@ const ProtobufCMessageDescriptor trf_msg__keep_alive__descriptor =
   (ProtobufCMessageInit) trf_msg__keep_alive__init,
   NULL,NULL,NULL    /* reserved[123] */
 };
-static const ProtobufCFieldDescriptor trf_msg__message_wrapper__field_descriptors[20] =
+static const ProtobufCFieldDescriptor trf_msg__message_wrapper__field_descriptors[21] =
 {
   {
     "session_id",
@@ -2957,8 +3092,20 @@ static const ProtobufCFieldDescriptor trf_msg__message_wrapper__field_descriptor
     0,NULL,NULL    /* reserved1,reserved2, etc */
   },
   {
-    "ka",
+    "ch_hello",
     31,
+    PROTOBUF_C_LABEL_NONE,
+    PROTOBUF_C_TYPE_MESSAGE,
+    offsetof(TrfMsg__MessageWrapper, wdata_case),
+    offsetof(TrfMsg__MessageWrapper, ch_hello),
+    &trf_msg__channel_hello__descriptor,
+    NULL,
+    0 | PROTOBUF_C_FIELD_FLAG_ONEOF,             /* flags */
+    0,NULL,NULL    /* reserved1,reserved2, etc */
+  },
+  {
+    "ka",
+    32,
     PROTOBUF_C_LABEL_NONE,
     PROTOBUF_C_TYPE_MESSAGE,
     offsetof(TrfMsg__MessageWrapper, wdata_case),
@@ -2971,6 +3118,7 @@ static const ProtobufCFieldDescriptor trf_msg__message_wrapper__field_descriptor
 };
 static const unsigned trf_msg__message_wrapper__field_indices_by_name[] = {
   17,   /* field[17] = addr_pf */
+  19,   /* field[19] = ch_hello */
   18,   /* field[18] = ch_open */
   9,   /* field[9] = client_cap */
   13,   /* field[13] = client_disp_req */
@@ -2980,7 +3128,7 @@ static const unsigned trf_msg__message_wrapper__field_indices_by_name[] = {
   5,   /* field[5] = cursor_data */
   4,   /* field[4] = disconnect */
   12,   /* field[12] = endpoint */
-  19,   /* field[19] = ka */
+  20,   /* field[20] = ka */
   16,   /* field[16] = server_ack */
   8,   /* field[8] = server_ack_f_req */
   10,   /* field[10] = server_cap */
@@ -2997,7 +3145,7 @@ static const ProtobufCIntRange trf_msg__message_wrapper__number_ranges[4 + 1] =
   { 9, 4 },
   { 20, 9 },
   { 30, 18 },
-  { 0, 20 }
+  { 0, 21 }
 };
 const ProtobufCMessageDescriptor trf_msg__message_wrapper__descriptor =
 {
@@ -3007,7 +3155,7 @@ const ProtobufCMessageDescriptor trf_msg__message_wrapper__descriptor =
   "TrfMsg__MessageWrapper",
   "trfMsg",
   sizeof(TrfMsg__MessageWrapper),
-  20,
+  21,
   trf_msg__message_wrapper__field_descriptors,
   trf_msg__message_wrapper__field_indices_by_name,
   4,  trf_msg__message_wrapper__number_ranges,

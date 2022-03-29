@@ -174,8 +174,7 @@ int trfNCNewSession(PTRFContext ctx, PTRFContext * out)
         trf__log_error("trf__Rand64() returned invalid session ID");
         return -EAGAIN;
     }
-    if ( !ctx->svr.clients 
-        || trf__CheckSessionID(ctx->svr.clients, session_id, 1) == 0 )
+    if (trf__CheckSessionID(ctx, session_id) < 0)
     {
         ret = trf__AllocSessionForClient(ctx, session_id, out);
         if (ret)
@@ -216,11 +215,15 @@ int trfNCServerClose(PTRFContext ctx)
     size_t bufsz = trf_msg__message_wrapper__get_packed_size(&msg);
     uint8_t * buff = calloc(1, bufsz);
     
-    for (PTRFContext c = ctx->svr.clients; c; c = c->next)
+    for (int i = 0; i < ctx->svr.max_clients; i++)
     {
-        if (trfNCSendDelimited(c->cli.client_fd, buff, bufsz, 0, &msg) < 0)
+        if (ctx->svr.clients[i])
         {
-            trf__log_error("unable to disconnect client");
+            if (trfNCSendDelimited(ctx->svr.clients[i]->cli.client_fd, 
+                                   buff, bufsz, 0, &msg) < 0)
+            {
+                trf__log_error("unable to disconnect client");
+            }
         }
     }
 

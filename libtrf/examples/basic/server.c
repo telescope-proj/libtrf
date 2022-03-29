@@ -146,15 +146,16 @@ int main(int argc, char ** argv)
     // Allocate a dummy framebuffer - normally in your application this should
     // be the pointer to the capture source's buffer.
 
-    req_disp->fb_addr = trfAllocAligned(trfGetDisplayBytes(displays), 2097152);
-    if (!req_disp->fb_addr)
+    req_disp->mem.ptr = trfAllocAligned(trfGetDisplayBytes(displays), 2097152);
+    if (!req_disp->mem.ptr)
     {
         printf("unable to allocate framebuffer\n");
         return -1;
     }
 
     #if defined(__linux__)
-        madvise(req_disp->fb_addr, trfGetDisplayBytes(displays), MADV_HUGEPAGE);
+        madvise(trfMemPtr(&req_disp->mem), trfGetDisplayBytes(displays),
+                MADV_HUGEPAGE);
     #endif
 
     // Register the buffer.
@@ -201,14 +202,23 @@ int main(int argc, char ** argv)
             struct fi_cq_data_entry de;
             struct fi_cq_err_entry err;
 
-            ret = trfGetSendProgress(client_ctx, &de, &err, 1);
+            ret = trfGetSendProgress(client_ctx, &de, &err, 1, NULL);
             if (ret <= 0)
             {
-                printf("Error: %s\n", fi_strerror(-ret));
+                if (ret == -FI_EAVAIL)
+                {
+                    printf("Error: %s\n", fi_strerror(err.err));
+                }
+                else
+                {
+                    printf("Error: %s\n", fi_strerror(-ret));
+                }
                 break;
             }
+
             req_disp->frame_cntr++;
-            if((ret = trfAckFrameReq(client_ctx, req_disp)) < 0){
+            if((ret = trfAckFrameReq(client_ctx, req_disp)) < 0)
+            {
                 printf("Unable to send Ack: %s\n", fi_strerror(ret));
             }
             printf("Sent frame: %d\n", req_disp->frame_cntr);

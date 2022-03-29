@@ -271,7 +271,8 @@ void trfDestroyFabricContext(PTRFContext ctx)
 
     PTRFXFabric f = ctx->xfer.fabric;
     
-    if (!ctx->disconnected && f->domain && f->ep && f->msg_mr && f->msg_ptr)
+    if (!ctx->disconnected && f->domain && f->ep && f->msg_mem.ptr 
+        && f->msg_mem.fabric_mr)
     {
         trf__log_trace("Sending disconnect message");
         TrfMsg__MessageWrapper mw = TRF_MSG__MESSAGE_WRAPPER__INIT;
@@ -279,22 +280,24 @@ void trfDestroyFabricContext(PTRFContext ctx)
         mw.disconnect = &dc;
         mw.wdata_case = TRF_MSG__MESSAGE_WRAPPER__WDATA_DISCONNECT;
         mw.disconnect->info = 0;
-        int ret = trfFabricSend(ctx, &mw);
+        int ret = trfFabricSendMsg(ctx, &f->msg_mem, trfMemPtr(&f->msg_mem),
+                                   trfMemSize(&f->msg_mem), f->peer_addr, 
+                                   ctx->opts, &mw);
         if (ret)
         {
             trf__log_error( "Failed to send disconnect message (fabric): %s;"
                             "peer may be in an invalid state", strerror(-ret));
         }
     }
-    if (f->msg_mr)
+    if (trfMemFabricMR(&f->msg_mem))
     {
-        fi_close(&f->msg_mr->fid);
-        f->msg_mr = NULL;
+        fi_close(&f->msg_mem.fabric_mr->fid);
+        f->msg_mem.fabric_mr = NULL;
     }
-    if (f->msg_ptr)
+    if (trfMemPtr(&f->msg_mem))
     {
-        free(f->msg_ptr);
-        f->msg_ptr = NULL;
+        free(trfMemPtr(&f->msg_mem));
+        f->msg_mem.ptr = NULL;
     }
     if (f->ep)
     {
@@ -371,39 +374,43 @@ void trfDestroyContext(PTRFContext ctx)
     if (!ctx)
         return;
 
-    PTRFContext cur_ctx = ctx;
-    PTRFContext prev_ctx = NULL;
-
-    while (cur_ctx)
+    switch (ctx->type)
     {
-        switch (cur_ctx->type)
-        {
-            case TRF_EP_SOURCE:
-                close(cur_ctx->svr.listen_fd);
-                trfDestroyContext(cur_ctx->svr.clients);
-                break;
-            case TRF_EP_SINK:
-            case TRF_EP_CONN_ID:
-                trfSendDisconnectMsg(cur_ctx->cli.client_fd, 
-                    cur_ctx->cli.session_id);
-                close(cur_ctx->cli.client_fd);
-                break;
-            default:
-                break;
-        }
-        switch (cur_ctx->xfer_type)
-        {
-            case TRFX_TYPE_LIBFABRIC:
-                trfDestroyFabricContext(cur_ctx);
-                break;
-            default:
-                break;
-        }
-        free(cur_ctx->opts);
-        prev_ctx = cur_ctx;
-        cur_ctx = cur_ctx->next;
-        free(prev_ctx);
+        case TRF_EP_SOURCE:
+            if (trfSockValid(ctx->svr.listen_fd))
+            {
+                close(ctx->svr.listen_fd);
+            }
+            for (int i = 0; i < ctx->svr.max_clients; i++)
+            {
+                if (ctx->svr.clients[i])
+                {
+                    trfDestroyContext(ctx->svr.clients[i]);
+                }
+            }
+            break;
+        case TRF_EP_SINK:
+        case TRF_EP_CONN_ID:
+            if (trfSockValid(ctx->cli.client_fd))
+            {
+                trfSendDisconnectMsg(ctx->cli.client_fd, 
+                    ctx->cli.session_id);
+                close(ctx->cli.client_fd);
+            }
+            break;
+        default:
+            break;
     }
+    switch (ctx->xfer_type)
+    {
+        case TRFX_TYPE_LIBFABRIC:
+            trfDestroyFabricContext(ctx);
+            break;
+        default:
+            break;
+    }
+
+    free(ctx->opts);
 }
 
 int trfCreateChannel(PTRFContext ctx, struct fi_info * fi, void * data, 
@@ -439,13 +446,266 @@ free_fabric:
     return ret;
 }
 
-int trfDeserializeWireProto(const char * proto, uint32_t * out)
+int trfBindSubchannel(PTRFContext main, PTRFContext sub)
 {
-    if (!proto || !out)
+    if (!main || !sub)
         return -EINVAL;
 
+    if (main->type != TRF_EP_SINK || main->type != TRF_EP_CONN_ID
+        || sub->type != TRF_EP_SINK || sub->type != TRF_EP_CONN_ID)
+    {
+        trf__log_error("Invalid channel type");
+        return -EINVAL;
+    }
+
+    for (int i = 0; i < main->cli.max_channels; i++)
+    {
+        if (!main->cli.channels[i])
+        {
+            main->cli.channels[i] = sub;
+            return i;
+        }
+    }
+
+    return -ESRCH;
+}
+
+int trfCreateSubchannel(PTRFContext ctx, PTRFContext * ctx_out, uint32_t id)
+{
+    if (!ctx || !ctx_out || !id)
+        return -EINVAL;
+
+    PTRFContext new_ctx = trfAllocContext();
+    if (!new_ctx)
+        return -ENOMEM;
+
+    new_ctx->disconnected = 1;
+
+    struct fi_info * fi_copy = fi_dupinfo(ctx->xfer.fabric->fi);
+    if (!fi_copy)
+        return -ENOMEM;
+
+    fi_copy->src_addr = NULL;
+
+    int ret = trfCreateChannel(new_ctx, fi_copy, NULL, 0);
+    fi_freeinfo(fi_copy);
+    if (ret < 0)
+    {
+        trf__log_error("Failed to allocate subchannel endpoint: %s",
+                       fi_strerror(-ret));
+        return ret;
+    }
+
+    char * addr_str = NULL;
+    ret = trfGetEndpointName(new_ctx, &addr_str);
+    if (ret < 0)
+    {
+        trf__log_error("Failed to get endpoint name: %s", fi_strerror(-ret));
+        goto free_new_ctx;
+    }
+
+    assert(addr_str);
+
+    char * proto_str = NULL;
+    ret = trfSerializeWireProto(ctx->xfer.fabric->fi->ep_attr->protocol,
+                                &proto_str);
+    if (ret < 0)
+    {
+        trf__log_error("Failed to get wire protocol %d", 
+                       ctx->xfer.fabric->fi->ep_attr->protocol);
+        goto free_addr;
+    }
+
+    assert(proto_str);
+
+    trf__log_debug("[subch] Serialized endpoint name: %s, protocol: %s",
+                   addr_str, proto_str);
+
+    // Register a temporary buffer to store the hello message. This buffer will
+    // be deregistered afterwards; the subchannel user is expected to manage
+    // and size their own message buffers to their requirements.
+
+    void * mem = NULL;
+    size_t s = trf__GetPageSize();
+    assert(s > 0);
+    mem = trfAllocAligned(s, s);
+    if (!mem)
+        goto free_proto;
+
+    {
+        TrfMsg__MessageWrapper mw   = TRF_MSG__MESSAGE_WRAPPER__INIT;
+        TrfMsg__ChannelOpen co      = TRF_MSG__CHANNEL_OPEN__INIT;
+        TrfMsg__Transport tr        = TRF_MSG__TRANSPORT__INIT;
+        mw.session_id               = ctx->cli.session_id;
+        mw.wdata_case               = TRF_MSG__MESSAGE_WRAPPER__WDATA_CH_OPEN;
+        mw.ch_open                  = &co;
+        co.id                       = id;
+        co.reply                    = 0;
+        co.transport                = &tr;
+        tr.src                      = addr_str;
+        tr.dest                     = NULL;
+        tr.proto                    = proto_str;
+
+        // Send the channel open message over the socket
+
+        ret = trfNCSendMsg(ctx->cli.client_fd, mem, s, ctx->opts->nc_snd_timeo,
+                           &mw);
+        if (ret < 0)
+        {
+            trf__log_error("Failed to send channel open message: %s",
+                           strerror(-ret));
+            goto free_mem;
+        }
+    }
+    
+    TrfMsg__MessageWrapper * rcv = NULL;
+    ret = trfNCRecvDelimited(ctx->cli.client_fd, mem, s, 
+                             ctx->opts->nc_rcv_timeo, &rcv);
+    if (ret < 0)
+    {
+        trf__log_error("Failed to receive channel open response: %s",
+                       strerror(-ret));
+        goto free_mem;
+    }
+
+    assert(rcv);
+
+    if (rcv->wdata_case != TRF_MSG__MESSAGE_WRAPPER__WDATA_CH_OPEN)
+    {
+        trf__log_warn("Peer sent invalid message type %d (expected %d)", 
+                      rcv->wdata_case, TRF_MSG__MESSAGE_WRAPPER__WDATA_CH_OPEN);
+        ret = -EBADMSG;
+        goto free_rcv;
+    }
+
+    TrfMsg__ChannelOpen * rco = rcv->ch_open;
+
+    if (!rco->transport
+        || !trf__ProtoStringValid(rco->transport->src)
+        || !trf__ProtoStringValid(rco->transport->name)
+        || !trf__ProtoStringValid(rco->transport->proto))
+    {
+        trf__log_warn("Peer sent garbage transport data");
+        goto free_rcv;
+    }
+
+    if (rco->id != id || !rco->reply)
+    {
+        trf__log_warn("Peer sent invalid data - values: "
+                      "id = %d (expected %d), reply: %d (expected %d)",
+                      rco->id, id, rco->reply, 1);
+        ret = -EBADE;
+        goto free_rcv;
+    }
+
+    ret = trfRegInternalMsgBuf(new_ctx, mem, s);
+    if (ret < 0)
+        goto free_rcv;
+    
+    assert(trfMemPtr(&ctx->xfer.fabric->msg_mem));
+
+    // Try to send a message over the transport
+
+    new_ctx->xfer.fabric->peer_addr = FI_ADDR_UNSPEC;
+    ret = trfInsertAVSerialized(new_ctx->xfer.fabric, rco->transport->src, 
+                                &new_ctx->xfer.fabric->peer_addr);
+    if (ret < 0)
+        goto free_rcv;
+
+    assert(new_ctx->xfer.fabric->peer_addr != FI_ADDR_UNSPEC);
+
+    {
+        TrfMsg__MessageWrapper mw   = TRF_MSG__MESSAGE_WRAPPER__INIT;
+        TrfMsg__ChannelHello hl     = TRF_MSG__CHANNEL_HELLO__INIT;
+        mw.wdata_case               = TRF_MSG__MESSAGE_WRAPPER__WDATA_CH_HELLO;
+        mw.ch_hello                 = &hl;
+        hl.channel_id               = id;
+        hl.reply                    = 0;
+        hl.session_id               = ctx->cli.session_id;
+
+        ret = trfFabricSendMsg(new_ctx, mem, trfMemPtr(mem), s, FI_ADDR_UNSPEC,
+                               ctx->opts, &mw);
+        if (ret < 0)
+            goto free_rcv;
+    }
+
+    struct TRFMem * msg_mem = &new_ctx->xfer.fabric->msg_mem;
+    TrfMsg__MessageWrapper * rcv_sub = NULL;
+    ret = trfFabricRecvMsg(new_ctx, msg_mem, trfMemPtr(msg_mem),
+                           trfMemSize(msg_mem), new_ctx->xfer.fabric->peer_addr,
+                           ctx->opts, &rcv_sub);
+    if (ret < 0)
+        goto free_rcv;
+
+    assert(rcv_sub);
+
+    if (rcv_sub->wdata_case != TRF_MSG__MESSAGE_WRAPPER__WDATA_CH_HELLO)
+    {
+        trf__log_warn("Peer sent invalid message type %d (expected %d)", 
+                      rcv->wdata_case, TRF_MSG__MESSAGE_WRAPPER__WDATA_CH_OPEN);
+        ret = -EBADMSG;
+        goto free_rcv_sub;
+    }
+
+    if (!rcv_sub->ch_hello->reply
+        || rcv_sub->ch_hello->channel_id != id
+        || rcv_sub->ch_hello->session_id != ctx->cli.session_id)
+    {
+        trf__log_warn("Peer sent invalid data - values: "
+                      "channel id = %d (expected %d), "
+                      "session id = %d (expected %d)",
+                      rcv_sub->ch_hello->session_id, id, 
+                      rcv_sub->ch_hello->session_id, ctx->cli.session_id);
+        ret = -EBADE;
+        goto free_rcv_sub;
+    }
+
+    // Connected - now clean everything up
+
+    fi_close(&msg_mem->fabric_mr->fid);
+    free(msg_mem->ptr);
+    msg_mem->fabric_mr = NULL;
+    msg_mem->ptr = NULL;
+
+    trf_msg__message_wrapper__free_unpacked(rcv_sub, NULL);
+    trf_msg__message_wrapper__free_unpacked(rcv, NULL);
+
+    free(proto_str);
+    free(addr_str);
+
+    new_ctx->disconnected = 0;
+
+    // Add the subchannel to the context
+
+    new_ctx->channel_id = id;
+
+
+    return 0;
+
+free_rcv_sub:
+    trf_msg__message_wrapper__free_unpacked(rcv_sub, NULL);
+free_rcv:
+    trf_msg__message_wrapper__free_unpacked(rcv, NULL);
+    proto_str = NULL;
+    addr_str = NULL;
+free_mem:
+    free(mem);
+free_proto:
+    free(proto_str);
+free_addr:
+    free(addr_str);
+free_new_ctx:
+    trfDestroyContext(new_ctx);
+    return ret;
+}
+
+int trfDeserializeWireProto(const char * proto, uint32_t * out)
+{
     assert( (sizeof(trf__fi_proto) / sizeof(trf__fi_proto[0]))
             == (sizeof(trf__fi_enum) / sizeof(trf__fi_enum[0])));
+
+    if (!proto || !out)
+        return -EINVAL;
 
     // Libfabric protocol strings
 
@@ -468,11 +728,11 @@ int trfDeserializeWireProto(const char * proto, uint32_t * out)
 
 int trfSerializeWireProto(uint32_t proto, char ** out)
 {
-    if (!out)
-        return -EINVAL;
-
     assert( (sizeof(trf__fi_proto) / sizeof(trf__fi_proto[0]))
             == (sizeof(trf__fi_enum) / sizeof(trf__fi_enum[0])));
+
+    if (!out)
+        return -EINVAL;
 
     // Libfabric protocol strings
 
@@ -505,7 +765,7 @@ int trfGetRoute(const char * dst, const char * prov, const char * proto,
     if (ret)
         return ret;
 
-    hints = trf__GetFabricHints();
+    hints = trf__FabricGetHints();
     int lf_fmt = trfConvertInternalAF(trf_fmt);
     switch (lf_fmt)
     {
@@ -955,7 +1215,7 @@ int trfGetFabricProviders(const char * host, const char * port,
         return -EINVAL;
     }
 
-    hints = trf__GetFabricHints();
+    hints = trf__FabricGetHints();
     trf__log_debug("Attempting to find fabric provider for %s:%s", host, port);
     ret = fi_getinfo(TRF_FABRIC_VERSION, host, port, 0, hints, &fi);
     if (ret)
@@ -1062,50 +1322,33 @@ int trfInsertAVSerialized(PTRFXFabric ctx, char * addr, fi_addr_t * addr_out)
 /* Memory Management & Registration Routines                                  */
 /* -------------------------------------------------------------------------- */
 
-int trf__FabricRegBuf(PTRFXFabric ctx, void * addr, size_t len, uint64_t flags,
-    struct fid_mr ** mr_out)
-{
-    trf__log_debug("Registering buffer %p with size %lu", addr, len);
-    int ret;
-    struct fid_mr * mr;
-    struct fid_domain * domain = ctx->domain;
-
-    ret = fi_mr_reg(domain, addr, len, flags, 0, 0, 0, &mr, NULL);
-    if (ret)
-    {
-        trf_fi_error("fi_mr_reg", ret);
-        return ret;
-    }
-
-    *mr_out = mr;
-    return 0;
-}
-
 int trfRegDisplaySource(PTRFContext ctx, PTRFDisplay disp)
 {
     int ret;
-    ret = trf__FabricRegBuf(ctx->xfer.fabric, disp->fb_addr, 
+    ret = trf__FabricRegBuf(ctx->xfer.fabric, trfMemPtr(&disp->mem), 
                             trfGetDisplayBytes(disp), FI_READ,
-                            &disp->fb_mr);
+                            &disp->mem.fabric_mr);
     if (ret < 0)
         return ret;
 
-    disp->fb_len    = trfGetDisplayBytes(disp);
-    disp->fb_offset = 0;
+    disp->mem.type      = TRF_MEM_TYPE_LF_MR;
+    disp->mem.size      = trfGetDisplayBytes(disp);
+    disp->fb_offset     = 0;
     return ret;
 }
 
 int trfRegDisplaySink(PTRFContext ctx, PTRFDisplay disp)
 {
     int ret;
-    ret = trf__FabricRegBuf(ctx->xfer.fabric, disp->fb_addr, 
+    ret = trf__FabricRegBuf(ctx->xfer.fabric, trfMemPtr(&disp->mem), 
                             trfGetDisplayBytes(disp), 
-                            FI_WRITE | FI_REMOTE_WRITE, &disp->fb_mr);
+                            FI_WRITE | FI_REMOTE_WRITE, &disp->mem.fabric_mr);
     if (ret < 0)
         return ret;
 
-    disp->fb_len    = trfGetDisplayBytes(disp);
-    disp->fb_offset = 0;
+    disp->mem.type      = TRF_MEM_TYPE_LF_MR;
+    disp->mem.size      = trfGetDisplayBytes(disp);
+    disp->fb_offset     = 0;
     return ret;
 }
 
@@ -1118,32 +1361,34 @@ int trfRegDisplayCustom(PTRFContext ctx, PTRFDisplay disp, size_t size,
                        "size: %lu, offset: %lu, flags: %lu)");
         return -EINVAL;
     }
-    if (disp->fb_addr + (offset + trfGetDisplayBytes(disp)) > 
-        (disp->fb_addr + size))
+    if (trfMemPtr(&disp->mem) + (offset + trfGetDisplayBytes(disp)) > 
+        (trfMemPtr(&disp->mem) + size))
     {
         trf__log_debug("Frame data would overflow buffer!");
         trf__log_debug("Data ends at: %p, Maximum: %p", 
-                       (disp->fb_addr + (offset + trfGetDisplayBytes(disp))),
-                       (disp->fb_addr + size));
+                       (trfMemPtr(&disp->mem) + 
+                            (offset + trfGetDisplayBytes(disp))),
+                       (trfMemPtr(&disp->mem) + size));
         return -ENOSPC;
     }
-    int ret;
-    ret = trf__FabricRegBuf(ctx->xfer.fabric, disp->fb_addr, size, flags,
-                            &disp->fb_mr);
+    size_t ret;
+    ret = trf__FabricRegBuf(ctx->xfer.fabric, trfMemPtr(&disp->mem), size, 
+                            flags, &disp->mem.fabric_mr);
     if (ret < 0)
         return ret;
 
-    disp->fb_len    = size;
-    disp->fb_offset = offset;
+    disp->mem.type      = TRF_MEM_TYPE_LF_MR;
+    disp->mem.size      = size;
+    disp->fb_offset     = offset;
     return ret;
 }
 
 int trfDeregDisplay(PTRFContext ctx, PTRFDisplay disp)
 {
-    int ret = fi_close(&disp->fb_mr->fid);
+    int ret = fi_close(&disp->mem.fabric_mr->fid);
     if (ret == 0)
     {
-        disp->fb_mr = NULL;
+        disp->mem.fabric_mr = NULL;
     }
     else
     {
@@ -1162,12 +1407,13 @@ int trfRegInternalMsgBuf(PTRFContext ctx, void * addr, size_t len)
     }
 
     PTRFXFabric f = ctx->xfer.fabric;
-    int ret;
-    ret = trf__FabricRegBuf(f, addr, len, FI_READ | FI_WRITE, &f->msg_mr);
+    struct TRFMem * meta = &f->msg_mem;
+    size_t ret;
+    ret = trf__FabricRegBuf(f, addr, len, FI_READ | FI_WRITE, &meta->fabric_mr);
     if (ret == 0)
     {
-        f->msg_ptr = addr;
-        f->msg_size = len;
+        meta->ptr   = addr;
+        meta->size  = len;
     }
     return ret;
 }
@@ -1205,10 +1451,10 @@ void trfFreeDisplayList(PTRFDisplay disp, int dealloc)
         free(disp_itm->name);
         if (dealloc)
         {
-            free(disp_itm->fb_addr);
-            if (disp_itm->fb_mr)
+            free(disp_itm->mem.ptr);
+            if (disp_itm->mem.fabric_mr)
             {
-                fi_close(&disp_itm->fb_mr->fid);
+                fi_close(&disp_itm->mem.fabric_mr->fid);
             }
         }
         disp_itm = disp_tmp;
@@ -1239,7 +1485,7 @@ int trfUpdateDisplayAddr(PTRFContext ctx, PTRFDisplay disp, void * addr)
 
     struct fid_mr * tmp_mr;
 
-    disp->fb_addr = addr;
+    disp->mem.ptr = addr;
     ssize_t fb_len = trfGetDisplayBytes(disp);
     if (fb_len < 0)
     {
@@ -1257,9 +1503,9 @@ int trfUpdateDisplayAddr(PTRFContext ctx, PTRFDisplay disp, void * addr)
         return ret;
     }
 
-    if (disp->fb_mr)
+    if (&disp->mem.fabric_mr)
     {
-        ret = fi_close(&disp->fb_mr->fid);
+        ret = fi_close(&disp->mem.fabric_mr->fid);
         if (ret)
         {
             trf_fi_error("fi_close", ret);
@@ -1268,7 +1514,7 @@ int trfUpdateDisplayAddr(PTRFContext ctx, PTRFDisplay disp, void * addr)
         }
     }
 
-    disp->fb_mr = tmp_mr;
+    disp->mem.fabric_mr = tmp_mr;
     return 0;
 }
 
@@ -1276,65 +1522,55 @@ int trfUpdateDisplayAddr(PTRFContext ctx, PTRFDisplay disp, void * addr)
 /* Session Management Routines                                                */
 /* -------------------------------------------------------------------------- */
 
-int trf__CheckSessionID(PTRFContext ctx, uint64_t session, uint8_t first)
+int trf__CheckSessionID(PTRFContext ctx, uint64_t session)
 {
     if (!ctx)
     {
         return -EINVAL;
     }
 
-    int found = 0;
-
-    if (first == 0)
+    PTRFContext * itms = ctx->svr.clients;
+    for (int i = 0; i < ctx->svr.max_clients; i++)
     {
-        for (PTRFContext ctx_itm = ctx; ctx_itm; ctx_itm = ctx_itm->next)
+        if (itms[i] && itms[i]->cli.session_id == session)
         {
-            if (ctx->cli.session_id == session)
-            {
-                found++;
-            }
-        }
-    }
-    else
-    {
-        for (PTRFContext ctx_itm = ctx; ctx_itm; ctx_itm = ctx_itm->next)
-        {
-            if (ctx->cli.session_id == session)
-            {
-                return 1;
-            }
+            return i;
         }
     }
 
-    return found;
+    return -1;
 }
 
-int trfGetEndpointName(PTRFContext ctx, char ** sas_buf)
+int trfGetFabricEndpointName(PTRFXFabric ctx, char ** sas_buf)
 {
+    if (!ctx || !sas_buf)
+        return -EINVAL;
+
     void * sas_tmp;
     size_t sas_len = 0;
     int ret;
 
-    ret = fi_getname(&ctx->xfer.fabric->ep->fid, NULL, &sas_len);
+    ret = fi_getname(&ctx->ep->fid, NULL, &sas_len);
     if (ret != 0 && ret != -FI_ETOOSMALL)
     {
         trf_fi_error("Get endpoint name length", ret);
-        return -1;    
+        return ret;
     }
     sas_tmp = calloc(1, sas_len);
     if (!sas_tmp)
     {
         trf__log_error("Unable to allocate source address buffer");
+        return -ENOMEM;
     }
-    ret = fi_getname(&ctx->xfer.fabric->ep->fid, sas_tmp, &sas_len);
+    ret = fi_getname(&ctx->ep->fid, sas_tmp, &sas_len);
     if (ret)
     {
         trf_fi_error("Get name", ret);
         free(sas_tmp);
-        return -1;
+        return ret;
     }
-    ret = trfSerializeAddress(sas_tmp, 
-        trfConvertFabricAF(ctx->xfer.fabric->addr_fmt), sas_buf);
+    ret = trfSerializeAddress(sas_tmp, trfConvertFabricAF(ctx->addr_fmt),
+                              sas_buf);
     if (ret < 0)
     {
         trf__log_error("Unable to serialize address");
@@ -1343,6 +1579,20 @@ int trfGetEndpointName(PTRFContext ctx, char ** sas_buf)
     }
     free(sas_tmp);
     return 0;
+}
+
+int trfGetEndpointName(PTRFContext ctx, char ** sas_buf)
+{
+    switch (ctx->xfer_type)
+    {
+        case TRFX_TYPE_LIBFABRIC:
+            return trfGetFabricEndpointName(ctx->xfer.fabric, sas_buf);
+        case TRFX_TYPE_INVALID:
+        case TRFX_TYPE_MAX:
+            return -EINVAL;
+        default:
+            return -ENOSYS;
+    }
 }
 
 int trfSendKeepAlive(PTRFContext ctx)
@@ -1357,7 +1607,10 @@ int trfSendKeepAlive(PTRFContext ctx)
     mw.wdata_case = TRF_MSG__MESSAGE_WRAPPER__WDATA_KA;
     mw.ka = &ka;
     ka.info = 0;
-    return trfFabricSend(ctx, &mw);
+    PTRFXFabric f = ctx->xfer.fabric;
+    return trfFabricSendMsg(ctx, &f->msg_mem, trfMemPtr(&f->msg_mem), 
+                            trfMemSize(&f->msg_mem), f->peer_addr, ctx->opts,
+                            &mw);
 }
 
 int trfGetMessageAuto(PTRFContext ctx, uint64_t flags, uint64_t * processed,
@@ -1383,31 +1636,25 @@ int trfGetMessageAuto(PTRFContext ctx, uint64_t flags, uint64_t * processed,
 
     trf__GetDelay(&tcur, &tend, ctx->opts->fab_rcv_timeo);
 
-    ret = trf__FabricPostRecv(ctx, FI_ADDR_UNSPEC, &tend);
+    struct TRFMem * mem = &ctx->xfer.fabric->msg_mem;
+    ret = trfFabricRecvMsg(ctx, mem, trfMemPtr(mem), trfMemSize(mem),
+                           ctx->xfer.fabric->peer_addr, ctx->opts, &msg);
     if (ret < 0)
     {
-        trf__log_error("Unable to post receive: %s", strerror(-ret));
+        trf__log_error("Unable to receive message: %s", strerror(-ret));
         goto free_msg;
     }
 
-    struct fi_cq_data_entry cqe;
-    struct fi_cq_err_entry err;
-    ret = trfGetRecvProgress(ctx, &cqe, &err, 1);
-    if (ret != 1)
-    {
-        trf__log_error("CQ error: %s", strerror(-ret));
-        goto free_msg;
-    }
-
-    ret = trfMsgUnpack(&msg, trfMsgGetPackedLength(ctx->xfer.fabric->msg_ptr), 
-                        trfMsgGetPayload(ctx->xfer.fabric->msg_ptr));
+    ret = trfMsgUnpack(&msg, trfMsgGetPackedLength(trfMemPtr(mem)), 
+                       trfMsgGetPayload(trfMemPtr(mem)));
     if (ret < 0)
     {
         trf__log_error("Unable to unpack message: %s", strerror(-ret));
         goto free_msg;
     }
 
-    trf__log_trace("Message Type: %d",msg->wdata_case);
+    trf__log_trace("Message Type: %d", msg->wdata_case);
+
     // Determine whether message should be processed internally
     uint64_t ifmt = trfPBToInternal(msg->wdata_case);
     if (ifmt & ~flags)
@@ -1532,7 +1779,11 @@ int trfSendClientReq(PTRFContext ctx, PTRFDisplay disp)
         cr->display[idx]->tex_fmt   = tmp_disp->format;
         idx++;
     }
-    ret = trfFabricSend(ctx, mw);
+
+    struct TRFMem * mem = &ctx->xfer.fabric->msg_mem;
+    ret = trfFabricSendMsg(ctx, mem, trfMemPtr(mem), trfMemSize(mem),
+                           ctx->xfer.fabric->peer_addr, ctx->opts, mw);
+
 free_message:
     trf_msg__message_wrapper__free_unpacked(mw, NULL);
     return ret;
@@ -1551,7 +1802,9 @@ int trfAckClientReq(PTRFContext ctx, uint32_t * disp_ids, int n_disp_ids)
     mw.server_ack = &sar;
     sar.display_ids = disp_ids;
     sar.n_display_ids = n_disp_ids;
-    return trfFabricSend(ctx, &mw);
+    struct TRFMem * mem = &ctx->xfer.fabric->msg_mem;
+    return trfFabricSendMsg(ctx, mem, trfMemPtr(mem), trfMemSize(mem),
+                            ctx->xfer.fabric->peer_addr, ctx->opts, &mw);
 }
 
 int trfSendDisplayList(PTRFContext ctx)
@@ -1623,7 +1876,9 @@ int trfSendDisplayList(PTRFContext ctx)
     }
 
     // Send Server Display Request
-    ret = trfFabricSend(ctx, msg);
+    struct TRFMem * mem = &ctx->xfer.fabric->msg_mem;
+    ret = trfFabricSendMsg(ctx, mem, trfMemPtr(mem), trfMemSize(mem),
+                           ctx->xfer.fabric->peer_addr, ctx->opts, msg);
     if (ret < 0)
     {
         trf__log_error("Unable to send Data");
@@ -1670,7 +1925,9 @@ int trfGetServerDisplays(PTRFContext ctx, PTRFDisplay * out)
     msg->client_disp_req->info = 0;
     
     // Send Server Display Request
-    ret = trfFabricSend(ctx, msg);
+    struct TRFMem * mem = &ctx->xfer.fabric->msg_mem;
+    ret = trfFabricSendMsg(ctx, mem, trfMemPtr(mem), trfMemSize(mem),
+                           ctx->xfer.fabric->peer_addr, ctx->opts, msg);
     if (ret < 0)
     {
         trf__log_error("Unable to send data");
@@ -1679,8 +1936,10 @@ int trfGetServerDisplays(PTRFContext ctx, PTRFDisplay * out)
 
     trf__log_trace("Display request cookie sent");
     trf_msg__message_wrapper__free_unpacked(msg, NULL);
+    msg = NULL;
 
-    ret = trfFabricRecv(ctx, &msg);
+    ret = trfFabricRecvMsg(ctx, mem, trfMemPtr(mem), trfMemSize(mem),
+                           ctx->xfer.fabric->peer_addr, ctx->opts, &msg);
     if (ret < 0)
     {
         trf__log_error("Message receive failed: %s", strerror(-ret));
@@ -1746,92 +2005,6 @@ free_msg:
     return ret;
 }
 
-int trfFabricSend(PTRFContext ctx, TrfMsg__MessageWrapper * msg)
-{
-    if (!ctx)
-    {
-        return -EINVAL;
-    }
-
-    PTRFContextOpts opts = ctx->opts;
-    size_t buff_size = opts->fab_snd_bufsize > 0 ? 
-        opts->fab_snd_bufsize : ctx->xfer.fabric->msg_size;
-
-    int ret = 0;
-    uint32_t size;
-    ret = trfMsgPack(msg, buff_size, ctx->xfer.fabric->msg_ptr, &size);
-    if (ret < 0)
-    {
-        trf__log_error("Unable to pack message");
-        return ret;
-    }
-
-    struct timespec tstart, tend;
-    clock_gettime(CLOCK_MONOTONIC, &tstart);
-    trf__GetDelay(&tstart, &tend, opts->fab_snd_timeo);
-    trf__log_trace("Attempting fabric send");
-    ret = trf__FabricPostSend(ctx, size, ctx->xfer.fabric->peer_addr, &tend);
-    if (ret < 0)
-    {
-        trf_fi_error("FabricPostSend", ret);
-        return ret;
-    }
-    
-    struct fi_cq_data_entry cqe;
-    struct fi_cq_err_entry err;
-    ret = trf__PollCQ(ctx->xfer.fabric->tx_cq, &cqe, &err, opts, &tend, 1, 
-                      TRF_SEND_CQ);
-    if (ret != 1)
-    {
-        memset(&err, 0, sizeof(err));
-        trf__log_error("CQ read error: %s\n", 
-            trf__GetCQErrString(ctx->xfer.fabric->tx_cq->cq, &err));
-        return ret == 0 ? -EIO : ret;
-    }
-    trf__log_trace("Message payload sent over fabric");
-    return 0;
-}
-
-int trfFabricRecv(PTRFContext ctx, TrfMsg__MessageWrapper ** msg)
-{
-    if (!ctx)
-    {
-        return -EINVAL;
-    }
-
-    ssize_t ret;
-    PTRFContextOpts opts = ctx->opts;
-    size_t buff_size = opts->fab_rcv_bufsize > 0 ? 
-        opts->fab_rcv_bufsize : ctx->xfer.fabric->msg_size;
-
-    trf__log_trace("Buffer size: %ld", buff_size);
-
-    struct timespec tstart, tend;
-    clock_gettime(CLOCK_MONOTONIC, &tstart);
-    trf__GetDelay(&tstart, &tend, opts->fab_rcv_timeo);
-    trf__log_trace("Attempting fabric recv");
-    ret = trf__FabricPostRecv(ctx, ctx->xfer.fabric->peer_addr, &tend);
-    if (ret < 0)
-    {
-        trf__log_error("Unable to post recv");
-        return ret;
-    }
-    
-    struct fi_cq_data_entry cqe;
-    struct fi_cq_err_entry err;
-    ret = trf__PollCQ(ctx->xfer.fabric->rx_cq, &cqe, &err, opts, &tend, 1, 
-                      TRF_SEND_CQ);
-    if (ret != 1)
-    {
-        trf__log_error("CQ read failed: %s\n", 
-            trf__GetCQErrString(ctx->xfer.fabric->rx_cq->cq, &err));
-        return ret == 0 ? -EIO : ret;
-    }
-
-    return trfMsgUnpack(msg, trfMsgGetPackedLength(ctx->xfer.fabric->msg_ptr), 
-        trfMsgGetPayload(ctx->xfer.fabric->msg_ptr));
-}
-
 int trfAckFrameReq(PTRFContext ctx, PTRFDisplay display)
 {
     int ret;
@@ -1841,202 +2014,240 @@ int trfAckFrameReq(PTRFContext ctx, PTRFDisplay display)
     msg.server_ack_f_req = &ack;
     ack.id = display->id;
     ack.frame_cntr = display->frame_cntr;
-    if ((ret = trfFabricSend(ctx, &msg)) < 0)
+    struct TRFMem * mem = &ctx->xfer.fabric->msg_mem;
+    trf__log_trace("Sending message: mem ptr: %p, size: %lu", trfMemPtr(mem), trfMemSize(mem));
+    ret = trfFabricSendMsg(ctx, mem, trfMemPtr(mem), trfMemSize(mem),
+                           ctx->xfer.fabric->peer_addr, ctx->opts, &msg);
+    if (ret < 0)
     {
         trf__log_error("Unable to send data");
     }
     return ret;
 }
 
-ssize_t trfSendFramePart(PTRFContext ctx, PTRFDisplay disp, uint64_t rbuf,
-    uint64_t rkey, struct TRFRect * rects, size_t num_rects)
+ssize_t trfRecvFrame(PTRFContext ctx, PTRFDisplay disp)
 {
-    if (!ctx || !disp || !rects || num_rects == 0)
+    PTRFXFabric f       = ctx->xfer.fabric;
+    PTRFMem msg_mem     = &ctx->xfer.fabric->msg_mem;
+
+    TrfMsg__MessageWrapper mw   = TRF_MSG__MESSAGE_WRAPPER__INIT;
+    TrfMsg__ClientFReq fr       = TRF_MSG__CLIENT_FREQ__INIT;
+    mw.wdata_case               = trfInternalToPB(TRFM_CLIENT_F_REQ);
+    mw.client_f_req             = &fr;
+    fr.id                       = disp->id;
+    fr.addr                     = (uint64_t) trfGetFBPtr(disp);
+    fr.rkey                     = trfMemFabricKey(&disp->mem);
+    fr.frame_cntr               = disp->frame_cntr;
+
+    ssize_t ret = trfFabricSendMsg(ctx, msg_mem, trfMemPtr(msg_mem), 
+                                   trfMemSize(msg_mem), f->peer_addr, ctx->opts,
+                                   &mw);
+    if (ret < 0)
     {
-        return -EINVAL;
+        trf__log_error("Unable to send frame request");
+        return ret;
     }
     
-    // Shorten access
-    PTRFXFabric f = ctx->xfer.fabric;
-
-    // Compressed texture formats are not directly pixel addressable and require
-    // special handling - for now, we'll just ignore them
-    if (trfTextureIsCompressed(disp->format))
+    ret = trfFabricRecvUnchecked(ctx, msg_mem, trfMemPtr(msg_mem),
+                                 trfMemSize(msg_mem), f->peer_addr);
+    if (ret < 0)
     {
-        return -ENOTSUP;
+        trf__log_error("Unable to post receive request");
+        return ret;
     }
 
-    // Allocate iovec for posting frame updates
-    ssize_t ret;
-    size_t max_iov = f->fi->tx_attr->rma_iov_limit;
-    struct iovec * iov = malloc(sizeof(struct iovec) * max_iov);
-    if (!iov)
-    {
-        return -ENOMEM;
-    }
-
-    // Since all the memory indirectly referenced by the rectangles should be in
-    // the same MR, we just need to set the MR descriptor to be the same across
-    // all items in the description array
-    void ** desc = malloc(sizeof(void *) * max_iov);
-    for (int i = 0; i < max_iov; i++)
-    {
-        desc[i] = fi_mr_desc(disp->fb_mr);
-    }
-
-    trf__log_debug("Display: %d x %d", disp->width, disp->height);
-
-    // Framebuffer line pitch
-    int32_t lpitch = trfGetTextureBytes(disp->width, 1, disp->format);
-    // Pixel pitch in bytes
-    int32_t ppitch = trfGetTextureBytes(1, 1, disp->format);
-
-    if (lpitch < 0)
-    {
-        free(iov);
-        free(desc);
-        return lpitch;
-    }
-    if (ppitch < 0)
-    {
-        free(iov);
-        free(desc);
-        return ppitch;
-    }
-    
-    // Determine how many CQEs we will need to use to track this operation
-    size_t num_cqe = 0;
-    for (int i = 0; i < num_rects; i++)
-    {
-        // Some rudimentary error checking
-        if (rects[i].x + rects[i].width > disp->width
-            || rects[i].y + rects[i].height > disp->height)
-        {
-            trf__log_error("Invalid rectangle! Pos: %d, %d Size: %d, %d", 
-                rects[i].x, rects[i].y, rects[i].width, rects[i].height);
-            return -EINVAL;
-        }
-        if (rects[i].x == 0 && rects[i].width == disp->width)
-        {
-            // Rectangles that span the entire width of the frame can be sent
-            // as a single RMA operation
-            num_cqe++;
-        }
-        else
-        {
-            // Otherwise we can send a vectored RMA for up to max_iov lines
-            num_cqe += rects[i].height / max_iov;
-        }
-    }
-
-    // The operation will never succeed if our max CQE count is exceeded -
-    // caller must optimize accesses before retrying
-    if (num_cqe > f->fi->tx_attr->size)
-    {
-        trf__log_error("Write operation exceeds max CQE count");
-        return -E2BIG;
-    }
-
-    // There may also be other operations in progress that have consumed CQEs
-    size_t rem_cqe = trf__DecrementCQ(f->tx_cq, num_cqe);
-    if (rem_cqe < num_cqe)
-        return -EAGAIN;
-
-    size_t iter = 0;
-    for (int i = 0; i < num_rects; i++)
-    {
-        // Get offset in framebuffer to rectangle
-        size_t offset = lpitch * rects[i].y + ppitch * rects[i].x;
-        // Rectangle line pitch
-        uint32_t rpitch = ppitch * rects[i].width;
-
-        trf__log_debug("Damage update rect: %d,%d %dx%d", 
-                       rects[i].x, rects[i].y, rects[i].width, rects[i].height);
-        trf__log_debug("lpitch: %d, ppitch: %d, offset: %lu, rpitch: %d",
-                       lpitch, ppitch, offset, rpitch);
-
-        // Full-width update mode
-        if (rects[i].x == 0 && rects[i].width == disp->width)
-        {
-            // Calculate contiguous region length
-            ssize_t rlen = trfGetTextureBytes(rects[i].width, rects[i].height, 
-                                             disp->format);
-            // The region length was invalid
-            if (rlen < 0)
-            {
-                goto try_recover;
-            }
-
-            // Post RMA write
-            ret = fi_write(ctx->xfer.fabric->ep, 
-                           disp->fb_addr + offset, (size_t) rlen, 
-                           disp->fb_mr, ctx->xfer.fabric->peer_addr, 
-                           rbuf + offset, rkey, (void *) iter);
-            if (ret < 0)
-            {
-                goto try_recover;
-            }
-            iter++;
-            continue;
-        }
-
-        // Vector update mode
-        size_t total = rects[i].height;
-        while (total)
-        {
-            // Split rectangle into max_iov lines
-            size_t iov_l = total > max_iov ? max_iov : total;
-            for (int j = 0; j < iov_l; j++)
-            {
-                iov[j].iov_base = disp->fb_addr + offset;
-                iov[j].iov_len  = rpitch;
-            }
-            
-            // Perform RMA write
-            ret = fi_writev(ctx->xfer.fabric->ep, iov, desc, max_iov,
-                            ctx->xfer.fabric->peer_addr, rbuf, rkey, 
-                            (void *) iter);
-            if (ret < 0)
-            {
-                goto try_recover;
-            }
-
-            // Update total and request count
-            total -= iov_l;
-            iter++;
-        }
-    }
-
-    // Return the number of submitted events
-    free(iov);
-    free(desc);
-    return iter;
-
-try_recover:
-    trf__log_error("Unable to perform RMA write # %d. fi_writev "
-        "returned: %s. Attempting to recover", iter, fi_strerror(-ret));
-    // Release the unused CQEs immediately then try to reclaim the rest by
-    // monitoring progress.
-    trf__IncrementCQ(f->tx_cq, num_cqe - iter);
-    while (iter)
-    {
-        struct fi_cq_data_entry de;
-        struct fi_cq_err_entry err;
-        ssize_t ret2 = trfGetSendProgress(ctx, &de, &err, 1);
-        if (ret2 < 0)
-        {
-            trf__log_error("Unable to recover: %s", 
-                trf__GetCQErrString(ctx->xfer.fabric->tx_cq->cq, &err));
-            trf__log_error("Context should be considered invalid");
-            free(iov);
-            free(desc);
-            return ret2;
-        }
-        trf__IncrementCQ(ctx->xfer.fabric->tx_cq, 1);
-        iter--;
-    }
-    return ret;
+    return 0;
 }
+
+// ssize_t trfSendFramePart(PTRFContext ctx, PTRFDisplay disp, uint64_t rbuf,
+//     uint64_t rkey, struct TRFRect * rects, size_t num_rects)
+// {
+//     if (!ctx || !disp || !rects || num_rects == 0)
+//     {
+//         return -EINVAL;
+//     }
+    
+//     // Shorten access
+//     PTRFXFabric f = ctx->xfer.fabric;
+
+//     // Compressed texture formats are not directly pixel addressable and require
+//     // special handling - for now, we'll just ignore them
+//     if (trfTextureIsCompressed(disp->format))
+//     {
+//         return -ENOTSUP;
+//     }
+
+//     // Allocate iovec for posting frame updates
+//     ssize_t ret;
+//     size_t max_iov = f->fi->tx_attr->rma_iov_limit;
+//     struct iovec * iov = malloc(sizeof(struct iovec) * max_iov);
+//     if (!iov)
+//     {
+//         return -ENOMEM;
+//     }
+
+//     // Since all the memory indirectly referenced by the rectangles should be in
+//     // the same MR, we just need to set the MR descriptor to be the same across
+//     // all items in the description array
+//     void ** desc = malloc(sizeof(void *) * max_iov);
+//     for (int i = 0; i < max_iov; i++)
+//     {
+//         desc[i] = fi_mr_desc(&disp->mem.fabric_mr);
+//     }
+
+//     trf__log_debug("Display: %d x %d", disp->width, disp->height);
+
+//     // Framebuffer line pitch
+//     int32_t lpitch = trfGetTextureBytes(disp->width, 1, disp->format);
+//     // Pixel pitch in bytes
+//     int32_t ppitch = trfGetTextureBytes(1, 1, disp->format);
+
+//     if (lpitch < 0)
+//     {
+//         free(iov);
+//         free(desc);
+//         return lpitch;
+//     }
+//     if (ppitch < 0)
+//     {
+//         free(iov);
+//         free(desc);
+//         return ppitch;
+//     }
+    
+//     // Determine how many CQEs we will need to use to track this operation
+//     size_t num_cqe = 0;
+//     for (int i = 0; i < num_rects; i++)
+//     {
+//         // Some rudimentary error checking
+//         if (rects[i].x + rects[i].width > disp->width
+//             || rects[i].y + rects[i].height > disp->height)
+//         {
+//             trf__log_error("Invalid rectangle! Pos: %d, %d Size: %d, %d", 
+//                 rects[i].x, rects[i].y, rects[i].width, rects[i].height);
+//             return -EINVAL;
+//         }
+//         if (rects[i].x == 0 && rects[i].width == disp->width)
+//         {
+//             // Rectangles that span the entire width of the frame can be sent
+//             // as a single RMA operation
+//             num_cqe++;
+//         }
+//         else
+//         {
+//             // Otherwise we can send a vectored RMA for up to max_iov lines
+//             num_cqe += rects[i].height / max_iov;
+//         }
+//     }
+
+//     // The operation will never succeed if our max CQE count is exceeded -
+//     // caller must optimize accesses before retrying
+//     if (num_cqe > f->fi->tx_attr->size)
+//     {
+//         trf__log_error("Write operation exceeds max CQE count");
+//         return -E2BIG;
+//     }
+
+//     // There may also be other operations in progress that have consumed CQEs
+//     size_t rem_cqe = trf__DecrementCQ(f->tx_cq, num_cqe);
+//     if (rem_cqe < num_cqe)
+//         return -EAGAIN;
+
+//     size_t iter = 0;
+//     for (int i = 0; i < num_rects; i++)
+//     {
+//         // Get offset in framebuffer to rectangle
+//         size_t offset = lpitch * rects[i].y + ppitch * rects[i].x;
+//         // Rectangle line pitch
+//         uint32_t rpitch = ppitch * rects[i].width;
+
+//         trf__log_debug("Damage update rect: %d,%d %dx%d", 
+//                        rects[i].x, rects[i].y, rects[i].width, rects[i].height);
+//         trf__log_debug("lpitch: %d, ppitch: %d, offset: %lu, rpitch: %d",
+//                        lpitch, ppitch, offset, rpitch);
+
+//         // Full-width update mode
+//         if (rects[i].x == 0 && rects[i].width == disp->width)
+//         {
+//             // Calculate contiguous region length
+//             ssize_t rlen = trfGetTextureBytes(rects[i].width, rects[i].height, 
+//                                              disp->format);
+//             // The region length was invalid
+//             if (rlen < 0)
+//             {
+//                 goto try_recover;
+//             }
+
+//             // Post RMA write
+//             ret = fi_write(ctx->xfer.fabric->ep, 
+//                            trfMemPtr(&disp->mem) + offset, (size_t) rlen, 
+//                            disp->mem.fabric_mr, ctx->xfer.fabric->peer_addr, 
+//                            rbuf + offset, rkey, (void *) iter);
+//             if (ret < 0)
+//             {
+//                 goto try_recover;
+//             }
+//             iter++;
+//             continue;
+//         }
+
+//         // Vector update mode
+//         size_t total = rects[i].height;
+//         while (total)
+//         {
+//             // Split rectangle into max_iov lines
+//             size_t iov_l = total > max_iov ? max_iov : total;
+//             for (int j = 0; j < iov_l; j++)
+//             {
+//                 iov[j].iov_base = trfMemPtr(&disp->mem) + offset;
+//                 iov[j].iov_len  = rpitch;
+//             }
+            
+//             // Perform RMA write
+//             ret = fi_writev(ctx->xfer.fabric->ep, iov, desc, max_iov,
+//                             ctx->xfer.fabric->peer_addr, rbuf, rkey, 
+//                             (void *) iter);
+//             if (ret < 0)
+//             {
+//                 goto try_recover;
+//             }
+
+//             // Update total and request count
+//             total -= iov_l;
+//             iter++;
+//         }
+//     }
+
+//     // Return the number of submitted events
+//     free(iov);
+//     free(desc);
+//     return iter;
+
+// try_recover:
+//     trf__log_error("Unable to perform RMA write # %d. fi_writev "
+//         "returned: %s. Attempting to recover", iter, fi_strerror(-ret));
+//     // Release the unused CQEs immediately then try to reclaim the rest by
+//     // monitoring progress.
+//     trf__IncrementCQ(f->tx_cq, num_cqe - iter);
+//     while (iter)
+//     {
+//         struct fi_cq_data_entry de;
+//         struct fi_cq_err_entry err;
+//         ssize_t ret2 = trfGetSendProgress(ctx, &de, &err, 1);
+//         if (ret2 < 0)
+//         {
+//             trf__log_error("Unable to recover: %s", 
+//                 trf__FabricGetCQErrString(ctx->xfer.fabric->tx_cq->cq, &err));
+//             trf__log_error("Context should be considered invalid");
+//             free(iov);
+//             free(desc);
+//             return ret2;
+//         }
+//         trf__IncrementCQ(ctx->xfer.fabric->tx_cq, 1);
+//         iter--;
+//     }
+//     return ret;
+// }
 
 ssize_t trfSendFrameChunk(PTRFContext ctx, PTRFDisplay disp, size_t start, 
                           size_t end, uint64_t rbuf, uint64_t rkey)
@@ -2059,23 +2270,45 @@ ssize_t trfSendFrameChunk(PTRFContext ctx, PTRFDisplay disp, size_t start,
     
     // Shorten access
     PTRFXFabric f = ctx->xfer.fabric;
-
-    // Compressed texture formats are not directly pixel addressable and require
-    // special handling - for now, we'll just ignore them
-    if (trfTextureIsCompressed(disp->format))
-    {
-        return -ENOTSUP;
-    }
+    void * sptr = (void *) ((uintptr_t) trfGetFBPtr(disp) + (uintptr_t) start);
 
     trf__DecrementCQ(f->tx_cq, 1);
     ssize_t ret;
-    ret = fi_write(f->ep, 
-                   trfGetFBPtr(disp), end - start,
-                   fi_mr_desc(disp->fb_mr), f->peer_addr, 
-                   rbuf, rkey, NULL);
+    ret = fi_write(f->ep, sptr, end - start, trfMemFabricDesc(&disp->mem), 
+                   f->peer_addr, rbuf, rkey, NULL);
     if (ret < 0)
     {
         trf__IncrementCQ(f->tx_cq, 1);
     }
     return ret;
+}
+
+ssize_t trfGetSendProgress(PTRFContext ctx, struct fi_cq_data_entry * de,
+                           struct fi_cq_err_entry * err, size_t count,
+                           PTRFContextOpts opts)
+{
+    PTRFContextOpts o = opts ? opts : ctx->opts;
+    ssize_t ret;
+    struct timespec deadline;
+    ret = trfGetDeadline(&deadline, o->fab_snd_timeo);
+    if (ret < 0)
+        return ret;
+
+    return trfFabricPollSend(ctx, de, err, o->fab_cq_sync, o->fab_poll_rate,
+                             &deadline, count);
+}
+
+ssize_t trfGetRecvProgress(PTRFContext ctx, struct fi_cq_data_entry * de,
+                           struct fi_cq_err_entry * err, size_t count,
+                           PTRFContextOpts opts)
+{
+    PTRFContextOpts o = opts ? opts : ctx->opts;
+    ssize_t ret;
+    struct timespec deadline;
+    ret = trfGetDeadline(&deadline, o->fab_rcv_timeo);
+    if (ret < 0)
+        return ret;
+
+    return trfFabricPollRecv(ctx, de, err, o->fab_cq_sync, o->fab_poll_rate,
+                             &deadline, count);
 }

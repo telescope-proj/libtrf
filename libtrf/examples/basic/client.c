@@ -71,7 +71,7 @@ int main(int argc, char ** argv)
 
     // Register buffer to store the first display's framebuffer
 
-    displays->fb_addr = trfAllocAligned(trfGetDisplayBytes(displays), 2097152);
+    displays->mem.ptr = trfAllocAligned(trfGetDisplayBytes(displays), 2097152);
     ret = trfRegDisplaySink(ctx, displays);
     if (ret < 0)
     {
@@ -80,7 +80,7 @@ int main(int argc, char ** argv)
     }
     
     #if defined(__linux__)
-        madvise(displays->fb_addr, trfGetDisplayBytes(displays), MADV_HUGEPAGE);
+        madvise(displays->mem.ptr, trfGetDisplayBytes(displays), MADV_HUGEPAGE);
     #endif
 
     // Indicate to the server that the client is ready to receive frames
@@ -88,6 +88,19 @@ int main(int argc, char ** argv)
     if ((ret = trfSendClientReq(ctx,displays)) < 0)
     {
         printf("Unable to send display request");
+        return -1;
+    }
+
+    // Wait until the server is ready
+
+    TrfMsg__MessageWrapper * msg = NULL;
+    PTRFXFabric f = ctx->xfer.fabric;
+    ret = trfFabricRecvMsg(ctx, &f->msg_mem, trfMemPtr(&f->msg_mem),
+                           trfMemSize(&f->msg_mem), f->peer_addr, ctx->opts,
+                           &msg);
+    if (trfPBToInternal(msg->wdata_case) != TRFM_SERVER_ACK)
+    {
+        printf("Invalid message type %d received", msg->wdata_case);
         return -1;
     }
 
@@ -115,19 +128,33 @@ int main(int argc, char ** argv)
         double tsd1 = timespecdiff(tstart, tend) / 1000000.0;
         struct fi_cq_data_entry de;
         struct fi_cq_err_entry err;
-        ret = trfGetRecvProgress(ctx, &de, &err, 1);
+        ret = trfGetRecvProgress(ctx, &de, &err, 1, NULL);
         if (ret < 0)
         {
             printf("Unable to get receive progress: error %s\n", 
                    strerror(-ret));
             return -1;
         }
-        clock_gettime(CLOCK_MONOTONIC, &tend);
-        double tsd2 = timespecdiff(tstart, tend) / 1000000.0;
-        printf("%d,%ld,%f,%f,%f,%f\n",
-               f, trfGetDisplayBytes(displays), tsd1, tsd2, 
-               ((double) trfGetDisplayBytes(displays)) / tsd2 / 1e5,
-               1000.0 / tsd2);
+
+        ret = trfMsgUnpack(&msg, 
+                           trfMsgGetPackedLength(ctx->xfer.fabric->msg_mem.ptr),
+                           trfMsgGetPayload(ctx->xfer.fabric->msg_mem.ptr));
+        if (ret < 0)
+            return -1;
+
+        switch (trfPBToInternal(msg->wdata_case))
+        {
+            case TRFM_SERVER_ACK_F_REQ:
+                clock_gettime(CLOCK_MONOTONIC, &tend);
+                double tsd2 = timespecdiff(tstart, tend) / 1000000.0;
+                printf("%d,%ld,%f,%f,%f,%f\n",
+                    f, trfGetDisplayBytes(displays), tsd1, tsd2, 
+                    ((double) trfGetDisplayBytes(displays)) / tsd2 / 1e5,
+                    1000.0 / tsd2);
+            default:
+                printf("Message type %d received!", msg->wdata_case);
+        }
+
         displays->frame_cntr++;
     }
     

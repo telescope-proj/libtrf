@@ -374,24 +374,6 @@ message ServerAckFReq {
     uint32 frame_cntr           = 2;
 }
 
-/*  @brief Cursor data update
-    If the display source contains a cursor, the cursor position information
-    should be sent separately. To update the cursor shape, the values 
-    width and height should be set to non-zero values, with tex_fmt and
-    bytes being set to the cursor data type and data respectively.
-*/
-message CursorData {
-    uint32 dgid                 = 1;    // Display group ID
-    uint32 x                    = 2;    // Cursor X position
-    uint32 y                    = 3;    // Cursor Y position
-    uint32 hpx                  = 4;    // Cursor X hotspot
-    uint32 hpy                  = 5;    // Cursor Y hotspot
-    uint32 width                = 6;    // Cursor image width
-    uint32 height               = 7;    // Cursor image height
-    uint32 tex_fmt              = 8;    // Cursor image format
-    bytes  data                 = 9;    // Raw image data
-}
-
 /* Session Termination */
 
 /*  @brief Disconnect message
@@ -406,11 +388,22 @@ message Disconnect {
 
 /* Channel management */
 
-/*  @brief Channel fast open
-    Currently reserved for future use.
+/*  @brief Subchannel open.
 */
 message ChannelOpen {
-    uint32 type                 = 1;    // Channel type
+    uint32 id                   = 1;    // Channel ID
+    Transport transport         = 2;    // Transport details
+    
+    // Indicates the message is a reply to a previous ChannelOpen message.
+    bool reply                  = 3;    
+}
+
+/*  @brief Hello message.
+*/
+message ChannelHello {
+    uint64 session_id           = 1;    // Session identifier
+    uint32 channel_id           = 2;    // Channel identifier
+    bool reply                  = 3;    // Reply flag
 }
 
 /*  @brief Keep alive message
@@ -452,7 +445,6 @@ message MessageWrapper {
 
         /*  1 byte identifiers for high-frequency messages (10 - 15) */
 
-        CursorData cursor_data              = 10;
         ClientFReq client_f_req             = 11;
         ServerNotifyChunk server_n_chunk    = 12;
         ServerAckFReq server_ack_f_req      = 13;
@@ -473,6 +465,7 @@ message MessageWrapper {
         AddrPF addr_pf                      = 28;
 
         ChannelOpen ch_open                 = 30;
-        KeepAlive ka                        = 31;
+        ChannelHello ch_hello               = 31;
+        KeepAlive ka                        = 32;
     }
 }

@@ -217,31 +217,33 @@ int trf__NCServerExchangeViableLinks(PTRFContext ctx, TRFSock client_sock,
             msg->addr_pf->addrs[i]->addr, msg->addr_pf->addrs[i]->netmask,
             msg->addr_pf->addrs[i]->speed);
     }
-
-    if ((ret = trf__AddrMsgToInterface(msg, &client_ifs)) < 0)
+    
+    ret = trf__AddrMsgToInterface(msg, &client_ifs);
+    if (ret < 0)
     {
         trf__log_error("Message conversion failed");
         ret = -EBADMSG;
         goto free_msg;
     }
 
-    if ((ret = trfGetInterfaceList(&server_ifs, &svr_num_ifs, ctx->opts->iface_flags)) < 0)
+    ret = trfGetInterfaceList(&server_ifs, &svr_num_ifs, ctx->opts->iface_flags);
+    if (ret < 0)
     {
         trf__log_error("Unable to get interface list");
         goto free_cli_ifs;
     }
 
-    PTRFAddrV av_svr = NULL;
-    if ((ret = trfCreateAddrV(server_ifs, client_ifs, &av_svr)) < 0)
+    PTRFAddrV av_cand = NULL;
+    if ((ret = trfCreateAddrV(server_ifs, client_ifs, &av_cand)) < 0)
     {
         trf__log_error("Unable to create address vector");
         goto free_svr_ifs;
     }
 
-    PTRFAddrV av_cand = NULL;
-    if ((ret = trfGetFastestLink(av_svr, &av_cand)) < 0)
+    ret = trfSortAddrV(av_cand);
+    if (ret < 0)
     {
-        trf__log_error("Unable to get fastest link");
+        trf__log_error("Unable to sort address vector");
         goto free_av;
     }
 
@@ -332,7 +334,7 @@ int trf__NCServerExchangeViableLinks(PTRFContext ctx, TRFSock client_sock,
     }
 
 free_av:
-    trfFreeAddrV(av_svr);
+    trfFreeAddrV(av_cand);
 free_svr_ifs:
     trfFreeInterfaceList(server_ifs);
 free_cli_ifs:
@@ -373,7 +375,6 @@ int trf__NCServerTestTransport(PTRFContext ctx, TRFSock client_sock,
     }
 
     int ret;
-    ssize_t fret;
     ret = trfCreateChannel(nctx, fi, src_addr, src_addr_size);
     if (ret < 0)
     {
@@ -385,7 +386,8 @@ int trf__NCServerTestTransport(PTRFContext ctx, TRFSock client_sock,
     ret = trfGetEndpointName(nctx, &sas_buf);
     if (ret < 0)
     {
-        trf__log_error("Unable to get created endpoint name");
+        trf__log_error("Unable to get created endpoint name: %s",
+                       fi_strerror(-ret));
         trfDestroyContext(nctx);
         return -EINVAL;
     }
@@ -482,6 +484,8 @@ int trf__NCServerTestTransport(PTRFContext ctx, TRFSock client_sock,
         return -EINVAL;
     }
 
+    trf__ProtoFree(peer_msg);
+
     // Temporarily set the NC socket to non-blocking mode so we can wait on
     // multiple events.
 
@@ -493,35 +497,35 @@ int trf__NCServerTestTransport(PTRFContext ctx, TRFSock client_sock,
         return ret;
     }
 
-    // Prepare timing variables and fabric resources
-
-    struct timespec tstart, tend;
-    ret = clock_gettime(CLOCK_MONOTONIC, &tstart);
-    if (ret < 0)
-    {
-        trf__log_error("System clock error: %s", strerror(errno));
-        trfDestroyContext(nctx);
-        return -errno;
-    }
-    trf__GetDelay(&tstart, &tend, ctx->opts->fab_rcv_timeo);
+    // Post receive to get session identifier
     
     nctx->xfer.fabric->peer_addr = peer;
 
-    ret = trf__FabricPostRecv(nctx, FI_ADDR_UNSPEC, &tend);
-    if (ret)
+    ret = trfFabricRecvUnchecked(nctx, &nctx->xfer.fabric->msg_mem, 
+                                 trfMemPtr(&nctx->xfer.fabric->msg_mem),
+                                 nctx->xfer.fabric->msg_mem.size, peer);
+    if (ret < 0)
     {
-        trf__log_error("Fabric post send: %d", ret);
+        trf_fi_error("trfFabricRecv", ret);
         trfDestroyContext(nctx);
         return ret;
     }
 
-    // Wait for a message on the fabric, or for a timeout
-    
-    struct fi_cq_data_entry de;
-    struct fi_cq_err_entry err;
-    uint8_t status = 0;
-    while (!trf__HasPassed(CLOCK_MONOTONIC, &tend))
+    // Wait for either a reply, timeout, or NACK
+
+    struct timespec tend;
+    ret = trfGetDeadline(&tend, trf__Max(nctx->opts->fab_rcv_timeo, 
+                                         nctx->opts->nc_rcv_timeo));
+    if (ret != 0)
     {
+        trf__log_fatal("System clock error: %s", strerror(errno));
+        return 0;
+    }
+
+    while (1)
+    {
+        // Poll socket for data
+
         ret = recv(client_sock, buffer, size, MSG_PEEK);
         if (ret <= 0 && errno != EAGAIN && errno != EWOULDBLOCK)
         {
@@ -531,127 +535,10 @@ int trf__NCServerTestTransport(PTRFContext ctx, TRFSock client_sock,
         }
         else if (ret > 0)
         {
+            // Receive NACK message from client
             trf__log_debug("Client socket has data");
-            status = 2;
-            break;
-        }
-
-        fret = fi_cq_read(nctx->xfer.fabric->rx_cq->cq, &de, 1);
-        if (fret == 1)
-        {
-            trf__log_trace("Sending confirmation...");
-            ret = clock_gettime(CLOCK_MONOTONIC, &tstart);
-            if (ret != 0)
-            {
-                trf__log_fatal("System clock error! Further LibTRF operations "
-                               "are very likely to fail! %s", strerror(errno));
-                status = 0;
-                ret = -errno;
-                break;
-            }
-            trf__GetDelay(&tstart, &tend, ctx->opts->fab_snd_timeo);
-            if (be64toh(* (uint64_t *) regd_buf) == session_id)
-            {
-                ret = trf__FabricPostSend(nctx, 8, peer, &tend);
-                if (ret < 0)
-                {
-                    trf_fi_error("Fabric send", ret);
-                    status = 0;
-
-                }
-                do {
-                    fret = fi_cq_read(nctx->xfer.fabric->tx_cq->cq, &de, 1);
-                } while (fret == -FI_EAGAIN);
-                if (fret != 1)
-                {
-                    trf_fi_error("Fabric read", fret);
-                    status = 0;
-                }
-                trf__log_trace("Confirmation sent");
-                status = 1;
-                break;
-            }
-            trf__log_warn("Invalid session ID. Local: %ld, Peer: %ld", 
-                          session_id, be64toh(* (uint64_t *) regd_buf));
-            status = 0;
-            break;
-        }
-        else if (fret != 1 && fret != -FI_EAGAIN)
-        {
-            if (fret == -FI_EAVAIL)
-            {
-                fret = fi_cq_readerr(nctx->xfer.fabric->rx_cq->cq, &err, 0);
-                if (fret != 1)
-                {
-                    trf__log_error("Unable to read fabric error");
-                    trfDestroyContext(nctx);
-                    return -EINVAL;
-                }
-                trf__log_error("Fabric error: %s", fi_strerror(err.err));
-                trfDestroyContext(nctx);
-                errno = err.prov_errno;
-                return -(err.err);
-            }
-            else
-            {
-                trf__log_error("Fabric receive failed: %s", fi_strerror(-fret));
-            }
-            trfDestroyContext(nctx);
-            return (int) -fret;
-        }
-    }
-
-    // Client should have sent a NACK if we have data on the socket, else the
-    // client is not conformant.
-
-    switch (status)
-    {
-        // Server-side timeout
-        case 0:
-            ret = trf__SetSockBlocking(client_sock);
-            if (ret < 0)
-            {
-                trf__log_error("Unable to set socket to blocking mode");
-                trfDestroyContext(nctx);
-                return ret;
-            }
-
-            TrfMsg__TransportNack nack = TRF_MSG__TRANSPORT_NACK__INIT;
-            msg.wdata_case = TRF_MSG__MESSAGE_WRAPPER__WDATA_TRANSPORT_NACK;
-            msg.transport_nack = &nack;
-            nack.reason = ETIMEDOUT;
-            
-            ret = trfNCSendDelimited(client_sock, buffer, 
-                                     size, ctx->opts->nc_snd_timeo, &msg);
-            if (ret < 0)
-            {
-                trf__log_error("Delimited send failed %s", strerror(-ret));
-                trfDestroyContext(nctx);
-                return ret;
-            }
-            return -ETIMEDOUT;
-        
-        // Connection works
-        case 1:
-            *new_ctx = nctx;
-            return 0;
-        
-        // Received NACK from peer
-        case 2:
-            // Set the socket back to blocking mode
-            ret = trf__SetSockBlocking(client_sock);
-            if (ret < 0)
-            {
-                trf__log_error("Unable to set socket to blocking mode");
-                trfDestroyContext(nctx);
-                return ret;
-            }
-
-            TrfMsg__MessageWrapper * mw = NULL;
-            
-            // Receive the NACK message
             ret = trfNCRecvDelimited(client_sock, buffer, size, 
-                                     ctx->opts->nc_rcv_timeo, &mw);
+                                     nctx->opts->nc_rcv_timeo, &peer_msg);
             if (ret < 0)
             {
                 trf__log_error("Delimited receive failed %s", strerror(-ret));
@@ -659,32 +546,107 @@ int trf__NCServerTestTransport(PTRFContext ctx, TRFSock client_sock,
                 return ret;
             }
             
-            if ((mw->wdata_case 
+            if ((peer_msg->wdata_case 
                 != TRF_MSG__MESSAGE_WRAPPER__WDATA_TRANSPORT_NACK)
-                || (!mw->transport_nack))
+                || (!peer_msg->transport_nack))
             {
-                trf__log_error("Unexpected message type %d in buffer",
-                               mw->wdata_case);
+                trf__log_error("Unexpected message type %d in buffer "
+                               "(or buffer is corrupted)", 
+                               peer_msg->wdata_case);
                 trfDestroyContext(nctx);
                 return -EBADMSG;
             }
 
-            errno = mw->transport_nack->reason;
-            trf_msg__message_wrapper__free_unpacked(mw, NULL);
+            errno = peer_msg->transport_nack->reason;
+            trf_msg__message_wrapper__free_unpacked(peer_msg, NULL);
             trfDestroyContext(nctx);
             return -ECONNABORTED;
-        
-        // System error
-        case 3:
-            trf__log_warn("Error: %s", fi_strerror(abs(ret)));
-            return -(abs(ret));
+        }
 
-        // Invalid result
-        default:
-            trf__log_fatal("Bug: Invalid status %d", status);
-            fflush(stdout);
-            fflush(stderr);
-            abort();
+        // Poll for session identifier on fabric
+
+        struct fi_cq_data_entry cqe;
+        struct fi_cq_err_entry err;
+        ret = trfFabricPollRecv(nctx, &cqe, &err, 0, 0, NULL, 1);
+        if (ret < 0 && ret != -FI_EAGAIN)
+        {
+            trf_fi_error("trfFabricPollRecv", ret);
+            trfDestroyContext(nctx);
+            return ret;
+        }
+        if (ret == 1)
+        {
+            // Session identifier received, send back the ID to the client
+            if (be64toh(* (uint64_t *) regd_buf) == session_id)
+            {
+                ret = trfFabricSend(nctx, &nctx->xfer.fabric->msg_mem, 
+                                    trfMemPtr(&nctx->xfer.fabric->msg_mem),
+                                    nctx->xfer.fabric->msg_mem.size, peer, 
+                                    nctx->opts);
+                switch (ret)
+                {
+                    // Success
+                    case 1:
+                        *new_ctx = nctx;
+                        return 0;
+                    // Timeout
+                    case -FI_EAGAIN:
+                    case -FI_ETIMEDOUT:
+                        TrfMsg__TransportNack nack = \
+                            TRF_MSG__TRANSPORT_NACK__INIT;
+                        msg.wdata_case = \
+                            TRF_MSG__MESSAGE_WRAPPER__WDATA_TRANSPORT_NACK;
+                        msg.transport_nack = &nack;
+                        nack.reason = ETIMEDOUT;
+                        ret = trfNCSendDelimited(client_sock, buffer, 
+                                                size, ctx->opts->nc_snd_timeo, 
+                                                &msg);
+                        if (ret < 0)
+                        {
+                            trf__log_error("Delimited send failed %s", 
+                                           strerror(-ret));
+                            trfDestroyContext(nctx);
+                            return ret;
+                        }
+                        trfDestroyContext(nctx);
+                        return -ETIMEDOUT;
+                    default:
+                        trf__log_error("Unexpected return value received: %d",
+                                       ret);
+                }
+            }
+            else
+            {
+                trf__log_error("Invalid session identifier received");
+                trfDestroyContext(nctx);
+                return -EINVAL;
+            }
+        }
+
+        // Check deadline
+        if (trf__HasPassed(CLOCK_MONOTONIC, &tend))
+        {
+            TrfMsg__TransportNack nack = \
+                TRF_MSG__TRANSPORT_NACK__INIT;
+            msg.wdata_case = \
+                TRF_MSG__MESSAGE_WRAPPER__WDATA_TRANSPORT_NACK;
+            msg.transport_nack = &nack;
+            nack.reason = ETIMEDOUT;
+            ret = trfNCSendDelimited(client_sock, buffer, 
+                                    size, ctx->opts->nc_snd_timeo, 
+                                    &msg);
+            if (ret < 0)
+            {
+                trf__log_error("Delimited send failed %s", 
+                                strerror(-ret));
+                trfDestroyContext(nctx);
+                return ret;
+            }
+            trfDestroyContext(nctx);
+            return -ETIMEDOUT;
+        }
+
+        trfSleep(ctx->opts->fab_poll_rate);
     }
 }
 
@@ -764,7 +726,7 @@ int trf__NCServerGetClientFabrics(PTRFContext ctx, TRFSock client_sock,
     {
         trf__log_error("Client transports not supported");
         trf_msg__message_wrapper__free_unpacked(msg, NULL);
-        return -ENOSYS;
+        return -ENOPROTOOPT;
     }
 
     *new_ctx = nctx;

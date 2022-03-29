@@ -79,11 +79,64 @@
  */
 struct TRFTCQFabric {
     struct fid_cq         * cq;       // Completion queue
-    atomic_int_fast8_t    lock;       // Whether lock is available
-    atomic_uint_fast64_t  entries;    // Number of remaining entries
+    atomic_int_fast64_t   entries;    // Number of remaining entries
 };
 
 #define PTRFTCQFabric struct TRFTCQFabric *
+
+/**
+ * @brief TRF memory region type
+ */
+typedef enum TRFMemType {
+    TRF_MEM_TYPE_INVALID,           // Invalid memory region
+    TRF_MEM_TYPE_RAW,               // Raw, unregistered memory region
+    TRF_MEM_TYPE_LF_MR,             // Libfabric memory region
+    TRF_MEM_TYPE_MAX                // Sentinel
+} TRFMemType;
+
+/**
+ * @brief Memory region object.
+ */
+struct TRFMem {
+    void                * ptr;          // Memory region pointer
+    size_t              size;           // Memory region size
+    TRFMemType type;                    // Memory region type
+    union {
+        struct fid_mr   * fabric_mr;    // Libfabric MR
+    };
+};
+
+#define PTRFMem struct TRFMem *
+
+static inline void * trfMemPtr(PTRFMem mem)
+{
+    return mem->ptr;
+}
+
+static inline size_t trfMemSize(PTRFMem mem)
+{
+    return (mem)->size;
+}
+
+static inline TRFMemType trfMemType(PTRFMem mem)
+{
+    return (mem)->type;
+}
+
+static inline struct fid_mr * trfMemFabricMR(PTRFMem mem) 
+{
+    return mem->fabric_mr;
+}
+
+static inline uint64_t trfMemFabricKey(PTRFMem mem)
+{
+    return fi_mr_key(mem->fabric_mr);
+}
+
+static inline void * trfMemFabricDesc(PTRFMem mem)
+{
+    return fi_mr_desc(mem->fabric_mr);
+}
 
 /**
  * @brief Remote access key object.
@@ -271,24 +324,9 @@ struct TRFXFabric {
     */
     struct fid_av       * av;
     /**
-      * @brief Message memory region.
-      * 
-      * LibTRF predefines a memory region for use in sending and receiving
-      * messages. However, you can use your own memory region if you wish.
-    */
-    struct fid_mr       * msg_mr;
-    /**
-     * @brief Message virtual memory address.
-     * 
-     * This address must correspond with the memory registered under msg_mr.
+     * @brief Message memory region.
      */
-    void                * msg_ptr;
-    /**
-     * @brief Message buffer size.
-     * 
-     * The length of the buffer referenced by msg_ptr.
-     */
-    size_t              msg_size;
+    struct TRFMem        msg_mem;
     /**
       * @brief Interrupt vector
       *
@@ -503,20 +541,10 @@ struct TRFDisplay {
      */ 
     uint32_t    y_offset;
     /**
-     * @brief Memory address of the display framebuffer
+     * @brief Memory region containing the framebuffer data.
      * 
      */
-    uint8_t     * fb_addr;
-    /**
-     * @brief Memory region object for the display framebuffer. Do not set manually.
-     * 
-     */
-    struct fid_mr * fb_mr;
-    /**
-     * @brief Framebuffer length. This is used if the memory region is larger
-     *        than the actual number of bytes needed to store the frame.
-     */
-    size_t fb_len;
+    struct TRFMem mem;
     /**
      * @brief Offset from the start of the framebuffer address to the start of
      *        the actual frame data, excluding any header information.
@@ -595,12 +623,18 @@ struct TRFContextOpts {
      * @brief Libfabric API/ABI version for this session.
      */
     uint32_t    fab_api_ver;
-
     /**
      * @brief Flags for determining if linklocal or external addresses should be used
-     * 
      */
     uint64_t    iface_flags;
+    /**
+     * @brief Maximum number of clients (server side only).
+     */
+    uint32_t    max_clients;
+    /**
+     * @brief Maximum number of subchannels.
+     */
+    uint32_t    max_subchannels;
 };
 
 /**
@@ -622,6 +656,10 @@ struct TRFContext {
      * the context. @see enum TRFEPType
      */
     enum TRFEPType type;
+    /**
+     * @brief Channel ID.
+     */
+    int channel_id;
     union {
         /**
          * @brief Server specific context items.
@@ -639,7 +677,11 @@ struct TRFContext {
              * 
              * Contains a list of clients which have connected via this server.
              */
-            struct TRFContext   * clients;
+            struct TRFContext   ** clients;
+            /**
+             * @brief Maximum number of clients.
+             */
+            int                 max_clients;
         } svr;
         /**
          * @brief Client specific context items.
@@ -654,6 +696,14 @@ struct TRFContext {
              * @brief Out of band channel FD.
              */
             TRFSock             client_fd;
+            /**
+             * @brief Subchannels.
+             */
+            struct TRFContext   ** channels;
+            /**
+             * @brief Maximum number of subchannels.
+             */
+            int                 max_channels;
         } cli;
     };
     /**
@@ -684,12 +734,6 @@ struct TRFContext {
      * disconnect from being called twice.
      */
     uint8_t disconnected;
-    /**
-     * @brief Related context pointer, next entry
-     * 
-    */
-    struct TRFContext * next;
-
 };
 
 /**

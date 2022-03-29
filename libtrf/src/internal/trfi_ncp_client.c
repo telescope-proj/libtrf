@@ -589,7 +589,8 @@ int trf__NCRecvAndTestCandidate(PTRFContext ctx, uint8_t * buffer, size_t size)
         trf__log_error("Failed to register internal message buffer");
         goto close_conn;
     }
-    ctx->xfer.fabric->msg_ptr = fabric_buf;
+
+    ctx->xfer.fabric->msg_mem.ptr = fabric_buf;
 
     // Once we have created the endpoint, we'll need to:
     // - Send the endpoint details via the regular NCP channel
@@ -678,80 +679,44 @@ int trf__NCRecvAndTestCandidate(PTRFContext ctx, uint8_t * buffer, size_t size)
     // Send the session ID over the fabric interface
 
     uint64_t session_id_be64 = htobe64(ctx->cli.session_id);
-    memcpy(ctx->xfer.fabric->msg_ptr, &session_id_be64,
+    memcpy(ctx->xfer.fabric->msg_mem.ptr, &session_id_be64,
            sizeof(session_id_be64));
 
-    struct timespec ts = {0};
-    struct timespec dl = {0};
-    ret = clock_gettime(CLOCK_MONOTONIC, &ts);
-    if (ret < 0)
-    {
-        trf__log_error("System clock error! "
-                       "Other TRF API calls are likely to fail!");
-        goto free_ep_strs;
-    }
-    trf__GetDelay(&ts, &dl, ctx->opts->fab_snd_timeo);
+    struct TRFMem * mem = &ctx->xfer.fabric->msg_mem;
+    struct timespec dl;
+    trfGetDeadline(&dl, ctx->opts->fab_snd_timeo);
+    int att = 0;
 
-    ret = trf__FabricPostSend(ctx, sizeof(uint64_t), lf_addr, &dl);
-    if (ret < 0)
+    do {        
+        ret = trfFabricSend(ctx, mem, trfMemPtr(mem), trfMemSize(mem), lf_addr,
+                            ctx->opts);
+        trfSleep(ctx->opts->fab_poll_rate);
+        att++;
+    } while (ret == -FI_EAGAIN && !trf__HasPassed(CLOCK_MONOTONIC, &dl));
+    
+    if (ret != 1)
     {
-        trf_fi_error("trf__FabricPostSend", ret);
+        trf_fi_error("trfFabricSend", ret);
         goto close_conn;
     }
 
-    // Check whether the message was sent, or a timeout occurred
-
-    struct fi_cq_data_entry cqe;
-    struct fi_cq_err_entry err;
-    do {
-        ret = fi_cq_read(ctx->xfer.fabric->tx_cq->cq, &cqe, 1);
-        if (ret == -FI_EAVAIL)
-        {
-            ret = fi_cq_readerr(ctx->xfer.fabric->tx_cq->cq, &err, 0);
-            if (ret < 0)
-            {
-                trf_fi_error("fi_cq_readerr", ret);
-            }
-            trf_fi_error("fi_cq_read", ret);
-        }
-    } while (ret == -FI_EAGAIN);
+    memset(trfMemPtr(mem), 0, 8);
     
-    trf__log_debug("Sent session cookie to server, waiting for response...");
+    trf__log_debug("Sent session cookie to server (%d attempts), "
+                   "waiting for response...", att);
 
     // The server should echo back our session ID before the timeout
-
-    ret = clock_gettime(CLOCK_MONOTONIC, &ts);
-    if (ret < 0)
+    
+    ret = trfFabricRecv(ctx, mem, trfMemPtr(mem), trfMemSize(mem), lf_addr,
+                        NULL);
+    if (ret != 1)
     {
-        trf__log_error("System clock error! "
-                       "Other TRF API calls are likely to fail!");
-        goto free_ep_strs;
-    }
-    trf__GetDelay(&ts, &dl, ctx->opts->fab_rcv_timeo);
-    memset(ctx->xfer.fabric->msg_ptr, 0, sizeof(session_id_be64));
-
-
-    ret = trf__FabricPostRecv(ctx, FI_ADDR_UNSPEC, &dl);
-    if (ret < 0)
-    {
-        trf_fi_error("trf__FabricPostRecv", ret);
+        trf_fi_error("trfFabricRecv", ret == 0 ? -EIO : ret);
         goto close_conn;
     }
 
-    do {
-        ret = fi_cq_read(ctx->xfer.fabric->rx_cq->cq, &cqe, 1);
-        if (ret == -FI_EAVAIL)
-        {
-            ret = fi_cq_readerr(ctx->xfer.fabric->rx_cq->cq, &err, 0);
-            if (ret < 0)
-            {
-                trf_fi_error("fi_cq_readerr", ret);
-            }
-            trf_fi_error("fi_cq_read", ret);
-        }
-    } while (ret == -FI_EAGAIN);
 
-    if (* (uint64_t *) fabric_buf != session_id_be64)
+    if (* (uint64_t *) mem->ptr != session_id_be64)
     {
         trf__log_error("Server echoed back incorrect session ID %lu "
                        "instead of %lu", be64toh(* (uint64_t *) fabric_buf),
@@ -778,4 +743,3 @@ free_msg:
     trf_msg__message_wrapper__free_unpacked(mw, NULL);
     return ret;
 }
-

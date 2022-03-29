@@ -57,31 +57,6 @@ struct TRFContext;
  */
 #define trf__RetIfNeg(x) if ((x) < 0) { return (x); }
 
-static inline int trf__LockCQ(PTRFTCQFabric tcq)
-{
-    int_fast8_t l = 1;
-    while (atomic_compare_exchange_strong_explicit(&tcq->lock, &l, 0,
-        memory_order_acquire, memory_order_relaxed)) {
-    l = 1;
-    }
-    return 0;
-}
-
-static inline int trf__TryLockCQ(PTRFTCQFabric tcq)
-{
-    int_fast8_t l = 1;
-    return atomic_compare_exchange_strong_explicit(&tcq->lock, &l, 0,
-        memory_order_acquire, memory_order_relaxed);
-}
-
-static inline int trf__UnlockCQ(PTRFTCQFabric tcq)
-{
-  int_fast8_t l = 0;
-  atomic_compare_exchange_strong_explicit(&tcq->lock, &l, 1,
-      memory_order_release, memory_order_relaxed);
-  return 0;
-}
-
 static inline int trf__CreateCQ(PTRFXFabric ctx, PTRFTCQFabric * tcq, 
                                 struct fi_cq_attr * attr, void * context)
 {
@@ -96,7 +71,6 @@ static inline int trf__CreateCQ(PTRFXFabric ctx, PTRFTCQFabric * tcq,
         free(tcq2);
         return ret;
     }
-    tcq2->lock = 1;
     tcq2->entries = attr->size;
     *tcq = tcq2;
     return 0;
@@ -115,20 +89,18 @@ static inline int trf__DestroyCQ(PTRFTCQFabric tcq)
  * 
  * @param tcq   Pointer to the CQ
  * @param n     Number of entries to decrement
- * @return      Number of remaining entries 
+ * @return      Number of remaining entries. 0 if insufficient.
  */
-static inline uint_fast64_t trf__DecrementCQ(PTRFTCQFabric tcq, uint64_t n)
+static inline int_fast64_t trf__DecrementCQ(PTRFTCQFabric tcq, uint64_t n)
 {
-    uint_fast64_t f;
-    trf__LockCQ(tcq);
-    f = atomic_load_explicit(&tcq->entries, memory_order_relaxed);
-    if (f >= n)
+    int_fast64_t f;
+    f = atomic_fetch_sub_explicit(&tcq->entries, n, memory_order_acq_rel);
+    if (f < 0)
     {
-        f -= n;
-        atomic_store_explicit(&tcq->entries, f, memory_order_relaxed);
+        atomic_fetch_add_explicit(&tcq->entries, n, memory_order_acq_rel);
+        return 0;
     }
-    trf__UnlockCQ(tcq);
-    return f;
+    return n;
 }
 
 /**
@@ -137,28 +109,23 @@ static inline uint_fast64_t trf__DecrementCQ(PTRFTCQFabric tcq, uint64_t n)
  * @param tcq   Pointer to the CQ
  * @param n     Number of entries to increment
  */
-static inline uint_fast64_t trf__IncrementCQ(PTRFTCQFabric tcq, uint64_t n)
+static inline int_fast64_t trf__IncrementCQ(PTRFTCQFabric tcq, uint64_t n)
 {
-    uint_fast64_t f;
-    trf__LockCQ(tcq);
-    f = atomic_fetch_add_explicit(&tcq->entries, n, memory_order_relaxed);
-    trf__UnlockCQ(tcq);
+    int_fast64_t f;
+    f = atomic_fetch_add_explicit(&tcq->entries, n, memory_order_acq_rel);
     return f + n;
 }
 
 /**
   * @brief          Check the number of times a session ID has been used.
   * 
-  * @param ctx      Context
+  * @param ctx      Server context
   * 
   * @param session  Session ID
   * 
-  * @param first    Whether to the first item or the total count
-  * 
-  * @return         Number of times this session ID has been used, negative
-  *                 error code on failure.
+  * @return         Index where the session ID is used. -1 if not used.
 */
-int trf__CheckSessionID(PTRFContext ctx, uint64_t session, uint8_t first);
+int trf__CheckSessionID(PTRFContext ctx, uint64_t session);
 
 /**
   * @brief Allocate resouces for an incoming session on ther server side with a
@@ -263,6 +230,24 @@ static inline void trf__GetDelay(struct timespec * ts, struct timespec * ts_out,
         ts_out->tv_sec++;
         ts_out->tv_nsec -= 1000000000;
     }
+}
+
+static inline int trf__RemainingMS(struct timespec * ts)
+{
+    struct timespec now;
+    clock_gettime(CLOCK_MONOTONIC, &now);
+    int ms;
+    if ((now.tv_sec > ts->tv_sec && now.tv_nsec > ts->tv_nsec)
+            || (now.tv_sec == ts->tv_sec && now.tv_nsec > ts->tv_nsec))
+    {
+        ms = 0;
+    }
+    else
+    {
+        int ms = (ts->tv_sec - now.tv_sec) * 1000;
+        ms += (ts->tv_nsec - now.tv_nsec) / 1000000;
+    }
+    return ms;
 }
 
 /**

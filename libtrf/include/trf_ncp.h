@@ -59,8 +59,86 @@
 #endif
 
 #define TRF_API_MAJOR    0
-#define TRF_API_MINOR    2
-#define TRF_API_PATCH    3
+#define TRF_API_MINOR    3
+#define TRF_API_PATCH    0
+
+// Preserved for compatibility
+#define trfNCSendDelimited trfNCSendMsg
+#define trfNCRecvDelimited trfNCRecvMsg
+#define trfNCFullRecv trfNCRecv
+#define trfNCFullSend trfNCSend
+
+/**
+  * @brief          Receive a delimited message in TRF Protocol Buffers format.
+  * 
+  * @param sock     Socket descriptor to receive from.
+  * 
+  * @param buf      Buffer to receive data into
+  * 
+  * @param size     Buffer max size
+  * 
+  * @param timeout  Receive timeout
+  * 
+  * @param handle   Handle to received message (raw data stored inside buf)
+  * 
+  * @return 0 on success, negative error code on failure
+*/
+int trfNCRecvMsg(TRFSock sock, uint8_t * buf, uint32_t size, int timeout, 
+    TrfMsg__MessageWrapper ** handle);
+
+/**
+  * @brief          Sends a delimited message in TRF Protocol Buffers format.
+  * 
+  * @param fd       File descriptor to send to.
+  * 
+  * @param buf      Scratch buffer for writing data to be sent
+  * 
+  * @param size     Buffer max size
+  * 
+  * @param timeout  Send timeout in milliseconds
+  * 
+  * @param handle   Message data handle, to be packed into buf and sent
+  * 
+  * @return         0 on success, negative error code on failure.
+*/
+int trfNCSendMsg(TRFSock sock, uint8_t * buf, uint32_t size, int timeout, 
+    TrfMsg__MessageWrapper * handle);
+
+/**
+  * @brief          Reliably recieves messages on the socket.
+  *
+  *                 Blocks until a message has been received in its entirety, or
+  *                 a timeout or error occurs.
+  *
+  * @param sock     Socket to read from.
+  *
+  * @param size     TNumber of bytes to receive.
+  *
+  * @param buf      Pointer to buffer where message will be stored
+  *
+  * @param timeout  Timeout in milliseconds
+  *
+  * @return         0 on success, negative error code on failure
+*/
+int trfNCRecv(TRFSock sock, ssize_t length, uint8_t * buf, int timeout);
+
+/**
+  * @brief          Reliably sends messages on the socket.
+  *
+  *                 Blocks until a message has been sent in its entirety, or a 
+  *                 timeout or error occurs.
+  * 
+  * @param sock     Socket to send to.
+  * 
+  * @param size     Number of bytes to send.
+  * 
+  * @param buf      Buffer containing the message to be sent
+  * 
+  * @param timeout  Timeout in milliseconds
+  * 
+  * @return         0 on success, negative error code on failure
+*/
+int trfNCSend(TRFSock sock, ssize_t length, uint8_t * buf, int timeout);
 
 /**
   * @brief Add Protobuf message to PTRFInterface

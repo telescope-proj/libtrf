@@ -322,7 +322,7 @@ int trfGetInterfaceList(PTRFInterface * list_out, uint32_t * length, uint64_t fl
 
                             ret = trfCheckNetwork(ifa_tmp->ifa_addr, nm, 
                                 (struct sockaddr *) &tmp->sa, tmp->subnet);
-                            trf__log_debug("Return Value from check network: %d", 
+                            trf__log_trace("Return Value from check network: %d", 
                                     ret);
                             if (ret == 0){
                                 trf_tmp->netmask = nm;

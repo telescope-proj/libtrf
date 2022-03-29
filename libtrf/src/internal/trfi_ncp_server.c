@@ -592,6 +592,7 @@ int trf__NCServerTestTransport(PTRFContext ctx, TRFSock client_sock,
                     // Timeout
                     case -FI_EAGAIN:
                     case -FI_ETIMEDOUT:
+                        ;
                         TrfMsg__TransportNack nack = \
                             TRF_MSG__TRANSPORT_NACK__INIT;
                         msg.wdata_case = \

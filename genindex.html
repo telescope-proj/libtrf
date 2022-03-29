@@ -81,11 +81,13 @@
 </li>
       <li><a href="api/trf_def.html#c.PTRFCursor">PTRFCursor (C macro)</a>
 </li>
-  </ul></td>
-  <td style="width: 33%; vertical-align: top;"><ul>
       <li><a href="api/trf_def.html#c.PTRFDisplay">PTRFDisplay (C macro)</a>
 </li>
+  </ul></td>
+  <td style="width: 33%; vertical-align: top;"><ul>
       <li><a href="api/trf_def.html#c.PTRFInterface">PTRFInterface (C macro)</a>
+</li>
+      <li><a href="api/trf_def.html#c.PTRFMem">PTRFMem (C macro)</a>
 </li>
       <li><a href="api/trf_def.html#c.PTRFSession">PTRFSession (C macro)</a>
 </li>
@@ -103,7 +105,7 @@
 </li>
       <li><a href="api/trf_internal.html#_CPPv426trf__AllocSessionForClient11PTRFContext8uint64_tP11PTRFContext">trf__AllocSessionForClient (C++ function)</a>
 </li>
-      <li><a href="api/trf_internal.html#_CPPv419trf__CheckSessionID11PTRFContext8uint64_t7uint8_t">trf__CheckSessionID (C++ function)</a>
+      <li><a href="api/trf_internal.html#_CPPv419trf__CheckSessionID11PTRFContext8uint64_t">trf__CheckSessionID (C++ function)</a>
 </li>
       <li><a href="api/trf_internal.html#_CPPv413trf__CreateCQ11PTRFXFabricP13PTRFTCQFabricP10fi_cq_attrPv">trf__CreateCQ (C++ function)</a>
 </li>
@@ -111,15 +113,7 @@
 </li>
       <li><a href="api/trf_internal.html#_CPPv414trf__DestroyCQ13PTRFTCQFabric">trf__DestroyCQ (C++ function)</a>
 </li>
-      <li><a href="api/trf.html#_CPPv419trf__FabricPostRecv11PTRFContext9fi_addr_tP8timespec">trf__FabricPostRecv (C++ function)</a>
-</li>
-      <li><a href="api/trf.html#_CPPv419trf__FabricPostSend11PTRFContext6size_t9fi_addr_tP8timespec">trf__FabricPostSend (C++ function)</a>
-</li>
-      <li><a href="api/trf.html#_CPPv419trf__GetCQErrStringP6fid_cqP15fi_cq_err_entry">trf__GetCQErrString (C++ function)</a>
-</li>
       <li><a href="api/trf_internal.html#_CPPv413trf__GetDelayP8timespecP8timespec8uint64_t">trf__GetDelay (C++ function)</a>
-</li>
-      <li><a href="api/trf.html#_CPPv419trf__GetFabricHintsv">trf__GetFabricHints (C++ function)</a>
 </li>
       <li><a href="api/trf_def.html#_CPPv416trf__GetPageSizev">trf__GetPageSize (C++ function)</a>
 </li>
@@ -129,21 +123,15 @@
 </li>
       <li><a href="api/trf_internal.html#_CPPv416trf__IncrementCQ13PTRFTCQFabric8uint64_t">trf__IncrementCQ (C++ function)</a>
 </li>
-      <li><a href="api/trf_internal.html#_CPPv411trf__LockCQ13PTRFTCQFabric">trf__LockCQ (C++ function)</a>
-</li>
       <li><a href="api/trf_internal.html#c.TRF__LOOPS">TRF__LOOPS (C macro)</a>
-</li>
-      <li><a href="api/trf.html#_CPPv411trf__PollCQP12TRFTCQFabricP16fi_cq_data_entryP15fi_cq_err_entry15PTRFContextOptsP8timespec6size_t7uint8_t">trf__PollCQ (C++ function)</a>
 </li>
       <li><a href="api/trf_internal.html#c.trf__ProtoStringValid">trf__ProtoStringValid (C macro)</a>
 </li>
       <li><a href="api/trf_internal.html#_CPPv411trf__Rand64v">trf__Rand64 (C++ function)</a>
 </li>
+      <li><a href="api/trf_internal.html#_CPPv416trf__RemainingMSP8timespec">trf__RemainingMS (C++ function)</a>
+</li>
       <li><a href="api/trf_internal.html#c.trf__RetIfNeg">trf__RetIfNeg (C macro)</a>
-</li>
-      <li><a href="api/trf_internal.html#_CPPv414trf__TryLockCQ13PTRFTCQFabric">trf__TryLockCQ (C++ function)</a>
-</li>
-      <li><a href="api/trf_internal.html#_CPPv413trf__UnlockCQ13PTRFTCQFabric">trf__UnlockCQ (C++ function)</a>
 </li>
       <li><a href="api/trf_ncp.html#c.TRF_API_MAJOR">TRF_API_MAJOR (C macro)</a>
 </li>
@@ -153,13 +141,9 @@
 </li>
       <li><a href="api/trf.html#c.TRF_FI_CUR_VER">TRF_FI_CUR_VER (C macro)</a>
 </li>
-      <li><a href="api/trf.html#c.trf_fi_error">trf_fi_error (C macro)</a>
-</li>
       <li><a href="api/trf.html#c.TRF_FI_MAX_VER">TRF_FI_MAX_VER (C macro)</a>
 </li>
       <li><a href="api/trf.html#c.TRF_FI_MIN_VER">TRF_FI_MIN_VER (C macro)</a>
-</li>
-      <li><a href="api/trf.html#c.trf_fi_warn">trf_fi_warn (C macro)</a>
 </li>
       <li><a href="api/trf_def.html#c.TRF_INTERFACE_EXT">TRF_INTERFACE_EXT (C macro)</a>
 </li>
@@ -222,6 +206,22 @@
       <li><a href="api/trf_proto.html#_CPPv435trf_msg__apiversion__pack_to_bufferPK18TrfMsg__APIVersionP15ProtobufCBuffer">trf_msg__apiversion__pack_to_buffer (C++ function)</a>
 </li>
       <li><a href="api/trf_proto.html#_CPPv427trf_msg__apiversion__unpackP18ProtobufCAllocator6size_tPK7uint8_t">trf_msg__apiversion__unpack (C++ function)</a>
+</li>
+      <li><a href="api/trf_proto.html#_CPPv434trf_msg__channel_hello__descriptor">trf_msg__channel_hello__descriptor (C++ member)</a>
+</li>
+      <li><a href="api/trf_proto.html#_CPPv437trf_msg__channel_hello__free_unpackedP20TrfMsg__ChannelHelloP18ProtobufCAllocator">trf_msg__channel_hello__free_unpacked (C++ function)</a>
+</li>
+      <li><a href="api/trf_proto.html#_CPPv439trf_msg__channel_hello__get_packed_sizePK20TrfMsg__ChannelHello">trf_msg__channel_hello__get_packed_size (C++ function)</a>
+</li>
+      <li><a href="api/trf_proto.html#c.TRF_MSG__CHANNEL_HELLO__INIT">TRF_MSG__CHANNEL_HELLO__INIT (C macro)</a>
+</li>
+      <li><a href="api/trf_proto.html#_CPPv428trf_msg__channel_hello__initP20TrfMsg__ChannelHello">trf_msg__channel_hello__init (C++ function)</a>
+</li>
+      <li><a href="api/trf_proto.html#_CPPv428trf_msg__channel_hello__packPK20TrfMsg__ChannelHelloP7uint8_t">trf_msg__channel_hello__pack (C++ function)</a>
+</li>
+      <li><a href="api/trf_proto.html#_CPPv438trf_msg__channel_hello__pack_to_bufferPK20TrfMsg__ChannelHelloP15ProtobufCBuffer">trf_msg__channel_hello__pack_to_buffer (C++ function)</a>
+</li>
+      <li><a href="api/trf_proto.html#_CPPv430trf_msg__channel_hello__unpackP18ProtobufCAllocator6size_tPK7uint8_t">trf_msg__channel_hello__unpack (C++ function)</a>
 </li>
       <li><a href="api/trf_proto.html#_CPPv433trf_msg__channel_open__descriptor">trf_msg__channel_open__descriptor (C++ member)</a>
 </li>
@@ -627,7 +627,11 @@
 </li>
       <li><a href="api/trf_def.html#_CPPv410TRFContext">TRFContext (C++ struct)</a>
 </li>
-      <li><a href="api/trf_def.html#_CPPv4N10TRFContextUt1_2E">TRFContext::[anonymous] (C++ member)</a>
+      <li><a href="api/trf_def.html#_CPPv4N10TRFContextUt1_4E">TRFContext::[anonymous] (C++ member)</a>
+</li>
+      <li><a href="api/trf_def.html#_CPPv4N10TRFContext10channel_idE">TRFContext::channel_id (C++ member)</a>
+</li>
+      <li><a href="api/trf_def.html#_CPPv4N10TRFContext8channelsE">TRFContext::channels (C++ member)</a>
 </li>
       <li><a href="api/trf_def.html#_CPPv4N10TRFContext3cliE">TRFContext::cli (C++ member)</a>
 </li>
@@ -643,7 +647,9 @@
 </li>
       <li><a href="api/trf_def.html#_CPPv4N10TRFContext9listen_fdE">TRFContext::listen_fd (C++ member)</a>
 </li>
-      <li><a href="api/trf_def.html#_CPPv4N10TRFContext4nextE">TRFContext::next (C++ member)</a>
+      <li><a href="api/trf_def.html#_CPPv4N10TRFContext12max_channelsE">TRFContext::max_channels (C++ member)</a>
+</li>
+      <li><a href="api/trf_def.html#_CPPv4N10TRFContext11max_clientsE">TRFContext::max_clients (C++ member)</a>
 </li>
       <li><a href="api/trf_def.html#_CPPv4N10TRFContext4optsE">TRFContext::opts (C++ member)</a>
 </li>
@@ -674,6 +680,10 @@
       <li><a href="api/trf_def.html#_CPPv4N14TRFContextOpts13fab_snd_timeoE">TRFContextOpts::fab_snd_timeo (C++ member)</a>
 </li>
       <li><a href="api/trf_def.html#_CPPv4N14TRFContextOpts11iface_flagsE">TRFContextOpts::iface_flags (C++ member)</a>
+</li>
+      <li><a href="api/trf_def.html#_CPPv4N14TRFContextOpts11max_clientsE">TRFContextOpts::max_clients (C++ member)</a>
+</li>
+      <li><a href="api/trf_def.html#_CPPv4N14TRFContextOpts15max_subchannelsE">TRFContextOpts::max_subchannels (C++ member)</a>
 </li>
       <li><a href="api/trf_def.html#_CPPv4N14TRFContextOpts14nc_rcv_bufsizeE">TRFContextOpts::nc_rcv_bufsize (C++ member)</a>
 </li>
@@ -723,12 +733,6 @@
 </li>
       <li><a href="api/trf_def.html#_CPPv4N10TRFDisplay4dgidE">TRFDisplay::dgid (C++ member)</a>
 </li>
-      <li><a href="api/trf_def.html#_CPPv4N10TRFDisplay7fb_addrE">TRFDisplay::fb_addr (C++ member)</a>
-</li>
-      <li><a href="api/trf_def.html#_CPPv4N10TRFDisplay6fb_lenE">TRFDisplay::fb_len (C++ member)</a>
-</li>
-      <li><a href="api/trf_def.html#_CPPv4N10TRFDisplay5fb_mrE">TRFDisplay::fb_mr (C++ member)</a>
-</li>
       <li><a href="api/trf_def.html#_CPPv4N10TRFDisplay9fb_offsetE">TRFDisplay::fb_offset (C++ member)</a>
 </li>
       <li><a href="api/trf_def.html#_CPPv4N10TRFDisplay6formatE">TRFDisplay::format (C++ member)</a>
@@ -738,6 +742,8 @@
       <li><a href="api/trf_def.html#_CPPv4N10TRFDisplay6heightE">TRFDisplay::height (C++ member)</a>
 </li>
       <li><a href="api/trf_def.html#_CPPv4N10TRFDisplay2idE">TRFDisplay::id (C++ member)</a>
+</li>
+      <li><a href="api/trf_def.html#_CPPv4N10TRFDisplay3memE">TRFDisplay::mem (C++ member)</a>
 </li>
       <li><a href="api/trf_def.html#_CPPv4N10TRFDisplay4nameE">TRFDisplay::name (C++ member)</a>
 </li>
@@ -769,10 +775,6 @@
 </li>
       <li><a href="api/trf_def.html#_CPPv4N9TRFEPType13TRF_EP_SOURCEE">TRFEPType::TRF_EP_SOURCE (C++ enumerator)</a>
 </li>
-      <li><a href="api/trf.html#_CPPv413trfFabricRecv11PTRFContextPP22TrfMsg__MessageWrapper">trfFabricRecv (C++ function)</a>
-</li>
-      <li><a href="api/trf.html#_CPPv413trfFabricSend11PTRFContextP22TrfMsg__MessageWrapper">trfFabricSend (C++ function)</a>
-</li>
       <li><a href="api/trf_interface.html#_CPPv412trfFreeAddrV9PTRFAddrV">trfFreeAddrV (C++ function)</a>
 </li>
       <li><a href="api/trf.html#_CPPv418trfFreeDisplayList11PTRFDisplayi">trfFreeDisplayList (C++ function)</a>
@@ -780,6 +782,8 @@
       <li><a href="api/trf.html#_CPPv420trfFreeInterfaceList13PTRFInterface">trfFreeInterfaceList (C++ function)</a>, <a href="api/trf_interface.html#_CPPv420trfFreeInterfaceList13PTRFInterface">[1]</a>
 </li>
       <li><a href="api/trf.html#_CPPv417trfGetCursorBytes10PTRFCursor">trfGetCursorBytes (C++ function)</a>
+</li>
+      <li><a href="api/trf.html#_CPPv414trfGetDeadlineP8timespeci">trfGetDeadline (C++ function)</a>
 </li>
       <li><a href="api/trf.html#_CPPv417trfGetDisplayByID11PTRFDisplayi">trfGetDisplayByID (C++ function)</a>
 </li>
@@ -805,15 +809,13 @@
 </li>
       <li><a href="api/trf.html#_CPPv417trfGetMessageAuto11PTRFContext8uint64_tP8uint64_tPPv">trfGetMessageAuto (C++ function)</a>
 </li>
-  </ul></td>
-  <td style="width: 33%; vertical-align: top;"><ul>
       <li><a href="api/trf_inet.html#_CPPv417trfGetNodeServiceP8sockaddrPc">trfGetNodeService (C++ function)</a>
 </li>
-      <li><a href="api/trf.html#_CPPv418trfGetRecvProgress11PTRFContextP16fi_cq_data_entryP15fi_cq_err_entry6size_t">trfGetRecvProgress (C++ function)</a>
+      <li><a href="api/trf.html#_CPPv418trfGetRecvProgress11PTRFContextP16fi_cq_data_entryP15fi_cq_err_entry6size_t15PTRFContextOpts">trfGetRecvProgress (C++ function)</a>
 </li>
       <li><a href="api/trf.html#_CPPv411trfGetRoutePKcPKcPKcPP7fi_info">trfGetRoute (C++ function)</a>
 </li>
-      <li><a href="api/trf.html#_CPPv418trfGetSendProgress11PTRFContextP16fi_cq_data_entryP15fi_cq_err_entry6size_t">trfGetSendProgress (C++ function)</a>
+      <li><a href="api/trf.html#_CPPv418trfGetSendProgress11PTRFContextP16fi_cq_data_entryP15fi_cq_err_entry6size_t15PTRFContextOpts">trfGetSendProgress (C++ function)</a>
 </li>
       <li><a href="api/trf.html#_CPPv420trfGetServerDisplays11PTRFContextP11PTRFDisplay">trfGetServerDisplays (C++ function)</a>
 </li>
@@ -833,6 +835,8 @@
 </li>
       <li><a href="api/trf_def.html#_CPPv4N12TRFInterface4nextE">TRFInterface::next (C++ member)</a>
 </li>
+  </ul></td>
+  <td style="width: 33%; vertical-align: top;"><ul>
       <li><a href="api/trf_def.html#_CPPv4N12TRFInterface4portE">TRFInterface::port (C++ member)</a>
 </li>
       <li><a href="api/trf_def.html#_CPPv4N12TRFInterface5speedE">TRFInterface::speed (C++ member)</a>
@@ -854,6 +858,42 @@
       <li><a href="api/trf_def.html#_CPPv4N9TRFMAType10TRF_MA_TAGE">TRFMAType::TRF_MA_TAG (C++ enumerator)</a>
 </li>
       <li><a href="api/trf_def.html#_CPPv4N9TRFMAType12TRF_MA_VADDRE">TRFMAType::TRF_MA_VADDR (C++ enumerator)</a>
+</li>
+      <li><a href="api/trf_def.html#_CPPv46TRFMem">TRFMem (C++ struct)</a>
+</li>
+      <li><a href="api/trf_def.html#_CPPv4N6TRFMemUt1_2E">TRFMem::[anonymous] (C++ member)</a>
+</li>
+      <li><a href="api/trf_def.html#_CPPv4N6TRFMem9fabric_mrE">TRFMem::fabric_mr (C++ member)</a>
+</li>
+      <li><a href="api/trf_def.html#_CPPv4N6TRFMem3ptrE">TRFMem::ptr (C++ member)</a>
+</li>
+      <li><a href="api/trf_def.html#_CPPv4N6TRFMem4sizeE">TRFMem::size (C++ member)</a>
+</li>
+      <li><a href="api/trf_def.html#_CPPv4N6TRFMem4typeE">TRFMem::type (C++ member)</a>
+</li>
+      <li><a href="api/trf_def.html#_CPPv416trfMemFabricDesc7PTRFMem">trfMemFabricDesc (C++ function)</a>
+</li>
+      <li><a href="api/trf_def.html#_CPPv415trfMemFabricKey7PTRFMem">trfMemFabricKey (C++ function)</a>
+</li>
+      <li><a href="api/trf_def.html#_CPPv414trfMemFabricMR7PTRFMem">trfMemFabricMR (C++ function)</a>
+</li>
+      <li><a href="api/trf_def.html#_CPPv49trfMemPtr7PTRFMem">trfMemPtr (C++ function)</a>
+</li>
+      <li><a href="api/trf_def.html#_CPPv410trfMemSize7PTRFMem">trfMemSize (C++ function)</a>
+</li>
+      <li><a href="api/trf_def.html#_CPPv410TRFMemType">TRFMemType (C++ enum)</a>
+</li>
+      <li><a href="api/trf_def.html#_CPPv410trfMemType7PTRFMem">trfMemType (C++ function)</a>
+</li>
+      <li><a href="api/trf_def.html#_CPPv410TRFMemType">TRFMemType (C++ type)</a>
+</li>
+      <li><a href="api/trf_def.html#_CPPv4N10TRFMemType20TRF_MEM_TYPE_INVALIDE">TRFMemType::TRF_MEM_TYPE_INVALID (C++ enumerator)</a>
+</li>
+      <li><a href="api/trf_def.html#_CPPv4N10TRFMemType18TRF_MEM_TYPE_LF_MRE">TRFMemType::TRF_MEM_TYPE_LF_MR (C++ enumerator)</a>
+</li>
+      <li><a href="api/trf_def.html#_CPPv4N10TRFMemType16TRF_MEM_TYPE_MAXE">TRFMemType::TRF_MEM_TYPE_MAX (C++ enumerator)</a>
+</li>
+      <li><a href="api/trf_def.html#_CPPv4N10TRFMemType16TRF_MEM_TYPE_RAWE">TRFMemType::TRF_MEM_TYPE_RAW (C++ enumerator)</a>
 </li>
       <li><a href="api/trf_proto.html#_CPPv416TrfMsg__AddrCand">TrfMsg__AddrCand (C++ struct)</a>
 
@@ -903,6 +943,22 @@
 </li>
       <li><a href="api/trf_proto.html#_CPPv426TrfMsg__APIVersion_Closure">TrfMsg__APIVersion_Closure (C++ type)</a>
 </li>
+      <li><a href="api/trf_proto.html#_CPPv420TrfMsg__ChannelHello">TrfMsg__ChannelHello (C++ struct)</a>
+
+      <ul>
+        <li><a href="api/trf_proto.html#_CPPv420TrfMsg__ChannelHello">(C++ type)</a>
+</li>
+      </ul></li>
+      <li><a href="api/trf_proto.html#_CPPv4N20TrfMsg__ChannelHello4baseE">TrfMsg__ChannelHello::base (C++ member)</a>
+</li>
+      <li><a href="api/trf_proto.html#_CPPv4N20TrfMsg__ChannelHello10channel_idE">TrfMsg__ChannelHello::channel_id (C++ member)</a>
+</li>
+      <li><a href="api/trf_proto.html#_CPPv4N20TrfMsg__ChannelHello5replyE">TrfMsg__ChannelHello::reply (C++ member)</a>
+</li>
+      <li><a href="api/trf_proto.html#_CPPv4N20TrfMsg__ChannelHello10session_idE">TrfMsg__ChannelHello::session_id (C++ member)</a>
+</li>
+      <li><a href="api/trf_proto.html#_CPPv428TrfMsg__ChannelHello_Closure">TrfMsg__ChannelHello_Closure (C++ type)</a>
+</li>
       <li><a href="api/trf_proto.html#_CPPv419TrfMsg__ChannelOpen">TrfMsg__ChannelOpen (C++ struct)</a>
 
       <ul>
@@ -911,7 +967,11 @@
       </ul></li>
       <li><a href="api/trf_proto.html#_CPPv4N19TrfMsg__ChannelOpen4baseE">TrfMsg__ChannelOpen::base (C++ member)</a>
 </li>
-      <li><a href="api/trf_proto.html#_CPPv4N19TrfMsg__ChannelOpen4typeE">TrfMsg__ChannelOpen::type (C++ member)</a>
+      <li><a href="api/trf_proto.html#_CPPv4N19TrfMsg__ChannelOpen2idE">TrfMsg__ChannelOpen::id (C++ member)</a>
+</li>
+      <li><a href="api/trf_proto.html#_CPPv4N19TrfMsg__ChannelOpen5replyE">TrfMsg__ChannelOpen::reply (C++ member)</a>
+</li>
+      <li><a href="api/trf_proto.html#_CPPv4N19TrfMsg__ChannelOpen9transportE">TrfMsg__ChannelOpen::transport (C++ member)</a>
 </li>
       <li><a href="api/trf_proto.html#_CPPv427TrfMsg__ChannelOpen_Closure">TrfMsg__ChannelOpen_Closure (C++ type)</a>
 </li>
@@ -1123,11 +1183,13 @@
         <li><a href="api/trf_proto.html#_CPPv422TrfMsg__MessageWrapper">(C++ type)</a>
 </li>
       </ul></li>
-      <li><a href="api/trf_proto.html#_CPPv4N22TrfMsg__MessageWrapperUt1_8E">TrfMsg__MessageWrapper::[anonymous] (C++ member)</a>
+      <li><a href="api/trf_proto.html#_CPPv4N22TrfMsg__MessageWrapperUt2_10E">TrfMsg__MessageWrapper::[anonymous] (C++ member)</a>
 </li>
       <li><a href="api/trf_proto.html#_CPPv4N22TrfMsg__MessageWrapper7addr_pfE">TrfMsg__MessageWrapper::addr_pf (C++ member)</a>
 </li>
       <li><a href="api/trf_proto.html#_CPPv4N22TrfMsg__MessageWrapper4baseE">TrfMsg__MessageWrapper::base (C++ member)</a>
+</li>
+      <li><a href="api/trf_proto.html#_CPPv4N22TrfMsg__MessageWrapper8ch_helloE">TrfMsg__MessageWrapper::ch_hello (C++ member)</a>
 </li>
       <li><a href="api/trf_proto.html#_CPPv4N22TrfMsg__MessageWrapper7ch_openE">TrfMsg__MessageWrapper::ch_open (C++ member)</a>
 </li>
@@ -1174,6 +1236,8 @@
       <li><a href="api/trf_proto.html#_CPPv4N33TrfMsg__MessageWrapper__WdataCase40TRF_MSG__MESSAGE_WRAPPER__WDATA__NOT_SETE">TrfMsg__MessageWrapper__WdataCase::TRF_MSG__MESSAGE_WRAPPER__WDATA__NOT_SET (C++ enumerator)</a>
 </li>
       <li><a href="api/trf_proto.html#_CPPv4N33TrfMsg__MessageWrapper__WdataCase39TRF_MSG__MESSAGE_WRAPPER__WDATA_ADDR_PFE">TrfMsg__MessageWrapper__WdataCase::TRF_MSG__MESSAGE_WRAPPER__WDATA_ADDR_PF (C++ enumerator)</a>
+</li>
+      <li><a href="api/trf_proto.html#_CPPv4N33TrfMsg__MessageWrapper__WdataCase40TRF_MSG__MESSAGE_WRAPPER__WDATA_CH_HELLOE">TrfMsg__MessageWrapper__WdataCase::TRF_MSG__MESSAGE_WRAPPER__WDATA_CH_HELLO (C++ enumerator)</a>
 </li>
       <li><a href="api/trf_proto.html#_CPPv4N33TrfMsg__MessageWrapper__WdataCase39TRF_MSG__MESSAGE_WRAPPER__WDATA_CH_OPENE">TrfMsg__MessageWrapper__WdataCase::TRF_MSG__MESSAGE_WRAPPER__WDATA_CH_OPEN (C++ enumerator)</a>
 </li>
@@ -1365,13 +1429,21 @@
 </li>
       <li><a href="api/trf_preflight.html#_CPPv423trfNCClientGetReachable13PTRFInterface7int64_t">trfNCClientGetReachable (C++ function)</a>
 </li>
-      <li><a href="api/trf_msg.html#_CPPv413trfNCFullRecv7TRFSock7ssize_tP7uint8_ti">trfNCFullRecv (C++ function)</a>
+      <li><a href="api/trf_ncp.html#c.trfNCFullRecv">trfNCFullRecv (C macro)</a>
 </li>
-      <li><a href="api/trf_msg.html#_CPPv413trfNCFullSend7TRFSock7ssize_tP7uint8_ti">trfNCFullSend (C++ function)</a>
+      <li><a href="api/trf_ncp.html#c.trfNCFullSend">trfNCFullSend (C macro)</a>
 </li>
-      <li><a href="api/trf_msg.html#_CPPv418trfNCRecvDelimited7TRFSockP7uint8_t8uint32_tiPP22TrfMsg__MessageWrapper">trfNCRecvDelimited (C++ function)</a>
+      <li><a href="api/trf_ncp.html#_CPPv49trfNCRecv7TRFSock7ssize_tP7uint8_ti">trfNCRecv (C++ function)</a>
 </li>
-      <li><a href="api/trf_msg.html#_CPPv418trfNCSendDelimited7TRFSockP7uint8_t8uint32_tiP22TrfMsg__MessageWrapper">trfNCSendDelimited (C++ function)</a>
+      <li><a href="api/trf_ncp.html#c.trfNCRecvDelimited">trfNCRecvDelimited (C macro)</a>
+</li>
+      <li><a href="api/trf_ncp.html#_CPPv412trfNCRecvMsg7TRFSockP7uint8_t8uint32_tiPP22TrfMsg__MessageWrapper">trfNCRecvMsg (C++ function)</a>
+</li>
+      <li><a href="api/trf_ncp.html#_CPPv49trfNCSend7TRFSock7ssize_tP7uint8_ti">trfNCSend (C++ function)</a>
+</li>
+      <li><a href="api/trf_ncp.html#c.trfNCSendDelimited">trfNCSendDelimited (C macro)</a>
+</li>
+      <li><a href="api/trf_ncp.html#_CPPv412trfNCSendMsg7TRFSockP7uint8_t8uint32_tiP22TrfMsg__MessageWrapper">trfNCSendMsg (C++ function)</a>
 </li>
       <li><a href="api/trf_preflight.html#_CPPv420trfNCServerPreFlightPiP8uint16_t">trfNCServerPreFlight (C++ function)</a>
 </li>
@@ -1417,10 +1489,6 @@
 </li>
       <li><a href="api/trf.html#_CPPv416trfSendClientReq11PTRFContext11PTRFDisplay">trfSendClientReq (C++ function)</a>
 </li>
-      <li><a href="api/trf.html#_CPPv423trfSendCursorFullUpdate11PTRFContexti10PTRFCursor">trfSendCursorFullUpdate (C++ function)</a>
-</li>
-      <li><a href="api/trf.html#_CPPv422trfSendCursorPosUpdate11PTRFContexti10PTRFCursor">trfSendCursorPosUpdate (C++ function)</a>
-</li>
       <li><a href="api/trf.html#_CPPv420trfSendDisconnectMsgi8uint64_t">trfSendDisconnectMsg (C++ function)</a>
 </li>
       <li><a href="api/trf.html#_CPPv418trfSendDisplayList11PTRFContext">trfSendDisplayList (C++ function)</a>
@@ -1454,8 +1522,6 @@
       <li><a href="api/trf_def.html#_CPPv4N12TRFTCQFabric2cqE">TRFTCQFabric::cq (C++ member)</a>
 </li>
       <li><a href="api/trf_def.html#_CPPv4N12TRFTCQFabric7entriesE">TRFTCQFabric::entries (C++ member)</a>
-</li>
-      <li><a href="api/trf_def.html#_CPPv4N12TRFTCQFabric4lockE">TRFTCQFabric::lock (C++ member)</a>
 </li>
       <li><a href="api/trf_def.html#_CPPv412TRFTexFormat">TRFTexFormat (C++ enum)</a>
 </li>
@@ -1539,11 +1605,7 @@
 </li>
       <li><a href="api/trf_def.html#_CPPv4N10TRFXFabric5intrvE">TRFXFabric::intrv (C++ member)</a>
 </li>
-      <li><a href="api/trf_def.html#_CPPv4N10TRFXFabric6msg_mrE">TRFXFabric::msg_mr (C++ member)</a>
-</li>
-      <li><a href="api/trf_def.html#_CPPv4N10TRFXFabric7msg_ptrE">TRFXFabric::msg_ptr (C++ member)</a>
-</li>
-      <li><a href="api/trf_def.html#_CPPv4N10TRFXFabric8msg_sizeE">TRFXFabric::msg_size (C++ member)</a>
+      <li><a href="api/trf_def.html#_CPPv4N10TRFXFabric7msg_memE">TRFXFabric::msg_mem (C++ member)</a>
 </li>
       <li><a href="api/trf_def.html#_CPPv4N10TRFXFabric9peer_addrE">TRFXFabric::peer_addr (C++ member)</a>
 </li>

@@ -93,16 +93,6 @@
 <dd></dd></dl>
 
 <dl class="cpp macro">
-<dt class="sig sig-object cpp" id="c.trf_fi_error">
-<span class="target" id="trf_8h_1a97fe53c8b045864e507ab95b7179fa68"></span><span class="sig-name descname"><span class="n"><span class="pre">trf_fi_error</span></span></span><span class="sig-paren">(</span><span class="n"><span class="pre">call</span></span>, <span class="n"><span class="pre">err</span></span><span class="sig-paren">)</span><a class="headerlink" href="#c.trf_fi_error" title="Permalink to this definition"></a><br /></dt>
-<dd></dd></dl>
-
-<dl class="cpp macro">
-<dt class="sig sig-object cpp" id="c.trf_fi_warn">
-<span class="target" id="trf_8h_1acd163c74853aca000fa62e8320ee6942"></span><span class="sig-name descname"><span class="n"><span class="pre">trf_fi_warn</span></span></span><span class="sig-paren">(</span><span class="n"><span class="pre">call</span></span>, <span class="n"><span class="pre">err</span></span><span class="sig-paren">)</span><a class="headerlink" href="#c.trf_fi_warn" title="Permalink to this definition"></a><br /></dt>
-<dd></dd></dl>
-
-<dl class="cpp macro">
 <dt class="sig sig-object cpp" id="c.TRF_FI_MIN_VER">
 <span class="target" id="trf_8h_1a3ea82ddd3786e0fda0952b7b6504bf93"></span><span class="sig-name descname"><span class="n"><span class="pre">TRF_FI_MIN_VER</span></span></span><a class="headerlink" href="#c.TRF_FI_MIN_VER" title="Permalink to this definition"></a><br /></dt>
 <dd></dd></dl>
@@ -120,6 +110,23 @@
 </div>
 <div class="breathe-sectiondef docutils container">
 <p class="breathe-sectiondef-title rubric" id="breathe-section-title-functions">Functions</p>
+<dl class="cpp function">
+<dt class="sig sig-object cpp" id="_CPPv414trfGetDeadlineP8timespeci">
+<span id="_CPPv314trfGetDeadlineP8timespeci"></span><span id="_CPPv214trfGetDeadlineP8timespeci"></span><span id="trfGetDeadline__timespecP.i"></span><span class="target" id="trf_8h_1a72497de1145ef596dd6aa781ab7ddba7"></span><span class="k"><span class="pre">static</span></span><span class="w"> </span><span class="k"><span class="pre">inline</span></span><span class="w"> </span><span class="kt"><span class="pre">int</span></span><span class="w"> </span><span class="sig-name descname"><span class="n"><span class="pre">trfGetDeadline</span></span></span><span class="sig-paren">(</span><span class="k"><span class="pre">struct</span></span><span class="w"> </span><span class="n"><span class="pre">timespec</span></span><span class="w"> </span><span class="p"><span class="pre">*</span></span><span class="n sig-param"><span class="pre">out</span></span>, <span class="kt"><span class="pre">int</span></span><span class="w"> </span><span class="n sig-param"><span class="pre">delay_ms</span></span><span class="sig-paren">)</span><a class="headerlink" href="#_CPPv414trfGetDeadlineP8timespeci" title="Permalink to this definition"></a><br /></dt>
+<dd><p>Get a timespec corresponding to a deadline in the future. </p>
+<dl class="field-list simple">
+<dt class="field-odd">Parameters</dt>
+<dd class="field-odd"><ul class="simple">
+<li><p><strong>out</strong> – Pointer to timespec to be filled in </p></li>
+<li><p><strong>delay_ms</strong> – Delay in milliseconds </p></li>
+</ul>
+</dd>
+<dt class="field-even">Returns</dt>
+<dd class="field-even"><p>0 on success, negative error code on failure. </p>
+</dd>
+</dl>
+</dd></dl>
+
 <dl class="cpp function">
 <dt class="sig sig-object cpp" id="_CPPv416trfAllocActiveEP11PTRFXFabricP7fi_infoPv6size_t">
 <span id="_CPPv316trfAllocActiveEP11PTRFXFabricP7fi_infoPv6size_t"></span><span id="_CPPv216trfAllocActiveEP11PTRFXFabricP7fi_infoPv6size_t"></span><span id="trfAllocActiveEP__PTRFXFabric.fi_infoP.voidP.s"></span><span class="target" id="trf_8h_1a403a009d04c39297a474f75f1cba7be5"></span><span class="kt"><span class="pre">int</span></span><span class="w"> </span><span class="sig-name descname"><span class="n"><span class="pre">trfAllocActiveEP</span></span></span><span class="sig-paren">(</span><span class="n"><span class="pre">PTRFXFabric</span></span><span class="w"> </span><span class="n sig-param"><span class="pre">ctx</span></span>, <span class="k"><span class="pre">struct</span></span><span class="w"> </span><span class="n"><span class="pre">fi_info</span></span><span class="w"> </span><span class="p"><span class="pre">*</span></span><span class="n sig-param"><span class="pre">fi</span></span>, <span class="kt"><span class="pre">void</span></span><span class="w"> </span><span class="p"><span class="pre">*</span></span><span class="n sig-param"><span class="pre">data</span></span>, <span class="n"><span class="pre">size_t</span></span><span class="w"> </span><span class="n sig-param"><span class="pre">size</span></span><span class="sig-paren">)</span><a class="headerlink" href="#_CPPv416trfAllocActiveEP11PTRFXFabricP7fi_infoPv6size_t" title="Permalink to this definition"></a><br /></dt>
@@ -662,40 +669,6 @@
 </dd></dl>
 
 <dl class="cpp function">
-<dt class="sig sig-object cpp" id="_CPPv413trfFabricSend11PTRFContextP22TrfMsg__MessageWrapper">
-<span id="_CPPv313trfFabricSend11PTRFContextP22TrfMsg__MessageWrapper"></span><span id="_CPPv213trfFabricSend11PTRFContextP22TrfMsg__MessageWrapper"></span><span id="trfFabricSend__PTRFContext.TrfMsg__MessageWrapperP"></span><span class="target" id="trf_8h_1aa726a962436644e58069f9a263ca1376"></span><span class="kt"><span class="pre">int</span></span><span class="w"> </span><span class="sig-name descname"><span class="n"><span class="pre">trfFabricSend</span></span></span><span class="sig-paren">(</span><span class="n"><span class="pre">PTRFContext</span></span><span class="w"> </span><span class="n sig-param"><span class="pre">ctx</span></span>, <a class="reference internal" href="trf_proto.html#_CPPv422TrfMsg__MessageWrapper" title="TrfMsg__MessageWrapper"><span class="n"><span class="pre">TrfMsg__MessageWrapper</span></span></a><span class="w"> </span><span class="p"><span class="pre">*</span></span><span class="n sig-param"><span class="pre">msg</span></span><span class="sig-paren">)</span><a class="headerlink" href="#_CPPv413trfFabricSend11PTRFContextP22TrfMsg__MessageWrapper" title="Permalink to this definition"></a><br /></dt>
-<dd><p>Send a message to the peer using the fabric connection. </p>
-<dl class="field-list simple">
-<dt class="field-odd">Parameters</dt>
-<dd class="field-odd"><ul class="simple">
-<li><p><strong>ctx</strong> – Context containing initialized fabric transport.</p></li>
-<li><p><strong>msg</strong> – Message handle to be packed and sent.</p></li>
-</ul>
-</dd>
-<dt class="field-even">Returns</dt>
-<dd class="field-even"><p>0 on success, negative error code on failure </p>
-</dd>
-</dl>
-</dd></dl>
-
-<dl class="cpp function">
-<dt class="sig sig-object cpp" id="_CPPv413trfFabricRecv11PTRFContextPP22TrfMsg__MessageWrapper">
-<span id="_CPPv313trfFabricRecv11PTRFContextPP22TrfMsg__MessageWrapper"></span><span id="_CPPv213trfFabricRecv11PTRFContextPP22TrfMsg__MessageWrapper"></span><span id="trfFabricRecv__PTRFContext.TrfMsg__MessageWrapperPP"></span><span class="target" id="trf_8h_1a225587931ecc70c3df9ae42bf5d0457b"></span><span class="kt"><span class="pre">int</span></span><span class="w"> </span><span class="sig-name descname"><span class="n"><span class="pre">trfFabricRecv</span></span></span><span class="sig-paren">(</span><span class="n"><span class="pre">PTRFContext</span></span><span class="w"> </span><span class="n sig-param"><span class="pre">ctx</span></span>, <a class="reference internal" href="trf_proto.html#_CPPv422TrfMsg__MessageWrapper" title="TrfMsg__MessageWrapper"><span class="n"><span class="pre">TrfMsg__MessageWrapper</span></span></a><span class="w"> </span><span class="p"><span class="pre">*</span></span><span class="p"><span class="pre">*</span></span><span class="n sig-param"><span class="pre">msg</span></span><span class="sig-paren">)</span><a class="headerlink" href="#_CPPv413trfFabricRecv11PTRFContextPP22TrfMsg__MessageWrapper" title="Permalink to this definition"></a><br /></dt>
-<dd><p>Receive a message from the peer using the fabric connection. </p>
-<dl class="field-list simple">
-<dt class="field-odd">Parameters</dt>
-<dd class="field-odd"><ul class="simple">
-<li><p><strong>ctx</strong> – Context containing initialized fabric transport.</p></li>
-<li><p><strong>msg</strong> – Output handle to the received message.</p></li>
-</ul>
-</dd>
-<dt class="field-even">Returns</dt>
-<dd class="field-even"><p>0 on success, negative error code on failure </p>
-</dd>
-</dl>
-</dd></dl>
-
-<dl class="cpp function">
 <dt class="sig sig-object cpp" id="_CPPv411trfGetFBPtr11PTRFDisplay">
 <span id="_CPPv311trfGetFBPtr11PTRFDisplay"></span><span id="_CPPv211trfGetFBPtr11PTRFDisplay"></span><span id="trfGetFBPtr__PTRFDisplay"></span><span class="target" id="trf_8h_1a58d144aec185dd73904be7be5055897b"></span><span class="k"><span class="pre">static</span></span><span class="w"> </span><span class="k"><span class="pre">inline</span></span><span class="w"> </span><span class="kt"><span class="pre">void</span></span><span class="w"> </span><span class="p"><span class="pre">*</span></span><span class="sig-name descname"><span class="n"><span class="pre">trfGetFBPtr</span></span></span><span class="sig-paren">(</span><span class="n"><span class="pre">PTRFDisplay</span></span><span class="w"> </span><span class="n sig-param"><span class="pre">disp</span></span><span class="sig-paren">)</span><a class="headerlink" href="#_CPPv411trfGetFBPtr11PTRFDisplay" title="Permalink to this definition"></a><br /></dt>
 <dd><p>Get the actual framebuffer data pointer after offsets. </p>
@@ -759,21 +732,13 @@
 <p>Compressed textures are not supported.</p>
 <dl class="field-list simple">
 <dt class="field-odd">Parameters</dt>
-<dd class="field-odd"><p><strong>ctx</strong> – Initialized context to send the frame to. </p>
-</dd>
-</dl>
-</dd></dl>
-
-<dl class="cpp function">
-<dt class="sig sig-object cpp" id="_CPPv423trfSendCursorFullUpdate11PTRFContexti10PTRFCursor">
-<span id="_CPPv323trfSendCursorFullUpdate11PTRFContexti10PTRFCursor"></span><span id="_CPPv223trfSendCursorFullUpdate11PTRFContexti10PTRFCursor"></span><span id="trfSendCursorFullUpdate__PTRFContext.i.PTRFCursor"></span><span class="target" id="trf_8h_1a35822985f1a495952c56b3a9b8d2d37f"></span><span class="k"><span class="pre">static</span></span><span class="w"> </span><span class="k"><span class="pre">inline</span></span><span class="w"> </span><span class="n"><span class="pre">ssize_t</span></span><span class="w"> </span><span class="sig-name descname"><span class="n"><span class="pre">trfSendCursorFullUpdate</span></span></span><span class="sig-paren">(</span><span class="n"><span class="pre">PTRFContext</span></span><span class="w"> </span><span class="n sig-param"><span class="pre">ctx</span></span>, <span class="kt"><span class="pre">int</span></span><span class="w"> </span><span class="n sig-param"><span class="pre">dgid</span></span>, <span class="n"><span class="pre">PTRFCursor</span></span><span class="w"> </span><span class="n sig-param"><span class="pre">cursor</span></span><span class="sig-paren">)</span><a class="headerlink" href="#_CPPv423trfSendCursorFullUpdate11PTRFContexti10PTRFCursor" title="Permalink to this definition"></a><br /></dt>
-<dd><p>Update the cursor position of a display group. </p>
-<dl class="field-list simple">
-<dt class="field-odd">Parameters</dt>
 <dd class="field-odd"><ul class="simple">
-<li><p><strong>ctx</strong> – Initialized context. </p></li>
-<li><p><strong>dgid</strong> – Display group ID. </p></li>
-<li><p><strong>cursor</strong> – Cursor data. </p></li>
+<li><p><strong>ctx</strong> – Initialized context to send the frame to.</p></li>
+<li><p><strong>disp</strong> – Display identifier.</p></li>
+<li><p><strong>start</strong> – Start offset in the framebuffer.</p></li>
+<li><p><strong>end</strong> – End offset in the framebuffer.</p></li>
+<li><p><strong>rbuf</strong> – Pointer to the remote frame buffer.</p></li>
+<li><p><strong>rkey</strong> – Remote access key.</p></li>
 </ul>
 </dd>
 <dt class="field-even">Returns</dt>
@@ -783,24 +748,14 @@
 </dd></dl>
 
 <dl class="cpp function">
-<dt class="sig sig-object cpp" id="_CPPv422trfSendCursorPosUpdate11PTRFContexti10PTRFCursor">
-<span id="_CPPv322trfSendCursorPosUpdate11PTRFContexti10PTRFCursor"></span><span id="_CPPv222trfSendCursorPosUpdate11PTRFContexti10PTRFCursor"></span><span id="trfSendCursorPosUpdate__PTRFContext.i.PTRFCursor"></span><span class="target" id="trf_8h_1a363785477741bb03bba6d4cf53ddcc7f"></span><span class="k"><span class="pre">static</span></span><span class="w"> </span><span class="k"><span class="pre">inline</span></span><span class="w"> </span><span class="n"><span class="pre">ssize_t</span></span><span class="w"> </span><span class="sig-name descname"><span class="n"><span class="pre">trfSendCursorPosUpdate</span></span></span><span class="sig-paren">(</span><span class="n"><span class="pre">PTRFContext</span></span><span class="w"> </span><span class="n sig-param"><span class="pre">ctx</span></span>, <span class="kt"><span class="pre">int</span></span><span class="w"> </span><span class="n sig-param"><span class="pre">dgid</span></span>, <span class="n"><span class="pre">PTRFCursor</span></span><span class="w"> </span><span class="n sig-param"><span class="pre">cursor</span></span><span class="sig-paren">)</span><a class="headerlink" href="#_CPPv422trfSendCursorPosUpdate11PTRFContexti10PTRFCursor" title="Permalink to this definition"></a><br /></dt>
-<dd></dd></dl>
-
-<dl class="cpp function">
 <dt class="sig sig-object cpp" id="_CPPv412trfRecvFrame11PTRFContext11PTRFDisplay">
-<span id="_CPPv312trfRecvFrame11PTRFContext11PTRFDisplay"></span><span id="_CPPv212trfRecvFrame11PTRFContext11PTRFDisplay"></span><span id="trfRecvFrame__PTRFContext.PTRFDisplay"></span><span class="target" id="trf_8h_1abbeb05172c81b8ce81adac2a9d1d73c2"></span><span class="k"><span class="pre">static</span></span><span class="w"> </span><span class="k"><span class="pre">inline</span></span><span class="w"> </span><span class="n"><span class="pre">ssize_t</span></span><span class="w"> </span><span class="sig-name descname"><span class="n"><span class="pre">trfRecvFrame</span></span></span><span class="sig-paren">(</span><span class="n"><span class="pre">PTRFContext</span></span><span class="w"> </span><span class="n sig-param"><span class="pre">ctx</span></span>, <span class="n"><span class="pre">PTRFDisplay</span></span><span class="w"> </span><span class="n sig-param"><span class="pre">disp</span></span><span class="sig-paren">)</span><a class="headerlink" href="#_CPPv412trfRecvFrame11PTRFContext11PTRFDisplay" title="Permalink to this definition"></a><br /></dt>
-<dd><p>Send a frame receive request. Non-blocking. </p>
-<p><div class="highlight-c notranslate"><div class="highlight"><pre><span></span>         <span class="nl">Warning</span><span class="p">:</span> <span class="n">You</span> <span class="n">must</span> <span class="n">call</span> <span class="n">trfGetRecvProgress</span><span class="p">()</span> <span class="n">to</span> <span class="n">ensure</span> <span class="n">the</span> <span class="n">frame</span>
-         <span class="n">is</span> <span class="n">ready</span> <span class="k">for</span> <span class="n">use</span><span class="o">!</span>
-</pre></div>
-</div>
-</p>
+<span id="_CPPv312trfRecvFrame11PTRFContext11PTRFDisplay"></span><span id="_CPPv212trfRecvFrame11PTRFContext11PTRFDisplay"></span><span id="trfRecvFrame__PTRFContext.PTRFDisplay"></span><span class="target" id="trf_8h_1a9b5e9e74e48e183932aed3709f9671c4"></span><span class="n"><span class="pre">ssize_t</span></span><span class="w"> </span><span class="sig-name descname"><span class="n"><span class="pre">trfRecvFrame</span></span></span><span class="sig-paren">(</span><span class="n"><span class="pre">PTRFContext</span></span><span class="w"> </span><span class="n sig-param"><span class="pre">ctx</span></span>, <span class="n"><span class="pre">PTRFDisplay</span></span><span class="w"> </span><span class="n sig-param"><span class="pre">disp</span></span><span class="sig-paren">)</span><a class="headerlink" href="#_CPPv412trfRecvFrame11PTRFContext11PTRFDisplay" title="Permalink to this definition"></a><br /></dt>
+<dd><p>Send a frame receive request. Non-blocking operation. </p>
 <dl class="field-list simple">
 <dt class="field-odd">Parameters</dt>
 <dd class="field-odd"><ul class="simple">
 <li><p><strong>ctx</strong> – Initialized context.</p></li>
-<li><p><strong>disp</strong> – Display identifier.</p></li>
+<li><p><strong>disp</strong> – Display identifier, containing registered framebuffer region.</p></li>
 </ul>
 </dd>
 <dt class="field-even">Returns</dt>
@@ -876,74 +831,6 @@
 </dd></dl>
 
 <dl class="cpp function">
-<dt class="sig sig-object cpp" id="_CPPv419trf__GetFabricHintsv">
-<span id="_CPPv319trf__GetFabricHintsv"></span><span id="_CPPv219trf__GetFabricHintsv"></span><span id="trf__GetFabricHints__void"></span><span class="target" id="trf_8h_1a589be054aae809c183e5006c54186c9a"></span><span class="k"><span class="pre">static</span></span><span class="w"> </span><span class="k"><span class="pre">inline</span></span><span class="w"> </span><span class="k"><span class="pre">struct</span></span><span class="w"> </span><span class="n"><span class="pre">fi_info</span></span><span class="w"> </span><span class="p"><span class="pre">*</span></span><span class="sig-name descname"><span class="n"><span class="pre">trf__GetFabricHints</span></span></span><span class="sig-paren">(</span><span class="kt"><span class="pre">void</span></span><span class="sig-paren">)</span><a class="headerlink" href="#_CPPv419trf__GetFabricHintsv" title="Permalink to this definition"></a><br /></dt>
-<dd><p>Default fabric requirements used by libtrf. </p>
-</dd></dl>
-
-<dl class="cpp function">
-<dt class="sig sig-object cpp" id="_CPPv419trf__FabricPostSend11PTRFContext6size_t9fi_addr_tP8timespec">
-<span id="_CPPv319trf__FabricPostSend11PTRFContext6size_t9fi_addr_tP8timespec"></span><span id="_CPPv219trf__FabricPostSend11PTRFContext6size_t9fi_addr_tP8timespec"></span><span id="trf__FabricPostSend__PTRFContext.s.fi_addr_t.timespecP"></span><span class="target" id="trf_8h_1a9fa9c1631f6589c444043996df6f73eb"></span><span class="k"><span class="pre">static</span></span><span class="w"> </span><span class="k"><span class="pre">inline</span></span><span class="w"> </span><span class="n"><span class="pre">ssize_t</span></span><span class="w"> </span><span class="sig-name descname"><span class="n"><span class="pre">trf__FabricPostSend</span></span></span><span class="sig-paren">(</span><span class="n"><span class="pre">PTRFContext</span></span><span class="w"> </span><span class="n sig-param"><span class="pre">ctx</span></span>, <span class="n"><span class="pre">size_t</span></span><span class="w"> </span><span class="n sig-param"><span class="pre">length</span></span>, <span class="n"><span class="pre">fi_addr_t</span></span><span class="w"> </span><span class="n sig-param"><span class="pre">peer</span></span>, <span class="k"><span class="pre">struct</span></span><span class="w"> </span><span class="n"><span class="pre">timespec</span></span><span class="w"> </span><span class="p"><span class="pre">*</span></span><span class="n sig-param"><span class="pre">deadline</span></span><span class="sig-paren">)</span><a class="headerlink" href="#_CPPv419trf__FabricPostSend11PTRFContext6size_t9fi_addr_tP8timespec" title="Permalink to this definition"></a><br /></dt>
-<dd></dd></dl>
-
-<dl class="cpp function">
-<dt class="sig sig-object cpp" id="_CPPv419trf__FabricPostRecv11PTRFContext9fi_addr_tP8timespec">
-<span id="_CPPv319trf__FabricPostRecv11PTRFContext9fi_addr_tP8timespec"></span><span id="_CPPv219trf__FabricPostRecv11PTRFContext9fi_addr_tP8timespec"></span><span id="trf__FabricPostRecv__PTRFContext.fi_addr_t.timespecP"></span><span class="target" id="trf_8h_1a9bf8d421e6fe3ee5220f4dd36e665c18"></span><span class="k"><span class="pre">static</span></span><span class="w"> </span><span class="k"><span class="pre">inline</span></span><span class="w"> </span><span class="n"><span class="pre">ssize_t</span></span><span class="w"> </span><span class="sig-name descname"><span class="n"><span class="pre">trf__FabricPostRecv</span></span></span><span class="sig-paren">(</span><span class="n"><span class="pre">PTRFContext</span></span><span class="w"> </span><span class="n sig-param"><span class="pre">ctx</span></span>, <span class="n"><span class="pre">fi_addr_t</span></span><span class="w"> </span><span class="n sig-param"><span class="pre">peer</span></span>, <span class="k"><span class="pre">struct</span></span><span class="w"> </span><span class="n"><span class="pre">timespec</span></span><span class="w"> </span><span class="p"><span class="pre">*</span></span><span class="n sig-param"><span class="pre">deadline</span></span><span class="sig-paren">)</span><a class="headerlink" href="#_CPPv419trf__FabricPostRecv11PTRFContext9fi_addr_tP8timespec" title="Permalink to this definition"></a><br /></dt>
-<dd></dd></dl>
-
-<dl class="cpp function">
-<dt class="sig sig-object cpp" id="_CPPv419trf__GetCQErrStringP6fid_cqP15fi_cq_err_entry">
-<span id="_CPPv319trf__GetCQErrStringP6fid_cqP15fi_cq_err_entry"></span><span id="_CPPv219trf__GetCQErrStringP6fid_cqP15fi_cq_err_entry"></span><span id="trf__GetCQErrString__fid_cqP.fi_cq_err_entryP"></span><span class="target" id="trf_8h_1ab466bcd28a4ebd5b133a758d46b8fde6"></span><span class="k"><span class="pre">static</span></span><span class="w"> </span><span class="k"><span class="pre">inline</span></span><span class="w"> </span><span class="k"><span class="pre">const</span></span><span class="w"> </span><span class="kt"><span class="pre">char</span></span><span class="w"> </span><span class="p"><span class="pre">*</span></span><span class="sig-name descname"><span class="n"><span class="pre">trf__GetCQErrString</span></span></span><span class="sig-paren">(</span><span class="k"><span class="pre">struct</span></span><span class="w"> </span><span class="n"><span class="pre">fid_cq</span></span><span class="w"> </span><span class="p"><span class="pre">*</span></span><span class="n sig-param"><span class="pre">cq</span></span>, <span class="k"><span class="pre">struct</span></span><span class="w"> </span><span class="n"><span class="pre">fi_cq_err_entry</span></span><span class="w"> </span><span class="p"><span class="pre">*</span></span><span class="n sig-param"><span class="pre">err</span></span><span class="sig-paren">)</span><a class="headerlink" href="#_CPPv419trf__GetCQErrStringP6fid_cqP15fi_cq_err_entry" title="Permalink to this definition"></a><br /></dt>
-<dd></dd></dl>
-
-<dl class="cpp function">
-<dt class="sig sig-object cpp" id="_CPPv411trf__PollCQP12TRFTCQFabricP16fi_cq_data_entryP15fi_cq_err_entry15PTRFContextOptsP8timespec6size_t7uint8_t">
-<span id="_CPPv311trf__PollCQP12TRFTCQFabricP16fi_cq_data_entryP15fi_cq_err_entry15PTRFContextOptsP8timespec6size_t7uint8_t"></span><span id="_CPPv211trf__PollCQP12TRFTCQFabricP16fi_cq_data_entryP15fi_cq_err_entry15PTRFContextOptsP8timespec6size_t7uint8_t"></span><span id="trf__PollCQ__TRFTCQFabricP.fi_cq_data_entryP.fi_cq_err_entryP.PTRFContextOpts.timespecP.s.uint8_t"></span><span class="target" id="trf_8h_1a5c50587f89a5e94d84303c7eb3813095"></span><span class="k"><span class="pre">static</span></span><span class="w"> </span><span class="k"><span class="pre">inline</span></span><span class="w"> </span><span class="n"><span class="pre">ssize_t</span></span><span class="w"> </span><span class="sig-name descname"><span class="n"><span class="pre">trf__PollCQ</span></span></span><span class="sig-paren">(</span><span class="k"><span class="pre">struct</span></span><span class="w"> </span><a class="reference internal" href="trf_def.html#_CPPv412TRFTCQFabric" title="TRFTCQFabric"><span class="n"><span class="pre">TRFTCQFabric</span></span></a><span class="w"> </span><span class="p"><span class="pre">*</span></span><span class="n sig-param"><span class="pre">tcq</span></span>, <span class="k"><span class="pre">struct</span></span><span class="w"> </span><span class="n"><span class="pre">fi_cq_data_entry</span></span><span class="w"> </span><span class="p"><span class="pre">*</span></span><span class="n sig-param"><span class="pre">de</span></span>, <span class="k"><span class="pre">struct</span></span><span class="w"> </span><span class="n"><span class="pre">fi_cq_err_entry</span></span><span class="w"> </span><span class="p"><span class="pre">*</span></span><span class="n sig-param"><span class="pre">err</span></span>, <span class="n"><span class="pre">PTRFContextOpts</span></span><span class="w"> </span><span class="n sig-param"><span class="pre">opts</span></span>, <span class="k"><span class="pre">struct</span></span><span class="w"> </span><span class="n"><span class="pre">timespec</span></span><span class="w"> </span><span class="p"><span class="pre">*</span></span><span class="n sig-param"><span class="pre">deadline</span></span>, <span class="n"><span class="pre">size_t</span></span><span class="w"> </span><span class="n sig-param"><span class="pre">count</span></span>, <span class="n"><span class="pre">uint8_t</span></span><span class="w"> </span><span class="n sig-param"><span class="pre">is_send_cq</span></span><span class="sig-paren">)</span><a class="headerlink" href="#_CPPv411trf__PollCQP12TRFTCQFabricP16fi_cq_data_entryP15fi_cq_err_entry15PTRFContextOptsP8timespec6size_t7uint8_t" title="Permalink to this definition"></a><br /></dt>
-<dd></dd></dl>
-
-<dl class="cpp function">
-<dt class="sig sig-object cpp" id="_CPPv418trfGetSendProgress11PTRFContextP16fi_cq_data_entryP15fi_cq_err_entry6size_t">
-<span id="_CPPv318trfGetSendProgress11PTRFContextP16fi_cq_data_entryP15fi_cq_err_entry6size_t"></span><span id="_CPPv218trfGetSendProgress11PTRFContextP16fi_cq_data_entryP15fi_cq_err_entry6size_t"></span><span id="trfGetSendProgress__PTRFContext.fi_cq_data_entryP.fi_cq_err_entryP.s"></span><span class="target" id="trf_8h_1afe8cfcf19093d40d1c082776919233f0"></span><span class="k"><span class="pre">static</span></span><span class="w"> </span><span class="k"><span class="pre">inline</span></span><span class="w"> </span><span class="n"><span class="pre">ssize_t</span></span><span class="w"> </span><span class="sig-name descname"><span class="n"><span class="pre">trfGetSendProgress</span></span></span><span class="sig-paren">(</span><span class="n"><span class="pre">PTRFContext</span></span><span class="w"> </span><span class="n sig-param"><span class="pre">ctx</span></span>, <span class="k"><span class="pre">struct</span></span><span class="w"> </span><span class="n"><span class="pre">fi_cq_data_entry</span></span><span class="w"> </span><span class="p"><span class="pre">*</span></span><span class="n sig-param"><span class="pre">de</span></span>, <span class="k"><span class="pre">struct</span></span><span class="w"> </span><span class="n"><span class="pre">fi_cq_err_entry</span></span><span class="w"> </span><span class="p"><span class="pre">*</span></span><span class="n sig-param"><span class="pre">err</span></span>, <span class="n"><span class="pre">size_t</span></span><span class="w"> </span><span class="n sig-param"><span class="pre">count</span></span><span class="sig-paren">)</span><a class="headerlink" href="#_CPPv418trfGetSendProgress11PTRFContextP16fi_cq_data_entryP15fi_cq_err_entry6size_t" title="Permalink to this definition"></a><br /></dt>
-<dd><p>Get the progress of all send operations. </p>
-<p>
-Warning: Be aware of short counts- if the CQ contains less than count entries, the function will only return the number of entries in the CQ.</p>
-<dl class="field-list simple">
-<dt class="field-odd">Parameters</dt>
-<dd class="field-odd"><ul class="simple">
-<li><p><strong>ctx</strong> – Initialized context.</p></li>
-<li><p><strong>de</strong> – Pointer to a data entry where completion details will be stored.</p></li>
-<li><p><strong>err</strong> – Pointer to an entry where error details will be stored.</p></li>
-<li><p><strong>count</strong> – Number of entries to read. Note: If multiple entries are to be read, the sizes of the buffers pointed to by de and err must be multiplied by count.</p></li>
-</ul>
-</dd>
-<dt class="field-even">Returns</dt>
-<dd class="field-even"><p>Number of completed operations, negative error code on failure. </p>
-</dd>
-</dl>
-</dd></dl>
-
-<dl class="cpp function">
-<dt class="sig sig-object cpp" id="_CPPv418trfGetRecvProgress11PTRFContextP16fi_cq_data_entryP15fi_cq_err_entry6size_t">
-<span id="_CPPv318trfGetRecvProgress11PTRFContextP16fi_cq_data_entryP15fi_cq_err_entry6size_t"></span><span id="_CPPv218trfGetRecvProgress11PTRFContextP16fi_cq_data_entryP15fi_cq_err_entry6size_t"></span><span id="trfGetRecvProgress__PTRFContext.fi_cq_data_entryP.fi_cq_err_entryP.s"></span><span class="target" id="trf_8h_1a4da4cb6a7ed46b0afcb9a5af40615e6f"></span><span class="k"><span class="pre">static</span></span><span class="w"> </span><span class="k"><span class="pre">inline</span></span><span class="w"> </span><span class="n"><span class="pre">ssize_t</span></span><span class="w"> </span><span class="sig-name descname"><span class="n"><span class="pre">trfGetRecvProgress</span></span></span><span class="sig-paren">(</span><span class="n"><span class="pre">PTRFContext</span></span><span class="w"> </span><span class="n sig-param"><span class="pre">ctx</span></span>, <span class="k"><span class="pre">struct</span></span><span class="w"> </span><span class="n"><span class="pre">fi_cq_data_entry</span></span><span class="w"> </span><span class="p"><span class="pre">*</span></span><span class="n sig-param"><span class="pre">de</span></span>, <span class="k"><span class="pre">struct</span></span><span class="w"> </span><span class="n"><span class="pre">fi_cq_err_entry</span></span><span class="w"> </span><span class="p"><span class="pre">*</span></span><span class="n sig-param"><span class="pre">err</span></span>, <span class="n"><span class="pre">size_t</span></span><span class="w"> </span><span class="n sig-param"><span class="pre">count</span></span><span class="sig-paren">)</span><a class="headerlink" href="#_CPPv418trfGetRecvProgress11PTRFContextP16fi_cq_data_entryP15fi_cq_err_entry6size_t" title="Permalink to this definition"></a><br /></dt>
-<dd><p>Get the progress of all receive operations. </p>
-<p>
-Warning: Be aware of short counts- if the CQ contains less than count entries, the function will only return the number of entries in the CQ.</p>
-<dl class="field-list simple">
-<dt class="field-odd">Parameters</dt>
-<dd class="field-odd"><ul class="simple">
-<li><p><strong>ctx</strong> – Initialized context.</p></li>
-<li><p><strong>de</strong> – Pointer to a data entry where completion details will be stored.</p></li>
-<li><p><strong>err</strong> – Pointer to an entry where error details will be stored.</p></li>
-<li><p><strong>count</strong> – Number of entries to read. Note: If multiple entries are to be read, the sizes of the buffers pointed to by de and err must be multiplied by count.</p></li>
-</ul>
-</dd>
-<dt class="field-even">Returns</dt>
-<dd class="field-even"><p>Number of completed operations, negative error code on failure. </p>
-</dd>
-</dl>
-</dd></dl>
-
-<dl class="cpp function">
 <dt class="sig sig-object cpp" id="_CPPv416trfSendKeepAlive11PTRFContext">
 <span id="_CPPv316trfSendKeepAlive11PTRFContext"></span><span id="_CPPv216trfSendKeepAlive11PTRFContext"></span><span id="trfSendKeepAlive__PTRFContext"></span><span class="target" id="trf_8h_1a0d93048b2c1977ca48c76f2c820b9bb0"></span><span class="kt"><span class="pre">int</span></span><span class="w"> </span><span class="sig-name descname"><span class="n"><span class="pre">trfSendKeepAlive</span></span></span><span class="sig-paren">(</span><span class="n"><span class="pre">PTRFContext</span></span><span class="w"> </span><span class="n sig-param"><span class="pre">ctx</span></span><span class="sig-paren">)</span><a class="headerlink" href="#_CPPv416trfSendKeepAlive11PTRFContext" title="Permalink to this definition"></a><br /></dt>
 <dd><p>Send Keep alive message. </p>
@@ -953,6 +840,46 @@ Warning: Be aware of short counts- if the CQ contains less than count entries, t
 </dd>
 <dt class="field-even">Returns</dt>
 <dd class="field-even"><p>0 on success, negative error code </p>
+</dd>
+</dl>
+</dd></dl>
+
+<dl class="cpp function">
+<dt class="sig sig-object cpp" id="_CPPv418trfGetSendProgress11PTRFContextP16fi_cq_data_entryP15fi_cq_err_entry6size_t15PTRFContextOpts">
+<span id="_CPPv318trfGetSendProgress11PTRFContextP16fi_cq_data_entryP15fi_cq_err_entry6size_t15PTRFContextOpts"></span><span id="_CPPv218trfGetSendProgress11PTRFContextP16fi_cq_data_entryP15fi_cq_err_entry6size_t15PTRFContextOpts"></span><span id="trfGetSendProgress__PTRFContext.fi_cq_data_entryP.fi_cq_err_entryP.s.PTRFContextOpts"></span><span class="target" id="trf_8h_1ae388419658fcf37b1e88ea2afb154721"></span><span class="n"><span class="pre">ssize_t</span></span><span class="w"> </span><span class="sig-name descname"><span class="n"><span class="pre">trfGetSendProgress</span></span></span><span class="sig-paren">(</span><span class="n"><span class="pre">PTRFContext</span></span><span class="w"> </span><span class="n sig-param"><span class="pre">ctx</span></span>, <span class="k"><span class="pre">struct</span></span><span class="w"> </span><span class="n"><span class="pre">fi_cq_data_entry</span></span><span class="w"> </span><span class="p"><span class="pre">*</span></span><span class="n sig-param"><span class="pre">de</span></span>, <span class="k"><span class="pre">struct</span></span><span class="w"> </span><span class="n"><span class="pre">fi_cq_err_entry</span></span><span class="w"> </span><span class="p"><span class="pre">*</span></span><span class="n sig-param"><span class="pre">err</span></span>, <span class="n"><span class="pre">size_t</span></span><span class="w"> </span><span class="n sig-param"><span class="pre">count</span></span>, <span class="n"><span class="pre">PTRFContextOpts</span></span><span class="w"> </span><span class="n sig-param"><span class="pre">opts</span></span><span class="sig-paren">)</span><a class="headerlink" href="#_CPPv418trfGetSendProgress11PTRFContextP16fi_cq_data_entryP15fi_cq_err_entry6size_t15PTRFContextOpts" title="Permalink to this definition"></a><br /></dt>
+<dd><p>Get the progress of all send operations. </p>
+<dl class="field-list simple">
+<dt class="field-odd">Parameters</dt>
+<dd class="field-odd"><ul class="simple">
+<li><p><strong>ctx</strong> – Context to use.</p></li>
+<li><p><strong>de</strong> – Data entry containing successful completion details.</p></li>
+<li><p><strong>err</strong> – Data entry containing error details, if any</p></li>
+<li><p><strong>count</strong> – Maximum number of completions to receive.</p></li>
+<li><p><strong>opts</strong> – Optional options to override the default context behaviours.</p></li>
+</ul>
+</dd>
+<dt class="field-even">Returns</dt>
+<dd class="field-even"><p>Number of completed operations. Negative error code on failure. </p>
+</dd>
+</dl>
+</dd></dl>
+
+<dl class="cpp function">
+<dt class="sig sig-object cpp" id="_CPPv418trfGetRecvProgress11PTRFContextP16fi_cq_data_entryP15fi_cq_err_entry6size_t15PTRFContextOpts">
+<span id="_CPPv318trfGetRecvProgress11PTRFContextP16fi_cq_data_entryP15fi_cq_err_entry6size_t15PTRFContextOpts"></span><span id="_CPPv218trfGetRecvProgress11PTRFContextP16fi_cq_data_entryP15fi_cq_err_entry6size_t15PTRFContextOpts"></span><span id="trfGetRecvProgress__PTRFContext.fi_cq_data_entryP.fi_cq_err_entryP.s.PTRFContextOpts"></span><span class="target" id="trf_8h_1a88973ba4fa0d28d35f0a786f909d2a17"></span><span class="n"><span class="pre">ssize_t</span></span><span class="w"> </span><span class="sig-name descname"><span class="n"><span class="pre">trfGetRecvProgress</span></span></span><span class="sig-paren">(</span><span class="n"><span class="pre">PTRFContext</span></span><span class="w"> </span><span class="n sig-param"><span class="pre">ctx</span></span>, <span class="k"><span class="pre">struct</span></span><span class="w"> </span><span class="n"><span class="pre">fi_cq_data_entry</span></span><span class="w"> </span><span class="p"><span class="pre">*</span></span><span class="n sig-param"><span class="pre">de</span></span>, <span class="k"><span class="pre">struct</span></span><span class="w"> </span><span class="n"><span class="pre">fi_cq_err_entry</span></span><span class="w"> </span><span class="p"><span class="pre">*</span></span><span class="n sig-param"><span class="pre">err</span></span>, <span class="n"><span class="pre">size_t</span></span><span class="w"> </span><span class="n sig-param"><span class="pre">count</span></span>, <span class="n"><span class="pre">PTRFContextOpts</span></span><span class="w"> </span><span class="n sig-param"><span class="pre">opts</span></span><span class="sig-paren">)</span><a class="headerlink" href="#_CPPv418trfGetRecvProgress11PTRFContextP16fi_cq_data_entryP15fi_cq_err_entry6size_t15PTRFContextOpts" title="Permalink to this definition"></a><br /></dt>
+<dd><p>Get the progress of all receive operations. </p>
+<dl class="field-list simple">
+<dt class="field-odd">Parameters</dt>
+<dd class="field-odd"><ul class="simple">
+<li><p><strong>ctx</strong> – Context to use.</p></li>
+<li><p><strong>de</strong> – Data entry containing successful completion details.</p></li>
+<li><p><strong>err</strong> – Data entry containing error details, if any</p></li>
+<li><p><strong>count</strong> – Maximum number of completions to receive.</p></li>
+<li><p><strong>opts</strong> – Optional options to override the default context behaviours.</p></li>
+</ul>
+</dd>
+<dt class="field-even">Returns</dt>
+<dd class="field-even"><p>Number of completed operations. Negative error code on failure. </p>
 </dd>
 </dl>
 </dd></dl>

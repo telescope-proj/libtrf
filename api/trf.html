@@ -128,6 +128,76 @@
 </dd></dl>
 
 <dl class="cpp function">
+<dt class="sig sig-object cpp" id="_CPPv419trfCreateSubchannel11PTRFContextP11PTRFContext8uint32_t">
+<span id="_CPPv319trfCreateSubchannel11PTRFContextP11PTRFContext8uint32_t"></span><span id="_CPPv219trfCreateSubchannel11PTRFContextP11PTRFContext8uint32_t"></span><span id="trfCreateSubchannel__PTRFContext.PTRFContextP.uint32_t"></span><span class="target" id="trf_8h_1a8a7f3bfa9f69cf61cf6bd705b17877bf"></span><span class="kt"><span class="pre">int</span></span><span class="w"> </span><span class="sig-name descname"><span class="n"><span class="pre">trfCreateSubchannel</span></span></span><span class="sig-paren">(</span><span class="n"><span class="pre">PTRFContext</span></span><span class="w"> </span><span class="n sig-param"><span class="pre">ctx</span></span>, <span class="n"><span class="pre">PTRFContext</span></span><span class="w"> </span><span class="p"><span class="pre">*</span></span><span class="n sig-param"><span class="pre">ctx_out</span></span>, <span class="n"><span class="pre">uint32_t</span></span><span class="w"> </span><span class="n sig-param"><span class="pre">id</span></span><span class="sig-paren">)</span><a class="headerlink" href="#_CPPv419trfCreateSubchannel11PTRFContextP11PTRFContext8uint32_t" title="Permalink to this definition"></a><br /></dt>
+<dd><p>Create a subchannel. </p>
+<dl class="field-list simple">
+<dt class="field-odd">Parameters</dt>
+<dd class="field-odd"><ul class="simple">
+<li><p><strong>ctx</strong> – Allocated context containing the main channel.</p></li>
+<li><p><strong>ctx_out</strong> – Subchannel output.</p></li>
+<li><p><strong>id</strong> – Subchannel ID. Must be unique to the main context.</p></li>
+</ul>
+</dd>
+<dt class="field-even">Returns</dt>
+<dd class="field-even"><p>0 on success, negative error code on failure. </p>
+</dd>
+</dl>
+</dd></dl>
+
+<dl class="cpp function">
+<dt class="sig sig-object cpp" id="_CPPv423trfProcessSubchannelReq11PTRFContextP11PTRFContextP22TrfMsg__MessageWrapper">
+<span id="_CPPv323trfProcessSubchannelReq11PTRFContextP11PTRFContextP22TrfMsg__MessageWrapper"></span><span id="_CPPv223trfProcessSubchannelReq11PTRFContextP11PTRFContextP22TrfMsg__MessageWrapper"></span><span id="trfProcessSubchannelReq__PTRFContext.PTRFContextP.TrfMsg__MessageWrapperP"></span><span class="target" id="trf_8h_1ae4fea55a3ac8671ddde23bea595cefef"></span><span class="kt"><span class="pre">int</span></span><span class="w"> </span><span class="sig-name descname"><span class="n"><span class="pre">trfProcessSubchannelReq</span></span></span><span class="sig-paren">(</span><span class="n"><span class="pre">PTRFContext</span></span><span class="w"> </span><span class="n sig-param"><span class="pre">ctx</span></span>, <span class="n"><span class="pre">PTRFContext</span></span><span class="w"> </span><span class="p"><span class="pre">*</span></span><span class="n sig-param"><span class="pre">ctx_out</span></span>, <a class="reference internal" href="trf_proto.html#_CPPv422TrfMsg__MessageWrapper" title="TrfMsg__MessageWrapper"><span class="n"><span class="pre">TrfMsg__MessageWrapper</span></span></a><span class="w"> </span><span class="p"><span class="pre">*</span></span><span class="n sig-param"><span class="pre">req</span></span><span class="sig-paren">)</span><a class="headerlink" href="#_CPPv423trfProcessSubchannelReq11PTRFContextP11PTRFContextP22TrfMsg__MessageWrapper" title="Permalink to this definition"></a><br /></dt>
+<dd><p>Process a subchannel creation request from the peer. </p>
+<dl class="field-list simple">
+<dt class="field-odd">Parameters</dt>
+<dd class="field-odd"><ul class="simple">
+<li><p><strong>ctx</strong> – Allocated context containing the main channel.</p></li>
+<li><p><strong>ctx_out</strong> – Subchannel output.</p></li>
+<li><p><strong>req</strong> – TRF control message containing the subchannel creation request.</p></li>
+</ul>
+</dd>
+<dt class="field-even">Returns</dt>
+<dd class="field-even"><p>0 on success, negative error code on failure. </p>
+</dd>
+</dl>
+</dd></dl>
+
+<dl class="cpp function">
+<dt class="sig sig-object cpp" id="_CPPv417trfBindSubchannel11PTRFContext11PTRFContext">
+<span id="_CPPv317trfBindSubchannel11PTRFContext11PTRFContext"></span><span id="_CPPv217trfBindSubchannel11PTRFContext11PTRFContext"></span><span id="trfBindSubchannel__PTRFContext.PTRFContext"></span><span class="target" id="trf_8h_1afea4f4d24a216accf21daffa8e239abe"></span><span class="kt"><span class="pre">int</span></span><span class="w"> </span><span class="sig-name descname"><span class="n"><span class="pre">trfBindSubchannel</span></span></span><span class="sig-paren">(</span><span class="n"><span class="pre">PTRFContext</span></span><span class="w"> </span><span class="n sig-param"><span class="pre">main</span></span>, <span class="n"><span class="pre">PTRFContext</span></span><span class="w"> </span><span class="n sig-param"><span class="pre">sub</span></span><span class="sig-paren">)</span><a class="headerlink" href="#_CPPv417trfBindSubchannel11PTRFContext11PTRFContext" title="Permalink to this definition"></a><br /></dt>
+<dd><p>Bind the subchannel to the main context. This ensures that the subchannel is closed when the main context is destroyed. </p>
+<dl class="field-list simple">
+<dt class="field-odd">Parameters</dt>
+<dd class="field-odd"><ul class="simple">
+<li><p><strong>main</strong> – Main channel.</p></li>
+<li><p><strong>sub</strong> – Subchannel.</p></li>
+</ul>
+</dd>
+<dt class="field-even">Returns</dt>
+<dd class="field-even"><p>0 on success, negative error code on failure. </p>
+</dd>
+</dl>
+</dd></dl>
+
+<dl class="cpp function">
+<dt class="sig sig-object cpp" id="_CPPv419trfUnbindSubchannel11PTRFContext8uint32_t">
+<span id="_CPPv319trfUnbindSubchannel11PTRFContext8uint32_t"></span><span id="_CPPv219trfUnbindSubchannel11PTRFContext8uint32_t"></span><span id="trfUnbindSubchannel__PTRFContext.uint32_t"></span><span class="target" id="trf_8h_1aa9aec03ff3aa201c1d7bfb05907127f5"></span><span class="kt"><span class="pre">int</span></span><span class="w"> </span><span class="sig-name descname"><span class="n"><span class="pre">trfUnbindSubchannel</span></span></span><span class="sig-paren">(</span><span class="n"><span class="pre">PTRFContext</span></span><span class="w"> </span><span class="n sig-param"><span class="pre">main</span></span>, <span class="n"><span class="pre">uint32_t</span></span><span class="w"> </span><span class="n sig-param"><span class="pre">id</span></span><span class="sig-paren">)</span><a class="headerlink" href="#_CPPv419trfUnbindSubchannel11PTRFContext8uint32_t" title="Permalink to this definition"></a><br /></dt>
+<dd><p>Unbind the subchannel from the main context. This is required if the channel disconnects, to prevent invalid memory accesses. </p>
+<dl class="field-list simple">
+<dt class="field-odd">Parameters</dt>
+<dd class="field-odd"><ul class="simple">
+<li><p><strong>main</strong> – Main channel</p></li>
+<li><p><strong>id</strong> – Subchannel ID</p></li>
+</ul>
+</dd>
+<dt class="field-even">Returns</dt>
+<dd class="field-even"><p>0 on success, negative error code on failure. </p>
+</dd>
+</dl>
+</dd></dl>
+
+<dl class="cpp function">
 <dt class="sig sig-object cpp" id="_CPPv416trfAllocActiveEP11PTRFXFabricP7fi_infoPv6size_t">
 <span id="_CPPv316trfAllocActiveEP11PTRFXFabricP7fi_infoPv6size_t"></span><span id="_CPPv216trfAllocActiveEP11PTRFXFabricP7fi_infoPv6size_t"></span><span id="trfAllocActiveEP__PTRFXFabric.fi_infoP.voidP.s"></span><span class="target" id="trf_8h_1a403a009d04c39297a474f75f1cba7be5"></span><span class="kt"><span class="pre">int</span></span><span class="w"> </span><span class="sig-name descname"><span class="n"><span class="pre">trfAllocActiveEP</span></span></span><span class="sig-paren">(</span><span class="n"><span class="pre">PTRFXFabric</span></span><span class="w"> </span><span class="n sig-param"><span class="pre">ctx</span></span>, <span class="k"><span class="pre">struct</span></span><span class="w"> </span><span class="n"><span class="pre">fi_info</span></span><span class="w"> </span><span class="p"><span class="pre">*</span></span><span class="n sig-param"><span class="pre">fi</span></span>, <span class="kt"><span class="pre">void</span></span><span class="w"> </span><span class="p"><span class="pre">*</span></span><span class="n sig-param"><span class="pre">data</span></span>, <span class="n"><span class="pre">size_t</span></span><span class="w"> </span><span class="n sig-param"><span class="pre">size</span></span><span class="sig-paren">)</span><a class="headerlink" href="#_CPPv416trfAllocActiveEP11PTRFXFabricP7fi_infoPv6size_t" title="Permalink to this definition"></a><br /></dt>
 <dd><p>Allocate an active endpoint. </p>
@@ -565,8 +635,8 @@
 </dd></dl>
 
 <dl class="cpp function">
-<dt class="sig sig-object cpp" id="_CPPv417trfGetMessageAuto11PTRFContext8uint64_tP8uint64_tPPv">
-<span id="_CPPv317trfGetMessageAuto11PTRFContext8uint64_tP8uint64_tPPv"></span><span id="_CPPv217trfGetMessageAuto11PTRFContext8uint64_tP8uint64_tPPv"></span><span id="trfGetMessageAuto__PTRFContext.uint64_t.uint64_tP.voidPP"></span><span class="target" id="trf_8h_1a566a337e8895b60277f2d59fec7c4597"></span><span class="kt"><span class="pre">int</span></span><span class="w"> </span><span class="sig-name descname"><span class="n"><span class="pre">trfGetMessageAuto</span></span></span><span class="sig-paren">(</span><span class="n"><span class="pre">PTRFContext</span></span><span class="w"> </span><span class="n sig-param"><span class="pre">ctx</span></span>, <span class="n"><span class="pre">uint64_t</span></span><span class="w"> </span><span class="n sig-param"><span class="pre">flags</span></span>, <span class="n"><span class="pre">uint64_t</span></span><span class="w"> </span><span class="p"><span class="pre">*</span></span><span class="n sig-param"><span class="pre">processed</span></span>, <span class="kt"><span class="pre">void</span></span><span class="w"> </span><span class="p"><span class="pre">*</span></span><span class="p"><span class="pre">*</span></span><span class="n sig-param"><span class="pre">data_out</span></span><span class="sig-paren">)</span><a class="headerlink" href="#_CPPv417trfGetMessageAuto11PTRFContext8uint64_tP8uint64_tPPv" title="Permalink to this definition"></a><br /></dt>
+<dt class="sig sig-object cpp" id="_CPPv417trfGetMessageAuto11PTRFContext8uint64_tP8uint64_tPPvPi">
+<span id="_CPPv317trfGetMessageAuto11PTRFContext8uint64_tP8uint64_tPPvPi"></span><span id="_CPPv217trfGetMessageAuto11PTRFContext8uint64_tP8uint64_tPPvPi"></span><span id="trfGetMessageAuto__PTRFContext.uint64_t.uint64_tP.voidPP.iP"></span><span class="target" id="trf_8h_1aea788a26046a58d6c05c410b69ddb839"></span><span class="kt"><span class="pre">int</span></span><span class="w"> </span><span class="sig-name descname"><span class="n"><span class="pre">trfGetMessageAuto</span></span></span><span class="sig-paren">(</span><span class="n"><span class="pre">PTRFContext</span></span><span class="w"> </span><span class="n sig-param"><span class="pre">ctx</span></span>, <span class="n"><span class="pre">uint64_t</span></span><span class="w"> </span><span class="n sig-param"><span class="pre">flags</span></span>, <span class="n"><span class="pre">uint64_t</span></span><span class="w"> </span><span class="p"><span class="pre">*</span></span><span class="n sig-param"><span class="pre">processed</span></span>, <span class="kt"><span class="pre">void</span></span><span class="w"> </span><span class="p"><span class="pre">*</span></span><span class="p"><span class="pre">*</span></span><span class="n sig-param"><span class="pre">data_out</span></span>, <span class="kt"><span class="pre">int</span></span><span class="w"> </span><span class="p"><span class="pre">*</span></span><span class="n sig-param"><span class="pre">opaque</span></span><span class="sig-paren">)</span><a class="headerlink" href="#_CPPv417trfGetMessageAuto11PTRFContext8uint64_tP8uint64_tPPvPi" title="Permalink to this definition"></a><br /></dt>
 <dd><p>Automatically process messages internally based on the message type. </p>
 <dl class="field-list simple">
 <dt class="field-odd">Parameters</dt>
@@ -575,6 +645,7 @@
 <li><p><strong>flags</strong> – Messages to process internally</p></li>
 <li><p><strong>processed</strong> – Message that was processed</p></li>
 <li><p><strong>data_out</strong> – Message data. Typically this is a pointer to a <a class="reference internal" href="trf_proto.html#struct_trf_msg_____message_wrapper"><span class="std std-ref">TrfMsg__MessageWrapper</span></a>, but can be any data. This is set to a non-NULL value if the message wasn’t processed internally.</p></li>
+<li><p><strong>opaque</strong> – Opaque pointer, used internally for state tracking. Do not modify. Before the first call, the initial value of this variable should be set to 0.</p></li>
 </ul>
 </dd>
 <dt class="field-even">Returns</dt>

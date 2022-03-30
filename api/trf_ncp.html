@@ -121,6 +121,20 @@
 <div class="breathe-sectiondef docutils container">
 <p class="breathe-sectiondef-title rubric" id="breathe-section-title-functions">Functions</p>
 <dl class="cpp function">
+<dt class="sig sig-object cpp" id="_CPPv412trfNCPollMsg7TRFSock">
+<span id="_CPPv312trfNCPollMsg7TRFSock"></span><span id="_CPPv212trfNCPollMsg7TRFSock"></span><span id="trfNCPollMsg__TRFSock"></span><span class="target" id="trf__ncp_8h_1a0bfbb08b9d48098e6a693fc0bc9f5a10"></span><span class="kt"><span class="pre">int</span></span><span class="w"> </span><span class="sig-name descname"><span class="n"><span class="pre">trfNCPollMsg</span></span></span><span class="sig-paren">(</span><span class="n"><span class="pre">TRFSock</span></span><span class="w"> </span><span class="n sig-param"><span class="pre">sock</span></span><span class="sig-paren">)</span><a class="headerlink" href="#_CPPv412trfNCPollMsg7TRFSock" title="Permalink to this definition"></a><br /></dt>
+<dd><p>Poll for incoming messages on the socket. </p>
+<dl class="field-list simple">
+<dt class="field-odd">Parameters</dt>
+<dd class="field-odd"><p><strong>sock</strong> – Socket descriptor.</p>
+</dd>
+<dt class="field-even">Returns</dt>
+<dd class="field-even"><p>Whether there is an incoming message. Negative error code on failure. </p>
+</dd>
+</dl>
+</dd></dl>
+
+<dl class="cpp function">
 <dt class="sig sig-object cpp" id="_CPPv412trfNCRecvMsg7TRFSockP7uint8_t8uint32_tiPP22TrfMsg__MessageWrapper">
 <span id="_CPPv312trfNCRecvMsg7TRFSockP7uint8_t8uint32_tiPP22TrfMsg__MessageWrapper"></span><span id="_CPPv212trfNCRecvMsg7TRFSockP7uint8_t8uint32_tiPP22TrfMsg__MessageWrapper"></span><span id="trfNCRecvMsg__TRFSock.uint8_tP.uint32_t.i.TrfMsg__MessageWrapperPP"></span><span class="target" id="trf__ncp_8h_1ac4572e9ce1e6b87fc405b9cb03f07987"></span><span class="kt"><span class="pre">int</span></span><span class="w"> </span><span class="sig-name descname"><span class="n"><span class="pre">trfNCRecvMsg</span></span></span><span class="sig-paren">(</span><span class="n"><span class="pre">TRFSock</span></span><span class="w"> </span><span class="n sig-param"><span class="pre">sock</span></span>, <span class="n"><span class="pre">uint8_t</span></span><span class="w"> </span><span class="p"><span class="pre">*</span></span><span class="n sig-param"><span class="pre">buf</span></span>, <span class="n"><span class="pre">uint32_t</span></span><span class="w"> </span><span class="n sig-param"><span class="pre">size</span></span>, <span class="kt"><span class="pre">int</span></span><span class="w"> </span><span class="n sig-param"><span class="pre">timeout</span></span>, <a class="reference internal" href="trf_proto.html#_CPPv422TrfMsg__MessageWrapper" title="TrfMsg__MessageWrapper"><span class="n"><span class="pre">TrfMsg__MessageWrapper</span></span></a><span class="w"> </span><span class="p"><span class="pre">*</span></span><span class="p"><span class="pre">*</span></span><span class="n sig-param"><span class="pre">handle</span></span><span class="sig-paren">)</span><a class="headerlink" href="#_CPPv412trfNCRecvMsg7TRFSockP7uint8_t8uint32_tiPP22TrfMsg__MessageWrapper" title="Permalink to this definition"></a><br /></dt>
 <dd><p>Receive a delimited message in TRF Protocol Buffers format. </p>

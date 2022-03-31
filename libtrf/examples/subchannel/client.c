@@ -23,50 +23,101 @@
 #include "trf.h"
 #include "trf_ncp.h"
 #include "trf_ncp_client.h"
+#include "common.h"
+
 #include <signal.h>
 
 #if defined(__linux__)
     #include <sys/mman.h>
 #endif
 
+pthread_mutex_t mut;
+
+void * demo_thread(void * arg)
+{
+    trf__log_set_level(2);
+    ts_printf("Demo thread started\n");
+    PTRFContext ctx = (PTRFContext) arg;
+    size_t s = trf__GetPageSize();
+    void * mem = trfAllocAligned(s, s);
+    if (!mem)
+        return (void *) ENOMEM;
+
+    uint32_t * counter = (uint32_t *) mem;
+    
+    intptr_t ret = trfRegInternalMsgBuf(ctx, mem, s);
+    if (ret < 0)
+        return (void *) -ret;
+
+    struct TRFMem * mr = &ctx->xfer.fabric->msg_mem;
+
+    while (*counter < 100)
+    {
+        ret = trfFabricRecv(ctx, mr, trfMemPtr(mr), 4, 
+                            ctx->xfer.fabric->peer_addr, ctx->opts);
+        if (ret < 0)
+        {
+            ts_printf("Fabric recv failed: %s\n", fi_strerror(-ret));
+            return (void *) -ret;
+        }
+
+        *counter += 1;
+        ts_printf("Counter: %d\n", *counter);
+        trfSleep(1);
+
+        ret = trfFabricSend(ctx, mr, trfMemPtr(mr), 4,
+                            ctx->xfer.fabric->peer_addr, ctx->opts);
+        if (ret < 0)
+        {
+            ts_printf("Fabric send failed: %s\n", fi_strerror(-ret));
+            return (void *) -ret;
+        }
+
+    }
+
+    return NULL;
+}
+
 int main(int argc, char ** argv)
 {
     char* host = "127.0.0.1";
     char* port = "35101";
+    pthread_t t;
 
     PTRFContext ctx = trfAllocContext();
     if (trfNCClientInit(ctx, host, port) < 0)
     {
-        printf("unable to initiate client\n");
+        ts_printf("unable to initiate client\n");
         fflush(stdout);
         return -1;
     }
-    printf("Hello!\n");
+    ts_printf("Hello!\n");
+    ts_printf("Socket FD: %d", ctx->cli.client_fd);
 
     PTRFDisplay displays;
-    printf("Retrieving displays\n");
+    ts_printf("Retrieving displays\n");
     ssize_t ret;
     ret = trfGetServerDisplays(ctx, &displays);
     if (ret < 0)
     {
-        printf("Unable to get server display list: error %s\n", strerror(ret));
+        ts_printf("Unable to get server display list: error %s\n", strerror(ret));
         return -1;
     }
 
-    printf("Server Display List\n");
-    printf("---------------------------------------------\n");
+    ts_printf("Server Display List\n");
+    ts_printf("---------------------------------------------\n");
 
     for (PTRFDisplay tmp_disp = displays; tmp_disp != NULL; 
         tmp_disp = tmp_disp->next)
     {
-        printf("Display ID:    %d\n", tmp_disp->id);
-        printf("Display Name:  %s\n", tmp_disp->name);
-        printf("Resolution:    %d x %d\n", tmp_disp->width, tmp_disp->height);
-        printf("Refresh Rate:  %d\n", tmp_disp->rate);
-        printf("Pixel Format:  %d\n", tmp_disp->format);
-        printf("Display Group: %d\n", tmp_disp->dgid);
-        printf("Group Offset:  %d, %d\n", tmp_disp->x_offset, tmp_disp->y_offset);
-        printf("---------------------------------------------\n");
+        ts_printf("Display ID:    %d\n", tmp_disp->id);
+        ts_printf("Display Name:  %s\n", tmp_disp->name);
+        ts_printf("Resolution:    %d x %d\n", tmp_disp->width, tmp_disp->height);
+        ts_printf("Refresh Rate:  %d\n", tmp_disp->rate);
+        ts_printf("Pixel Format:  %d\n", tmp_disp->format);
+        ts_printf("Display Group: %d\n", tmp_disp->dgid);
+        ts_printf("Group Offset:  %d, %d\n", tmp_disp->x_offset, tmp_disp->y_offset);
+        ts_printf("---------------------------------------------\n");
     }
 
     // Register buffer to store the first display's framebuffer
@@ -75,7 +126,7 @@ int main(int argc, char ** argv)
     ret = trfRegDisplaySink(ctx, displays);
     if (ret < 0)
     {
-        printf("Unable to register display sink: error %s\n", strerror(ret));
+        ts_printf("Unable to register display sink: error %s\n", strerror(ret));
         return -1;
     }
     
@@ -87,7 +138,7 @@ int main(int argc, char ** argv)
 
     if ((ret = trfSendClientReq(ctx,displays)) < 0)
     {
-        printf("Unable to send display request");
+        ts_printf("Unable to send display request");
         return -1;
     }
 
@@ -98,20 +149,46 @@ int main(int argc, char ** argv)
     ret = trfFabricRecvMsg(ctx, &f->msg_mem, trfMemPtr(&f->msg_mem),
                            trfMemSize(&f->msg_mem), f->peer_addr, ctx->opts,
                            &msg);
+    if (ret < 0)
+    {
+        ts_printf("Unable to receive message: %s\n", fi_strerror(-ret));
+        return -1;
+    }
+    
     if (trfPBToInternal(msg->wdata_case) != TRFM_SERVER_ACK)
     {
-        printf("Invalid message type %d received", msg->wdata_case);
+        ts_printf("Invalid message type %d received", msg->wdata_case);
         return -1;
     }
 
+    // Create a subchannel
+
+    ts_printf("Creating subchannel with ID 10...\n");
+    PTRFContext sub = NULL;
+    ret = trfCreateSubchannel(ctx, &sub, 10);
+    if (ret < 0)
+    {
+        ts_printf("Could not create subchannel: %s\n", fi_strerror(-ret));
+        return -1;
+    }
+
+    // Create a new thread to use the subchannel
+    ret = pthread_create(&t, NULL, demo_thread, sub);
+    if (ret)
+        ts_printf("Error creating thread: %s\n", strerror(errno));
+
+    
     #define timespecdiff(_start, _end) \
         (((_end).tv_sec - (_start).tv_sec) * 1000000000 + \
         ((_end).tv_nsec - (_start).tv_nsec))
 
+    
     // Request 100 frames from the first display in the list
-    printf( "\"Frame\",\"Size\",\"Request (ms)\",\"Frame Time (ms)\""
+    
+    ts_printf( "\"Frame\",\"Size\",\"Request (ms)\",\"Frame Time (ms)\""
             ",\"Speed (Gbit/s)\",\"Framerate (Hz)\"\n");
     struct timespec tstart, tend;
+    
     for (int f = 0; f < 100; f++)
     {
         // Post a frame receive request. This will inform the server that the
@@ -121,7 +198,7 @@ int main(int argc, char ** argv)
         ret = trfRecvFrame(ctx, displays);
         if (ret < 0)
         {
-            printf("Unable to receive frame: error %s\n", strerror(-ret));
+            ts_printf("Unable to receive frame: error %s\n", strerror(-ret));
             return -1;
         }
         clock_gettime(CLOCK_MONOTONIC, &tend);
@@ -131,7 +208,7 @@ int main(int argc, char ** argv)
         ret = trfGetRecvProgress(ctx, &de, &err, 1, NULL);
         if (ret < 0)
         {
-            printf("Unable to get receive progress: error %s\n", 
+            ts_printf("Unable to get receive progress: error %s\n", 
                    strerror(-ret));
             return -1;
         }
@@ -147,18 +224,24 @@ int main(int argc, char ** argv)
             case TRFM_SERVER_ACK_F_REQ:
                 clock_gettime(CLOCK_MONOTONIC, &tend);
                 double tsd2 = timespecdiff(tstart, tend) / 1000000.0;
-                printf("%d,%ld,%f,%f,%f,%f\n",
+                ts_printf("%d,%ld,%f,%f,%f,%f\n",
                     f, trfGetDisplayBytes(displays), tsd1, tsd2, 
                     ((double) trfGetDisplayBytes(displays)) / tsd2 / 1e5,
                     1000.0 / tsd2);
                 break;
             default:
-                printf("Message type %d received!", msg->wdata_case);
+                ts_printf("Message type %d received!", msg->wdata_case);
         }
 
         displays->frame_cntr++;
     }
     
+    // Wait for the other thread to finish
+    uint64_t * retval;
+    pthread_join(t, (void *) &retval);
+    if (retval)
+        ts_printf("Thread failed with: %s", strerror(errno));
+
     // Once done, destroy the context releasing all resources and closing the
     // connection.
     trfDestroyContext(ctx);

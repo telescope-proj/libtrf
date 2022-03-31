@@ -952,51 +952,6 @@ void   trf_msg__server_ack_freq__free_unpacked
   assert(message->base.descriptor == &trf_msg__server_ack_freq__descriptor);
   protobuf_c_message_free_unpacked ((ProtobufCMessage*)message, allocator);
 }
-void   trf_msg__cursor_data__init
-                     (TrfMsg__CursorData         *message)
-{
-  static const TrfMsg__CursorData init_value = TRF_MSG__CURSOR_DATA__INIT;
-  *message = init_value;
-}
-size_t trf_msg__cursor_data__get_packed_size
-                     (const TrfMsg__CursorData *message)
-{
-  assert(message->base.descriptor == &trf_msg__cursor_data__descriptor);
-  return protobuf_c_message_get_packed_size ((const ProtobufCMessage*)(message));
-}
-size_t trf_msg__cursor_data__pack
-                     (const TrfMsg__CursorData *message,
-                      uint8_t       *out)
-{
-  assert(message->base.descriptor == &trf_msg__cursor_data__descriptor);
-  return protobuf_c_message_pack ((const ProtobufCMessage*)message, out);
-}
-size_t trf_msg__cursor_data__pack_to_buffer
-                     (const TrfMsg__CursorData *message,
-                      ProtobufCBuffer *buffer)
-{
-  assert(message->base.descriptor == &trf_msg__cursor_data__descriptor);
-  return protobuf_c_message_pack_to_buffer ((const ProtobufCMessage*)message, buffer);
-}
-TrfMsg__CursorData *
-       trf_msg__cursor_data__unpack
-                     (ProtobufCAllocator  *allocator,
-                      size_t               len,
-                      const uint8_t       *data)
-{
-  return (TrfMsg__CursorData *)
-     protobuf_c_message_unpack (&trf_msg__cursor_data__descriptor,
-                                allocator, len, data);
-}
-void   trf_msg__cursor_data__free_unpacked
-                     (TrfMsg__CursorData *message,
-                      ProtobufCAllocator *allocator)
-{
-  if(!message)
-    return;
-  assert(message->base.descriptor == &trf_msg__cursor_data__descriptor);
-  protobuf_c_message_free_unpacked ((ProtobufCMessage*)message, allocator);
-}
 void   trf_msg__disconnect__init
                      (TrfMsg__Disconnect         *message)
 {
@@ -2515,148 +2470,6 @@ const ProtobufCMessageDescriptor trf_msg__server_ack_freq__descriptor =
   (ProtobufCMessageInit) trf_msg__server_ack_freq__init,
   NULL,NULL,NULL    /* reserved[123] */
 };
-static const ProtobufCFieldDescriptor trf_msg__cursor_data__field_descriptors[9] =
-{
-  {
-    "dgid",
-    1,
-    PROTOBUF_C_LABEL_NONE,
-    PROTOBUF_C_TYPE_UINT32,
-    0,   /* quantifier_offset */
-    offsetof(TrfMsg__CursorData, dgid),
-    NULL,
-    NULL,
-    0,             /* flags */
-    0,NULL,NULL    /* reserved1,reserved2, etc */
-  },
-  {
-    "x",
-    2,
-    PROTOBUF_C_LABEL_NONE,
-    PROTOBUF_C_TYPE_UINT32,
-    0,   /* quantifier_offset */
-    offsetof(TrfMsg__CursorData, x),
-    NULL,
-    NULL,
-    0,             /* flags */
-    0,NULL,NULL    /* reserved1,reserved2, etc */
-  },
-  {
-    "y",
-    3,
-    PROTOBUF_C_LABEL_NONE,
-    PROTOBUF_C_TYPE_UINT32,
-    0,   /* quantifier_offset */
-    offsetof(TrfMsg__CursorData, y),
-    NULL,
-    NULL,
-    0,             /* flags */
-    0,NULL,NULL    /* reserved1,reserved2, etc */
-  },
-  {
-    "hpx",
-    4,
-    PROTOBUF_C_LABEL_NONE,
-    PROTOBUF_C_TYPE_UINT32,
-    0,   /* quantifier_offset */
-    offsetof(TrfMsg__CursorData, hpx),
-    NULL,
-    NULL,
-    0,             /* flags */
-    0,NULL,NULL    /* reserved1,reserved2, etc */
-  },
-  {
-    "hpy",
-    5,
-    PROTOBUF_C_LABEL_NONE,
-    PROTOBUF_C_TYPE_UINT32,
-    0,   /* quantifier_offset */
-    offsetof(TrfMsg__CursorData, hpy),
-    NULL,
-    NULL,
-    0,             /* flags */
-    0,NULL,NULL    /* reserved1,reserved2, etc */
-  },
-  {
-    "width",
-    6,
-    PROTOBUF_C_LABEL_NONE,
-    PROTOBUF_C_TYPE_UINT32,
-    0,   /* quantifier_offset */
-    offsetof(TrfMsg__CursorData, width),
-    NULL,
-    NULL,
-    0,             /* flags */
-    0,NULL,NULL    /* reserved1,reserved2, etc */
-  },
-  {
-    "height",
-    7,
-    PROTOBUF_C_LABEL_NONE,
-    PROTOBUF_C_TYPE_UINT32,
-    0,   /* quantifier_offset */
-    offsetof(TrfMsg__CursorData, height),
-    NULL,
-    NULL,
-    0,             /* flags */
-    0,NULL,NULL    /* reserved1,reserved2, etc */
-  },
-  {
-    "tex_fmt",
-    8,
-    PROTOBUF_C_LABEL_NONE,
-    PROTOBUF_C_TYPE_UINT32,
-    0,   /* quantifier_offset */
-    offsetof(TrfMsg__CursorData, tex_fmt),
-    NULL,
-    NULL,
-    0,             /* flags */
-    0,NULL,NULL    /* reserved1,reserved2, etc */
-  },
-  {
-    "data",
-    9,
-    PROTOBUF_C_LABEL_NONE,
-    PROTOBUF_C_TYPE_BYTES,
-    0,   /* quantifier_offset */
-    offsetof(TrfMsg__CursorData, data),
-    NULL,
-    NULL,
-    0,             /* flags */
-    0,NULL,NULL    /* reserved1,reserved2, etc */
-  },
-};
-static const unsigned trf_msg__cursor_data__field_indices_by_name[] = {
-  8,   /* field[8] = data */
-  0,   /* field[0] = dgid */
-  6,   /* field[6] = height */
-  3,   /* field[3] = hpx */
-  4,   /* field[4] = hpy */
-  7,   /* field[7] = tex_fmt */
-  5,   /* field[5] = width */
-  1,   /* field[1] = x */
-  2,   /* field[2] = y */
-};
-static const ProtobufCIntRange trf_msg__cursor_data__number_ranges[1 + 1] =
-{
-  { 1, 0 },
-  { 0, 9 }
-};
-const ProtobufCMessageDescriptor trf_msg__cursor_data__descriptor =
-{
-  PROTOBUF_C__MESSAGE_DESCRIPTOR_MAGIC,
-  "trfMsg.CursorData",
-  "CursorData",
-  "TrfMsg__CursorData",
-  "trfMsg",
-  sizeof(TrfMsg__CursorData),
-  9,
-  trf_msg__cursor_data__field_descriptors,
-  trf_msg__cursor_data__field_indices_by_name,
-  1,  trf_msg__cursor_data__number_ranges,
-  (ProtobufCMessageInit) trf_msg__cursor_data__init,
-  NULL,NULL,NULL    /* reserved[123] */
-};
 static const ProtobufCFieldDescriptor trf_msg__disconnect__field_descriptors[1] =
 {
   {
@@ -2759,20 +2572,8 @@ const ProtobufCMessageDescriptor trf_msg__channel_open__descriptor =
   (ProtobufCMessageInit) trf_msg__channel_open__init,
   NULL,NULL,NULL    /* reserved[123] */
 };
-static const ProtobufCFieldDescriptor trf_msg__channel_hello__field_descriptors[3] =
+static const ProtobufCFieldDescriptor trf_msg__channel_hello__field_descriptors[2] =
 {
-  {
-    "session_id",
-    1,
-    PROTOBUF_C_LABEL_NONE,
-    PROTOBUF_C_TYPE_UINT64,
-    0,   /* quantifier_offset */
-    offsetof(TrfMsg__ChannelHello, session_id),
-    NULL,
-    NULL,
-    0,             /* flags */
-    0,NULL,NULL    /* reserved1,reserved2, etc */
-  },
   {
     "channel_id",
     2,
@@ -2799,14 +2600,13 @@ static const ProtobufCFieldDescriptor trf_msg__channel_hello__field_descriptors[
   },
 };
 static const unsigned trf_msg__channel_hello__field_indices_by_name[] = {
-  1,   /* field[1] = channel_id */
-  2,   /* field[2] = reply */
-  0,   /* field[0] = session_id */
+  0,   /* field[0] = channel_id */
+  1,   /* field[1] = reply */
 };
 static const ProtobufCIntRange trf_msg__channel_hello__number_ranges[1 + 1] =
 {
-  { 1, 0 },
-  { 0, 3 }
+  { 2, 0 },
+  { 0, 2 }
 };
 const ProtobufCMessageDescriptor trf_msg__channel_hello__descriptor =
 {
@@ -2816,7 +2616,7 @@ const ProtobufCMessageDescriptor trf_msg__channel_hello__descriptor =
   "TrfMsg__ChannelHello",
   "trfMsg",
   sizeof(TrfMsg__ChannelHello),
-  3,
+  2,
   trf_msg__channel_hello__field_descriptors,
   trf_msg__channel_hello__field_indices_by_name,
   1,  trf_msg__channel_hello__number_ranges,
@@ -2861,7 +2661,7 @@ const ProtobufCMessageDescriptor trf_msg__keep_alive__descriptor =
   (ProtobufCMessageInit) trf_msg__keep_alive__init,
   NULL,NULL,NULL    /* reserved[123] */
 };
-static const ProtobufCFieldDescriptor trf_msg__message_wrapper__field_descriptors[21] =
+static const ProtobufCFieldDescriptor trf_msg__message_wrapper__field_descriptors[20] =
 {
   {
     "session_id",
@@ -2919,18 +2719,6 @@ static const ProtobufCFieldDescriptor trf_msg__message_wrapper__field_descriptor
     offsetof(TrfMsg__MessageWrapper, wdata_case),
     offsetof(TrfMsg__MessageWrapper, disconnect),
     &trf_msg__disconnect__descriptor,
-    NULL,
-    0 | PROTOBUF_C_FIELD_FLAG_ONEOF,             /* flags */
-    0,NULL,NULL    /* reserved1,reserved2, etc */
-  },
-  {
-    "cursor_data",
-    10,
-    PROTOBUF_C_LABEL_NONE,
-    PROTOBUF_C_TYPE_MESSAGE,
-    offsetof(TrfMsg__MessageWrapper, wdata_case),
-    offsetof(TrfMsg__MessageWrapper, cursor_data),
-    &trf_msg__cursor_data__descriptor,
     NULL,
     0 | PROTOBUF_C_FIELD_FLAG_ONEOF,             /* flags */
     0,NULL,NULL    /* reserved1,reserved2, etc */
@@ -3117,35 +2905,35 @@ static const ProtobufCFieldDescriptor trf_msg__message_wrapper__field_descriptor
   },
 };
 static const unsigned trf_msg__message_wrapper__field_indices_by_name[] = {
-  17,   /* field[17] = addr_pf */
-  19,   /* field[19] = ch_hello */
-  18,   /* field[18] = ch_open */
-  9,   /* field[9] = client_cap */
-  13,   /* field[13] = client_disp_req */
-  6,   /* field[6] = client_f_req */
+  16,   /* field[16] = addr_pf */
+  18,   /* field[18] = ch_hello */
+  17,   /* field[17] = ch_open */
+  8,   /* field[8] = client_cap */
+  12,   /* field[12] = client_disp_req */
+  5,   /* field[5] = client_f_req */
   1,   /* field[1] = client_hello */
-  15,   /* field[15] = client_req */
-  5,   /* field[5] = cursor_data */
+  14,   /* field[14] = client_req */
   4,   /* field[4] = disconnect */
-  12,   /* field[12] = endpoint */
-  20,   /* field[20] = ka */
-  16,   /* field[16] = server_ack */
-  8,   /* field[8] = server_ack_f_req */
-  10,   /* field[10] = server_cap */
-  14,   /* field[14] = server_disp */
+  11,   /* field[11] = endpoint */
+  19,   /* field[19] = ka */
+  15,   /* field[15] = server_ack */
+  7,   /* field[7] = server_ack_f_req */
+  9,   /* field[9] = server_cap */
+  13,   /* field[13] = server_disp */
   2,   /* field[2] = server_hello */
-  7,   /* field[7] = server_n_chunk */
+  6,   /* field[6] = server_n_chunk */
   3,   /* field[3] = server_reject */
   0,   /* field[0] = session_id */
-  11,   /* field[11] = transport_nack */
+  10,   /* field[10] = transport_nack */
 };
-static const ProtobufCIntRange trf_msg__message_wrapper__number_ranges[4 + 1] =
+static const ProtobufCIntRange trf_msg__message_wrapper__number_ranges[5 + 1] =
 {
   { 1, 0 },
   { 9, 4 },
-  { 20, 9 },
-  { 30, 18 },
-  { 0, 21 }
+  { 11, 5 },
+  { 20, 8 },
+  { 30, 17 },
+  { 0, 20 }
 };
 const ProtobufCMessageDescriptor trf_msg__message_wrapper__descriptor =
 {
@@ -3155,10 +2943,10 @@ const ProtobufCMessageDescriptor trf_msg__message_wrapper__descriptor =
   "TrfMsg__MessageWrapper",
   "trfMsg",
   sizeof(TrfMsg__MessageWrapper),
-  21,
+  20,
   trf_msg__message_wrapper__field_descriptors,
   trf_msg__message_wrapper__field_indices_by_name,
-  4,  trf_msg__message_wrapper__number_ranges,
+  5,  trf_msg__message_wrapper__number_ranges,
   (ProtobufCMessageInit) trf_msg__message_wrapper__init,
   NULL,NULL,NULL    /* reserved[123] */
 };

@@ -49,7 +49,7 @@ enum TRFM_Type {
     TRFM_SERVER_ACK_F_REQ       = (1 << 13),
     TRFM_ADDR_PF                = (1 << 14),
     TRFM_CH_OPEN                = (1 << 15),
-    TRFM_CURSOR_DATA            = (1 << 16),
+    TRFM_CH_HELLO               = (1 << 16),
     TRFM_KEEP_ALIVE             = (1 << 17),
     TRFM_TRANSPORT_NACK         = (1 << 18),
     TRFM_MAX                    = (1 << 19)
@@ -126,8 +126,8 @@ static inline uint64_t trfPBToInternal(int pb_type)
             return TRFM_ADDR_PF;
         case TRF_MSG__MESSAGE_WRAPPER__WDATA_CH_OPEN:
             return TRFM_CH_OPEN;
-        case TRF_MSG__MESSAGE_WRAPPER__WDATA_CURSOR_DATA:
-            return TRFM_CURSOR_DATA;
+        case TRF_MSG__MESSAGE_WRAPPER__WDATA_CH_HELLO:
+            return TRFM_CH_HELLO;
         case TRF_MSG__MESSAGE_WRAPPER__WDATA_KA:
             return TRFM_KEEP_ALIVE;
         case TRF_MSG__MESSAGE_WRAPPER__WDATA_TRANSPORT_NACK:
@@ -171,8 +171,8 @@ static inline uint64_t trfInternalToPB(enum TRFM_Type type)
             return TRF_MSG__MESSAGE_WRAPPER__WDATA_ADDR_PF;
         case TRFM_CH_OPEN:
             return TRF_MSG__MESSAGE_WRAPPER__WDATA_CH_OPEN;
-        case TRFM_CURSOR_DATA:
-            return TRF_MSG__MESSAGE_WRAPPER__WDATA_CURSOR_DATA;
+        case TRFM_CH_HELLO:
+            return TRF_MSG__MESSAGE_WRAPPER__WDATA_CH_HELLO;
         case TRFM_KEEP_ALIVE:
             return TRF_MSG__MESSAGE_WRAPPER__WDATA_KA;
         case TRFM_TRANSPORT_NACK:

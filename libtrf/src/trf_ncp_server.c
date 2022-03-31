@@ -109,6 +109,8 @@ int trfNCAccept(PTRFContext ctx, PTRFContext * ctx_out)
         goto free_buf;
     }
 
+    trf__SetSockNonBlocking(client_sock);
+
     // Receive client hello message and verify API version
     
     uint64_t session_id = 0;
@@ -145,8 +147,17 @@ int trfNCAccept(PTRFContext ctx, PTRFContext * ctx_out)
         goto free_av;
     }
     
+    // Inherit the options from the server context
+
+    cli_ctx->opts = calloc(1, sizeof(*cli_ctx->opts));
+    if (!cli_ctx->opts)
+        goto free_av;
+
+    trfDuplicateOpts(ctx->opts, cli_ctx->opts);
+
     // Return the created context
 
+    cli_ctx->cli.client_fd = client_sock;
     *ctx_out = cli_ctx;
     free(av_cand);
     return 0;

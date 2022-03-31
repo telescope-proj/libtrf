@@ -60,13 +60,23 @@
 
 #define TRF_API_MAJOR    0
 #define TRF_API_MINOR    3
-#define TRF_API_PATCH    0
+#define TRF_API_PATCH    1
 
 // Preserved for compatibility
 #define trfNCSendDelimited trfNCSendMsg
 #define trfNCRecvDelimited trfNCRecvMsg
 #define trfNCFullRecv trfNCRecv
 #define trfNCFullSend trfNCSend
+
+/**
+ * @brief           Poll for incoming messages on the socket.
+ * 
+ * @param sock      Socket descriptor.
+ * 
+ * @return          Whether there is an incoming message.
+ *                  Negative error code on failure.
+ */
+int trfNCPollMsg(TRFSock sock);
 
 /**
   * @brief          Receive a delimited message in TRF Protocol Buffers format.

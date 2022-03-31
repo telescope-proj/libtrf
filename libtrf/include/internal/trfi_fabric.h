@@ -41,7 +41,7 @@ static inline int trf__FabricRegBuf(PTRFXFabric ctx, void * addr, size_t len,
 
     struct fid_domain * domain = ctx->domain;
     ret = fi_mr_reg(domain, addr, len, flags, 0, 0, 0, mr_out, NULL);
-    if (ret)
+    if (ret < 0)
     {
         trf_fi_error("fi_mr_reg", ret);
         return ret;

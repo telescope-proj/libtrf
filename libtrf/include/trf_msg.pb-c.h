@@ -36,7 +36,6 @@ typedef struct TrfMsg__DisplayReq TrfMsg__DisplayReq;
 typedef struct TrfMsg__ClientFReq TrfMsg__ClientFReq;
 typedef struct TrfMsg__ServerNotifyChunk TrfMsg__ServerNotifyChunk;
 typedef struct TrfMsg__ServerAckFReq TrfMsg__ServerAckFReq;
-typedef struct TrfMsg__CursorData TrfMsg__CursorData;
 typedef struct TrfMsg__Disconnect TrfMsg__Disconnect;
 typedef struct TrfMsg__ChannelOpen TrfMsg__ChannelOpen;
 typedef struct TrfMsg__ChannelHello TrfMsg__ChannelHello;
@@ -679,58 +678,6 @@ struct  TrfMsg__ServerAckFReq
 
 
 /**
- *  @brief Cursor data update
- *If the display source contains a cursor, the cursor position information
- *should be sent separately. To update the cursor shape, the values 
- *width and height should be set to non-zero values, with tex_fmt and
- *bytes being set to the cursor data type and data respectively.
- */
-struct  TrfMsg__CursorData
-{
-  ProtobufCMessage base;
-  /**
-   * Display group ID
-   */
-  uint32_t dgid;
-  /**
-   * Cursor X position
-   */
-  uint32_t x;
-  /**
-   * Cursor Y position
-   */
-  uint32_t y;
-  /**
-   * Cursor X hotspot
-   */
-  uint32_t hpx;
-  /**
-   * Cursor Y hotspot
-   */
-  uint32_t hpy;
-  /**
-   * Cursor image width
-   */
-  uint32_t width;
-  /**
-   * Cursor image height
-   */
-  uint32_t height;
-  /**
-   * Cursor image format
-   */
-  uint32_t tex_fmt;
-  /**
-   * Raw image data
-   */
-  ProtobufCBinaryData data;
-};
-#define TRF_MSG__CURSOR_DATA__INIT \
- { PROTOBUF_C_MESSAGE_INIT (&trf_msg__cursor_data__descriptor) \
-    , 0, 0, 0, 0, 0, 0, 0, 0, {0,NULL} }
-
-
-/**
  *  @brief Disconnect message
  *The server or client may send a disconnect message. The receiver should
  *then treat the connection as closed and release the resources associated
@@ -781,10 +728,6 @@ struct  TrfMsg__ChannelHello
 {
   ProtobufCMessage base;
   /**
-   * Session identifier
-   */
-  uint64_t session_id;
-  /**
    * Channel identifier
    */
   uint32_t channel_id;
@@ -795,7 +738,7 @@ struct  TrfMsg__ChannelHello
 };
 #define TRF_MSG__CHANNEL_HELLO__INIT \
  { PROTOBUF_C_MESSAGE_INIT (&trf_msg__channel_hello__descriptor) \
-    , 0, 0, 0 }
+    , 0, 0 }
 
 
 /**
@@ -823,7 +766,6 @@ typedef enum {
   TRF_MSG__MESSAGE_WRAPPER__WDATA_SERVER_HELLO = 3,
   TRF_MSG__MESSAGE_WRAPPER__WDATA_SERVER_REJECT = 4,
   TRF_MSG__MESSAGE_WRAPPER__WDATA_DISCONNECT = 9,
-  TRF_MSG__MESSAGE_WRAPPER__WDATA_CURSOR_DATA = 10,
   TRF_MSG__MESSAGE_WRAPPER__WDATA_CLIENT_F_REQ = 11,
   TRF_MSG__MESSAGE_WRAPPER__WDATA_SERVER_N_CHUNK = 12,
   TRF_MSG__MESSAGE_WRAPPER__WDATA_SERVER_ACK_F_REQ = 13,
@@ -861,7 +803,6 @@ struct  TrfMsg__MessageWrapper
     TrfMsg__ServerHello *server_hello;
     TrfMsg__ServerReject *server_reject;
     TrfMsg__Disconnect *disconnect;
-    TrfMsg__CursorData *cursor_data;
     TrfMsg__ClientFReq *client_f_req;
     TrfMsg__ServerNotifyChunk *server_n_chunk;
     TrfMsg__ServerAckFReq *server_ack_f_req;
@@ -1283,25 +1224,6 @@ TrfMsg__ServerAckFReq *
 void   trf_msg__server_ack_freq__free_unpacked
                      (TrfMsg__ServerAckFReq *message,
                       ProtobufCAllocator *allocator);
-/* TrfMsg__CursorData methods */
-void   trf_msg__cursor_data__init
-                     (TrfMsg__CursorData         *message);
-size_t trf_msg__cursor_data__get_packed_size
-                     (const TrfMsg__CursorData   *message);
-size_t trf_msg__cursor_data__pack
-                     (const TrfMsg__CursorData   *message,
-                      uint8_t             *out);
-size_t trf_msg__cursor_data__pack_to_buffer
-                     (const TrfMsg__CursorData   *message,
-                      ProtobufCBuffer     *buffer);
-TrfMsg__CursorData *
-       trf_msg__cursor_data__unpack
-                     (ProtobufCAllocator  *allocator,
-                      size_t               len,
-                      const uint8_t       *data);
-void   trf_msg__cursor_data__free_unpacked
-                     (TrfMsg__CursorData *message,
-                      ProtobufCAllocator *allocator);
 /* TrfMsg__Disconnect methods */
 void   trf_msg__disconnect__init
                      (TrfMsg__Disconnect         *message);
@@ -1462,9 +1384,6 @@ typedef void (*TrfMsg__ServerNotifyChunk_Closure)
 typedef void (*TrfMsg__ServerAckFReq_Closure)
                  (const TrfMsg__ServerAckFReq *message,
                   void *closure_data);
-typedef void (*TrfMsg__CursorData_Closure)
-                 (const TrfMsg__CursorData *message,
-                  void *closure_data);
 typedef void (*TrfMsg__Disconnect_Closure)
                  (const TrfMsg__Disconnect *message,
                   void *closure_data);
@@ -1507,7 +1426,6 @@ extern const ProtobufCMessageDescriptor trf_msg__display_req__descriptor;
 extern const ProtobufCMessageDescriptor trf_msg__client_freq__descriptor;
 extern const ProtobufCMessageDescriptor trf_msg__server_notify_chunk__descriptor;
 extern const ProtobufCMessageDescriptor trf_msg__server_ack_freq__descriptor;
-extern const ProtobufCMessageDescriptor trf_msg__cursor_data__descriptor;
 extern const ProtobufCMessageDescriptor trf_msg__disconnect__descriptor;
 extern const ProtobufCMessageDescriptor trf_msg__channel_open__descriptor;
 extern const ProtobufCMessageDescriptor trf_msg__channel_hello__descriptor;

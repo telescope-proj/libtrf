@@ -283,7 +283,7 @@ void trfDestroyFabricContext(PTRFContext ctx)
         int ret = trfFabricSendMsg(ctx, &f->msg_mem, trfMemPtr(&f->msg_mem),
                                    trfMemSize(&f->msg_mem), f->peer_addr, 
                                    ctx->opts, &mw);
-        if (ret)
+        if (ret != 1)
         {
             trf__log_error( "Failed to send disconnect message (fabric): %s;"
                             "peer may be in an invalid state", strerror(-ret));
@@ -291,7 +291,7 @@ void trfDestroyFabricContext(PTRFContext ctx)
     }
     if (trfMemFabricMR(&f->msg_mem))
     {
-        fi_close(&f->msg_mem.fabric_mr->fid);
+        fi_close((fid_t) trfMemFabricMR(&f->msg_mem));
         f->msg_mem.fabric_mr = NULL;
     }
     if (trfMemPtr(&f->msg_mem))
@@ -470,6 +470,29 @@ int trfBindSubchannel(PTRFContext main, PTRFContext sub)
     return -ESRCH;
 }
 
+int trfUnbindSubchannel(PTRFContext main, uint32_t id)
+{
+    if (!main || !id)
+        return -EINVAL;
+
+    if (main->type != TRF_EP_SINK || main->type != TRF_EP_CONN_ID)
+    {
+        trf__log_error("Invalid channel type");
+        return -EINVAL;
+    }
+
+    for (int i = 0; i < main->cli.max_channels; i++)
+    {
+        if (main->cli.channels[i] && main->cli.channels[i]->channel_id == id)
+        {
+            main->cli.channels[i] = NULL;
+            return 0;
+        }
+    }
+
+    return -ESRCH;
+}
+
 int trfCreateSubchannel(PTRFContext ctx, PTRFContext * ctx_out, uint32_t id)
 {
     if (!ctx || !ctx_out || !id)
@@ -483,18 +506,34 @@ int trfCreateSubchannel(PTRFContext ctx, PTRFContext * ctx_out, uint32_t id)
 
     struct fi_info * fi_copy = fi_dupinfo(ctx->xfer.fabric->fi);
     if (!fi_copy)
+    {
+        free(new_ctx);
         return -ENOMEM;
+    }
 
     fi_copy->src_addr = NULL;
 
     int ret = trfCreateChannel(new_ctx, fi_copy, NULL, 0);
-    fi_freeinfo(fi_copy);
     if (ret < 0)
     {
         trf__log_error("Failed to allocate subchannel endpoint: %s",
                        fi_strerror(-ret));
         return ret;
     }
+
+    new_ctx->opts = calloc(1, sizeof(*new_ctx->opts));
+    trfDuplicateOpts(ctx->opts, new_ctx->opts);
+    if (!new_ctx->opts)
+    {
+        new_ctx->disconnected = 1;
+        trfDestroyContext(new_ctx);
+        return -ENOMEM;
+    }
+
+    char * prov_str = strdup(fi_copy->fabric_attr->prov_name);
+    fi_freeinfo(fi_copy);
+
+    assert(prov_str);
 
     char * addr_str = NULL;
     ret = trfGetEndpointName(new_ctx, &addr_str);
@@ -507,19 +546,21 @@ int trfCreateSubchannel(PTRFContext ctx, PTRFContext * ctx_out, uint32_t id)
     assert(addr_str);
 
     char * proto_str = NULL;
-    ret = trfSerializeWireProto(ctx->xfer.fabric->fi->ep_attr->protocol,
+    ret = trfSerializeWireProto(new_ctx->xfer.fabric->fi->ep_attr->protocol,
                                 &proto_str);
     if (ret < 0)
     {
         trf__log_error("Failed to get wire protocol %d", 
-                       ctx->xfer.fabric->fi->ep_attr->protocol);
+                       new_ctx->xfer.fabric->fi->ep_attr->protocol);
         goto free_addr;
     }
 
     assert(proto_str);
 
-    trf__log_debug("[subch] Serialized endpoint name: %s, protocol: %s",
-                   addr_str, proto_str);
+    trf__log_debug("[subch] Serialized endpoint created");
+    trf__log_debug("[subch] Address : %s", addr_str);
+    trf__log_debug("[subch] Protocol: %s", proto_str);
+    trf__log_debug("[subch] Provider: %s", prov_str);
 
     // Register a temporary buffer to store the hello message. This buffer will
     // be deregistered afterwards; the subchannel user is expected to manage
@@ -543,6 +584,7 @@ int trfCreateSubchannel(PTRFContext ctx, PTRFContext * ctx_out, uint32_t id)
         co.reply                    = 0;
         co.transport                = &tr;
         tr.src                      = addr_str;
+        tr.name                     = prov_str;
         tr.dest                     = NULL;
         tr.proto                    = proto_str;
 
@@ -558,15 +600,19 @@ int trfCreateSubchannel(PTRFContext ctx, PTRFContext * ctx_out, uint32_t id)
         }
     }
     
+    trf__log_trace("[subch] Sent channel open message");
+
     TrfMsg__MessageWrapper * rcv = NULL;
-    ret = trfNCRecvDelimited(ctx->cli.client_fd, mem, s, 
-                             ctx->opts->nc_rcv_timeo, &rcv);
+    ret = trfNCRecvMsg(ctx->cli.client_fd, mem, s, 
+                       ctx->opts->nc_rcv_timeo, &rcv);
     if (ret < 0)
     {
         trf__log_error("Failed to receive channel open response: %s",
                        strerror(-ret));
         goto free_mem;
     }
+
+    trf__log_trace("[subch] Received open message");
 
     assert(rcv);
 
@@ -610,32 +656,32 @@ int trfCreateSubchannel(PTRFContext ctx, PTRFContext * ctx_out, uint32_t id)
     ret = trfInsertAVSerialized(new_ctx->xfer.fabric, rco->transport->src, 
                                 &new_ctx->xfer.fabric->peer_addr);
     if (ret < 0)
-        goto free_rcv;
+        goto dereg_mem;
 
     assert(new_ctx->xfer.fabric->peer_addr != FI_ADDR_UNSPEC);
+    struct TRFMem * msg_mem = &new_ctx->xfer.fabric->msg_mem;
 
     {
         TrfMsg__MessageWrapper mw   = TRF_MSG__MESSAGE_WRAPPER__INIT;
         TrfMsg__ChannelHello hl     = TRF_MSG__CHANNEL_HELLO__INIT;
         mw.wdata_case               = TRF_MSG__MESSAGE_WRAPPER__WDATA_CH_HELLO;
         mw.ch_hello                 = &hl;
+        mw.session_id               = ctx->cli.session_id;
         hl.channel_id               = id;
         hl.reply                    = 0;
-        hl.session_id               = ctx->cli.session_id;
 
-        ret = trfFabricSendMsg(new_ctx, mem, trfMemPtr(mem), s, FI_ADDR_UNSPEC,
-                               ctx->opts, &mw);
+        ret = trfFabricSendMsg(new_ctx, msg_mem, trfMemPtr(msg_mem), s,
+                               FI_ADDR_UNSPEC, ctx->opts, &mw);
         if (ret < 0)
-            goto free_rcv;
+            goto dereg_mem;
     }
 
-    struct TRFMem * msg_mem = &new_ctx->xfer.fabric->msg_mem;
     TrfMsg__MessageWrapper * rcv_sub = NULL;
     ret = trfFabricRecvMsg(new_ctx, msg_mem, trfMemPtr(msg_mem),
                            trfMemSize(msg_mem), new_ctx->xfer.fabric->peer_addr,
                            ctx->opts, &rcv_sub);
     if (ret < 0)
-        goto free_rcv;
+        goto dereg_mem;
 
     assert(rcv_sub);
 
@@ -649,13 +695,13 @@ int trfCreateSubchannel(PTRFContext ctx, PTRFContext * ctx_out, uint32_t id)
 
     if (!rcv_sub->ch_hello->reply
         || rcv_sub->ch_hello->channel_id != id
-        || rcv_sub->ch_hello->session_id != ctx->cli.session_id)
+        || rcv_sub->session_id != ctx->cli.session_id)
     {
-        trf__log_warn("Peer sent invalid data - values: "
-                      "channel id = %d (expected %d), "
-                      "session id = %d (expected %d)",
-                      rcv_sub->ch_hello->session_id, id, 
-                      rcv_sub->ch_hello->session_id, ctx->cli.session_id);
+        trf__log_warn("Peer sent invalid data - values (actual/expect): "
+                      "reply: (%d/%d), channel: (%d/%d) session: (%d/%d)",
+                      rcv_sub->ch_hello->reply, 1, 
+                      rcv_sub->ch_hello->channel_id, id,
+                      rcv_sub->session_id, new_ctx->cli.session_id);
         ret = -EBADE;
         goto free_rcv_sub;
     }
@@ -672,18 +718,20 @@ int trfCreateSubchannel(PTRFContext ctx, PTRFContext * ctx_out, uint32_t id)
 
     free(proto_str);
     free(addr_str);
+    free(prov_str);
 
     new_ctx->disconnected = 0;
-
-    // Add the subchannel to the context
-
     new_ctx->channel_id = id;
-
+    *ctx_out = new_ctx;
 
     return 0;
 
 free_rcv_sub:
     trf_msg__message_wrapper__free_unpacked(rcv_sub, NULL);
+dereg_mem:
+    fi_close((fid_t) trfMemFabricMR(&new_ctx->xfer.fabric->msg_mem));
+    new_ctx->xfer.fabric->msg_mem.ptr = NULL;
+    new_ctx->xfer.fabric->msg_mem.fabric_mr = NULL;
 free_rcv:
     trf_msg__message_wrapper__free_unpacked(rcv, NULL);
     proto_str = NULL;
@@ -694,6 +742,225 @@ free_proto:
     free(proto_str);
 free_addr:
     free(addr_str);
+free_new_ctx:
+    free(prov_str);
+    trfDestroyContext(new_ctx);
+    return ret;
+}
+
+int trfProcessSubchannelReq(PTRFContext ctx, PTRFContext * ctx_out,
+                            TrfMsg__MessageWrapper * req)
+{
+    if (!ctx || !ctx_out || !req)
+        return -EINVAL;
+
+    TrfMsg__ChannelOpen * rco = req->ch_open;
+
+    if (trfPBToInternal(req->wdata_case) != TRFM_CH_OPEN
+        || !rco->transport)
+        return -EBADMSG;
+
+    if (!rco->transport
+        || !trf__ProtoStringValid(rco->transport->src)
+        || !trf__ProtoStringValid(rco->transport->name)
+        || !trf__ProtoStringValid(rco->transport->proto))
+    {
+        trf__log_warn("Peer sent garbage transport data");
+        return -EBADMSG;
+    }
+
+    trf__log_trace("Processing subchannel request");
+    PTRFContext new_ctx = trfAllocContext();
+    if (!new_ctx)
+        return -ENOMEM;
+
+    new_ctx->opts = calloc(1, sizeof(*new_ctx->opts));
+    trfDuplicateOpts(ctx->opts, new_ctx->opts);
+    if (!new_ctx->opts)
+    {
+        free(new_ctx);
+        return -ENOMEM;
+    }
+    new_ctx->disconnected = 1;
+
+    uint32_t id = rco->id;
+    new_ctx->channel_id     = id;
+    new_ctx->cli.session_id = ctx->cli.session_id;
+
+    struct fi_info * fi = NULL;
+    int ret = trfGetRoute(rco->transport->src,
+                          rco->transport->name,
+                          rco->transport->proto, &fi);
+    if (ret < 0)
+    {
+        goto free_new_ctx;
+    }
+
+    if (fi->next)
+    {
+        fi_freeinfo(fi->next);
+        fi->next = NULL;
+    }
+
+    ret = trfCreateChannel(new_ctx, fi, NULL, 0);
+    if (ret < 0)
+    {
+        trf__log_error("Failed to allocate subchannel endpoint: %s",
+                       fi_strerror(-ret));
+        goto free_fi;
+    }
+
+    char * addr_str = NULL;
+    ret = trfGetEndpointName(new_ctx, &addr_str);
+    if (ret < 0)
+    {
+        trf__log_error("Failed to get endpoint name: %s", fi_strerror(-ret));
+        goto free_new_ctx;
+    }
+
+    assert(addr_str);
+
+    char * proto_str = NULL;
+    ret = trfSerializeWireProto(new_ctx->xfer.fabric->fi->ep_attr->protocol,
+                                &proto_str);
+    if (ret < 0)
+    {
+        trf__log_error("Failed to get wire protocol %d", 
+                       new_ctx->xfer.fabric->fi->ep_attr->protocol);
+        goto free_addr;
+    }
+
+    assert(proto_str);
+
+    trf__log_debug("[subch] Serialized endpoint name: %s, protocol: %s",
+                   addr_str, proto_str);
+
+    // Register temporary message buffer
+
+    void * mem = NULL;
+    size_t s = trf__GetPageSize();
+    assert(s > 0);
+    mem = trfAllocAligned(s, s);
+    if (!mem)
+    {
+        ret = -ENOMEM;
+        goto free_proto;
+    }
+
+    {
+        TrfMsg__MessageWrapper mw   = TRF_MSG__MESSAGE_WRAPPER__INIT;
+        TrfMsg__ChannelOpen co      = TRF_MSG__CHANNEL_OPEN__INIT;
+        TrfMsg__Transport tr        = TRF_MSG__TRANSPORT__INIT;
+        mw.session_id               = new_ctx->cli.session_id;
+        mw.wdata_case               = TRF_MSG__MESSAGE_WRAPPER__WDATA_CH_OPEN;
+        mw.ch_open                  = &co;
+        co.id                       = id;
+        co.reply                    = 1;
+        co.transport                = &tr;
+        tr.name                     = fi->fabric_attr->prov_name;
+        tr.src                      = addr_str;
+        tr.dest                     = NULL;
+        tr.proto                    = proto_str;
+
+        // Send the channel open reply over the main socket
+
+        ret = trfNCSendMsg(ctx->cli.client_fd, mem, s, ctx->opts->nc_snd_timeo,
+                           &mw);
+        if (ret < 0)
+        {
+            trf__log_error("Failed to send channel open message: %s",
+                           strerror(-ret));
+            goto free_mem;
+        }
+    }
+
+    // Register the client in the address vector
+
+    TrfMsg__MessageWrapper * rcv = NULL;
+    new_ctx->xfer.fabric->peer_addr = FI_ADDR_UNSPEC;
+    ret = trfInsertAVSerialized(new_ctx->xfer.fabric, rco->transport->src, 
+                                &new_ctx->xfer.fabric->peer_addr);
+    if (ret < 0)
+        goto free_mem;
+
+    assert(new_ctx->xfer.fabric->peer_addr != FI_ADDR_UNSPEC);
+    
+    // Post fabric receive
+
+    ret = trfRegInternalMsgBuf(new_ctx, mem, s);
+    if (ret < 0)
+        goto free_mem;
+
+    struct TRFMem * msg_mem = &new_ctx->xfer.fabric->msg_mem;
+    assert(trfMemPtr(msg_mem));
+
+    ret = trfFabricRecvMsg(new_ctx, msg_mem, trfMemPtr(msg_mem),
+                           trfMemSize(msg_mem), new_ctx->xfer.fabric->peer_addr,
+                           new_ctx->opts, &rcv);
+    if (ret < 0)
+        goto dereg_mem;
+
+    assert(rcv);
+
+    if (rcv->ch_hello->reply
+        || rcv->ch_hello->channel_id != id
+        || rcv->session_id != new_ctx->cli.session_id)
+    {
+        trf__log_warn("Peer sent invalid data - values (actual/expect): "
+                      "reply: (%d/%d), channel: (%d/%d) session: (%d/%d)",
+                      rcv->ch_hello->reply, 0,
+                      rcv->ch_hello->channel_id, id,
+                      rcv->session_id, new_ctx->cli.session_id);
+        ret = -EBADE;
+        goto free_rcv;
+    }
+
+    // Send back a reply echoing back the data
+
+    rcv->ch_hello->reply = 1;
+    ret = trfFabricSendMsg(new_ctx, msg_mem, trfMemPtr(msg_mem), 
+                           trfMemSize(msg_mem), new_ctx->xfer.fabric->peer_addr,
+                           new_ctx->opts, rcv);
+    if (ret < 0)
+    {
+        trf__log_error("Fabric send failed: %s", fi_strerror(-ret));
+        goto free_rcv;
+    }
+
+    // Connected - now clean everything up
+
+    fi_close(&msg_mem->fabric_mr->fid);
+    free(msg_mem->ptr);
+    msg_mem->fabric_mr = NULL;
+    msg_mem->ptr = NULL;
+
+    trf_msg__message_wrapper__free_unpacked(rcv, NULL);
+
+    free(proto_str);
+    free(addr_str);
+
+    new_ctx->disconnected = 0;
+    new_ctx->channel_id = id;
+
+    *ctx_out = new_ctx;
+
+    return 0;
+
+free_rcv:
+    trf_msg__message_wrapper__free_unpacked(rcv, NULL);
+dereg_mem:
+    fi_close((fid_t) trfMemFabricMR(&new_ctx->xfer.fabric->msg_mem));
+    new_ctx->xfer.fabric->msg_mem.fabric_mr = NULL;
+    new_ctx->xfer.fabric->msg_mem.ptr = NULL;
+free_mem:
+    free(mem);
+    mem = NULL;
+free_proto:
+    free(proto_str);
+free_addr:
+    free(addr_str);
+free_fi:
+    fi_freeinfo(fi);
 free_new_ctx:
     trfDestroyContext(new_ctx);
     return ret;
@@ -1412,8 +1679,8 @@ int trfRegInternalMsgBuf(PTRFContext ctx, void * addr, size_t len)
     ret = trf__FabricRegBuf(f, addr, len, FI_READ | FI_WRITE, &meta->fabric_mr);
     if (ret == 0)
     {
-        meta->ptr   = addr;
-        meta->size  = len;
+        f->msg_mem.ptr  = addr;
+        f->msg_mem.size = len;
     }
     return ret;
 }
@@ -1503,7 +1770,7 @@ int trfUpdateDisplayAddr(PTRFContext ctx, PTRFDisplay disp, void * addr)
         return ret;
     }
 
-    if (&disp->mem.fabric_mr)
+    if (disp->mem.fabric_mr)
     {
         ret = fi_close(&disp->mem.fabric_mr->fid);
         if (ret)
@@ -1614,7 +1881,7 @@ int trfSendKeepAlive(PTRFContext ctx)
 }
 
 int trfGetMessageAuto(PTRFContext ctx, uint64_t flags, uint64_t * processed,
-    void ** data_out)
+    void ** data_out, int * opaque)
 {
     if (!ctx || !data_out || !processed)
     {
@@ -1623,34 +1890,86 @@ int trfGetMessageAuto(PTRFContext ctx, uint64_t flags, uint64_t * processed,
 
     int ret = 0;
 
-    struct timespec tcur, tend;
+    struct timespec tend;
     TrfMsg__MessageWrapper * msg = NULL;
 
-    ret = clock_gettime(CLOCK_MONOTONIC, &tcur);
-    if (ret < 0)
-    {
-        trf__log_error("System clock error: %s", strerror(errno));
-        ret = -errno;
-        goto free_msg;
-    }
-
-    trf__GetDelay(&tcur, &tend, ctx->opts->fab_rcv_timeo);
-
+    trfGetDeadline(&tend, ctx->opts->fab_rcv_timeo);
     struct TRFMem * mem = &ctx->xfer.fabric->msg_mem;
-    ret = trfFabricRecvMsg(ctx, mem, trfMemPtr(mem), trfMemSize(mem),
-                           ctx->xfer.fabric->peer_addr, ctx->opts, &msg);
-    if (ret < 0)
+    int flag = 0;
+
+    if (!*opaque)
     {
-        trf__log_error("Unable to receive message: %s", strerror(-ret));
-        goto free_msg;
+        ret = trfFabricRecvUnchecked(ctx, mem, trfMemPtr(mem),
+                                        trfMemSize(mem), 
+                                        ctx->xfer.fabric->peer_addr);
+        if (ret < 0)
+        {
+            trf__log_error("Unable to receive message: %s", strerror(-ret));
+            return ret;
+        }
+
+        *opaque = 1;
+    }
+    
+    struct fi_cq_data_entry de;
+    struct fi_cq_err_entry err;
+
+    while (1)
+    {
+        ret = trfNCPollMsg(ctx->cli.client_fd);
+        if (ret > 0)
+        {
+            flag = 1;
+            break;
+        }
+        else if (ret < 0 && ret != -EAGAIN)
+        {
+            trf__log_error("Receive error (control): %s", strerror(-ret));
+            break;
+        }
+
+        ret = trfFabricPollRecv(ctx, &de, &err, ctx->opts->fab_cq_sync,
+                                ctx->opts->fab_poll_rate, NULL, 1);
+        if (ret < 0 && ret != -FI_EAGAIN)
+        {
+            trf__log_error("Receive error (fabric): %s", fi_strerror(-ret));
+            break;
+        }
+        if (ret == 1)
+        {
+            *opaque = 0;
+            flag = 2;
+            break;
+        }
+        trfSleep(ctx->opts->fab_poll_rate);
     }
 
-    ret = trfMsgUnpack(&msg, trfMsgGetPackedLength(trfMemPtr(mem)), 
-                       trfMsgGetPayload(trfMemPtr(mem)));
-    if (ret < 0)
+    switch (flag)
     {
-        trf__log_error("Unable to unpack message: %s", strerror(-ret));
-        goto free_msg;
+        case 0:
+            return -ETIMEDOUT;
+        case 1:
+            ret = trfNCRecvMsg(ctx->cli.client_fd, trfMemPtr(mem),
+                               trfMemSize(mem), ctx->opts->nc_rcv_timeo, &msg);
+            if (ret < 0)
+            {
+                trf__log_error("Unable to unpack message (NC): %s",
+                               strerror(-ret));
+                return ret;
+            }
+            break;
+        case 2:
+            ret = trfMsgUnpack(&msg, trfMsgGetPackedLength(trfMemPtr(mem)), 
+                       trfMsgGetPayload(trfMemPtr(mem)));
+            if (ret < 0)
+            {
+                trf__log_error("Unable to unpack message (fabric): %s",
+                               strerror(-ret));
+                return ret;
+            }
+            break;
+        default:
+            return ret < 0 ? ret : -EIO;
     }
 
     trf__log_trace("Message Type: %d", msg->wdata_case);
@@ -1783,6 +2102,7 @@ int trfSendClientReq(PTRFContext ctx, PTRFDisplay disp)
     struct TRFMem * mem = &ctx->xfer.fabric->msg_mem;
     ret = trfFabricSendMsg(ctx, mem, trfMemPtr(mem), trfMemSize(mem),
                            ctx->xfer.fabric->peer_addr, ctx->opts, mw);
+    trf__log_trace("Sent client request over fabric");
 
 free_message:
     trf_msg__message_wrapper__free_unpacked(mw, NULL);

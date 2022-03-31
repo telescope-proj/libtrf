@@ -23,6 +23,22 @@
 
 #include "trf_ncp.h"
 
+int trfNCPollMsg(TRFSock sock)
+{
+    if (!trfSockValid(sock))
+        return -ENOTSOCK;
+
+    int ret;
+    uint32_t delim;
+    ret = recv(sock, &delim, 4, MSG_PEEK | MSG_NOSIGNAL);
+    if (ret < 0)
+        return -errno;
+
+    //trf__log_trace("Peeked message header: %d", ntohl(delim));
+    
+    return ret;
+}
+
 int trfNCRecvMsg(TRFSock sock, uint8_t * buf, uint32_t size, int timeout, 
     TrfMsg__MessageWrapper ** handle )
 {
@@ -97,6 +113,8 @@ int trfNCSendMsg(TRFSock sock, uint8_t * buf, uint32_t size, int timeout,
 int trfNCRecv(TRFSock sock, ssize_t len, uint8_t * buf, 
     int timeout)
 {
+    struct timespec deadline;
+    trfGetDeadline(&deadline, timeout);
     ssize_t cur_recv = 0;
     ssize_t loop_recv = 0;
     trf__log_trace("<< %d bytes", len);
@@ -109,11 +127,19 @@ int trfNCRecv(TRFSock sock, ssize_t len, uint8_t * buf,
                 trf__log_trace("Connection closed");
                 return -ENOTCONN;
             case -1:
+                if (errno == EAGAIN)
+                    break;
+
                 trf__log_trace("Recv failed: %s", strerror(errno));
                 return -errno;
             default:
                 cur_recv += loop_recv;
         }
+        if (trf__HasPassed(CLOCK_MONOTONIC, &deadline))
+        {
+            break;
+        }
+        trfSleep(1);
     }
     trf__log_trace("Receive Completed");
     return cur_recv;
@@ -122,6 +148,8 @@ int trfNCRecv(TRFSock sock, ssize_t len, uint8_t * buf,
 int trfNCSend(TRFSock sock, ssize_t len, uint8_t * buf,
     int timeout)
 {
+    struct timespec deadline;
+    trfGetDeadline(&deadline, timeout);
     ssize_t cur_send = 0;
     ssize_t loop_send = 0;
     trf__log_trace(">> %d bytes", len);
@@ -134,11 +162,19 @@ int trfNCSend(TRFSock sock, ssize_t len, uint8_t * buf,
                 trf__log_trace("Connection closed");
                 return -ENOTCONN;
             case -1:
+                if (errno == EAGAIN)
+                    break;
+
                 trf__log_trace("Send failed: %s", strerror(errno));
                 return -errno;
             default:
                 cur_send += loop_send;
         }
+        if (trf__HasPassed(CLOCK_MONOTONIC, &deadline))
+        {
+            break;
+        }
+        trfSleep(1);
     }
     trf__log_trace("Send Completed");
     return cur_send;

@@ -1,4 +1,4 @@
-if [ ! -f /usr/bin/protod-c ]
+if [ ! -f /usr/bin/protoc-c ]
 then
     echo "Protocol Buffers C compiler required."
     echo "Please install it from your distribution's package manager."

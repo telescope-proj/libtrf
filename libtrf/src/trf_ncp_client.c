@@ -191,6 +191,13 @@ int trfNCClientInit(PTRFContext ctx, char * host, char * port)
     }
 
     ctx->type = TRF_EP_SINK;
+
+    // Connected - clean up, but keep the control channel open
+
+    trfFreeInterfaceList(svr_ifs);
+    free(buff);
+
+    return 0;
     
 free_svr_if_list:
     trfFreeInterfaceList(svr_ifs);

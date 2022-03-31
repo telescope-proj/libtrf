@@ -401,7 +401,6 @@ message ChannelOpen {
 /*  @brief Hello message.
 */
 message ChannelHello {
-    uint64 session_id           = 1;    // Session identifier
     uint32 channel_id           = 2;    // Channel identifier
     bool reply                  = 3;    // Reply flag
 }

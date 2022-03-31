@@ -121,6 +121,59 @@ static inline int trfGetDeadline(struct timespec * out, int delay_ms)
 }
 
 /**
+ * @brief           Create a subchannel.
+ * 
+ * @param ctx       Allocated context containing the main channel.
+ * 
+ * @param ctx_out   Subchannel output.
+ * 
+ * @param id        Subchannel ID. Must be unique to the main context.
+ * 
+ * @return          0 on success, negative error code on failure.
+ */
+int trfCreateSubchannel(PTRFContext ctx, PTRFContext * ctx_out, uint32_t id);
+
+/**
+ * @brief           Process a subchannel creation request from the peer.
+ *
+ * @param ctx       Allocated context containing the main channel.
+ *
+ * @param ctx_out   Subchannel output.
+ *
+ * @param req       TRF control message containing the subchannel creation
+ *                  request.
+ * 
+ * @return          0 on success, negative error code on failure.
+ */
+int trfProcessSubchannelReq(PTRFContext ctx, PTRFContext * ctx_out,
+                            TrfMsg__MessageWrapper * req);
+
+/**
+ * @brief           Bind the subchannel to the main context. This ensures that
+ *                  the subchannel is closed when the main context is destroyed.
+ *
+ * @param main      Main channel.
+ *
+ * @param sub       Subchannel.
+ *
+ * @return          0 on success, negative error code on failure.
+ */
+int trfBindSubchannel(PTRFContext main, PTRFContext sub);
+
+/**
+ * @brief           Unbind the subchannel from the main context. This is
+ *                  required if the channel disconnects, to prevent invalid
+ *                  memory accesses.
+ *
+ * @param main      Main channel
+ * 
+ * @param id        Subchannel ID
+ * 
+ * @return          0 on success, negative error code on failure.
+ */
+int trfUnbindSubchannel(PTRFContext main, uint32_t id);
+
+/**
  * @brief Allocate an active endpoint.
  * 
  * @param ctx   Context in which to store the allocated endpoint.
@@ -486,21 +539,25 @@ void trfFreeDisplayList(PTRFDisplay disp, int dealloc);
  *                      message type.
  *
  * @param ctx           Context to use
- * 
+ *
  * @param flags         Messages to process internally
- * 
+ *
  * @param processed     Message that was processed
- * 
- * @param data_out      Message data. Typically this is a pointer to a 
+ *
+ * @param data_out      Message data. Typically this is a pointer to a
  *                      TrfMsg__MessageWrapper, but can be any data. This is set
  *                      to a non-NULL value if the message wasn't processed
  *                      internally.
- * 
+ *
+ * @param opaque        Opaque pointer, used internally for state tracking. Do
+ *                      not modify. Before the first call, the initial value of
+ *                      this variable should be set to 0.
+ *
  * @return              Number of messages processed internally, negative error
  *                      code if an error occurred.
  */
 int trfGetMessageAuto(PTRFContext ctx, uint64_t flags, uint64_t * processed,
-    void ** data_out);
+    void ** data_out, int * opaque);
   
 /**
  * @brief       Make the referenced display buffer available for use, as the
@@ -574,7 +631,7 @@ int trfAckClientReq(PTRFContext ctx, uint32_t * disp_ids, int n_disp_ids);
  */
 static inline void * trfGetFBPtr(PTRFDisplay disp)
 {
-    if (&disp->mem.ptr)
+    if (disp->mem.ptr)
     {
         return (void *) ((uintptr_t) disp->mem.ptr + disp->fb_offset);
     }
@@ -597,18 +654,6 @@ static inline ssize_t trfSendFrame(PTRFContext ctx, PTRFDisplay disp,
     ssize_t ret;
     trf__log_trace("Sending frame update to client %lu - addr: %p, rkey: %lu",
                    ctx->xfer.fabric->peer_addr, (void *) rbuf, rkey);
-    trf__log_trace("Fabric EP: %p\nFabric MSG ptr: %p\nFabric rcvBufSize: %lu\nMsgMR: %p\nPeerAddr: %lu\nDisplayFB: %p\nFabricDesc: %p\nRxCQ: %p\nTxCQ:%p\nDisplayBytes:%lu\n",
-                    ctx->xfer.fabric->ep,
-                    trfMemPtr(&ctx->xfer.fabric->msg_mem),
-                    ctx->opts->nc_rcv_bufsize,
-                    ctx->xfer.fabric->msg_mem.fabric_mr,
-                    ctx->xfer.fabric->peer_addr,
-                    trfGetFBPtr(disp),
-                    trfMemFabricDesc(&disp->mem),
-                    ctx->xfer.fabric->rx_cq,
-                    ctx->xfer.fabric->tx_cq,
-                    trfGetDisplayBytes(disp));
-    
     ret = fi_write(ctx->xfer.fabric->ep, 
                    trfGetFBPtr(disp), trfGetDisplayBytes(disp), 
                    trfMemFabricDesc(&disp->mem), ctx->xfer.fabric->peer_addr, 

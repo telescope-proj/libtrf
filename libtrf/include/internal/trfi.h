@@ -244,7 +244,7 @@ static inline int trf__RemainingMS(struct timespec * ts)
     }
     else
     {
-        int ms = (ts->tv_sec - now.tv_sec) * 1000;
+        ms = (ts->tv_sec - now.tv_sec) * 1000;
         ms += (ts->tv_nsec - now.tv_nsec) / 1000000;
     }
     return ms;

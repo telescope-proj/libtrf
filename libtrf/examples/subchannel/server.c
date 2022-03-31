@@ -23,19 +23,75 @@
 #include "trf.h"
 #include "trf_ncp.h"
 #include "trf_ncp_server.h"
+#include "common.h"
+
 #include <signal.h>
+#include <pthread.h>
 
 #if defined(__linux__)
     #include <sys/mman.h>
 #endif
+
+pthread_mutex_t mut;
+
+void * demo_thread(void * arg)
+{
+    trf__log_set_level(2);
+    ts_printf("Demo thread started\n");
+    PTRFContext ctx = (PTRFContext) arg;
+    size_t s = trf__GetPageSize();
+    void * mem = trfAllocAligned(s, s);
+    if (!mem)
+        return (void *) ENOMEM;
+
+    uint32_t * counter = (uint32_t *) mem;
+    *counter = 0;
+
+    intptr_t ret = trfRegInternalMsgBuf(ctx, mem, s);
+    if (ret < 0)
+        return (void *) -ret;
+
+    struct TRFMem * mr = &ctx->xfer.fabric->msg_mem;
+
+    while (*counter < 100)
+    {
+        uint32_t prev = *counter;
+        ts_printf("Counter: %d\n", *counter);
+        ret = trfFabricSend(ctx, mr, trfMemPtr(mr), 4,
+                            ctx->xfer.fabric->peer_addr, ctx->opts);
+        if (ret < 0)
+        {
+            ts_printf("Fabric send failed: %s\n", fi_strerror(-ret));
+            return (void *) -ret;
+        }
+
+        ret = trfFabricRecv(ctx, mr, trfMemPtr(mr), 4, 
+                            ctx->xfer.fabric->peer_addr, ctx->opts);
+        if (ret < 0)
+        {
+            ts_printf("Fabric recv failed: %s\n", fi_strerror(-ret));
+            return (void *) -ret;
+        }
+        
+        if (*counter == prev)
+        {
+            ts_printf("Client did not increment counter!\n");
+            return (void *) EBADE;
+        }
+
+    }
+
+    return NULL;
+}
 
 int main(int argc, char ** argv)
 {
     char* host = "0.0.0.0";
     char* port = "35101";
     int ret;
-    int opaque;
+    int opaque = 0;
 
+    pthread_t t;
     PTRFContext ctx = trfAllocContext();
     PTRFDisplay displays = calloc(1, sizeof(struct TRFDisplay));
 
@@ -95,16 +151,12 @@ int main(int argc, char ** argv)
     // data requests and errors, may not be processed internally and must be
     // handled manually, even if the flags for them are set.
 
-    while (1)
+    ret = trfGetMessageAuto(client_ctx, TRFM_SET_DISP, &processed, 
+                            (void **) &msg, &opaque);
+    if (ret < 0)
     {
-        ret = trfGetMessageAuto(client_ctx, TRFM_SET_DISP, &processed, 
-                                (void **) &msg, &opaque);
-        if (ret < 0)
-        {
-            printf("unable to get poll messages: %d\n", ret);
-            continue;
-        }
-        break;
+        printf("unable to get poll messages: %d\n", ret);
+        return -1;
     }
 
     if (msg && trfPBToInternal(msg->wdata_case) != TRFM_CLIENT_DISP_REQ)
@@ -119,7 +171,8 @@ int main(int argc, char ** argv)
     // The client will indicate that it requires a specific display, and the
     // server should allocate the required memory.
     
-    ret = trfGetMessageAuto(client_ctx, 0, &processed, (void **) &msg, &opaque);
+    ret = trfGetMessageAuto(client_ctx, TRFM_CLIENT_REQ, &processed, 
+                            (void **) &msg, &opaque);
     if (ret < 0)
     {
         printf("unable to get poll messages: %d\n", ret);
@@ -128,7 +181,8 @@ int main(int argc, char ** argv)
 
     if (msg && trfPBToInternal(msg->wdata_case) != TRFM_CLIENT_REQ)
     {
-        printf("Wrong Message Type 2: %" PRIu64 "\n", trfPBToInternal(msg->wdata_case));
+        printf("Wrong Message Type 2: %" PRIu64 "\n", 
+               trfPBToInternal(msg->wdata_case));
         return -1;
     }
 
@@ -189,6 +243,24 @@ int main(int argc, char ** argv)
             printf("unable to get poll messages: %d\n", ret);
             return -1;
         }
+        else if (processed == TRFM_CH_OPEN)
+        {
+            // Client wants to open a subchannel
+            PTRFContext sub = NULL;
+            ret = trfProcessSubchannelReq(client_ctx, &sub, msg);
+            if (ret < 0)
+            {
+                printf("Subchannel creation failed\n");
+                continue;
+            }
+
+            printf("Opened subchannel %d\n", sub->channel_id);
+
+            // Create a new thread to use the subchannel
+            ret = pthread_create(&t, NULL, demo_thread, sub);
+            if (ret)
+                printf("Error creating thread: %s\n", strerror(errno));
+        }
         if (processed == TRFM_CLIENT_F_REQ)
         {
             // Handle the frame request
@@ -239,6 +311,11 @@ int main(int argc, char ** argv)
         }
     }
 
+    uint64_t * retval;
+    pthread_join(t, (void *) &retval);
+    if (retval)
+        printf("Thread failed with: %s", strerror(errno));
+    
     trfDestroyContext(client_ctx);
     trfDestroyContext(ctx);
 }

@@ -70,7 +70,8 @@ int trfMsgUnpack(TrfMsg__MessageWrapper ** handle, uint32_t size, uint8_t * buf)
     {
         return -EIO;
     }
-    trf__log_debug("Unpacked message size: %d",
-        trf_msg__message_wrapper__get_packed_size(*handle));
+    trf__log_debug("Unpacked message size: %d, type: %d",
+        trf_msg__message_wrapper__get_packed_size(*handle),
+        (*handle)->wdata_case);
     return 0;
 }

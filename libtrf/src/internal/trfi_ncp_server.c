@@ -233,10 +233,11 @@ int trf__NCServerExchangeViableLinks(PTRFContext ctx, TRFSock client_sock,
         goto free_cli_ifs;
     }
 
-    ret = trfSortInterfaceList(server_ifs);
-    if (ret < 0)
+    PTRFInterface server_ifs2 = trfSortInterfaceList(server_ifs);
+    if (!server_ifs2)
     {
         trf__log_error("Unable to sort interface list");
+        ret = errno;
         goto free_svr_ifs;
     }
 
@@ -247,12 +248,14 @@ int trf__NCServerExchangeViableLinks(PTRFContext ctx, TRFSock client_sock,
         goto free_svr_ifs;
     }
 
-    ret = trfSortAddrV(av_cand);
-    if (ret < 0)
+    PTRFAddrV av_cand2 = trfSortAddrV(av_cand);
+    if (!av_cand2)
     {
-        trf__log_error("Unable to sort address vector");
+        ret = errno;
         goto free_av;
     }
+
+    av_cand = av_cand2;
 
     // Free the old message addresses
 

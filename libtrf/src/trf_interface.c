@@ -564,13 +564,14 @@ freenomem:
 #endif
 }
 
-int trfSortInterfaceList(PTRFInterface list)
+PTRFInterface trfSortInterfaceList(PTRFInterface list)
 {
     if (!list)
     {
         trf__log_error(
-            "Invalid address vector passed to trfSortInterfaceList()");
-        return -EINVAL;
+            "Invalid interface list passed to trfSortInterfaceList()");
+        errno = -EINVAL;
+        return NULL;
     }
 
     int len = 0;
@@ -582,19 +583,24 @@ int trfSortInterfaceList(PTRFInterface list)
     }
 
     if (len > UINT16_MAX)
-        return -ENOBUFS;
+    {
+        errno = -ENOBUFS;
+        return NULL;
+    }
 
     uint16_t * idx_list = calloc(len, sizeof(uint16_t));
     if (!idx_list)
     {
-        return -ENOMEM;
+        errno = -ENOMEM;
+        return NULL;
     }
 
     PTRFInterface * ptr_list = calloc(len + 1, sizeof(PTRFInterface));
     if (!ptr_list)
     {
         free(ptr_list);
-        return -ENOMEM;
+        errno = -ENOMEM;
+        return NULL;
     }
 
     int rem = len;
@@ -608,7 +614,7 @@ int trfSortInterfaceList(PTRFInterface list)
         {
             if (!idx_list[idx] && if_tmp->speed > max_spd)
             {
-                trf__log_debug("Fastest pair speed: %d", if_tmp->speed);
+                trf__log_trace("Fastest link speed: %d", if_tmp->speed);
                 if_max = if_tmp;
                 max_spd = if_tmp->speed;
                 if_max_idx = idx;
@@ -626,19 +632,21 @@ int trfSortInterfaceList(PTRFInterface list)
         ptr_list[rem]->next = ptr_list[rem + 1];
     }
 
+    PTRFInterface head = ptr_list[0];
     free(ptr_list);
     free(idx_list);
-    return 0;
+    return head;
 }
 
-int trfSortAddrV(PTRFAddrV av)
+PTRFAddrV trfSortAddrV(PTRFAddrV av)
 {
     // This is very inefficient, but it should work for now
 
     if (!av)
     {
         trf__log_error("Invalid address vector passed to trfSortAddrV()");
-        return -EINVAL;
+        errno = -EINVAL;
+        return NULL;
     }
 
     int len = 0;
@@ -650,19 +658,24 @@ int trfSortAddrV(PTRFAddrV av)
     }
 
     if (len > UINT16_MAX)
-        return -ENOBUFS;
+    {
+        errno = -ENOBUFS;
+        return NULL;
+    }
 
     uint16_t * idx_list = calloc(len, sizeof(uint16_t));
     if (!idx_list)
     {
-        return -ENOMEM;
+        errno = -ENOMEM;
+        return NULL;
     }
 
     PTRFAddrV * ptr_list = calloc(len + 1, sizeof(PTRFAddrV));
     if (!ptr_list)
     {
         free(idx_list);
-        return -ENOMEM;
+        errno = -ENOMEM;
+        return NULL;
     }
 
     int rem = len;
@@ -694,9 +707,10 @@ int trfSortAddrV(PTRFAddrV av)
         ptr_list[rem]->next = ptr_list[rem + 1];
     }
 
+    PTRFAddrV head = ptr_list[0];
     free(ptr_list);
     free(idx_list);
-    return 0;
+    return head;
 }
 
 int trfGetFastestLink(PTRFAddrV av, PTRFAddrV * av_out)

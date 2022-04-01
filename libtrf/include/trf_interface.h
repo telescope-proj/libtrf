@@ -64,7 +64,7 @@ void trfFreeAddrV(PTRFAddrV av);
  * @param av  Address vector to sort
  * @return    int 
  */
-int trfSortAddrV(PTRFAddrV av);
+PTRFAddrV trfSortAddrV(PTRFAddrV av);
 
 /**
   * @brief Create an address vector list containing viable links between two
@@ -97,7 +97,7 @@ int trfGetInterfaceList(PTRFInterface * list_out, uint32_t * length, uint64_t fl
  * @brief Sort an interface list.
  * @param list Interface list
  */
-int trfSortInterfaceList(PTRFInterface list);
+PTRFInterface trfSortInterfaceList(PTRFInterface list);
 
 /**
   * @brief Determine the fastest interface in the address vector.

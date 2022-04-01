@@ -141,13 +141,16 @@ int trf__NCSendInterfaceList(PTRFContext ctx, uint8_t * buffer, size_t size,
     if (ret < 0)
         return ret;
 
-    ret = trfSortInterfaceList(client_ifs);
-    if (ret < 0)
+    PTRFInterface client_ifs2;
+    client_ifs2 = trfSortInterfaceList(client_ifs);
+    if (!client_ifs2)
     {
         trf__log_error("Unable to sort interface list");
         trfFreeInterfaceList(client_ifs);
         return ret;
     }
+
+    client_ifs = client_ifs2;
     
     trf__log_debug("Interfaces found: %d", num_ifs);
 
@@ -157,7 +160,6 @@ int trf__NCSendInterfaceList(PTRFContext ctx, uint8_t * buffer, size_t size,
         trfGetIPaddr(tmp->addr, temp);
         trf__log_trace("Found Interface: %s", temp);
     }
-
 
     TrfMsg__MessageWrapper mw   = TRF_MSG__MESSAGE_WRAPPER__INIT;
     TrfMsg__AddrPF apf          = TRF_MSG__ADDR_PF__INIT;
@@ -194,7 +196,6 @@ int trf__NCSendInterfaceList(PTRFContext ctx, uint8_t * buffer, size_t size,
         i++;
     }
 
-    mw.wdata_case = TRF_MSG__MESSAGE_WRAPPER__WDATA_ADDR_PF;
     mw.session_id = ctx->cli.session_id;
 
     size_t m_size = trf_msg__message_wrapper__get_packed_size(&mw);

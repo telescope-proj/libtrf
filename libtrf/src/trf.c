@@ -1638,7 +1638,7 @@ int trfRegDisplayCustom(PTRFContext ctx, PTRFDisplay disp, size_t size,
                        (trfMemPtr(&disp->mem) + size));
         return -ENOSPC;
     }
-    size_t ret;
+    ssize_t ret;
     ret = trf__FabricRegBuf(ctx->xfer.fabric, trfMemPtr(&disp->mem), size, 
                             flags, &disp->mem.fabric_mr);
     if (ret < 0)

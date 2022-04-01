@@ -49,10 +49,25 @@
  * 
  * @param size_out  Output size of packed data in bytes
  * 
- * @return          0 on success, negative error code on failure
+ * @return          Number of bytes written, negative error code on failure.
  */
-int trfMsgPack(TrfMsg__MessageWrapper * handle, uint32_t size, uint8_t * buf, 
-    uint32_t * size_out);
+ssize_t trfMsgPack(TrfMsg__MessageWrapper * handle, uint32_t size, uint8_t * buf);
+
+/**
+ * @brief           Pack message into a buffer to be sent. Generic version.
+ * 
+ * @param handle    Handle to message wrapper containing message to be sent
+ * 
+ * @param size      Size of provided buffer
+ * 
+ * @param buf       Buffer to store packed message
+ * 
+ * @param size_out  Output size of packed data in bytes
+ * 
+ * @return          Number of bytes written, negative error code on failure.
+ */
+ssize_t trfMsgPackProtobuf(ProtobufCMessage * message, uint32_t size,
+                           uint8_t * buf);
 
 /**
  * @brief         Unpack delimited message from buffer
@@ -65,7 +80,24 @@ int trfMsgPack(TrfMsg__MessageWrapper * handle, uint32_t size, uint8_t * buf,
  * 
  * @return        0 on success, negative error code on failure
  */
-int trfMsgUnpack(TrfMsg__MessageWrapper ** handle, uint32_t size, uint8_t * buf);
+ssize_t trfMsgUnpack(TrfMsg__MessageWrapper ** handle, uint32_t size,
+                     uint8_t * buf);
+
+/**
+ * @brief         Unpack delimited message from buffer. Generic version.
+ * 
+ * @param handle  Handle to be set to unpacked message data
+ * 
+ * @param size    Length of the serialized message to be decoded
+ * 
+ * @param buf     Buffer containing message
+ * 
+ * @return        0 on success, negative error code on failure
+ */
+ssize_t trfMsgUnpackProtobuf(ProtobufCMessage ** out,
+                             const ProtobufCMessageDescriptor * desc,
+                             size_t size, uint8_t * buf);
+
 
 static inline int32_t trfMsgGetPackedLength(uint8_t * buf)
 {

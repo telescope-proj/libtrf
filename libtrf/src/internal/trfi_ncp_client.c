@@ -140,6 +140,14 @@ int trf__NCSendInterfaceList(PTRFContext ctx, uint8_t * buffer, size_t size,
     ret = trfGetInterfaceList(&client_ifs, &num_ifs, ctx->opts->iface_flags);
     if (ret < 0)
         return ret;
+
+    ret = trfSortInterfaceList(client_ifs);
+    if (ret < 0)
+    {
+        trf__log_error("Unable to sort interface list");
+        trfFreeInterfaceList(client_ifs);
+        return ret;
+    }
     
     trf__log_debug("Interfaces found: %d", num_ifs);
 

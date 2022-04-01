@@ -564,6 +564,73 @@ freenomem:
 #endif
 }
 
+int trfSortInterfaceList(PTRFInterface list)
+{
+    if (!list)
+    {
+        trf__log_error(
+            "Invalid address vector passed to trfSortInterfaceList()");
+        return -EINVAL;
+    }
+
+    int len = 0;
+    PTRFInterface if_tmp = list;
+    while (if_tmp)
+    {
+        len++;
+        if_tmp = if_tmp->next;
+    }
+
+    if (len > UINT16_MAX)
+        return -ENOBUFS;
+
+    uint16_t * idx_list = calloc(len, sizeof(uint16_t));
+    if (!idx_list)
+    {
+        return -ENOMEM;
+    }
+
+    PTRFInterface * ptr_list = calloc(len + 1, sizeof(PTRFInterface));
+    if (!ptr_list)
+    {
+        free(ptr_list);
+        return -ENOMEM;
+    }
+
+    int rem = len;
+    while (rem)
+    {
+        PTRFInterface if_max = NULL;
+        int max_spd = -100;
+        int idx = 0;
+        int if_max_idx = 0;
+        for (if_tmp = list; if_tmp; if_tmp = if_tmp->next)
+        {
+            if (!idx_list[idx] && if_tmp->speed > max_spd)
+            {
+                trf__log_debug("Fastest pair speed: %d", if_tmp->speed);
+                if_max = if_tmp;
+                max_spd = if_tmp->speed;
+                if_max_idx = idx;
+            }
+            idx++;
+        }
+        idx_list[if_max_idx] = rem;
+        ptr_list[len - rem] = if_max;
+        rem--;
+    }
+
+    for (; rem < len; rem++)
+    {
+        assert(ptr_list[rem]);
+        ptr_list[rem]->next = ptr_list[rem + 1];
+    }
+
+    free(ptr_list);
+    free(idx_list);
+    return 0;
+}
+
 int trfSortAddrV(PTRFAddrV av)
 {
     // This is very inefficient, but it should work for now

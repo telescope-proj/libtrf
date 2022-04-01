@@ -92,12 +92,11 @@ ssize_t trfFabricSendMsg(PTRFContext ctx, PTRFMem mem, void * addr, size_t len,
         len = trfMemSize(mem);
 
     ssize_t ret;
-    uint32_t size_out = 0;
-    ret = trfMsgPack(msg, len, addr, &size_out);
+    ret = trfMsgPack(msg, len, addr);
     if (ret < 0)
         return ret;
     
-    return trfFabricSend(ctx, mem, addr, size_out, peer, opts);
+    return trfFabricSend(ctx, mem, addr, ret, peer, opts);
 }
 
 /* ---- Receive operations ---- */

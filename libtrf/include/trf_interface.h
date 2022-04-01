@@ -94,6 +94,12 @@ void trfFreeInterfaceList(PTRFInterface ifaces);
 int trfGetInterfaceList(PTRFInterface * list_out, uint32_t * length, uint64_t flags);
 
 /**
+ * @brief Sort an interface list.
+ * @param list Interface list
+ */
+int trfSortInterfaceList(PTRFInterface list);
+
+/**
   * @brief Determine the fastest interface in the address vector.
   * @param av       Addess vector to search
   * @param av_out: Pointer to the node inside av containing the fastest interface

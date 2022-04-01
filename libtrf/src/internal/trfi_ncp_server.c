@@ -233,6 +233,13 @@ int trf__NCServerExchangeViableLinks(PTRFContext ctx, TRFSock client_sock,
         goto free_cli_ifs;
     }
 
+    ret = trfSortInterfaceList(server_ifs);
+    if (ret < 0)
+    {
+        trf__log_error("Unable to sort interface list");
+        goto free_svr_ifs;
+    }
+
     PTRFAddrV av_cand = NULL;
     if ((ret = trfCreateAddrV(server_ifs, client_ifs, &av_cand)) < 0)
     {

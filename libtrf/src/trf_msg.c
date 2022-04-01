@@ -24,54 +24,60 @@
 #include "trf_msg.h"
 #include "trf_log.h"
 
-int trfMsgPack(TrfMsg__MessageWrapper * handle, uint32_t size, uint8_t * buf, 
-    uint32_t * size_out)
+ssize_t trfMsgPackProtobuf(ProtobufCMessage * msg, uint32_t size, uint8_t * buf)
 {
-    if (!handle)
+    if (!msg || !protobuf_c_message_check(msg))
         return -EINVAL;
 
-    size_t to_write = trf_msg__message_wrapper__get_packed_size(handle);
+    size_t to_write = protobuf_c_message_get_packed_size(msg);
     if (!to_write)
     {
         trf__log_trace("Unable to get message size");
         return -EINVAL;
-    } 
+    }
     // Protobuf messages must not exceed 2GB in size
     else if (to_write > size - sizeof(uint32_t) 
              || to_write + sizeof(uint32_t) >= (1 << 31))
     {
         trf__log_trace("Buffer too small to store message");
-        return -ENOMEM;
+        return -ENOBUFS;
     }
-    trf__log_trace("To send: %lu, type: %d", to_write, handle->wdata_case);
+    trf__log_trace("To send: %lu", to_write);
     * (uint32_t *) buf = htonl(to_write);
-    size_t pack_sz = trf_msg__message_wrapper__pack(
-        handle, buf + sizeof(uint32_t)
-    );
+    size_t pack_sz = protobuf_c_message_pack(msg, buf + sizeof(uint32_t));
     if (pack_sz != to_write)
     {
         trf__log_trace("Mismatched packed size %lu/%lu", to_write, pack_sz);
         return -EIO;
     }
-    *size_out = to_write + sizeof(uint32_t);
+    return to_write + sizeof(uint32_t);
+}
+
+ssize_t trfMsgPack(TrfMsg__MessageWrapper * handle, uint32_t size,
+                   uint8_t * buf)
+{
+    return trfMsgPackProtobuf((ProtobufCMessage *) handle, size, buf);
+}
+
+ssize_t trfMsgUnpackProtobuf(ProtobufCMessage ** out,
+                             const ProtobufCMessageDescriptor * desc,
+                             size_t size, uint8_t * buf)
+{
+    if (!out || !desc || !size || !buf)
+        return -EINVAL;
+
+    *out = protobuf_c_message_unpack(desc, NULL, size, buf);
+    if (!*out)
+        return -EIO;
+
     return 0;
 }
 
-int trfMsgUnpack(TrfMsg__MessageWrapper ** handle, uint32_t size, uint8_t * buf)
+ssize_t trfMsgUnpack(TrfMsg__MessageWrapper ** handle, uint32_t size,
+                     uint8_t * buf)
 {
-    trf__log_trace("Attempting to unpack message %p with size %d", buf, size);
-    if (!buf || size == 0 || size >= (1 << 31))
-    {
-        trf__log_trace("Invalid buffer or size");
-        return -EINVAL;
-    }
-    *handle = trf_msg__message_wrapper__unpack(NULL, size, buf);
-    if (!*handle)
-    {
-        return -EIO;
-    }
-    trf__log_debug("Unpacked message size: %d, type: %d",
-        trf_msg__message_wrapper__get_packed_size(*handle),
-        (*handle)->wdata_case);
-    return 0;
+    return trfMsgUnpackProtobuf((ProtobufCMessage **) handle, 
+                                (const ProtobufCMessageDescriptor *) 
+                                &trf_msg__message_wrapper__descriptor,
+                                size, buf);
 }

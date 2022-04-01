@@ -90,18 +90,17 @@ int trfNCSendMsg(TRFSock sock, uint8_t * buf, uint32_t size, int timeout,
         return -EINVAL;
     }
 
-    int ret;
+    ssize_t ret, to_write;
     
     // Pack message to be sent.
-    uint32_t to_write;
-    ret = trfMsgPack(handle, size, buf, &to_write);
-    if (ret < 0)
+    to_write = trfMsgPack(handle, size, buf);
+    if (to_write < 0)
     {
-        return ret;
+        return to_write;
     }
 
     // Send complete message
-    ret = trfNCFullSend(sock, to_write, buf, timeout);
+    ret = trfNCSend(sock, to_write, buf, timeout);
     if (ret != to_write)
     {
         return ret < 0 ? ret : -EIO;

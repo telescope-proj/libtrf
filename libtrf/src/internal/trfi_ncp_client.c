@@ -502,21 +502,37 @@ int trf__NCRecvAndTestCandidate(PTRFContext ctx, uint8_t * buffer, size_t size)
 
     TrfMsg__MessageWrapper * mw = NULL;
     struct fi_info * fii        = NULL;
+    int ret;
 
-    size_t bufsize = trf__Min(size, ctx->opts->nc_rcv_bufsize);
-    int ret = trfNCRecvDelimited(trf__ClientFD(ctx), buffer, bufsize,
+    // Filter out transport NACK messages
+    while (1)
+    {
+        size_t bufsize = trf__Min(size, ctx->opts->nc_rcv_bufsize);
+        ret = trfNCRecvDelimited(trf__ClientFD(ctx), buffer, bufsize,
                                  ctx->opts->nc_rcv_timeo, &mw);
-    if (ret < 0)
-    {
-        trf__log_error("Failed to receive message");
-        return ret;
-    }
+        if (ret < 0)
+        {
+            trf__log_error("Failed to receive message");
+            return ret;
+        }
 
-    if (mw->wdata_case != TRF_MSG__MESSAGE_WRAPPER__WDATA_SERVER_CAP)
-    {
-        trf__log_error("Invalid message type");
-        trf_msg__message_wrapper__free_unpacked(mw, NULL);
-        return -EINVAL;
+        if (mw->wdata_case == TRF_MSG__MESSAGE_WRAPPER__WDATA_TRANSPORT_NACK)
+        {
+            trf__log_warn("Transport NACK for transport %d received: %s",
+                          mw->transport_nack->index,
+                          strerror(mw->transport_nack->reason));
+            trf_msg__message_wrapper__free_unpacked(mw, NULL);
+            continue;
+        }
+
+        if (mw->wdata_case != TRF_MSG__MESSAGE_WRAPPER__WDATA_SERVER_CAP)
+        {
+            trf__log_error("Invalid message type %d", mw->wdata_case);
+            trf_msg__message_wrapper__free_unpacked(mw, NULL);
+            return -EINVAL;
+        }
+
+        break;
     }
 
     if (!mw->server_cap->transport)
@@ -724,7 +740,6 @@ int trf__NCRecvAndTestCandidate(PTRFContext ctx, uint8_t * buffer, size_t size)
         goto close_conn;
     }
 
-
     if (* (uint64_t *) mem->ptr != session_id_be64)
     {
         trf__log_error("Server echoed back incorrect session ID %lu "
@@ -743,7 +758,9 @@ free_ep_strs:
     free(tpt_name);
     free(proto_name);
 close_conn:
+    ctx->disconnected = 1;
     trfDestroyFabricContext(ctx);
+    ctx->disconnected = 0;
     fabric_buf = NULL;
 free_fi:
     fi_freeinfo(fii);

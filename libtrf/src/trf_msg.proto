@@ -198,8 +198,10 @@ message ServerCap {
     transport candidate.
 */
 message TransportNack {
+    /*  @brief Transport index. */
+    uint32 index                    = 1;
     /*  @brief NACK reason. */
-    uint32 reason                   = 1;
+    uint32 reason                   = 2;
 }
 
 /*  @brief Created endpoint name

@@ -72,7 +72,8 @@ ssize_t trfFabricSend(PTRFContext ctx, PTRFMem mem, void * addr, size_t len,
     }
     else
     {
-        trf__log_debug("CQ read failed: %s", 
+        trf__log_debug("CQ read failed (%d): %s", 
+            ret,
             trf__FabricGetCQErrString(ctx->xfer.fabric->tx_cq->cq, &err));
         return ret;
     }

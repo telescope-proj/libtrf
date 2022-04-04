@@ -344,7 +344,7 @@ int trfGetInterfaceList(PTRFInterface * list_out, uint32_t * length, uint64_t fl
                                     break;
                                 }
                                 memset(test, 0, INET6_ADDRSTRLEN);
-                                if (trfGetIPaddr(ifa_tmp->ifa_addr, test) < 0)
+                                if (trfGetIPaddr(ifa_tmp->ifa_addr, test) == 0)
                                 {
                                     trf__log_trace("External IP address found: %s", test);
                                 }

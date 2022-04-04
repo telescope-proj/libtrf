@@ -1856,11 +1856,23 @@ const ProtobufCMessageDescriptor trf_msg__server_cap__descriptor =
   (ProtobufCMessageInit) trf_msg__server_cap__init,
   NULL,NULL,NULL    /* reserved[123] */
 };
-static const ProtobufCFieldDescriptor trf_msg__transport_nack__field_descriptors[1] =
+static const ProtobufCFieldDescriptor trf_msg__transport_nack__field_descriptors[2] =
 {
   {
-    "reason",
+    "index",
     1,
+    PROTOBUF_C_LABEL_NONE,
+    PROTOBUF_C_TYPE_UINT32,
+    0,   /* quantifier_offset */
+    offsetof(TrfMsg__TransportNack, index),
+    NULL,
+    NULL,
+    0,             /* flags */
+    0,NULL,NULL    /* reserved1,reserved2, etc */
+  },
+  {
+    "reason",
+    2,
     PROTOBUF_C_LABEL_NONE,
     PROTOBUF_C_TYPE_UINT32,
     0,   /* quantifier_offset */
@@ -1872,12 +1884,13 @@ static const ProtobufCFieldDescriptor trf_msg__transport_nack__field_descriptors
   },
 };
 static const unsigned trf_msg__transport_nack__field_indices_by_name[] = {
-  0,   /* field[0] = reason */
+  0,   /* field[0] = index */
+  1,   /* field[1] = reason */
 };
 static const ProtobufCIntRange trf_msg__transport_nack__number_ranges[1 + 1] =
 {
   { 1, 0 },
-  { 0, 1 }
+  { 0, 2 }
 };
 const ProtobufCMessageDescriptor trf_msg__transport_nack__descriptor =
 {
@@ -1887,7 +1900,7 @@ const ProtobufCMessageDescriptor trf_msg__transport_nack__descriptor =
   "TrfMsg__TransportNack",
   "trfMsg",
   sizeof(TrfMsg__TransportNack),
-  1,
+  2,
   trf_msg__transport_nack__field_descriptors,
   trf_msg__transport_nack__field_indices_by_name,
   1,  trf_msg__transport_nack__number_ranges,

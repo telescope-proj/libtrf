@@ -32,8 +32,8 @@
 #define trf__ProtoFree(msg) \
     trf_msg__message_wrapper__free_unpacked(msg, NULL); msg = NULL;
 
-int trf__NCSendTransportNack(PTRFContext ctx, TRFSock sock, uint32_t reason,
-                             uint8_t * buffer, size_t size);
+int trf__NCSendTransportNack(PTRFContext ctx, TRFSock sock, uint32_t index, 
+                             uint32_t reason, uint8_t * buffer, size_t size);
 
 int trf__SetSockNonBlocking(TRFSock sock);
 

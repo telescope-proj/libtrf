@@ -390,13 +390,17 @@ struct  TrfMsg__TransportNack
 {
   ProtobufCMessage base;
   /**
+   *  @brief Transport index. 
+   */
+  uint32_t index;
+  /**
    *  @brief NACK reason. 
    */
   uint32_t reason;
 };
 #define TRF_MSG__TRANSPORT_NACK__INIT \
  { PROTOBUF_C_MESSAGE_INIT (&trf_msg__transport_nack__descriptor) \
-    , 0 }
+    , 0, 0 }
 
 
 /**

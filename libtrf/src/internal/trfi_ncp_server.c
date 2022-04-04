@@ -241,6 +241,8 @@ int trf__NCServerExchangeViableLinks(PTRFContext ctx, TRFSock client_sock,
         goto free_svr_ifs;
     }
 
+    server_ifs = server_ifs2;
+
     PTRFAddrV av_cand = NULL;
     if ((ret = trfCreateAddrV(server_ifs, client_ifs, &av_cand)) < 0)
     {
@@ -356,7 +358,7 @@ free_msg:
 
 
 int trf__NCServerTestTransport(PTRFContext ctx, TRFSock client_sock, 
-                               uint64_t session_id,
+                               uint64_t session_id, int index,
                                uint8_t * buffer, size_t size, 
                                void * src_addr, size_t src_addr_size,
                                struct fi_info * fi, PTRFContext * new_ctx)
@@ -462,24 +464,40 @@ int trf__NCServerTestTransport(PTRFContext ctx, TRFSock client_sock,
     free(sas_buf);
     sas_buf = NULL;
 
-    // Wait for the client to send back its transport endpoint
-
+    // Wait for the client to send back its transport endpoint or NACK message
+    
     TrfMsg__MessageWrapper * peer_msg = NULL;
-    ret = trfNCRecvDelimited(client_sock, buffer, size, 
-                             ctx->opts->nc_rcv_timeo, &peer_msg);
-    if (ret < 0)
-    {
-        trf__log_error("Delimited receive failed %s", strerror(-ret));
-        trfDestroyContext(nctx);
-        return ret;
-    }
 
-    if (peer_msg->wdata_case != TRF_MSG__MESSAGE_WRAPPER__WDATA_ENDPOINT)
+    while (1)
     {
-        trf__log_error("Invalid message type received");
-        trf_msg__message_wrapper__free_unpacked(peer_msg, NULL);
-        trfDestroyContext(nctx);
-        return -EINVAL;
+        ret = trfNCRecvDelimited(client_sock, buffer, size, 
+                                ctx->opts->nc_rcv_timeo, &peer_msg);
+        if (ret < 0)
+        {
+            trf__log_error("Delimited receive failed %s", strerror(-ret));
+            trfDestroyContext(nctx);
+            return ret;
+        }
+
+        if (peer_msg->wdata_case == TRF_MSG__MESSAGE_WRAPPER__WDATA_TRANSPORT_NACK)
+        {
+            trf__log_warn("Transport NACK for transport %d received: %s",
+                          peer_msg->transport_nack->index + 1,
+                          strerror(peer_msg->transport_nack->reason));
+            trf__ProtoFree(peer_msg);
+            continue;
+        }
+
+        if (peer_msg->wdata_case != TRF_MSG__MESSAGE_WRAPPER__WDATA_ENDPOINT)
+        {
+            trf__log_error("Invalid message type %d received",
+                           peer_msg->wdata_case);
+            trf__ProtoFree(peer_msg);
+            trfDestroyContext(nctx);
+            return -EINVAL;
+        }
+
+        break;
     }
 
     // Insert peer address into AV
@@ -609,6 +627,7 @@ int trf__NCServerTestTransport(PTRFContext ctx, TRFSock client_sock,
                             TRF_MSG__MESSAGE_WRAPPER__WDATA_TRANSPORT_NACK;
                         msg.transport_nack = &nack;
                         nack.reason = ETIMEDOUT;
+                        nack.index  = index;
                         ret = trfNCSendDelimited(client_sock, buffer, 
                                                 size, ctx->opts->nc_snd_timeo, 
                                                 &msg);
@@ -718,16 +737,16 @@ int trf__NCServerGetClientFabrics(PTRFContext ctx, TRFSock client_sock,
 
         // We found a transport, try this one
         ret = trf__NCServerTestTransport(ctx, client_sock, session_id,
-                                         buffer, size, NULL, 0,
+                                         i, buffer, size, NULL, 0,
                                          fi, &nctx);
         if (ret < 0)
         {
-            trf__log_info("Route %d invalid: %s", i, fi_strerror(-ret));
+            trf__log_info("Route %d invalid: %s", i + 1, fi_strerror(-ret));
         }
         else
         {
             fi_freeinfo(fi);
-            trf__log_info("Route %d valid", i);
+            trf__log_info("Route %d valid", i + 1);
             flag = 1;
             break;
         }

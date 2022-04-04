@@ -158,6 +158,7 @@ int trfNCClientInit(PTRFContext ctx, char * host, char * port)
     // connections one by one until we either find a working connection, or the
     // server gives up and has no more entries to send.
 
+    int index = 0;
     int ret2 = 0;
     do {
         ret = trf__NCRecvAndTestCandidate(ctx, buff, buff_size);
@@ -168,13 +169,14 @@ int trfNCClientInit(PTRFContext ctx, char * host, char * port)
         }
         else if (ret == -ETIMEDOUT)
         {
-            ret2 = trf__NCSendTransportNack(ctx, trf__ClientFD(ctx), -ret,
-                                            buff, buff_size);
+            ret2 = trf__NCSendTransportNack(ctx, trf__ClientFD(ctx), index, 
+                                            -ret, buff, buff_size);
             if (ret2 < 0)
             {
                 break;
             }
         }
+        index++;
     } while (ret == -ETIMEDOUT);
 
     if (ret2 != 0)

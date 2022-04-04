@@ -1,12 +1,14 @@
 #include "internal/trfi_ncp.h"
 
-int trf__NCSendTransportNack(PTRFContext ctx, TRFSock sock, uint32_t reason,
-                    uint8_t * buffer, size_t size)
+int trf__NCSendTransportNack(PTRFContext ctx, TRFSock sock, uint32_t index, 
+                             uint32_t reason, uint8_t * buffer, size_t size)
 {
     TrfMsg__MessageWrapper mw   = TRF_MSG__MESSAGE_WRAPPER__INIT;
     TrfMsg__TransportNack tn    = TRF_MSG__TRANSPORT_NACK__INIT;
     mw.transport_nack           = &tn;
     tn.reason                   = reason;
+    tn.index                    = index;
+    mw.wdata_case = TRF_MSG__MESSAGE_WRAPPER__WDATA_TRANSPORT_NACK;
 
     return trfNCSendDelimited(sock, buffer, size,
                               ctx->opts->nc_snd_timeo, &mw);

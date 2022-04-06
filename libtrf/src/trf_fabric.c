@@ -112,16 +112,27 @@ ssize_t trfFabricRecv(PTRFContext ctx, PTRFMem mem, void * addr, size_t len,
     PTRFContextOpts o   = opts ? opts : ctx->opts;
     PTRFXFabric f       = ctx->xfer.fabric;
     fi_addr_t dest      = peer != FI_ADDR_UNSPEC ? peer : f->peer_addr;
-
     ssize_t ret;
-    ret = trfFabricRecvUnchecked(ctx, mem, addr, len, dest);
-    if (ret < 0)
-        return ret;
 
     struct timespec deadline;
-    ret = trfGetDeadline(&deadline, o->fab_snd_timeo);
+    ret = trfGetDeadline(&deadline, o->fab_rcv_timeo);
     if (ret < 0)
         return ret;
+
+    do
+    {
+        ret = trfFabricRecvUnchecked(ctx, mem, addr, len, dest);
+        if (ret < 0 && ret != -FI_EAGAIN)
+        {
+            trf__log_trace("Unchecked recv failed: %s", fi_strerror(-ret));
+            return ret;
+        }
+        if (ret == 0)
+        {
+            break;
+        }
+        trfSleep(ctx->opts->fab_poll_rate);
+    } while (ret == -FI_EAGAIN && !trf__HasPassed(CLOCK_MONOTONIC, &deadline));
 
     struct fi_cq_data_entry cqe;
     struct fi_cq_err_entry err;

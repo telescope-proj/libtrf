@@ -60,7 +60,7 @@
 
 #define TRF_API_MAJOR    0
 #define TRF_API_MINOR    3
-#define TRF_API_PATCH    3
+#define TRF_API_PATCH    4
 
 // Preserved for compatibility
 #define trfNCSendDelimited trfNCSendMsg

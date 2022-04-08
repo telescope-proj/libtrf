@@ -271,7 +271,7 @@ static inline ssize_t trfFabricRecvUnchecked(PTRFContext ctx, PTRFMem mem,
         return -EINVAL;
 
     PTRFXFabric f       = ctx->xfer.fabric;
-    return trf__FabricTrackedRecv(f->tx_cq, f->ep, peer, mem, addr, len);
+    return trf__FabricTrackedRecv(f->rx_cq, f->ep, peer, mem, addr, len);
 }
 
 /**

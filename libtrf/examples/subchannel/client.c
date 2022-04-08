@@ -53,6 +53,10 @@ void * demo_thread(void * arg)
 
     while (*counter < 100)
     {
+
+        struct timespec start;
+        clock_gettime(CLOCK_MONOTONIC, &start);
+
         ret = trfFabricRecv(ctx, mr, trfMemPtr(mr), 4, 
                             ctx->xfer.fabric->peer_addr, ctx->opts);
         if (ret < 0)
@@ -61,10 +65,13 @@ void * demo_thread(void * arg)
             return (void *) -ret;
         }
 
-        *counter += 1;
-        ts_printf("Counter: %d\n", *counter);
-        trfSleep(1);
+        struct timespec end;
+        clock_gettime(CLOCK_MONOTONIC, &end);
+        double tsd1 = timespecdiff(start, end) / 1000000.0;
 
+        *counter += 1;
+        ts_printf("Counter,%d,4,%f,,,%f\n", *counter, tsd1, 1000/tsd1);
+        
         ret = trfFabricSend(ctx, mr, trfMemPtr(mr), 4,
                             ctx->xfer.fabric->peer_addr, ctx->opts);
         if (ret < 0)
@@ -73,6 +80,7 @@ void * demo_thread(void * arg)
             return (void *) -ret;
         }
 
+        trfSleep(1);
     }
 
     return NULL;
@@ -172,21 +180,16 @@ int main(int argc, char ** argv)
         return -1;
     }
 
+    ts_printf("\"Thread\",\"Frame/Counter\",\"Size\",\"Request (ms)\","
+              "\"Frame Time (ms)\",\"Speed (Gbit/s)\",\"Rate (Hz)\"\n");
+
     // Create a new thread to use the subchannel
     ret = pthread_create(&t, NULL, demo_thread, sub);
     if (ret)
         ts_printf("Error creating thread: %s\n", strerror(errno));
-
-    
-    #define timespecdiff(_start, _end) \
-        (((_end).tv_sec - (_start).tv_sec) * 1000000000 + \
-        ((_end).tv_nsec - (_start).tv_nsec))
-
     
     // Request 100 frames from the first display in the list
     
-    ts_printf( "\"Frame\",\"Size\",\"Request (ms)\",\"Frame Time (ms)\""
-            ",\"Speed (Gbit/s)\",\"Framerate (Hz)\"\n");
     struct timespec tstart, tend;
     
     for (int f = 0; f < 100; f++)
@@ -224,7 +227,7 @@ int main(int argc, char ** argv)
             case TRFM_SERVER_ACK_F_REQ:
                 clock_gettime(CLOCK_MONOTONIC, &tend);
                 double tsd2 = timespecdiff(tstart, tend) / 1000000.0;
-                ts_printf("%d,%ld,%f,%f,%f,%f\n",
+                ts_printf("Frame,%d,%ld,%f,%f,%f,%f\n",
                     f, trfGetDisplayBytes(displays), tsd1, tsd2, 
                     ((double) trfGetDisplayBytes(displays)) / tsd2 / 1e5,
                     1000.0 / tsd2);

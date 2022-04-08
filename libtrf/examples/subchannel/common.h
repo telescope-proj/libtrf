@@ -10,4 +10,8 @@ const char * port = "33000";
     pthread_mutex_unlock(&mut);     \
 } while (0);                        \
 
+#define timespecdiff(_start, _end) \
+        (((_end).tv_sec - (_start).tv_sec) * 1000000000 + \
+        ((_end).tv_nsec - (_start).tv_nsec))
+
 #endif

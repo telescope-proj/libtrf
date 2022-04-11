@@ -83,6 +83,7 @@ void * demo_thread(void * arg)
         trfSleep(1);
     }
 
+    trfDestroyContext(ctx);
     return NULL;
 }
 
@@ -90,6 +91,20 @@ int main(int argc, char ** argv)
 {
     char* host = "127.0.0.1";
     char* port = "35101";
+    bool  ci   = 0;
+
+    printf("argc: %d\n", argc);
+
+    if (argc >= 2)
+        host = argv[1];
+
+    if (argc >= 3)
+        port = argv[2];
+
+    if (argc >= 4)
+        if (strncmp(argv[3], "ci", 2) == 0)
+            ci = 1;
+
     pthread_t t;
 
     PTRFContext ctx = trfAllocContext();
@@ -97,8 +112,9 @@ int main(int argc, char ** argv)
     {
         ts_printf("unable to initiate client\n");
         fflush(stdout);
-        return -1;
+        return 1;
     }
+    
     ts_printf("Hello!\n");
     ts_printf("Socket FD: %d", ctx->cli.client_fd);
 
@@ -109,7 +125,7 @@ int main(int argc, char ** argv)
     if (ret < 0)
     {
         ts_printf("Unable to get server display list: error %s\n", strerror(ret));
-        return -1;
+        return 1;
     }
 
     ts_printf("Server Display List\n");
@@ -131,23 +147,26 @@ int main(int argc, char ** argv)
     // Register buffer to store the first display's framebuffer
 
     displays->mem.ptr = trfAllocAligned(trfGetDisplayBytes(displays), 2097152);
-    ret = trfRegDisplaySink(ctx, displays);
-    if (ret < 0)
-    {
-        ts_printf("Unable to register display sink: error %s\n", strerror(ret));
-        return -1;
-    }
     
     #if defined(__linux__)
         madvise(displays->mem.ptr, trfGetDisplayBytes(displays), MADV_HUGEPAGE);
     #endif
+
+    ret = trfRegDisplaySink(ctx, displays);
+    if (ret < 0)
+    {
+        ts_printf("Unable to register display sink: error %s\n", strerror(ret));
+        return 1;
+    }
+    
+    memset(displays->mem.ptr, 0, trfGetDisplayBytes(displays));
 
     // Indicate to the server that the client is ready to receive frames
 
     if ((ret = trfSendClientReq(ctx,displays)) < 0)
     {
         ts_printf("Unable to send display request");
-        return -1;
+        return 1;
     }
 
     // Wait until the server is ready
@@ -160,13 +179,13 @@ int main(int argc, char ** argv)
     if (ret < 0)
     {
         ts_printf("Unable to receive message: %s\n", fi_strerror(-ret));
-        return -1;
+        return 1;
     }
     
     if (trfPBToInternal(msg->wdata_case) != TRFM_SERVER_ACK)
     {
         ts_printf("Invalid message type %d received", msg->wdata_case);
-        return -1;
+        return 1;
     }
 
     // Create a subchannel
@@ -177,7 +196,7 @@ int main(int argc, char ** argv)
     if (ret < 0)
     {
         ts_printf("Could not create subchannel: %s\n", fi_strerror(-ret));
-        return -1;
+        return 1;
     }
 
     ts_printf("\"Thread\",\"Frame/Counter\",\"Size\",\"Request (ms)\","
@@ -191,6 +210,7 @@ int main(int argc, char ** argv)
     // Request 100 frames from the first display in the list
     
     struct timespec tstart, tend;
+    uint32_t fcheck = 0;
     
     for (int f = 0; f < 100; f++)
     {
@@ -202,7 +222,7 @@ int main(int argc, char ** argv)
         if (ret < 0)
         {
             ts_printf("Unable to receive frame: error %s\n", strerror(-ret));
-            return -1;
+            return 1;
         }
         clock_gettime(CLOCK_MONOTONIC, &tend);
         double tsd1 = timespecdiff(tstart, tend) / 1000000.0;
@@ -213,14 +233,14 @@ int main(int argc, char ** argv)
         {
             ts_printf("Unable to get receive progress: error %s\n", 
                    strerror(-ret));
-            return -1;
+            return 1;
         }
 
         ret = trfMsgUnpack(&msg, 
                            trfMsgGetPackedLength(ctx->xfer.fabric->msg_mem.ptr),
                            trfMsgGetPayload(ctx->xfer.fabric->msg_mem.ptr));
         if (ret < 0)
-            return -1;
+            return 1;
 
         switch (trfPBToInternal(msg->wdata_case))
         {
@@ -236,6 +256,24 @@ int main(int argc, char ** argv)
                 ts_printf("Message type %d received!", msg->wdata_case);
         }
 
+        if (ci)
+        {
+            // Check frame integrity
+            fcheck += 0x01010101;
+            for (size_t i = 0; i < trfGetDisplayBytes(displays) / 4; i++)
+            {
+                uint32_t val = * (((uint32_t *) trfGetFBPtr(displays)) + i);
+                if (val != fcheck)
+                {
+                    ts_printf("Error: Integrity check failed! "
+                            "Position: %lu of %lu, Expected: 0x%08x, "
+                            "Value: 0x%08x", 
+                            i * 4, trfGetDisplayBytes(displays), fcheck, val);
+                    return 1;
+                }
+            }
+        }
+
         displays->frame_cntr++;
     }
     
@@ -243,7 +281,14 @@ int main(int argc, char ** argv)
     uint64_t * retval;
     pthread_join(t, (void *) &retval);
     if (retval)
+    {
         ts_printf("Thread failed with: %s", strerror(errno));
+        return 1;
+    }
+
+    void * fb = displays->mem.ptr;
+    trfUpdateDisplayAddr(ctx, displays, NULL);
+    free(fb);
 
     // Once done, destroy the context releasing all resources and closing the
     // connection.

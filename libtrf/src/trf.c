@@ -288,6 +288,7 @@ void trfDestroyFabricContext(PTRFContext ctx)
             trf__log_error( "Failed to send disconnect message (fabric): %s;"
                             "peer may be in an invalid state", strerror(-ret));
         }
+        ctx->disconnected = 1;
     }
     if (trfMemFabricMR(&f->msg_mem))
     {
@@ -1739,7 +1740,7 @@ int trfBindDisplayList(PTRFContext ctx, PTRFDisplay list)
 
 int trfUpdateDisplayAddr(PTRFContext ctx, PTRFDisplay disp, void * addr)
 {
-    if (!disp || !addr)
+    if (!disp)
         return -EINVAL;
 
     int ret;
@@ -1750,7 +1751,7 @@ int trfUpdateDisplayAddr(PTRFContext ctx, PTRFDisplay disp, void * addr)
         return -EINVAL;
     }
 
-    struct fid_mr * tmp_mr;
+    struct fid_mr * tmp_mr = NULL;
 
     disp->mem.ptr = addr;
     ssize_t fb_len = trfGetDisplayBytes(disp);
@@ -1761,13 +1762,16 @@ int trfUpdateDisplayAddr(PTRFContext ctx, PTRFDisplay disp, void * addr)
         return fb_len;
     }
 
-    uint64_t flags = ctx->type == TRF_EP_SINK ? FI_REMOTE_WRITE : 0;
-    ret = fi_mr_reg(ctx->xfer.fabric->domain, addr, fb_len, flags, 0, 0,
-        0, &tmp_mr, NULL);
-    if (ret)
+    if (addr)
     {
-        trf_fi_error("fi_mr_reg", ret);
-        return ret;
+        uint64_t flags = ctx->type == TRF_EP_SINK ? FI_REMOTE_WRITE : 0;
+        ret = fi_mr_reg(ctx->xfer.fabric->domain, addr, fb_len, flags, 0, 0,
+            0, &tmp_mr, NULL);
+        if (ret)
+        {
+            trf_fi_error("fi_mr_reg", ret);
+            return ret;
+        }
     }
 
     if (disp->mem.fabric_mr)

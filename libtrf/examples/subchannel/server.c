@@ -81,6 +81,13 @@ void * demo_thread(void * arg)
 
     }
 
+    ts_printf("Counter check passed!");
+
+    // In this test the client is expected to send a disconnect
+
+    ctx->disconnected = 1;
+    trfDestroyContext(ctx);
+
     return NULL;
 }
 
@@ -88,6 +95,20 @@ int main(int argc, char ** argv)
 {
     char* host = "0.0.0.0";
     char* port = "35101";
+    bool  ci   = 0;
+
+    printf("argc: %d\n", argc);
+
+    if (argc >= 2)
+        host = argv[1];
+
+    if (argc >= 3)
+        port = argv[2];
+
+    if (argc >= 4)
+        if (strncmp(argv[3], "ci", 2) == 0)
+            ci = 1;
+
     int ret;
     int opaque = 0;
 
@@ -113,7 +134,7 @@ int main(int argc, char ** argv)
     if (trfNCServerInit(ctx, host, port) < 0)
     {
         printf("unable to initiate server\n");
-        return -1;
+        return 1;
     }
 
     // Block until a client connects. This will establish a link with the client
@@ -125,7 +146,7 @@ int main(int argc, char ** argv)
     if (trfNCAccept(ctx, &client_ctx) < 0)
     {
         printf("unable to accept client\n");
-        return -1;
+        return 1;
     }
 
     // Bind a display list to the client context. This will be used to respond
@@ -137,7 +158,7 @@ int main(int argc, char ** argv)
     if (ret < 0)
     {
         printf("unable to bind displays\n");
-        return -1;
+        return 1;
     }
 
     printf("Connection established\n");
@@ -156,13 +177,13 @@ int main(int argc, char ** argv)
     if (ret < 0)
     {
         printf("unable to get poll messages: %d\n", ret);
-        return -1;
+        return 1;
     }
 
     if (msg && trfPBToInternal(msg->wdata_case) != TRFM_CLIENT_DISP_REQ)
     {
         printf("Wrong Message Type 1: %" PRIu64 "\n", trfPBToInternal(msg->wdata_case));
-        return -1;
+        return 1;
     }
 
     printf("Requesting second message...\n");
@@ -176,14 +197,14 @@ int main(int argc, char ** argv)
     if (ret < 0)
     {
         printf("unable to get poll messages: %d\n", ret);
-        return -1;
+        return 1;
     }
 
     if (msg && trfPBToInternal(msg->wdata_case) != TRFM_CLIENT_REQ)
     {
         printf("Wrong Message Type 2: %" PRIu64 "\n", 
                trfPBToInternal(msg->wdata_case));
-        return -1;
+        return 1;
     }
 
     // Get the display requested
@@ -193,7 +214,7 @@ int main(int argc, char ** argv)
     if (!req_disp)
     {
         printf("unable to get display: %s\n", strerror(errno));
-        return -1;
+        return 1;
     }
 
     trf__ProtoFree(msg);
@@ -205,7 +226,7 @@ int main(int argc, char ** argv)
     if (!req_disp->mem.ptr)
     {
         printf("unable to allocate framebuffer\n");
-        return -1;
+        return 1;
     }
 
     #if defined(__linux__)
@@ -219,8 +240,10 @@ int main(int argc, char ** argv)
     if (ret < 0)
     {
         printf("unable to register display source: %d\n", ret);
-        return -1;
+        return 1;
     }
+
+    memset(req_disp->mem.ptr, 0, trfGetDisplayBytes(req_disp));
 
     // Acknowledge the request
 
@@ -229,11 +252,15 @@ int main(int argc, char ** argv)
     if (ret < 0)
     {
         printf("unable to acknowledge request: %d\n", ret);
-        return -1;
+        return 1;
     }
+
+    // Frame integrity check
+    uint32_t fcheck = 0;
 
     // Handle incoming frame requests
 
+    PTRFContext sub = NULL;
     while (1)
     {
         ret = trfGetMessageAuto(client_ctx, ~TRFM_CLIENT_F_REQ, &processed, 
@@ -241,19 +268,22 @@ int main(int argc, char ** argv)
         if (ret < 0)
         {
             printf("unable to get poll messages: %d\n", ret);
-            return -1;
+            return 1;
         }
         else if (processed == TRFM_CH_OPEN)
         {
             // Client wants to open a subchannel
-            PTRFContext sub = NULL;
+            if (sub)
+            {
+                printf("Warning: Client already opened a subchannel!");
+                continue;
+            }
             ret = trfProcessSubchannelReq(client_ctx, &sub, msg);
             if (ret < 0)
             {
                 printf("Subchannel creation failed\n");
                 continue;
             }
-
             printf("Opened subchannel %d\n", sub->channel_id);
 
             // Create a new thread to use the subchannel
@@ -263,13 +293,23 @@ int main(int argc, char ** argv)
         }
         if (processed == TRFM_CLIENT_F_REQ)
         {
+            if (ci)
+            {
+                // Data integrity check
+                fcheck += 0x01010101;
+                for (int i = 0; i <= trfGetDisplayBytes(req_disp) / 4; i++)
+                {
+                    * (((uint32_t *) trfGetFBPtr(displays)) + i) = fcheck;
+                }
+            }
+
             // Handle the frame request
             ret = trfSendFrame(client_ctx, req_disp, msg->client_f_req->addr, 
                 msg->client_f_req->rkey);
             if (ret < 0)
             {
                 printf("unable to send frame: %d\n", ret);
-                return -1;
+                return 1;
             }
 
             struct fi_cq_data_entry de;
@@ -314,8 +354,17 @@ int main(int argc, char ** argv)
     uint64_t * retval;
     pthread_join(t, (void *) &retval);
     if (retval)
+    {
         printf("Thread failed with: %s", strerror(errno));
+        return 1;
+    }
     
+    // Deregister the frame buffer before freeing memory
+    void * fb = req_disp->mem.ptr;
+    trfUpdateDisplayAddr(client_ctx, req_disp, NULL);
+    free(fb);
+
+    // Destroy context objects
     trfDestroyContext(client_ctx);
     trfDestroyContext(ctx);
 }

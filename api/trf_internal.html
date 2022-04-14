@@ -222,12 +222,40 @@
 </dd></dl>
 
 <dl class="cpp function">
-<dt class="sig sig-object cpp" id="_CPPv48trfSleepi">
-<span id="_CPPv38trfSleepi"></span><span id="_CPPv28trfSleepi"></span><span id="trfSleep__i"></span><span class="target" id="trfi_8h_1a10f317f5891b5c1c6851b37ef43a6e76"></span><span class="k"><span class="pre">static</span></span><span class="w"> </span><span class="k"><span class="pre">inline</span></span><span class="w"> </span><span class="kt"><span class="pre">void</span></span><span class="w"> </span><span class="sig-name descname"><span class="n"><span class="pre">trfSleep</span></span></span><span class="sig-paren">(</span><span class="kt"><span class="pre">int</span></span><span class="w"> </span><span class="n sig-param"><span class="pre">ms</span></span><span class="sig-paren">)</span><a class="headerlink" href="#_CPPv48trfSleepi" title="Permalink to this definition"></a><br /></dt>
+<dt class="sig sig-object cpp" id="_CPPv48trfSleep8uint32_t">
+<span id="_CPPv38trfSleep8uint32_t"></span><span id="_CPPv28trfSleep8uint32_t"></span><span id="trfSleep__uint32_t"></span><span class="target" id="trfi_8h_1ab3f87972a645ffbfcfccffd2a27add8f"></span><span class="k"><span class="pre">static</span></span><span class="w"> </span><span class="k"><span class="pre">inline</span></span><span class="w"> </span><span class="kt"><span class="pre">int</span></span><span class="w"> </span><span class="sig-name descname"><span class="n"><span class="pre">trfSleep</span></span></span><span class="sig-paren">(</span><span class="n"><span class="pre">uint32_t</span></span><span class="w"> </span><span class="n sig-param"><span class="pre">ms</span></span><span class="sig-paren">)</span><a class="headerlink" href="#_CPPv48trfSleep8uint32_t" title="Permalink to this definition"></a><br /></dt>
 <dd><p>Sleep for a given number of milliseconds. </p>
 <dl class="field-list simple">
 <dt class="field-odd">Parameters</dt>
-<dd class="field-odd"><p><strong>ms</strong> – Number of milliseconds to sleep. </p>
+<dd class="field-odd"><p><strong>ms</strong> – Number of milliseconds to sleep. Note: A value of zero will not suspend thread execution across all operating systems.</p>
+</dd>
+<dt class="field-even">Returns</dt>
+<dd class="field-even"><p>0 on success, negative error code on failure. On Windows, this function always returns 0. On Linux, signals which occur during the sleep return -EINTR. </p>
+</dd>
+</dl>
+</dd></dl>
+
+<dl class="cpp function">
+<dt class="sig sig-object cpp" id="_CPPv412trfNanoSleep8uint64_t">
+<span id="_CPPv312trfNanoSleep8uint64_t"></span><span id="_CPPv212trfNanoSleep8uint64_t"></span><span id="trfNanoSleep__uint64_t"></span><span class="target" id="trfi_8h_1a1e965830fa6c05ff335017243782ab70"></span><span class="k"><span class="pre">static</span></span><span class="w"> </span><span class="k"><span class="pre">inline</span></span><span class="w"> </span><span class="kt"><span class="pre">int</span></span><span class="w"> </span><span class="sig-name descname"><span class="n"><span class="pre">trfNanoSleep</span></span></span><span class="sig-paren">(</span><span class="n"><span class="pre">uint64_t</span></span><span class="w"> </span><span class="n sig-param"><span class="pre">ns</span></span><span class="sig-paren">)</span><a class="headerlink" href="#_CPPv412trfNanoSleep8uint64_t" title="Permalink to this definition"></a><br /></dt>
+<dd><p>High resolution sleep function. </p>
+<dl class="field-list simple">
+<dt class="field-odd">Parameters</dt>
+<dd class="field-odd"><p><strong>ns</strong> – Number of nanoseconds to sleep. <div class="highlight-c notranslate"><div class="highlight"><pre><span></span>         <span class="nl">Note</span><span class="p">:</span> <span class="n">A</span> <span class="n">value</span> <span class="n">of</span> <span class="n">zero</span> <span class="n">will</span> <span class="n">not</span> <span class="n">suspend</span> <span class="kr">thread</span> <span class="n">execution</span> <span class="n">across</span>
+         <span class="n">all</span> <span class="n">operating</span> <span class="n">systems</span><span class="p">.</span>  
+
+         <span class="n">While</span> <span class="n">this</span> <span class="n">function</span> <span class="n">may</span> <span class="n">be</span> <span class="n">useful</span> <span class="k">for</span> <span class="n">very</span> <span class="n">specific</span> <span class="n">use</span> <span class="n">cases</span><span class="p">,</span>
+         <span class="n">it</span> <span class="n">should</span> <span class="n">be</span> <span class="n">noted</span> <span class="n">that</span> <span class="n">sleeps</span> <span class="n">have</span> <span class="n">their</span> <span class="n">own</span> <span class="n">context</span> <span class="k">switch</span> <span class="n">and</span>
+         <span class="n">TLB</span> <span class="n">flush</span> <span class="n">overhead</span><span class="p">,</span> <span class="n">and</span> <span class="n">may</span> <span class="n">not</span> <span class="n">present</span> <span class="n">any</span> <span class="n">benefit</span> <span class="n">over</span> <span class="n">using</span>
+         <span class="n">the</span> <span class="n">regular</span> <span class="n">trfSleep</span><span class="p">()</span> <span class="n">function</span><span class="p">.</span>
+</pre></div>
+</div>
+</p>
+</dd>
+<dt class="field-even">Returns</dt>
+<dd class="field-even"><p><p>0 on success, negative error code on failure.</p>
+<p>On Windows, this function always returns 0. On Linux, signals which occur during the sleep return -EINTR.</p>
+</p>
 </dd>
 </dl>
 </dd></dl>

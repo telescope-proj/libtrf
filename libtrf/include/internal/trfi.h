@@ -195,18 +195,67 @@ static inline char * trfStrdup(char * str)
 
 /**
  * @brief Sleep for a given number of milliseconds.
+ *
+ * @param ms    Number of milliseconds to sleep. 
+ *              Note: A value of zero will not suspend thread execution across
+ *              all operating systems.
  * 
- * @param ms    Number of milliseconds to sleep.
+ * @return      0 on success, negative error code on failure.
+ *              On Windows, this function always returns 0. On Linux, signals
+ *              which occur during the sleep return -EINTR.
  */
-static inline void trfSleep(int ms) {
-    if (ms <= 0) { return; }
+static inline int trfSleep(uint32_t ms) {
+    if (!ms)
+        return 0;
+
 #ifdef _WIN32
     Sleep(ms);
+    return 0;
 #else
     struct timespec t;
     t.tv_sec    = ms / 1000;
     t.tv_nsec   = (ms % 1000) * 1000000;
-    nanosleep(&t, NULL);
+    int ret = nanosleep(&t, NULL);
+    if (ret < 0)
+        return -errno;
+        
+    return 0;
+#endif
+}
+
+/**
+ * @brief High resolution sleep function.
+ *
+ * @param ns    Number of nanoseconds to sleep.  
+ *
+ *              Note: A value of zero will not suspend thread execution across
+ *              all operating systems.  
+ *
+ *              While this function may be useful for very specific use cases,
+ *              it should be noted that sleeps have their own context switch and
+ *              TLB flush overhead, and may not present any benefit over using
+ *              the regular trfSleep() function.  
+ * 
+ * @return      0 on success, negative error code on failure.  
+ *              On Windows, this function always returns 0. On Linux, signals
+ *              which occur during the sleep return -EINTR.
+ */
+static inline int trfNanoSleep(uint64_t ns) {
+    if (!ns)
+        return 0;
+
+#ifdef _WIN32
+    NtDelayExecution(FALSE, ns / 100);
+    return 0;
+#else
+    struct timespec t;
+    t.tv_sec    = ns / 1000000000;
+    t.tv_nsec   = ns % 1000000000;
+    int ret = nanosleep(&t, NULL);
+    if (ret < 0)
+        return -errno;
+    
+    return 0;
 #endif
 }
 
@@ -235,7 +284,10 @@ static inline void trf__GetDelay(struct timespec * ts, struct timespec * ts_out,
 static inline int trf__RemainingMS(struct timespec * ts)
 {
     struct timespec now;
-    clock_gettime(CLOCK_MONOTONIC, &now);
+    int ret = clock_gettime(CLOCK_MONOTONIC, &now);
+    if (ret < 0)
+        return -errno;
+
     int ms;
     if ((now.tv_sec > ts->tv_sec && now.tv_nsec > ts->tv_nsec)
             || (now.tv_sec == ts->tv_sec && now.tv_nsec > ts->tv_nsec))
@@ -264,11 +316,12 @@ static inline int trf__HasPassed(clockid_t clock, struct timespec * ts)
 {
     struct timespec now;
     int ret = clock_gettime(clock, &now);
-    if (ret != 0) {
+    if (ret == -1)
         return -errno;
-    }
+    
     return ((now.tv_sec > ts->tv_sec && now.tv_nsec > ts->tv_nsec)
             || (now.tv_sec == ts->tv_sec && now.tv_nsec > ts->tv_nsec));
+    
 }
 
 #define trf__ProtoStringValid(ptr) \

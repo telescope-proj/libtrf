@@ -81,7 +81,7 @@ void * demo_thread(void * arg)
 
     }
 
-    ts_printf("Counter check passed!");
+    ts_printf("Counter check passed!\n");
 
     // In this test the client is expected to send a disconnect
 
@@ -118,15 +118,15 @@ int main(int argc, char ** argv)
 
     // Example display, named "test", with a resolution of 1920x1080.
     
-    displays->id = 0;
-    displays->name = "test";
-    displays->width = 1920;
-    displays->height = 1080;
-    displays->rate = 60;
-    displays->format = TRF_TEX_BGRA_8888;
-    displays->dgid = 0;
-    displays->x_offset = 0;
-    displays->y_offset = 0;
+    displays->id        = 0;
+    displays->name      = strdup("test");
+    displays->width     = 1920;
+    displays->height    = 1080;
+    displays->rate      = 60;
+    displays->format    = TRF_TEX_BGRA_8888;
+    displays->dgid      = 0;
+    displays->x_offset  = 0;
+    displays->y_offset  = 0;
 
     // Initialize the server's resources and start listening on the specified
     // host and port for incoming negotiation channel connections.
@@ -349,7 +349,10 @@ int main(int argc, char ** argv)
         {
             printf("Wrong message type...\n");
         }
+        trf__ProtoFree(msg);
     }
+
+    trf__ProtoFree(msg);
 
     uint64_t * retval;
     pthread_join(t, (void *) &retval);
@@ -358,13 +361,18 @@ int main(int argc, char ** argv)
         printf("Thread failed with: %s", strerror(errno));
         return 1;
     }
-    
-    // Deregister the frame buffer before freeing memory
-    void * fb = req_disp->mem.ptr;
-    trfUpdateDisplayAddr(client_ctx, req_disp, NULL);
-    free(fb);
+
+    // Free display data
+    trfFreeDisplayList(displays, 1);
 
     // Destroy context objects
     trfDestroyContext(client_ctx);
     trfDestroyContext(ctx);
+
+    if (ci)
+    {
+        ts_printf("Frame check passed!\n");
+    }
+
+    return 0;
 }

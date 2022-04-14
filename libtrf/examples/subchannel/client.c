@@ -188,6 +188,8 @@ int main(int argc, char ** argv)
         return 1;
     }
 
+    trf__ProtoFree(msg);
+
     // Create a subchannel
 
     ts_printf("Creating subchannel with ID 10...\n");
@@ -275,8 +277,9 @@ int main(int argc, char ** argv)
         }
 
         displays->frame_cntr++;
+        trf__ProtoFree(msg);
     }
-    
+
     // Wait for the other thread to finish
     uint64_t * retval;
     pthread_join(t, (void *) &retval);
@@ -286,11 +289,17 @@ int main(int argc, char ** argv)
         return 1;
     }
 
-    void * fb = displays->mem.ptr;
-    trfUpdateDisplayAddr(ctx, displays, NULL);
-    free(fb);
+    // Free display list
+    trfFreeDisplayList(displays, 1);
 
     // Once done, destroy the context releasing all resources and closing the
     // connection.
     trfDestroyContext(ctx);
+
+    if (ci)
+    {
+        ts_printf("Frame check passed!\n");
+    }
+
+    return 0;
 }

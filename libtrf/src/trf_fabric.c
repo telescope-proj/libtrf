@@ -56,7 +56,6 @@ ssize_t trfFabricSend(PTRFContext ctx, PTRFMem mem, void * addr, size_t len,
         trfSleep(ctx->opts->fab_poll_rate);
     } while (ret == -FI_EAGAIN && !trf__HasPassed(CLOCK_MONOTONIC, &deadline));
     
-
     struct fi_cq_data_entry cqe;
     struct fi_cq_err_entry err;
     ret = trfFabricPollSend(ctx, &cqe, &err, ctx->opts->fab_cq_sync, 

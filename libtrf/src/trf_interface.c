@@ -81,43 +81,39 @@ PTRFAddrV trfDuplicateAddrV(PTRFAddrV av)
         return NULL;
     }
     PTRFAddrV out_start = out;
-    PTRFAddrV out_prev = NULL;
     PTRFAddrV v = av;
     while (v)
     {
-        out->src_addr = calloc(1, sizeof(*out->src_addr));
+        out->src_addr = malloc(TRF_SA_LEN(v->src_addr));
         if (!out->src_addr)
         {
             trf__log_error("Memory allocation failed");
             trfFreeAddrV(out_start);
             return NULL;
         }
-        memcpy(out->src_addr, v->src_addr, sizeof(*out->src_addr));
-        out->dst_addr = calloc(1, sizeof(*out->dst_addr));
+        memcpy(out->src_addr, v->src_addr, TRF_SA_LEN(v->src_addr));
+        out->dst_addr = malloc(TRF_SA_LEN(v->dst_addr));
         if (!out->dst_addr)
         {
             trf__log_error("Memory allocation failed");
             trfFreeAddrV(out_start);
             return NULL;
         }
-        memcpy(out->dst_addr, v->dst_addr, sizeof(*out->dst_addr));
-        out->next = calloc(1, sizeof(*out->next));
-        if (!out->next)
-        {
-            trf__log_error("Memory allocation failed");
-            trfFreeAddrV(out_start);
-            return NULL;
-        }
+        memcpy(out->dst_addr, v->dst_addr, TRF_SA_LEN(v->dst_addr));
         out->pair_speed = v->pair_speed;
-        out_prev = out;
-        out = out->next;
+        if (v->next)
+        {
+            out->next = calloc(1, sizeof(*out));
+            if (!out->next)
+            {
+                trf__log_error("Memory allocation failed");
+                trfFreeAddrV(out_start);
+                return NULL;
+            }
+            out = out->next;
+        }
+        out->next = NULL;
         v = v->next;
-    }
-
-    if (out_prev)
-    {
-        trfFreeAddrV(out_prev->next);
-        out_prev->next = NULL;
     }
 
     return out_start;

@@ -172,7 +172,7 @@ int trfAllocActiveEP(PTRFXFabric ctx, struct fi_info * fi, void * data,
     if (ret)
     {
         trf_fi_error("Bind event queue to address vector", ret);
-        goto free_av;
+        goto free_eq;
     }
     if (data && !(fi->src_addr))
     {
@@ -184,7 +184,7 @@ int trfAllocActiveEP(PTRFXFabric ctx, struct fi_info * fi, void * data,
             if (!abuf)
             {
                 ret = -FI_ENOMEM;
-                goto free_av;
+                goto free_eq;
             }
             memcpy(abuf, data, size);
             fi->src_addr    = abuf;
@@ -197,7 +197,7 @@ int trfAllocActiveEP(PTRFXFabric ctx, struct fi_info * fi, void * data,
             {
                 trf__log_error("Failed to set source address: %s",
                                fi_strerror(-ret));
-                goto free_av;
+                goto free_eq;
             }
         }
     }
@@ -217,13 +217,13 @@ int trfAllocActiveEP(PTRFXFabric ctx, struct fi_info * fi, void * data,
     ret = fi_ep_bind(ctx->ep, &ctx->tx_cq->cq->fid, FI_TRANSMIT);
     if (ret)
     {
-        trf_fi_error("EP bind to TXCQ", ret);
+        trf_fi_error("EP bind to TX CQ", ret);
         goto free_endpoint;
     }
     ret = fi_ep_bind(ctx->ep, &ctx->rx_cq->cq->fid, FI_RECV);
     if (ret)
     {
-        trf_fi_error("EP bind to RXCQ", ret);
+        trf_fi_error("EP bind to RX CQ", ret);
         goto free_endpoint;
     }
     ret = fi_enable(ctx->ep);
@@ -238,6 +238,12 @@ int trfAllocActiveEP(PTRFXFabric ctx, struct fi_info * fi, void * data,
         fi->src_addrlen = 0;
     }
     ctx->fi = fi_dupinfo(fi);
+    if (!ctx->fi)
+    {
+        trf_fi_error("Duplicate fi_info struct", -errno);
+        goto free_endpoint;
+    }
+    trf__log_trace("ctx->fi: %p", ctx->fi);
     return ret;
 
 free_endpoint:
@@ -245,6 +251,9 @@ free_endpoint:
     ctx->ep = NULL;
 free_addr_data:
     free(abuf);
+free_eq:
+    fi_close(&ctx->eq->fid);
+    ctx->eq = NULL;
 free_av:
     fi_close(&ctx->av->fid);
     ctx->av = NULL;
@@ -266,7 +275,7 @@ free_fabric:
 
 void trfDestroyFabricContext(PTRFContext ctx)
 {
-    if (!ctx || !ctx->xfer.fabric)
+    if (!ctx || ctx->xfer_type != TRFX_TYPE_LIBFABRIC || !ctx->xfer.fabric)
         return;
 
     PTRFXFabric f = ctx->xfer.fabric;
@@ -298,7 +307,8 @@ void trfDestroyFabricContext(PTRFContext ctx)
     if (trfMemPtr(&f->msg_mem))
     {
         free(trfMemPtr(&f->msg_mem));
-        f->msg_mem.ptr = NULL;
+        f->msg_mem.ptr  = NULL;
+        f->msg_mem.size = 0;
     }
     if (f->ep)
     {
@@ -320,6 +330,11 @@ void trfDestroyFabricContext(PTRFContext ctx)
         fi_close(&f->av->fid);
         f->av = NULL;
     }
+    if (f->eq)
+    {
+        fi_close(&f->eq->fid);
+        f->eq = NULL;
+    }
     if (f->domain)
     {
         fi_close(&f->domain->fid);
@@ -332,10 +347,14 @@ void trfDestroyFabricContext(PTRFContext ctx)
     }
     if (f->fi)
     {
+        trf__log_trace("freeing ctx->fi: %p %p", f->fi, ctx->xfer.fabric->fi);
         fi_freeinfo(f->fi);
+        f->fi = NULL;
     }
+    
     free(ctx->xfer.fabric);
     ctx->xfer.fabric = NULL;
+    ctx->xfer_type = TRFX_TYPE_INVALID;
 }
 
 void trfSendDisconnectMsg(int fd, uint64_t session_id)
@@ -361,6 +380,7 @@ void trfSendDisconnectMsg(int fd, uint64_t session_id)
             trf__log_error( "Failed to send disconnect message (socket): %s;"
                             "peer may be in an invalid state", strerror(-ret));
         }
+        free(tmp_buf);
     }
     else
     {
@@ -412,6 +432,7 @@ void trfDestroyContext(PTRFContext ctx)
     }
 
     free(ctx->opts);
+    free(ctx);
 }
 
 int trfCreateChannel(PTRFContext ctx, struct fi_info * fi, void * data, 
@@ -512,6 +533,7 @@ int trfCreateSubchannel(PTRFContext ctx, PTRFContext * ctx_out, uint32_t id)
         return -ENOMEM;
     }
 
+    free(fi_copy->src_addr);
     fi_copy->src_addr = NULL;
 
     int ret = trfCreateChannel(new_ctx, fi_copy, NULL, 0);
@@ -533,7 +555,6 @@ int trfCreateSubchannel(PTRFContext ctx, PTRFContext * ctx_out, uint32_t id)
 
     char * prov_str = strdup(fi_copy->fabric_attr->prov_name);
     fi_freeinfo(fi_copy);
-
     assert(prov_str);
 
     char * addr_str = NULL;
@@ -797,12 +818,6 @@ int trfProcessSubchannelReq(PTRFContext ctx, PTRFContext * ctx_out,
         goto free_new_ctx;
     }
 
-    if (fi->next)
-    {
-        fi_freeinfo(fi->next);
-        fi->next = NULL;
-    }
-
     ret = trfCreateChannel(new_ctx, fi, NULL, 0);
     if (ret < 0)
     {
@@ -810,6 +825,9 @@ int trfProcessSubchannelReq(PTRFContext ctx, PTRFContext * ctx_out,
                        fi_strerror(-ret));
         goto free_fi;
     }
+
+    fi_freeinfo(fi);
+    fi = NULL;
 
     char * addr_str = NULL;
     ret = trfGetEndpointName(new_ctx, &addr_str);
@@ -849,6 +867,7 @@ int trfProcessSubchannelReq(PTRFContext ctx, PTRFContext * ctx_out,
     }
 
     {
+        PTRFXFabric f = new_ctx->xfer.fabric;
         TrfMsg__MessageWrapper mw   = TRF_MSG__MESSAGE_WRAPPER__INIT;
         TrfMsg__ChannelOpen co      = TRF_MSG__CHANNEL_OPEN__INIT;
         TrfMsg__Transport tr        = TRF_MSG__TRANSPORT__INIT;
@@ -858,7 +877,7 @@ int trfProcessSubchannelReq(PTRFContext ctx, PTRFContext * ctx_out,
         co.id                       = id;
         co.reply                    = 1;
         co.transport                = &tr;
-        tr.name                     = fi->fabric_attr->prov_name;
+        tr.name                     = f->fi->fabric_attr->prov_name;
         tr.src                      = addr_str;
         tr.dest                     = NULL;
         tr.proto                    = proto_str;
@@ -1084,7 +1103,7 @@ int trfGetRoute(const char * dst, const char * prov, const char * proto,
     hints->addr_format              = lf_fmt;
     hints->dest_addr                = dst_copy;
     hints->ep_attr->protocol        = proto_id;
-    hints->fabric_attr->prov_name   = strdup(prov);
+    hints->fabric_attr->prov_name   = (char *) prov;
 
     ret = fi_getinfo(TRF_FABRIC_VERSION, NULL, NULL, 0, hints, &info);
     if (ret) {
@@ -1096,6 +1115,7 @@ int trfGetRoute(const char * dst, const char * prov, const char * proto,
     *fi = info;
 
 free_hints:
+    hints->fabric_attr->prov_name = NULL;
     fi_freeinfo(hints);
     return ret;
 
@@ -1471,6 +1491,61 @@ int trfPrintFabricProviders(struct fi_info * fi)
     return 0;
 }
 
+/**
+ * @brief Deduplicate entries in an fi_info list, based on the fabric provider
+ * name. This function is currently for internal use only.
+ *
+ * @param fi    The fi_info list to deduplicate.
+ */
+static inline void trfDedupFabricList(struct fi_info * fi)
+{
+    char prov_names[32][32];
+    for (int i = 0; i < 32; i++)
+    {
+        memset(prov_names[i], 0, 32);
+    }
+    int names_used          = 0;
+    struct fi_info * prev   = NULL;
+    struct fi_info * tmp    = fi;
+    while (tmp)
+    {
+        int flag = 0;
+        for (int i = 0; i < names_used; i++)
+        {
+            if (strncmp(tmp->fabric_attr->prov_name, &prov_names[i][0], 32)
+                == 0)
+            {
+                flag = 1;
+                break;
+            }
+        }
+        if (flag)
+        {
+            struct fi_info * tmp2 = NULL;
+            if (tmp->next)
+            {
+                tmp2 = tmp->next;
+                tmp->next = NULL;
+                fi_freeinfo(tmp);
+                if (prev)
+                {
+                    prev->next = tmp2;
+                }
+                tmp = tmp2;
+                continue;
+            }
+        }
+        else
+        {
+            strncpy(&prov_names[names_used][0], tmp->fabric_attr->prov_name, 
+                    32);
+            names_used++;
+        }
+        prev = tmp;
+        tmp = tmp->next;
+    }
+}
+
 int trfGetFabricProviders(const char * host, const char * port, 
     enum TRFEPType req_type, struct fi_info ** fi_out)
 {
@@ -1492,12 +1567,17 @@ int trfGetFabricProviders(const char * host, const char * port,
         return ret;
     }
 
+    /*  Deduplicate the list of fabric providers, the other side does not need
+        the extra information (such as FI_INJECT size)
+    */
+    trfDedupFabricList(fi);
+
     /*  Iterate through the list of interfaces and print out the name and
         provider name (debug)
     */
-    
     trfPrintFabricProviders(fi);
 
+    fi_freeinfo(hints);
     *fi_out = fi;
     return 0;
 }
@@ -1715,16 +1795,16 @@ void trfFreeDisplayList(PTRFDisplay disp, int dealloc)
     while (disp_itm)
     {
         PTRFDisplay disp_tmp = disp_itm->next;
-        free(disp_itm);
-        free(disp_itm->name);
         if (dealloc)
         {
-            free(disp_itm->mem.ptr);
             if (disp_itm->mem.fabric_mr)
             {
                 fi_close(&disp_itm->mem.fabric_mr->fid);
             }
+            free(disp_itm->mem.ptr);
         }
+        free(disp_itm->name);
+        free(disp_itm);
         disp_itm = disp_tmp;
     }
 }

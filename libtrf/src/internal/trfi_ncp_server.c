@@ -77,12 +77,6 @@ int trf__NCServerCreateSocket(const char * host, const char * port,
         trf__log_error("Listen failed: %s", strerror(trfLastSockError));
         goto cleanup_sock;
     }
-    int enable = 1;
-    if (setsockopt(sfd, SOL_SOCKET, SO_REUSEADDR, &enable, sizeof(int)) < 0)
-    {
-        trf__log_error("Unable to set SO_REUSEADDR: %s", 
-            strerror(trfLastSockError));
-    }
     
     *sock = sfd;
     trf__log_trace("Assign Server FD");
@@ -336,15 +330,6 @@ int trf__NCServerExchangeViableLinks(PTRFContext ctx, TRFSock client_sock,
         goto free_av;
     }
 
-    trf_msg__message_wrapper__free_unpacked(msg, NULL);
-    msg = NULL;
-    *av = trfDuplicateAddrV(av_cand);
-    if (!*av)
-    {
-        trf__log_error("Unable to duplicate address vector");
-        ret = -ENOMEM;
-    }
-
 free_av:
     trfFreeAddrV(av_cand);
 free_svr_ifs:
@@ -373,18 +358,19 @@ int trf__NCServerTestTransport(PTRFContext ctx, TRFSock client_sock,
     // Allocate communication channel
 
     nctx->opts           = malloc(sizeof(*nctx->opts));
+    if (!nctx->opts)
+    {
+        trf__log_error("Unable to allocate context options");
+        trfDestroyContext(nctx);
+        return -ENOMEM;
+    }
+
     nctx->type           = TRF_EP_CONN_ID;
     nctx->cli.client_fd  = TRFInvalidSock;
     nctx->cli.session_id = session_id;
     nctx->xfer_type      = TRFX_TYPE_LIBFABRIC;
     nctx->disconnected   = 1;
     trfDuplicateOpts(ctx->opts, nctx->opts);
-    if (!nctx->opts)
-    {
-        trf__log_error("Unable to duplicate options");
-        free(nctx);
-        return -ENOMEM;
-    }
 
     int ret;
     ret = trfCreateChannel(nctx, fi, src_addr, src_addr_size);
@@ -544,7 +530,7 @@ int trf__NCServerTestTransport(PTRFContext ctx, TRFSock client_sock,
     struct timespec tend;
     ret = trfGetDeadline(&tend, trf__Max(nctx->opts->fab_rcv_timeo, 
                                          nctx->opts->nc_rcv_timeo));
-    if (ret != 0)
+    if (ret < 0)
     {
         trf__log_fatal("System clock error: %s", strerror(errno));
         return 0;
@@ -742,6 +728,7 @@ int trf__NCServerGetClientFabrics(PTRFContext ctx, TRFSock client_sock,
         if (ret < 0)
         {
             trf__log_info("Route %d invalid: %s", i + 1, fi_strerror(-ret));
+            fi_freeinfo(fi);
         }
         else
         {

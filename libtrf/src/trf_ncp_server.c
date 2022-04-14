@@ -58,7 +58,7 @@ int trfNCServerInit(PTRFContext ctx, char * host, char * port)
         return -EALREADY;
     }
 
-    trf__log_info("libtrf server %d.%d.%d initializing", 
+    trf__log_info("libtrf server %d.%d.%d initializing",
         TRF_API_MAJOR, TRF_API_MINOR, TRF_API_PATCH
     );
 
@@ -125,9 +125,8 @@ int trfNCAccept(PTRFContext ctx, PTRFContext * ctx_out)
     // Once we have a connection, we will receive a list of client addresses and
     // send back the viable ones
 
-    PTRFAddrV av_cand = NULL;
     ret = trf__NCServerExchangeViableLinks(ctx, client_sock, mbuf, mbuf_size,
-                                           &av_cand);
+                                           NULL);
     if (ret < 0)
     {
         trf__log_error("Unable to get viable links: %s", strerror(-ret));
@@ -144,26 +143,16 @@ int trfNCAccept(PTRFContext ctx, PTRFContext * ctx_out)
     {
         trf__log_error("Unable to find common fabric interface: %s", 
                        fi_strerror(-ret));
-        goto free_av;
+        goto close_sock;
     }
-    
-    // Inherit the options from the server context
-
-    cli_ctx->opts = calloc(1, sizeof(*cli_ctx->opts));
-    if (!cli_ctx->opts)
-        goto free_av;
-
-    trfDuplicateOpts(ctx->opts, cli_ctx->opts);
 
     // Return the created context
 
     cli_ctx->cli.client_fd = client_sock;
     *ctx_out = cli_ctx;
-    free(av_cand);
+    free(mbuf);
     return 0;
 
-free_av:
-    trfFreeAddrV(av_cand);
 close_sock:
     if (client_sock) {
         close(client_sock);

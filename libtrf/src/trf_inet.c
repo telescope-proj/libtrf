@@ -240,11 +240,11 @@ int trfCheckNetwork(struct sockaddr * net1, int8_t net1_sn ,
         break;
     case AF_INET6: ;
         uint64_t * ca1 = (uint64_t *) \
-            ((struct sockaddr_in6 *) &net1)->sin6_addr.s6_addr;
+            ((struct sockaddr_in6 *) net1)->sin6_addr.s6_addr;
         uint64_t * ca2 = ca1 ++;
 
         uint64_t * da1 = (uint64_t *) \
-            ((struct sockaddr_in6 *) &net2)->sin6_addr.s6_addr;
+            ((struct sockaddr_in6 *) net2)->sin6_addr.s6_addr;
         uint64_t * da2 = da1 ++;
 
         uint64_t cnm1 = net1_sn > 64 ? \

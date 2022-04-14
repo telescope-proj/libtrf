@@ -111,9 +111,13 @@
  */
 static inline int trfGetDeadline(struct timespec * out, int delay_ms)
 {
+    // this is unnecessary but GCC won't shut up if I don't include it
+    out->tv_sec = 0;
+    out->tv_nsec = 0;
+
     struct timespec now;
     int ret = clock_gettime(CLOCK_MONOTONIC, &now);
-    if (ret < 0)
+    if (ret != 0)
         return -errno;
 
     trf__GetDelay(&now, out, delay_ms);

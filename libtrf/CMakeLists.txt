@@ -31,8 +31,7 @@ add_compile_options(
   "-ffast-math"
   "-fdata-sections"
   "-ffunction-sections"
-  #"$<$<CONFIG:DEBUG>:-O0;-g3;-ggdb>"
-  "-O0;-g3;-ggdb"
+  "$<$<CONFIG:DEBUG>:-O0;-g3;-ggdb>"
 )
 
 add_library(trf STATIC ${SOURCES})

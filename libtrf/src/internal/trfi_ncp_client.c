@@ -68,6 +68,7 @@ int trf__NCCreateClientSocket(const char * host, const char * port,
         return -1;
     }
 
+    freeaddrinfo(res);
     * fd = sfd;
 
     return 0;
@@ -439,16 +440,6 @@ int trf__NCSendClientTransports(PTRFContext ctx, PTRFInterface dests,
         }
     }
 
-    // Free fi_info list
-    for (i = 0; i < dests_len; i++)
-    {
-        if (fi_list[i])
-        {
-            fi_freeinfo(fi_list[i]);
-        }
-    }
-    free(fi_list);
-
     // We may have skipped some transports due to serialization errors
     cc.n_transports = j;
 
@@ -468,20 +459,22 @@ int trf__NCSendClientTransports(PTRFContext ctx, PTRFInterface dests,
     if (!buffer)
         free(buf);
 
-    return 0;
+    ret = 0;
 
 free_transports:
     while (j)
     {
-        if (cc.transports[j])
+        if (cc.transports[j - 1])
         {
-            free(cc.transports[j]->proto);
-            free(cc.transports[j]->src);
-            free(cc.transports[j]->dest);
-            free(cc.transports[j]);
+            free(cc.transports[j - 1]->proto);
+            free(cc.transports[j - 1]->src);
+            free(cc.transports[j - 1]->dest);
+            free(cc.transports[j - 1]->name);
+            free(cc.transports[j - 1]);
         }
         j--;
     }
+    free(cc.transports);
 free_fi_list:
     for (i = 0; i < dests_len; i++)
     {
@@ -698,8 +691,7 @@ int trf__NCRecvAndTestCandidate(PTRFContext ctx, uint8_t * buffer, size_t size)
     }
 
     // This should also free tpt_name, ep_name, proto_name
-    trf_msg__message_wrapper__free_unpacked(mw, NULL);
-    mw = NULL;
+    trf__ProtoFree(mw);
 
     // Send the session ID over the fabric interface
 
@@ -709,7 +701,13 @@ int trf__NCRecvAndTestCandidate(PTRFContext ctx, uint8_t * buffer, size_t size)
 
     struct TRFMem * mem = &ctx->xfer.fabric->msg_mem;
     struct timespec dl;
-    trfGetDeadline(&dl, ctx->opts->fab_snd_timeo);
+    ret = trfGetDeadline(&dl, ctx->opts->fab_snd_timeo);
+    if (ret < 0)
+    {
+        trf__log_error("Unable to get timeout: %s", strerror(-ret));
+        goto free_ep_strs;
+    }
+
     int att = 0;
 
     do {        
@@ -726,7 +724,6 @@ int trf__NCRecvAndTestCandidate(PTRFContext ctx, uint8_t * buffer, size_t size)
     }
 
     memset(trfMemPtr(mem), 0, 8);
-    
     trf__log_debug("Sent session cookie to server (%d attempts), "
                    "waiting for response...", att);
 
@@ -749,8 +746,7 @@ int trf__NCRecvAndTestCandidate(PTRFContext ctx, uint8_t * buffer, size_t size)
         goto close_conn;
     }
 
-    ctx->xfer.fabric->fi = fii;
-
+    fi_freeinfo(fii);
     return 0;
 
 free_ep_strs:

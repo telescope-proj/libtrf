@@ -1,0 +1,206 @@
+<!DOCTYPE html>
+<html class="writer-html5" lang="en" >
+<head>
+  <meta charset="utf-8" /><meta name="generator" content="Docutils 0.17.1: http://docutils.sourceforge.net/" />
+
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>Mellanox NIC configuration &mdash; libtrf  documentation</title>
+      <link rel="stylesheet" href="../_static/pygments.css" type="text/css" />
+      <link rel="stylesheet" href="../_static/css/theme.css" type="text/css" />
+      <link rel="stylesheet" href="../_static/graphviz.css" type="text/css" />
+  <!--[if lt IE 9]>
+    <script src="../_static/js/html5shiv.min.js"></script>
+  <![endif]-->
+  
+        <script data-url_root="../" id="documentation_options" src="../_static/documentation_options.js"></script>
+        <script src="../_static/jquery.js"></script>
+        <script src="../_static/underscore.js"></script>
+        <script src="../_static/doctools.js"></script>
+    <script src="../_static/js/theme.js"></script>
+    <link rel="index" title="Index" href="../genindex.html" />
+    <link rel="search" title="Search" href="../search.html" />
+    <link rel="next" title="InfiniBand Configuration" href="infiniband.html" />
+    <link rel="prev" title="Hardware Offload Configuration" href="offload.html" /> 
+</head>
+
+<body class="wy-body-for-nav"> 
+  <div class="wy-grid-for-nav">
+    <nav data-toggle="wy-nav-shift" class="wy-nav-side">
+      <div class="wy-side-scroll">
+        <div class="wy-side-nav-search" >
+            <a href="../index.html" class="icon icon-home"> libtrf
+          </a>
+<div role="search">
+  <form id="rtd-search-form" class="wy-form" action="../search.html" method="get">
+    <input type="text" name="q" placeholder="Search docs" />
+    <input type="hidden" name="check_keywords" value="yes" />
+    <input type="hidden" name="area" value="default" />
+  </form>
+</div>
+        </div><div class="wy-menu wy-menu-vertical" data-spy="affix" role="navigation" aria-label="Navigation menu">
+              <ul class="current">
+<li class="toctree-l1 current"><a class="reference internal" href="index.html">Network Configuration Documentation</a><ul class="current">
+<li class="toctree-l2"><a class="reference internal" href="setup.html">Network Setup &amp; Usage Guide</a></li>
+<li class="toctree-l2"><a class="reference internal" href="offload.html">Hardware Offload Configuration</a></li>
+<li class="toctree-l2 current"><a class="current reference internal" href="#">Mellanox NIC configuration</a><ul>
+<li class="toctree-l3"><a class="reference internal" href="#enabling-sr-iov-at-boot-time">Enabling SR-IOV at boot time</a></li>
+<li class="toctree-l3"><a class="reference internal" href="#setting-vf-mac-addresses">Setting VF MAC Addresses</a></li>
+</ul>
+</li>
+<li class="toctree-l2"><a class="reference internal" href="infiniband.html">InfiniBand Configuration</a></li>
+</ul>
+</li>
+<li class="toctree-l1"><a class="reference internal" href="../api/index.html">TRF API Function Documentation</a></li>
+</ul>
+
+        </div>
+      </div>
+    </nav>
+
+    <section data-toggle="wy-nav-shift" class="wy-nav-content-wrap"><nav class="wy-nav-top" aria-label="Mobile navigation menu" >
+          <i data-toggle="wy-nav-top" class="fa fa-bars"></i>
+          <a href="../index.html">libtrf</a>
+      </nav>
+
+      <div class="wy-nav-content">
+        <div class="rst-content">
+          <div role="navigation" aria-label="Page navigation">
+  <ul class="wy-breadcrumbs">
+      <li><a href="../index.html" class="icon icon-home"></a> &raquo;</li>
+          <li><a href="index.html">Network Configuration Documentation</a> &raquo;</li>
+      <li>Mellanox NIC configuration</li>
+      <li class="wy-breadcrumbs-aside">
+            <a href="../_sources/network/mellanox.rst.txt" rel="nofollow"> View page source</a>
+      </li>
+  </ul>
+  <hr/>
+</div>
+          <div role="main" class="document" itemscope="itemscope" itemtype="http://schema.org/Article">
+           <div itemprop="articleBody">
+             
+  <section id="mellanox-nic-configuration">
+<span id="network-mellanox"></span><h1>Mellanox NIC configuration<a class="headerlink" href="#mellanox-nic-configuration" title="Permalink to this headline"></a></h1>
+<p>Mellanox NICs usually come in three flavours:</p>
+<ul class="simple">
+<li><p>Connect-IB, which is InfiniBand-only</p></li>
+<li><p>EN, which is Ethernet-only</p></li>
+<li><p>VPI, which supports both protocols</p></li>
+</ul>
+<p>All types are supported through the LibTRF verbs interface. In general, it does
+not matter which hardware you have so long as all types are the same across the
+network and switches.</p>
+<div class="admonition warning">
+<p class="admonition-title">Warning</p>
+<p>Differing transport types may only be interoperable over TCP, without any
+RDMA acceleration! IB and Ethernet <strong>are not interoperable at the link
+layer.</strong></p>
+</div>
+<p>Determine the NIC you want to query using <code class="docutils literal notranslate"><span class="pre">lspci</span></code>:</p>
+<div class="highlight-c notranslate"><div class="highlight"><pre><span></span>$ lspci | egrep -i &quot;infiniband|ethernet&quot;
+0c:00.0 Infiniband controller: Mellanox Technologies MT28908 Family [ConnectX-6]
+12:00.0 Infiniband controller: Mellanox Technologies MT28908 Family [ConnectX-6]
+4b:00.0 Infiniband controller: Mellanox Technologies MT28908 Family [ConnectX-6]
+54:00.0 Infiniband controller: Mellanox Technologies MT28908 Family [ConnectX-6]
+8d:00.0 Infiniband controller: Mellanox Technologies MT28908 Family [ConnectX-6]
+94:00.0 Infiniband controller: Mellanox Technologies MT28908 Family [ConnectX-6]
+ba:00.0 Infiniband controller: Mellanox Technologies MT28908 Family [ConnectX-6]
+cc:00.0 Infiniband controller: Mellanox Technologies MT28908 Family [ConnectX-6]
+e1:00.0 Ethernet controller: Mellanox Technologies MT28908 Family [ConnectX-6]
+e1:00.1 Ethernet controller: Mellanox Technologies MT28908 Family [ConnectX-6]
+e2:00.0 Ethernet controller: Intel Corporation I210 Gigabit Network Connection (rev 03)
+</pre></div>
+</div>
+<p>To change the operating mode, install the <code class="docutils literal notranslate"><span class="pre">mstflint</span></code> package, which should be
+available from your distribution package manager or preinstalled in the
+MLNX-OFED driver, where you may also use <code class="docutils literal notranslate"><span class="pre">mlxconfig</span></code>.</p>
+<div class="highlight-c notranslate"><div class="highlight"><pre><span></span># mstconfig -d 0c:00.0 set LINK_TYPE_P1=ETH
+
+Device #1:
+----------
+
+Device type:    ConnectX6
+Name:           MCX653105A-HDA_Ax
+Description:    ConnectX-6 VPI adapter card; HDR IB (200Gb/s) and 200GbE; single-port QSFP56; PCIe4.0 x16; tall bracket; ROHS R6
+Device:         0c:00.0
+
+Configurations:                              Next Boot       New
+        LINK_TYPE_P1                         IB(1)           ETH(2)
+
+Apply new Configuration? (y/n) [n] : y
+Applying... Done!
+-I- Please reboot machine to load new configurations.
+</pre></div>
+</div>
+<p>If you are using SR-IOV to pass a VF into a virtual machine, you may also
+configure this from <code class="docutils literal notranslate"><span class="pre">mstconfig</span></code>. The parameters are:</p>
+<p><code class="docutils literal notranslate"><span class="pre">SRIOV_EN=1</span> <span class="pre">NUM_OF_VFS=x</span></code>, where <code class="docutils literal notranslate"><span class="pre">x</span></code> is your desired virtual NIC count.</p>
+<div class="admonition note">
+<p class="admonition-title">Note</p>
+<p>Older NICs, such as the ConnectX-3 Pro and older may either not support
+SR-IOV out of the box, or VFs may not work properly when passed through,
+especially if the guest is a Windows guest. The fix may require the
+installation of the MLNX-OFED 4.x LTS driver, which is known to fail to
+compile on newer kernel versions. You may have to pass the entire PCIe
+device to the virtual machine if you would like to use it in a virtual
+environment.</p>
+</div>
+<div class="admonition note">
+<p class="admonition-title">Note</p>
+<p>If SRIOV_EN option does not show up in mstconfig, you may have to configure
+this in the FlexBoot option ROM at boot time. In your motherboard UEFI/BIOS,
+you will also have to enable VT-d/IOMMU and SR-IOV support.</p>
+</div>
+<section id="enabling-sr-iov-at-boot-time">
+<h2>Enabling SR-IOV at boot time<a class="headerlink" href="#enabling-sr-iov-at-boot-time" title="Permalink to this headline"></a></h2>
+<p>Enabling SR-IOV at boot time for mlx4 can be done by adding a file to
+<code class="docutils literal notranslate"><span class="pre">/etc/modprobe.d/</span></code>. As previously mentioned, <code class="docutils literal notranslate"><span class="pre">x</span></code> is your desired virtual NIC
+count.</p>
+<div class="highlight-c notranslate"><div class="highlight"><pre><span></span><span class="cp"># mlx4 and OFED LTS 4.x driver users</span>
+<span class="n">options</span> <span class="n">mlx4_core</span> <span class="n">probe_vf</span><span class="o">=</span><span class="mi">0</span> <span class="n">max_vfs</span><span class="o">=</span><span class="n">x</span>
+
+<span class="cp"># mlx5 and current OFED driver users</span>
+<span class="n">options</span> <span class="n">mlx5_core</span> <span class="n">probe_vf</span><span class="o">=</span><span class="mi">0</span> <span class="n">max_vfs</span><span class="o">=</span><span class="n">x</span>
+</pre></div>
+</div>
+</section>
+<section id="setting-vf-mac-addresses">
+<h2>Setting VF MAC Addresses<a class="headerlink" href="#setting-vf-mac-addresses" title="Permalink to this headline"></a></h2>
+<p>Setting VF MACs can be done using the <code class="docutils literal notranslate"><span class="pre">ip</span></code> command. For instance:</p>
+<div class="highlight-c notranslate"><div class="highlight"><pre><span></span><span class="n">ip</span> <span class="n">link</span> <span class="n">set</span> <span class="n">enp225s0f0</span> <span class="n">vf</span> <span class="mi">1</span> <span class="n">mac</span> <span class="mo">00</span><span class="o">:</span><span class="mi">52</span><span class="o">:</span><span class="mi">44</span><span class="o">:</span><span class="mi">11</span><span class="o">:</span><span class="mi">22</span><span class="o">:</span><span class="mi">33</span>
+</pre></div>
+</div>
+</section>
+</section>
+
+
+           </div>
+          </div>
+          <footer><div class="rst-footer-buttons" role="navigation" aria-label="Footer">
+        <a href="offload.html" class="btn btn-neutral float-left" title="Hardware Offload Configuration" accesskey="p" rel="prev"><span class="fa fa-arrow-circle-left" aria-hidden="true"></span> Previous</a>
+        <a href="infiniband.html" class="btn btn-neutral float-right" title="InfiniBand Configuration" accesskey="n" rel="next">Next <span class="fa fa-arrow-circle-right" aria-hidden="true"></span></a>
+    </div>
+
+  <hr/>
+
+  <div role="contentinfo">
+    <p>&#169; Copyright 2022, Telescope Team.</p>
+  </div>
+
+  Built with <a href="https://www.sphinx-doc.org/">Sphinx</a> using a
+    <a href="https://github.com/readthedocs/sphinx_rtd_theme">theme</a>
+    provided by <a href="https://readthedocs.org">Read the Docs</a>.
+   
+
+</footer>
+        </div>
+      </div>
+    </section>
+  </div>
+  <script>
+      jQuery(function () {
+          SphinxRtdTheme.Navigation.enable(true);
+      });
+  </script> 
+
+</body>
+</html>

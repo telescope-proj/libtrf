@@ -1,0 +1,220 @@
+<!DOCTYPE html>
+<html class="writer-html5" lang="en" >
+<head>
+  <meta charset="utf-8" /><meta name="generator" content="Docutils 0.17.1: http://docutils.sourceforge.net/" />
+
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>Network Setup &amp; Usage Guide &mdash; libtrf  documentation</title>
+      <link rel="stylesheet" href="../_static/pygments.css" type="text/css" />
+      <link rel="stylesheet" href="../_static/css/theme.css" type="text/css" />
+      <link rel="stylesheet" href="../_static/graphviz.css" type="text/css" />
+  <!--[if lt IE 9]>
+    <script src="../_static/js/html5shiv.min.js"></script>
+  <![endif]-->
+  
+        <script data-url_root="../" id="documentation_options" src="../_static/documentation_options.js"></script>
+        <script src="../_static/jquery.js"></script>
+        <script src="../_static/underscore.js"></script>
+        <script src="../_static/doctools.js"></script>
+    <script src="../_static/js/theme.js"></script>
+    <link rel="index" title="Index" href="../genindex.html" />
+    <link rel="search" title="Search" href="../search.html" />
+    <link rel="next" title="Hardware Offload Configuration" href="offload.html" />
+    <link rel="prev" title="Network Configuration Documentation" href="index.html" /> 
+</head>
+
+<body class="wy-body-for-nav"> 
+  <div class="wy-grid-for-nav">
+    <nav data-toggle="wy-nav-shift" class="wy-nav-side">
+      <div class="wy-side-scroll">
+        <div class="wy-side-nav-search" >
+            <a href="../index.html" class="icon icon-home"> libtrf
+          </a>
+<div role="search">
+  <form id="rtd-search-form" class="wy-form" action="../search.html" method="get">
+    <input type="text" name="q" placeholder="Search docs" />
+    <input type="hidden" name="check_keywords" value="yes" />
+    <input type="hidden" name="area" value="default" />
+  </form>
+</div>
+        </div><div class="wy-menu wy-menu-vertical" data-spy="affix" role="navigation" aria-label="Navigation menu">
+              <ul class="current">
+<li class="toctree-l1 current"><a class="reference internal" href="index.html">Network Configuration Documentation</a><ul class="current">
+<li class="toctree-l2 current"><a class="current reference internal" href="#">Network Setup &amp; Usage Guide</a><ul>
+<li class="toctree-l3"><a class="reference internal" href="#general-configuration">General Configuration</a></li>
+<li class="toctree-l3"><a class="reference internal" href="#transport-specific-configuration">Transport-specific configuration</a><ul>
+<li class="toctree-l4"><a class="reference internal" href="#tcp">TCP</a></li>
+<li class="toctree-l4"><a class="reference internal" href="#rdma-over-converged-ethernet-roce-v1">RDMA over Converged Ethernet (RoCE) v1</a></li>
+<li class="toctree-l4"><a class="reference internal" href="#rdma-over-converged-ethernet-roce-v2">RDMA over Converged Ethernet (RoCE) v2</a></li>
+<li class="toctree-l4"><a class="reference internal" href="#iwarp">iWARP</a></li>
+<li class="toctree-l4"><a class="reference internal" href="#infiniband">InfiniBand</a></li>
+</ul>
+</li>
+<li class="toctree-l3"><a class="reference internal" href="#unsupported-transports">Unsupported Transports</a></li>
+</ul>
+</li>
+<li class="toctree-l2"><a class="reference internal" href="offload.html">Hardware Offload Configuration</a></li>
+<li class="toctree-l2"><a class="reference internal" href="mellanox.html">Mellanox NIC configuration</a></li>
+<li class="toctree-l2"><a class="reference internal" href="infiniband.html">InfiniBand Configuration</a></li>
+</ul>
+</li>
+<li class="toctree-l1"><a class="reference internal" href="../api/index.html">TRF API Function Documentation</a></li>
+</ul>
+
+        </div>
+      </div>
+    </nav>
+
+    <section data-toggle="wy-nav-shift" class="wy-nav-content-wrap"><nav class="wy-nav-top" aria-label="Mobile navigation menu" >
+          <i data-toggle="wy-nav-top" class="fa fa-bars"></i>
+          <a href="../index.html">libtrf</a>
+      </nav>
+
+      <div class="wy-nav-content">
+        <div class="rst-content">
+          <div role="navigation" aria-label="Page navigation">
+  <ul class="wy-breadcrumbs">
+      <li><a href="../index.html" class="icon icon-home"></a> &raquo;</li>
+          <li><a href="index.html">Network Configuration Documentation</a> &raquo;</li>
+      <li>Network Setup &amp; Usage Guide</li>
+      <li class="wy-breadcrumbs-aside">
+            <a href="../_sources/network/setup.rst.txt" rel="nofollow"> View page source</a>
+      </li>
+  </ul>
+  <hr/>
+</div>
+          <div role="main" class="document" itemscope="itemscope" itemtype="http://schema.org/Article">
+           <div itemprop="articleBody">
+             
+  <section id="network-setup-usage-guide">
+<span id="network-setup"></span><h1>Network Setup &amp; Usage Guide<a class="headerlink" href="#network-setup-usage-guide" title="Permalink to this headline"></a></h1>
+<p>Using the LibTRF APIs with RDMA NICs may require additional configuration for
+optimal performance. Please see below for setup considerations depending on the
+fabric provider.</p>
+<section id="general-configuration">
+<h2>General Configuration<a class="headerlink" href="#general-configuration" title="Permalink to this headline"></a></h2>
+<p>For all transports, the use of jumbo frames is highly recommended. Be wary of
+the limitations of both your switches and network cards. A safe bet is a 4KB
+MTU, and most newer hardware supports 9KB+ MTUs. Try reducing the MTU if you
+experience packet loss.</p>
+<p>A quick check to determine whether your MTU is set too high is to ping the peer
+address with PMTUD enabled. For instance, if your MTU is set to 4000 bytes and
+my peer address is 203.0.113.0, you may do the following:</p>
+<div class="highlight-c notranslate"><div class="highlight"><pre><span></span>ping -M do -s $((4000-28)) 203.0.113.10
+</pre></div>
+</div>
+</section>
+<section id="transport-specific-configuration">
+<h2>Transport-specific configuration<a class="headerlink" href="#transport-specific-configuration" title="Permalink to this headline"></a></h2>
+<section id="tcp">
+<h3>TCP<a class="headerlink" href="#tcp" title="Permalink to this headline"></a></h3>
+<ul class="simple">
+<li><p>Practically all network hardware</p></li>
+</ul>
+<p>No switch configuration is required. Usually, this transport does not have any
+hardware acceleration support, save for checksum offload. Use of a NIC’s
+full-stack TCP Offload Engine (TOE), as supported by some Chelsio NICs, is not
+recommended.</p>
+<p>Realtek NICs are barely deserving of the term “NIC”, and may require disabling
+hardware offloads if poor performance is experienced. See the
+<a class="reference internal" href="offload.html"><span class="doc">Hardware Offload Configuration</span></a> section.</p>
+</section>
+<section id="rdma-over-converged-ethernet-roce-v1">
+<h3>RDMA over Converged Ethernet (RoCE) v1<a class="headerlink" href="#rdma-over-converged-ethernet-roce-v1" title="Permalink to this headline"></a></h3>
+<ul class="simple">
+<li><p>Mellanox ConnectX-2 EN / VPI</p></li>
+<li><p>Mellanox ConnectX-3 EN / VPI</p></li>
+</ul>
+<p>Requires the port to be dedicated for RDMA traffic with regular flow control
+(802.3x) enabled along the entire path, or for Priority Flow Control (PFC) to be
+configured.</p>
+</section>
+<section id="rdma-over-converged-ethernet-roce-v2">
+<h3>RDMA over Converged Ethernet (RoCE) v2<a class="headerlink" href="#rdma-over-converged-ethernet-roce-v2" title="Permalink to this headline"></a></h3>
+<p><strong>Not interoperable</strong> with RoCE v1. However, some NICs, such as Mellanox NICs,
+may be toggled between RoCE v1 and RoCE v2 operating modes.</p>
+<ul class="simple">
+<li><p>Software RoCE Driver (rdma_rxe)</p></li>
+<li><p>Mellanox ConnectX-3 Pro EN / VPI</p></li>
+<li><p>Mellanox ConnectX-4 and later</p></li>
+<li><p>Marvell / QLogic FastLinq 41000/45000 Series</p></li>
+<li><p>Intel E810 Series</p></li>
+</ul>
+<p>Unless the NIC supports Zero Touch RoCE (ZTR-RTTCC, ConnectX-5 and newer), the
+port must either be dedicated for RDMA traffic with regular flow control
+(802.3x) enabled along the entire path. Alternatively, either PFC or ECN must be
+configured.</p>
+</section>
+<section id="iwarp">
+<h3>iWARP<a class="headerlink" href="#iwarp" title="Permalink to this headline"></a></h3>
+<ul class="simple">
+<li><p>Chelsio Terminator 3 or later</p></li>
+<li><p>Chelsio T520-CR</p></li>
+<li><p>Intel X722 Series</p></li>
+<li><p>Intel E810 Series</p></li>
+<li><p>Marvell / QLogic FastLinq 41000/45000 Series</p></li>
+</ul>
+<p>iWARP requires no special switch configuration. However, configuring jumbo
+frames and ECN may improve performance.</p>
+</section>
+<section id="infiniband">
+<h3>InfiniBand<a class="headerlink" href="#infiniband" title="Permalink to this headline"></a></h3>
+<p><strong>Not interoperable with Ethernet.</strong> All InfiniBand versions should support RDMA
+traffic.</p>
+<ul class="simple">
+<li><p>Mellanox ConnectX-2 VPI or later</p></li>
+<li><p>Mellanox Connect-IB</p></li>
+<li><p>QLogic QLE7300 Series</p></li>
+</ul>
+<p>Requires a Subnet Manager (SM) and InfiniBand switching hardware, but no special
+switch configuration as by design, InfiniBand is a lossless fabric. See
+<span class="xref std std-ref">_setup_infiniband</span></p>
+</section>
+</section>
+<section id="unsupported-transports">
+<h2>Unsupported Transports<a class="headerlink" href="#unsupported-transports" title="Permalink to this headline"></a></h2>
+<p>Some transports supported by Libfabric, but unsupported by LibTRF are as
+follows:</p>
+<ul class="simple">
+<li><p>UDP</p></li>
+<li><p>Omni-Path (PSM2/OPX)</p></li>
+<li><p>PSM3</p></li>
+<li><p>EFA</p></li>
+<li><p>BGQ</p></li>
+<li><p>SHM</p></li>
+</ul>
+</section>
+</section>
+
+
+           </div>
+          </div>
+          <footer><div class="rst-footer-buttons" role="navigation" aria-label="Footer">
+        <a href="index.html" class="btn btn-neutral float-left" title="Network Configuration Documentation" accesskey="p" rel="prev"><span class="fa fa-arrow-circle-left" aria-hidden="true"></span> Previous</a>
+        <a href="offload.html" class="btn btn-neutral float-right" title="Hardware Offload Configuration" accesskey="n" rel="next">Next <span class="fa fa-arrow-circle-right" aria-hidden="true"></span></a>
+    </div>
+
+  <hr/>
+
+  <div role="contentinfo">
+    <p>&#169; Copyright 2022, Telescope Team.</p>
+  </div>
+
+  Built with <a href="https://www.sphinx-doc.org/">Sphinx</a> using a
+    <a href="https://github.com/readthedocs/sphinx_rtd_theme">theme</a>
+    provided by <a href="https://readthedocs.org">Read the Docs</a>.
+   
+
+</footer>
+        </div>
+      </div>
+    </section>
+  </div>
+  <script>
+      jQuery(function () {
+          SphinxRtdTheme.Navigation.enable(true);
+      });
+  </script> 
+
+</body>
+</html>

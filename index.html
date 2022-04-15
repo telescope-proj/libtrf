@@ -4,7 +4,7 @@
   <meta charset="utf-8" /><meta name="generator" content="Docutils 0.17.1: http://docutils.sourceforge.net/" />
 
   <meta name="viewport" content="width=device-width, initial-scale=1.0" />
-  <title>Welcome to libtrf’s documentation! &mdash; libtrf  documentation</title>
+  <title>Telescope Remote Framebuffer Library &mdash; libtrf  documentation</title>
       <link rel="stylesheet" href="_static/pygments.css" type="text/css" />
       <link rel="stylesheet" href="_static/css/theme.css" type="text/css" />
       <link rel="stylesheet" href="_static/graphviz.css" type="text/css" />
@@ -19,7 +19,7 @@
     <script src="_static/js/theme.js"></script>
     <link rel="index" title="Index" href="genindex.html" />
     <link rel="search" title="Search" href="search.html" />
-    <link rel="next" title="TRF API Function Documentation" href="api/index.html" /> 
+    <link rel="next" title="Network Configuration Documentation" href="network/index.html" /> 
 </head>
 
 <body class="wy-body-for-nav"> 
@@ -38,6 +38,7 @@
 </div>
         </div><div class="wy-menu wy-menu-vertical" data-spy="affix" role="navigation" aria-label="Navigation menu">
               <ul>
+<li class="toctree-l1"><a class="reference internal" href="network/index.html">Network Configuration Documentation</a></li>
 <li class="toctree-l1"><a class="reference internal" href="api/index.html">TRF API Function Documentation</a></li>
 </ul>
 
@@ -55,7 +56,7 @@
           <div role="navigation" aria-label="Page navigation">
   <ul class="wy-breadcrumbs">
       <li><a href="#" class="icon icon-home"></a> &raquo;</li>
-      <li>Welcome to libtrf’s documentation!</li>
+      <li>Telescope Remote Framebuffer Library</li>
       <li class="wy-breadcrumbs-aside">
             <a href="_sources/index.rst.txt" rel="nofollow"> View page source</a>
       </li>
@@ -65,25 +66,62 @@
           <div role="main" class="document" itemscope="itemscope" itemtype="http://schema.org/Article">
            <div itemprop="articleBody">
              
-  <section id="welcome-to-libtrf-s-documentation">
-<h1>Welcome to libtrf’s documentation!<a class="headerlink" href="#welcome-to-libtrf-s-documentation" title="Permalink to this headline"></a></h1>
+  <section id="telescope-remote-framebuffer-library">
+<h1>Telescope Remote Framebuffer Library<a class="headerlink" href="#telescope-remote-framebuffer-library" title="Permalink to this headline"></a></h1>
 <div class="toctree-wrapper compound">
 </div>
 <section id="what-is-libtrf">
 <h2>What is libtrf?<a class="headerlink" href="#what-is-libtrf" title="Permalink to this headline"></a></h2>
-<p><cite>libtrf</cite> abstracts the connection, synchronization, and transmission aspects of remote framebuffer relay, attempting to make the best use of available network hardware.</p>
-<p>While this library initially targets Linux users, it keeps to standard C as much as possible and may eventually be usable on other operating systems supported by Libfabric, such as FreeBSD, macOS, and Windows. It does not require special hardware support, falling back to TCP when acceleration is unavailable.</p>
+<p><code class="docutils literal notranslate"><span class="pre">libtrf</span></code> is a transport library designed for uncompressed, point-to-point
+video transmission across high-bandwidth, low-latency networks. It features
+request latencies measured in microseconds, and high throughput up to 200
+Gbit/s on RDMA transports.</p>
+</section>
+<section id="software-support">
+<h2>Software Support<a class="headerlink" href="#software-support" title="Permalink to this headline"></a></h2>
+<p>Currently, LibTRF supports major Linux distributions with a focus on RHEL-based
+distributions where RDMA packages are well-maintained and tested. Most features
+will likely work on FreeBSD and macOS, though releases are not regularly tested
+on these targets.</p>
+<p>Windows is not currently supported.</p>
 <p><a class="reference external" href="https://github.com/telescope-proj/libtrf">Github Repository</a></p>
 </section>
-</section>
 <section id="indices-and-tables">
-<h1>Indices and tables<a class="headerlink" href="#indices-and-tables" title="Permalink to this headline"></a></h1>
+<h2>Indices and tables<a class="headerlink" href="#indices-and-tables" title="Permalink to this headline"></a></h2>
 <ul class="simple">
 <li><p><a class="reference internal" href="genindex.html"><span class="std std-ref">Index</span></a></p></li>
 <li><p><a class="reference internal" href="search.html"><span class="std std-ref">Search Page</span></a></p></li>
 </ul>
+<section id="table-of-contents">
+<h3>Table of Contents<a class="headerlink" href="#table-of-contents" title="Permalink to this headline"></a></h3>
 <div class="toctree-wrapper compound">
 <ul>
+<li class="toctree-l1"><a class="reference internal" href="network/index.html">Network Configuration Documentation</a><ul>
+<li class="toctree-l2"><a class="reference internal" href="network/setup.html">Network Setup &amp; Usage Guide</a><ul>
+<li class="toctree-l3"><a class="reference internal" href="network/setup.html#general-configuration">General Configuration</a></li>
+<li class="toctree-l3"><a class="reference internal" href="network/setup.html#transport-specific-configuration">Transport-specific configuration</a><ul>
+<li class="toctree-l4"><a class="reference internal" href="network/setup.html#tcp">TCP</a></li>
+<li class="toctree-l4"><a class="reference internal" href="network/setup.html#rdma-over-converged-ethernet-roce-v1">RDMA over Converged Ethernet (RoCE) v1</a></li>
+<li class="toctree-l4"><a class="reference internal" href="network/setup.html#rdma-over-converged-ethernet-roce-v2">RDMA over Converged Ethernet (RoCE) v2</a></li>
+<li class="toctree-l4"><a class="reference internal" href="network/setup.html#iwarp">iWARP</a></li>
+<li class="toctree-l4"><a class="reference internal" href="network/setup.html#infiniband">InfiniBand</a></li>
+</ul>
+</li>
+<li class="toctree-l3"><a class="reference internal" href="network/setup.html#unsupported-transports">Unsupported Transports</a></li>
+</ul>
+</li>
+<li class="toctree-l2"><a class="reference internal" href="network/offload.html">Hardware Offload Configuration</a></li>
+<li class="toctree-l2"><a class="reference internal" href="network/mellanox.html">Mellanox NIC configuration</a><ul>
+<li class="toctree-l3"><a class="reference internal" href="network/mellanox.html#enabling-sr-iov-at-boot-time">Enabling SR-IOV at boot time</a></li>
+<li class="toctree-l3"><a class="reference internal" href="network/mellanox.html#setting-vf-mac-addresses">Setting VF MAC Addresses</a></li>
+</ul>
+</li>
+<li class="toctree-l2"><a class="reference internal" href="network/infiniband.html">InfiniBand Configuration</a><ul>
+<li class="toctree-l3"><a class="reference internal" href="network/infiniband.html#sr-iov-configuration">SR-IOV Configuration</a></li>
+</ul>
+</li>
+</ul>
+</li>
 <li class="toctree-l1"><a class="reference internal" href="api/index.html">TRF API Function Documentation</a><ul>
 <li class="toctree-l2"><a class="reference internal" href="api/trf.html">TRF Core Functionality</a></li>
 <li class="toctree-l2"><a class="reference internal" href="api/trf_def.html">System Data Structures</a></li>
@@ -98,12 +136,27 @@
 </ul>
 </div>
 </section>
+</section>
+<section id="software-license">
+<h2>Software License<a class="headerlink" href="#software-license" title="Permalink to this headline"></a></h2>
+<section id="telescope-remote-framebuffer-library-libtrf">
+<h3>Telescope Remote Framebuffer Library (libtrf)<a class="headerlink" href="#telescope-remote-framebuffer-library-libtrf" title="Permalink to this headline"></a></h3>
+<p>Copyright (c) 2022 <a class="reference external" href="https://github.com/beanfacts">Tim Dettmar</a>. Licensed under
+<a class="reference external" href="https://www.gnu.org/licenses/old-licenses/lgpl-2.1.en.html">LGPL 2.1 only</a>.</p>
+</section>
+<section id="ini-not-invented-here-inih">
+<h3>INI Not Invented Here (inih)<a class="headerlink" href="#ini-not-invented-here-inih" title="Permalink to this headline"></a></h3>
+<p>Copyright (c) 2009 <a class="reference external" href="https://github.com/benhoyt">Ben Hoyt</a>. Licensed under <a class="reference external" href="https://github.com/benhoyt/inih/blob/master/LICENSE.txt">BSD
+3-Clause</a>.</p>
+</section>
+</section>
+</section>
 
 
            </div>
           </div>
           <footer><div class="rst-footer-buttons" role="navigation" aria-label="Footer">
-        <a href="api/index.html" class="btn btn-neutral float-right" title="TRF API Function Documentation" accesskey="n" rel="next">Next <span class="fa fa-arrow-circle-right" aria-hidden="true"></span></a>
+        <a href="network/index.html" class="btn btn-neutral float-right" title="Network Configuration Documentation" accesskey="n" rel="next">Next <span class="fa fa-arrow-circle-right" aria-hidden="true"></span></a>
     </div>
 
   <hr/>

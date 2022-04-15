@@ -473,8 +473,8 @@ int trfBindSubchannel(PTRFContext main, PTRFContext sub)
     if (!main || !sub)
         return -EINVAL;
 
-    if (main->type != TRF_EP_SINK || main->type != TRF_EP_CONN_ID
-        || sub->type != TRF_EP_SINK || sub->type != TRF_EP_CONN_ID)
+    if ((main->type != TRF_EP_SINK && main->type != TRF_EP_CONN_ID)
+        || (sub->type != TRF_EP_SINK && sub->type != TRF_EP_CONN_ID))
     {
         trf__log_error("Invalid channel type");
         return -EINVAL;
@@ -497,7 +497,7 @@ int trfUnbindSubchannel(PTRFContext main, uint32_t id)
     if (!main || !id)
         return -EINVAL;
 
-    if (main->type != TRF_EP_SINK || main->type != TRF_EP_CONN_ID)
+    if (main->type != TRF_EP_SINK && main->type != TRF_EP_CONN_ID)
     {
         trf__log_error("Invalid channel type");
         return -EINVAL;
@@ -662,7 +662,7 @@ int trfCreateSubchannel(PTRFContext ctx, PTRFContext * ctx_out, uint32_t id)
         trf__log_warn("Peer sent invalid data - values: "
                       "id = %d (expected %d), reply: %d (expected %d)",
                       rco->id, id, rco->reply, 1);
-        ret = -EBADE;
+        ret = -EBADMSG;
         goto free_rcv;
     }
 
@@ -724,7 +724,7 @@ int trfCreateSubchannel(PTRFContext ctx, PTRFContext * ctx_out, uint32_t id)
                       rcv_sub->ch_hello->reply, 1, 
                       rcv_sub->ch_hello->channel_id, id,
                       rcv_sub->session_id, new_ctx->cli.session_id);
-        ret = -EBADE;
+        ret = -EBADMSG;
         goto free_rcv_sub;
     }
 
@@ -931,7 +931,7 @@ int trfProcessSubchannelReq(PTRFContext ctx, PTRFContext * ctx_out,
                       rcv->ch_hello->reply, 0,
                       rcv->ch_hello->channel_id, id,
                       rcv->session_id, new_ctx->cli.session_id);
-        ret = -EBADE;
+        ret = -EBADMSG;
         goto free_rcv;
     }
 

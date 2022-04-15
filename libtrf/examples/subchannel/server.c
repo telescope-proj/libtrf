@@ -76,7 +76,7 @@ void * demo_thread(void * arg)
         if (*counter == prev)
         {
             ts_printf("Client did not increment counter!\n");
-            return (void *) EBADE;
+            return (void *) EBADMSG;
         }
 
     }

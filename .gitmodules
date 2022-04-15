@@ -1,0 +1,3 @@
+[submodule "repos/inih"]
+	path = repos/inih
+	url = https://github.com/telescope-proj/inih

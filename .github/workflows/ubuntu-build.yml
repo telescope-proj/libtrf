@@ -1,4 +1,4 @@
-name: "UbuntuBuild"
+name: "Ubuntu Build"
 
 on:
   push:

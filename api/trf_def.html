@@ -481,6 +481,12 @@
 </dd></dl>
 
 <dl class="cpp enumerator">
+<dt class="sig sig-object cpp" id="_CPPv4N12TRFTexFormat20TRF_TEX_RGBA_1010102E">
+<span id="_CPPv3N12TRFTexFormat20TRF_TEX_RGBA_1010102E"></span><span id="_CPPv2N12TRFTexFormat20TRF_TEX_RGBA_1010102E"></span><span class="target" id="trf__def_8h_1ae776d3218f19c8be3d21ff24f8c4553da28c7f9dd15a2ede247c5c7137868ce2a"></span><span class="k"><span class="pre">enumerator</span></span><span class="w"> </span><span class="sig-name descname"><span class="n"><span class="pre">TRF_TEX_RGBA_1010102</span></span></span><a class="headerlink" href="#_CPPv4N12TRFTexFormat20TRF_TEX_RGBA_1010102E" title="Permalink to this definition"></a><br /></dt>
+<dd><p>RGBA, 10 bpc RGB, 2 bit alpha. </p>
+</dd></dl>
+
+<dl class="cpp enumerator">
 <dt class="sig sig-object cpp" id="_CPPv4N12TRFTexFormat14TRF_TEX_MONO_8E">
 <span id="_CPPv3N12TRFTexFormat14TRF_TEX_MONO_8E"></span><span id="_CPPv2N12TRFTexFormat14TRF_TEX_MONO_8E"></span><span class="target" id="trf__def_8h_1ae776d3218f19c8be3d21ff24f8c4553da7c8a3797e1c3bd0253eef449ee472979"></span><span class="k"><span class="pre">enumerator</span></span><span class="w"> </span><span class="sig-name descname"><span class="n"><span class="pre">TRF_TEX_MONO_8</span></span></span><a class="headerlink" href="#_CPPv4N12TRFTexFormat14TRF_TEX_MONO_8E" title="Permalink to this definition"></a><br /></dt>
 <dd><p>Monochrome, 8 bits per pixel. </p>
@@ -594,6 +600,51 @@
 <dt class="sig sig-object cpp" id="_CPPv417trfDuplicateAddrV9PTRFAddrV">
 <span id="_CPPv317trfDuplicateAddrV9PTRFAddrV"></span><span id="_CPPv217trfDuplicateAddrV9PTRFAddrV"></span><span id="trfDuplicateAddrV__PTRFAddrV"></span><span class="target" id="trf__def_8h_1a1d6561ecdec24ca727a8d5fbdf9d9c41"></span><span class="n"><span class="pre">PTRFAddrV</span></span><span class="w"> </span><span class="sig-name descname"><span class="n"><span class="pre">trfDuplicateAddrV</span></span></span><span class="sig-paren">(</span><span class="n"><span class="pre">PTRFAddrV</span></span><span class="w"> </span><span class="n sig-param"><span class="pre">av</span></span><span class="sig-paren">)</span><a class="headerlink" href="#_CPPv417trfDuplicateAddrV9PTRFAddrV" title="Permalink to this definition"></a><br /></dt>
 <dd></dd></dl>
+
+<dl class="cpp function">
+<dt class="sig sig-object cpp" id="_CPPv415trfTimespecToMsP8timespec">
+<span id="_CPPv315trfTimespecToMsP8timespec"></span><span id="_CPPv215trfTimespecToMsP8timespec"></span><span id="trfTimespecToMs__timespecP"></span><span class="target" id="trf__def_8h_1adcf46f7f81b5644c21e5b1ffbb1adc98"></span><span class="k"><span class="pre">static</span></span><span class="w"> </span><span class="k"><span class="pre">inline</span></span><span class="w"> </span><span class="kt"><span class="pre">int</span></span><span class="w"> </span><span class="sig-name descname"><span class="n"><span class="pre">trfTimespecToMs</span></span></span><span class="sig-paren">(</span><span class="k"><span class="pre">struct</span></span><span class="w"> </span><span class="n"><span class="pre">timespec</span></span><span class="w"> </span><span class="p"><span class="pre">*</span></span><span class="n sig-param"><span class="pre">ts</span></span><span class="sig-paren">)</span><a class="headerlink" href="#_CPPv415trfTimespecToMsP8timespec" title="Permalink to this definition"></a><br /></dt>
+<dd><p>Convert a timespec into an absolute delay in milliseconds. </p>
+<dl class="field-list simple">
+<dt class="field-odd">Parameters</dt>
+<dd class="field-odd"><p><strong>ts</strong> – </p>
+</dd>
+<dt class="field-even">Returns</dt>
+<dd class="field-even"><p>int </p>
+</dd>
+</dl>
+</dd></dl>
+
+<dl class="cpp function">
+<dt class="sig sig-object cpp" id="_CPPv415trfMsToTimespeci">
+<span id="_CPPv315trfMsToTimespeci"></span><span id="_CPPv215trfMsToTimespeci"></span><span id="trfMsToTimespec__i"></span><span class="target" id="trf__def_8h_1acd2feb29aa5c31f6d6fdc31a89dca2fe"></span><span class="k"><span class="pre">static</span></span><span class="w"> </span><span class="k"><span class="pre">inline</span></span><span class="w"> </span><span class="k"><span class="pre">struct</span></span><span class="w"> </span><span class="n"><span class="pre">timespec</span></span><span class="w"> </span><span class="sig-name descname"><span class="n"><span class="pre">trfMsToTimespec</span></span></span><span class="sig-paren">(</span><span class="kt"><span class="pre">int</span></span><span class="w"> </span><span class="n sig-param"><span class="pre">ms</span></span><span class="sig-paren">)</span><a class="headerlink" href="#_CPPv415trfMsToTimespeci" title="Permalink to this definition"></a><br /></dt>
+<dd><p>Convert a delay in milliseconds to a timespec representation. </p>
+<dl class="field-list simple">
+<dt class="field-odd">Parameters</dt>
+<dd class="field-odd"><p><strong>ms</strong> – Delay in milliseconds</p>
+</dd>
+<dt class="field-even">Returns</dt>
+<dd class="field-even"><p>struct timespec </p>
+</dd>
+</dl>
+</dd></dl>
+
+<dl class="cpp function">
+<dt class="sig sig-object cpp" id="_CPPv414trfSumTimespecP8timespecP8timespec">
+<span id="_CPPv314trfSumTimespecP8timespecP8timespec"></span><span id="_CPPv214trfSumTimespecP8timespecP8timespec"></span><span id="trfSumTimespec__timespecP.timespecP"></span><span class="target" id="trf__def_8h_1a53cd43ca41dabadf16b1f4a96a522884"></span><span class="k"><span class="pre">static</span></span><span class="w"> </span><span class="k"><span class="pre">inline</span></span><span class="w"> </span><span class="k"><span class="pre">struct</span></span><span class="w"> </span><span class="n"><span class="pre">timespec</span></span><span class="w"> </span><span class="sig-name descname"><span class="n"><span class="pre">trfSumTimespec</span></span></span><span class="sig-paren">(</span><span class="k"><span class="pre">struct</span></span><span class="w"> </span><span class="n"><span class="pre">timespec</span></span><span class="w"> </span><span class="p"><span class="pre">*</span></span><span class="n sig-param"><span class="pre">ts</span></span>, <span class="k"><span class="pre">struct</span></span><span class="w"> </span><span class="n"><span class="pre">timespec</span></span><span class="w"> </span><span class="p"><span class="pre">*</span></span><span class="n sig-param"><span class="pre">ts2</span></span><span class="sig-paren">)</span><a class="headerlink" href="#_CPPv414trfSumTimespecP8timespecP8timespec" title="Permalink to this definition"></a><br /></dt>
+<dd><p>Sum two timespecs and return the result. </p>
+<dl class="field-list simple">
+<dt class="field-odd">Parameters</dt>
+<dd class="field-odd"><ul class="simple">
+<li><p><strong>ts</strong> – First timespec</p></li>
+<li><p><strong>ts2</strong> – Second timespec</p></li>
+</ul>
+</dd>
+<dt class="field-even">Returns</dt>
+<dd class="field-even"><p>Result timespec </p>
+</dd>
+</dl>
+</dd></dl>
 
 </div>
 <dl class="cpp struct">

@@ -104,7 +104,11 @@ int trfNCAccept(PTRFContext ctx, PTRFContext * ctx_out)
     );
     if (!trfSockValid(client_sock))
     {
-        trf__log_error("Unable to accept client connection");
+        if (errno != EINTR)
+        {
+            trf__log_error("Unable to accept client connection: %s",
+                           strerror(errno));
+        }
         ret = -errno;
         goto free_buf;
     }
@@ -159,7 +163,7 @@ close_sock:
     }
 free_buf:
     free(mbuf);
-    return -1;
+    return ret;
 }
 
 int trfNCNewSession(PTRFContext ctx, PTRFContext * out)

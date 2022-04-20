@@ -483,13 +483,16 @@ enum TRFTexFormat {
     TRF_TEX_RGBA_16161616,
     /**
      * @brief BGRA, 16 bits per channel HDR float
-     * 
      */
     TRF_TEX_BGRA_16161616F,
     /**
      * @brief BGRA, 16 bits per channel
      */
     TRF_TEX_BGRA_16161616,
+    /**
+     * @brief RGBA, 10 bpc RGB, 2 bit alpha
+     */
+    TRF_TEX_RGBA_1010102,
     /**
      * @brief Monochrome, 8 bits per pixel
      */
@@ -894,5 +897,56 @@ static inline void trfDuplicateOpts(PTRFContextOpts in, PTRFContextOpts out)
 }
 
 PTRFAddrV trfDuplicateAddrV(PTRFAddrV av);
+
+/**
+ * @brief   Convert a timespec into an absolute delay in milliseconds.
+ * 
+ * @param   ts 
+ * 
+ * @return  int 
+ */
+static inline int trfTimespecToMs(struct timespec * ts)
+{
+    int out = ts->tv_sec * 1000;
+    return out + (ts->tv_nsec / 1000000);
+}
+
+/**
+ * @brief       Convert a delay in milliseconds to a timespec representation.
+ * 
+ * @param ms    Delay in milliseconds
+ * 
+ * @return      struct timespec
+ */
+static inline struct timespec trfMsToTimespec(int ms)
+{
+    struct timespec out;
+    out.tv_sec = ms / 1000;
+    out.tv_nsec = (ms % 1000) * 1000000;
+    return out;
+}
+
+/**
+ * @brief       Sum two timespecs and return the result.
+ * 
+ * @param ts    First timespec
+ * 
+ * @param ts2   Second timespec
+ * 
+ * @return      Result timespec
+ */
+static inline struct timespec trfSumTimespec(struct timespec * ts, 
+                                             struct timespec * ts2)
+{
+    struct timespec out = *ts;
+    out.tv_sec += ts2->tv_sec;
+    out.tv_nsec += ts2->tv_nsec;
+    while (out.tv_nsec > 1000000000)
+    {
+        out.tv_nsec -= 1000000000;
+        out.tv_sec++;
+    }
+    return out;
+}
 
 #endif // _TRF_DEF_H_

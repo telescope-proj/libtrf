@@ -478,6 +478,7 @@ static inline ssize_t trfGetTextureBytes(size_t width, size_t height,
             return width * height * 3;
         case TRF_TEX_RGBA_8888:
         case TRF_TEX_BGRA_8888:
+        case TRF_TEX_RGBA_1010102:
             return width * height * 4;
         case TRF_TEX_RGBA_16161616:
         case TRF_TEX_RGBA_16161616F:
@@ -824,5 +825,6 @@ ssize_t trfGetSendProgress(PTRFContext ctx, struct fi_cq_data_entry * de,
 ssize_t trfGetRecvProgress(PTRFContext ctx, struct fi_cq_data_entry * de,
                            struct fi_cq_err_entry * err, size_t count,
                            PTRFContextOpts opts);
+
 
 #endif // _TRF_H_

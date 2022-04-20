@@ -1,7 +1,7 @@
 .. _network:
 
-Network Configuration Documentation
-===================================
+Network Configuration
+=====================
 
 .. toctree::
 

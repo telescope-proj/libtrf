@@ -38,8 +38,7 @@ full-stack TCP Offload Engine (TOE), as supported by some Chelsio NICs, is not
 recommended.
 
 Realtek NICs are barely deserving of the term "NIC", and may require disabling
-hardware offloads if poor performance is experienced. See the 
-:doc:`Hardware Offload Configuration <offload>` section.
+hardware offloads if poor performance is experienced. See :doc:`offload`.
 
 RDMA over Converged Ethernet (RoCE) v1
 ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
@@ -92,7 +91,7 @@ traffic.
 
 Requires a Subnet Manager (SM) and InfiniBand switching hardware, but no special
 switch configuration as by design, InfiniBand is a lossless fabric. See
-:ref:`_setup_infiniband`
+:doc:`infiniband`.
 
 Unsupported Transports
 ----------------------

@@ -486,10 +486,11 @@ static inline ssize_t trfGetTextureBytes(size_t width, size_t height,
         case TRF_TEX_BGRA_16161616F:
             return width * height * 8;
         case TRF_TEX_ETC1:
+        case TRF_TEX_ETC2:
         case TRF_TEX_DXT1:
             if (width % 4 || height % 4) { return -ENOTSUP; }
             return width * height / 2;
-        case TRF_TEX_ETC2:
+        case TRF_TEX_ETC2_EAC:
         case TRF_TEX_DXT5:
             if (width % 4 || height % 4) { return -ENOTSUP; }
             return width * height;

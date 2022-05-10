@@ -470,9 +470,13 @@ enum TRFTexFormat {
      */
     TRF_TEX_ETC1,
     /**
-      * @brief ETC2 compressed texture format
+      * @brief ETC2 (RGB) compressed texture format
       */
     TRF_TEX_ETC2,
+    /**
+     * @brief ETC2 (EAC, RGBA) compressed texture format
+     */
+    TRF_TEX_ETC2_EAC,
     /**
       * @brief RGBA, 16 bits per channel HDR float
       */

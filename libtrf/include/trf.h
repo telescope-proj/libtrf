@@ -521,6 +521,7 @@ static inline uint8_t trfTextureIsCompressed(enum TRFTexFormat fmt)
     {
         case TRF_TEX_ETC1:
         case TRF_TEX_ETC2:
+        case TRF_TEX_ETC2_EAC:
         case TRF_TEX_DXT1:
         case TRF_TEX_DXT5:
             return 1;

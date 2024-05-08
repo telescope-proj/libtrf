@@ -1,21 +1,24 @@
 <!DOCTYPE html>
-<html class="writer-html5" lang="en" >
+<html class="writer-html5" lang="en" data-content_root="../">
 <head>
-  <meta charset="utf-8" /><meta name="generator" content="Docutils 0.17.1: http://docutils.sourceforge.net/" />
+  <meta charset="utf-8" /><meta name="viewport" content="width=device-width, initial-scale=1" />
 
   <meta name="viewport" content="width=device-width, initial-scale=1.0" />
   <title>Interface &amp; Address Introspection &mdash; libtrf  documentation</title>
-      <link rel="stylesheet" href="../_static/pygments.css" type="text/css" />
-      <link rel="stylesheet" href="../_static/css/theme.css" type="text/css" />
-      <link rel="stylesheet" href="../_static/graphviz.css" type="text/css" />
+      <link rel="stylesheet" type="text/css" href="../_static/pygments.css?v=80d5e7a1" />
+      <link rel="stylesheet" type="text/css" href="../_static/css/theme.css?v=19f00094" />
+      <link rel="stylesheet" type="text/css" href="../_static/graphviz.css?v=fd3f3429" />
+
+  
   <!--[if lt IE 9]>
     <script src="../_static/js/html5shiv.min.js"></script>
   <![endif]-->
   
-        <script data-url_root="../" id="documentation_options" src="../_static/documentation_options.js"></script>
-        <script src="../_static/jquery.js"></script>
-        <script src="../_static/underscore.js"></script>
-        <script src="../_static/doctools.js"></script>
+        <script src="../_static/jquery.js?v=5d32c60e"></script>
+        <script src="../_static/_sphinx_javascript_frameworks_compat.js?v=2cd50e6c"></script>
+        <script src="../_static/documentation_options.js?v=5929fcd5"></script>
+        <script src="../_static/doctools.js?v=9a2dae69"></script>
+        <script src="../_static/sphinx_highlight.js?v=dc90522c"></script>
     <script src="../_static/js/theme.js"></script>
     <link rel="index" title="Index" href="../genindex.html" />
     <link rel="search" title="Search" href="../search.html" />
@@ -28,11 +31,15 @@
     <nav data-toggle="wy-nav-shift" class="wy-nav-side">
       <div class="wy-side-scroll">
         <div class="wy-side-nav-search" >
-            <a href="../index.html" class="icon icon-home"> libtrf
+
+          
+          
+          <a href="../index.html" class="icon icon-home">
+            libtrf
           </a>
 <div role="search">
   <form id="rtd-search-form" class="wy-form" action="../search.html" method="get">
-    <input type="text" name="q" placeholder="Search docs" />
+    <input type="text" name="q" placeholder="Search docs" aria-label="Search docs" />
     <input type="hidden" name="check_keywords" value="yes" />
     <input type="hidden" name="area" value="default" />
   </form>
@@ -45,7 +52,20 @@
 <li class="toctree-l2"><a class="reference internal" href="trf.html">TRF Core Functionality</a></li>
 <li class="toctree-l2"><a class="reference internal" href="trf_def.html">System Data Structures</a></li>
 <li class="toctree-l2"><a class="reference internal" href="trf_inet.html">Address Handling Functions</a></li>
-<li class="toctree-l2 current"><a class="current reference internal" href="#">Interface &amp; Address Introspection</a></li>
+<li class="toctree-l2 current"><a class="current reference internal" href="#">Interface &amp; Address Introspection</a><ul>
+<li class="toctree-l3"><a class="reference internal" href="#_CPPv419trfValidRouteUpdate13PTRFInterfacePc"><code class="docutils literal notranslate"><span class="pre">trfValidRouteUpdate()</span></code></a></li>
+<li class="toctree-l3"><a class="reference internal" href="#_CPPv416trfRemoveInvalid13PTRFInterfaceP13PTRFInterfacePi"><code class="docutils literal notranslate"><span class="pre">trfRemoveInvalid()</span></code></a></li>
+<li class="toctree-l3"><a class="reference internal" href="#_CPPv412trfFreeAddrV9PTRFAddrV"><code class="docutils literal notranslate"><span class="pre">trfFreeAddrV()</span></code></a></li>
+<li class="toctree-l3"><a class="reference internal" href="#_CPPv412trfSortAddrV9PTRFAddrV"><code class="docutils literal notranslate"><span class="pre">trfSortAddrV()</span></code></a></li>
+<li class="toctree-l3"><a class="reference internal" href="#_CPPv414trfCreateAddrV13PTRFInterface13PTRFInterfaceP9PTRFAddrV"><code class="docutils literal notranslate"><span class="pre">trfCreateAddrV()</span></code></a></li>
+<li class="toctree-l3"><a class="reference internal" href="#_CPPv420trfFreeInterfaceList13PTRFInterface"><code class="docutils literal notranslate"><span class="pre">trfFreeInterfaceList()</span></code></a></li>
+<li class="toctree-l3"><a class="reference internal" href="#_CPPv419trfGetInterfaceListP13PTRFInterfaceP8uint32_t8uint64_t"><code class="docutils literal notranslate"><span class="pre">trfGetInterfaceList()</span></code></a></li>
+<li class="toctree-l3"><a class="reference internal" href="#_CPPv420trfSortInterfaceList13PTRFInterface"><code class="docutils literal notranslate"><span class="pre">trfSortInterfaceList()</span></code></a></li>
+<li class="toctree-l3"><a class="reference internal" href="#_CPPv417trfGetFastestLink9PTRFAddrVP9PTRFAddrV"><code class="docutils literal notranslate"><span class="pre">trfGetFastestLink()</span></code></a></li>
+<li class="toctree-l3"><a class="reference internal" href="#_CPPv415trfGetLinkSpeedPcP7int32_t"><code class="docutils literal notranslate"><span class="pre">trfGetLinkSpeed()</span></code></a></li>
+<li class="toctree-l3"><a class="reference internal" href="#_CPPv425trfGetInterfaceListLength13PTRFInterface"><code class="docutils literal notranslate"><span class="pre">trfGetInterfaceListLength()</span></code></a></li>
+</ul>
+</li>
 <li class="toctree-l2"><a class="reference internal" href="trf_internal.html">TRF Internal System Functions</a></li>
 <li class="toctree-l2"><a class="reference internal" href="trf_msg.html">Message Handling Functions</a></li>
 <li class="toctree-l2"><a class="reference internal" href="trf_ncp.html">Negotiation Channel Protocol - Connection Management Functions</a></li>
@@ -67,9 +87,9 @@
         <div class="rst-content">
           <div role="navigation" aria-label="Page navigation">
   <ul class="wy-breadcrumbs">
-      <li><a href="../index.html" class="icon icon-home"></a> &raquo;</li>
-          <li><a href="index.html">TRF API Function Documentation</a> &raquo;</li>
-      <li>Interface &amp; Address Introspection</li>
+      <li><a href="../index.html" class="icon icon-home" aria-label="Home"></a></li>
+          <li class="breadcrumb-item"><a href="index.html">TRF API Function Documentation</a></li>
+      <li class="breadcrumb-item active">Interface &amp; Address Introspection</li>
       <li class="wy-breadcrumbs-aside">
             <a href="../_sources/api/trf_interface.rst.txt" rel="nofollow"> View page source</a>
       </li>
@@ -80,22 +100,22 @@
            <div itemprop="articleBody">
              
   <section id="interface-address-introspection">
-<span id="api-interface"></span><h1>Interface &amp; Address Introspection<a class="headerlink" href="#interface-address-introspection" title="Permalink to this headline"></a></h1>
+<span id="api-interface"></span><h1>Interface &amp; Address Introspection<a class="headerlink" href="#interface-address-introspection" title="Link to this heading"></a></h1>
 <p>Interface &amp; Address Vector Management. </p>
 <div class="breathe-sectiondef docutils container">
 <p class="breathe-sectiondef-title rubric" id="breathe-section-title-functions">Functions</p>
 <dl class="cpp function">
 <dt class="sig sig-object cpp" id="_CPPv419trfValidRouteUpdate13PTRFInterfacePc">
-<span id="_CPPv319trfValidRouteUpdate13PTRFInterfacePc"></span><span id="_CPPv219trfValidRouteUpdate13PTRFInterfacePc"></span><span id="trfValidRouteUpdate__PTRFInterface.cP"></span><span class="target" id="trf__interface_8h_1a631b5d44e67dfb3682dd7ef7cad0e865"></span><span class="kt"><span class="pre">bool</span></span><span class="w"> </span><span class="sig-name descname"><span class="n"><span class="pre">trfValidRouteUpdate</span></span></span><span class="sig-paren">(</span><span class="n"><span class="pre">PTRFInterface</span></span><span class="w"> </span><span class="n sig-param"><span class="pre">clientIf</span></span>, <span class="kt"><span class="pre">char</span></span><span class="w"> </span><span class="p"><span class="pre">*</span></span><span class="n sig-param"><span class="pre">address</span></span><span class="sig-paren">)</span><a class="headerlink" href="#_CPPv419trfValidRouteUpdate13PTRFInterfacePc" title="Permalink to this definition"></a><br /></dt>
+<span id="_CPPv319trfValidRouteUpdate13PTRFInterfacePc"></span><span id="_CPPv219trfValidRouteUpdate13PTRFInterfacePc"></span><span id="trfValidRouteUpdate__PTRFInterface.cP"></span><span class="target" id="trf__interface_8h_1a631b5d44e67dfb3682dd7ef7cad0e865"></span><span class="kt"><span class="pre">bool</span></span><span class="w"> </span><span class="sig-name descname"><span class="n"><span class="pre">trfValidRouteUpdate</span></span></span><span class="sig-paren">(</span><span class="n"><span class="pre">PTRFInterface</span></span><span class="w"> </span><span class="n sig-param"><span class="pre">clientIf</span></span>, <span class="kt"><span class="pre">char</span></span><span class="w"> </span><span class="p"><span class="pre">*</span></span><span class="n sig-param"><span class="pre">address</span></span><span class="sig-paren">)</span><a class="headerlink" href="#_CPPv419trfValidRouteUpdate13PTRFInterfacePc" title="Link to this definition"></a><br /></dt>
 <dd><p>Mark an address in an interface list as valid and reachable. </p>
 <dl class="field-list simple">
-<dt class="field-odd">Parameters</dt>
+<dt class="field-odd">Parameters<span class="colon">:</span></dt>
 <dd class="field-odd"><ul class="simple">
 <li><p><strong>addr</strong> – Address to mark </p></li>
 <li><p><strong>clientIf</strong> – Interface List </p></li>
 </ul>
 </dd>
-<dt class="field-even">Returns</dt>
+<dt class="field-even">Returns<span class="colon">:</span></dt>
 <dd class="field-even"><p>True on success, False on failure </p>
 </dd>
 </dl>
@@ -103,17 +123,17 @@
 
 <dl class="cpp function">
 <dt class="sig sig-object cpp" id="_CPPv416trfRemoveInvalid13PTRFInterfaceP13PTRFInterfacePi">
-<span id="_CPPv316trfRemoveInvalid13PTRFInterfaceP13PTRFInterfacePi"></span><span id="_CPPv216trfRemoveInvalid13PTRFInterfaceP13PTRFInterfacePi"></span><span id="trfRemoveInvalid__PTRFInterface.PTRFInterfaceP.iP"></span><span class="target" id="trf__interface_8h_1a2fc4ef3ec7046458475a924ec7b496c7"></span><span class="kt"><span class="pre">int</span></span><span class="w"> </span><span class="sig-name descname"><span class="n"><span class="pre">trfRemoveInvalid</span></span></span><span class="sig-paren">(</span><span class="n"><span class="pre">PTRFInterface</span></span><span class="w"> </span><span class="n sig-param"><span class="pre">ifs</span></span>, <span class="n"><span class="pre">PTRFInterface</span></span><span class="w"> </span><span class="p"><span class="pre">*</span></span><span class="n sig-param"><span class="pre">out_ifs</span></span>, <span class="kt"><span class="pre">int</span></span><span class="w"> </span><span class="p"><span class="pre">*</span></span><span class="n sig-param"><span class="pre">n_ifs</span></span><span class="sig-paren">)</span><a class="headerlink" href="#_CPPv416trfRemoveInvalid13PTRFInterfaceP13PTRFInterfacePi" title="Permalink to this definition"></a><br /></dt>
+<span id="_CPPv316trfRemoveInvalid13PTRFInterfaceP13PTRFInterfacePi"></span><span id="_CPPv216trfRemoveInvalid13PTRFInterfaceP13PTRFInterfacePi"></span><span id="trfRemoveInvalid__PTRFInterface.PTRFInterfaceP.iP"></span><span class="target" id="trf__interface_8h_1a2fc4ef3ec7046458475a924ec7b496c7"></span><span class="kt"><span class="pre">int</span></span><span class="w"> </span><span class="sig-name descname"><span class="n"><span class="pre">trfRemoveInvalid</span></span></span><span class="sig-paren">(</span><span class="n"><span class="pre">PTRFInterface</span></span><span class="w"> </span><span class="n sig-param"><span class="pre">ifs</span></span>, <span class="n"><span class="pre">PTRFInterface</span></span><span class="w"> </span><span class="p"><span class="pre">*</span></span><span class="n sig-param"><span class="pre">out_ifs</span></span>, <span class="kt"><span class="pre">int</span></span><span class="w"> </span><span class="p"><span class="pre">*</span></span><span class="n sig-param"><span class="pre">n_ifs</span></span><span class="sig-paren">)</span><a class="headerlink" href="#_CPPv416trfRemoveInvalid13PTRFInterfaceP13PTRFInterfacePi" title="Link to this definition"></a><br /></dt>
 <dd><p>Remove invalid or unreachable addresses from an interface list. </p>
 <dl class="field-list simple">
-<dt class="field-odd">Parameters</dt>
+<dt class="field-odd">Parameters<span class="colon">:</span></dt>
 <dd class="field-odd"><ul class="simple">
 <li><p><strong>ifs</strong> – PTRFInterface for client </p></li>
 <li><p><strong>out_ifs</strong> – new interface to return to client </p></li>
 <li><p><strong>n_ifs</strong> – Number of interfaces in the new list </p></li>
 </ul>
 </dd>
-<dt class="field-even">Returns</dt>
+<dt class="field-even">Returns<span class="colon">:</span></dt>
 <dd class="field-even"><p>0 on success, negative error code on failure </p>
 </dd>
 </dl>
@@ -121,13 +141,13 @@
 
 <dl class="cpp function">
 <dt class="sig sig-object cpp" id="_CPPv412trfFreeAddrV9PTRFAddrV">
-<span id="_CPPv312trfFreeAddrV9PTRFAddrV"></span><span id="_CPPv212trfFreeAddrV9PTRFAddrV"></span><span id="trfFreeAddrV__PTRFAddrV"></span><span class="target" id="trf__interface_8h_1a30d950576385c016413ffc0998ba7c79"></span><span class="kt"><span class="pre">void</span></span><span class="w"> </span><span class="sig-name descname"><span class="n"><span class="pre">trfFreeAddrV</span></span></span><span class="sig-paren">(</span><span class="n"><span class="pre">PTRFAddrV</span></span><span class="w"> </span><span class="n sig-param"><span class="pre">av</span></span><span class="sig-paren">)</span><a class="headerlink" href="#_CPPv412trfFreeAddrV9PTRFAddrV" title="Permalink to this definition"></a><br /></dt>
+<span id="_CPPv312trfFreeAddrV9PTRFAddrV"></span><span id="_CPPv212trfFreeAddrV9PTRFAddrV"></span><span id="trfFreeAddrV__PTRFAddrV"></span><span class="target" id="trf__interface_8h_1a30d950576385c016413ffc0998ba7c79"></span><span class="kt"><span class="pre">void</span></span><span class="w"> </span><span class="sig-name descname"><span class="n"><span class="pre">trfFreeAddrV</span></span></span><span class="sig-paren">(</span><span class="n"><span class="pre">PTRFAddrV</span></span><span class="w"> </span><span class="n sig-param"><span class="pre">av</span></span><span class="sig-paren">)</span><a class="headerlink" href="#_CPPv412trfFreeAddrV9PTRFAddrV" title="Link to this definition"></a><br /></dt>
 <dd><p>Free an address vector. </p>
 <dl class="field-list simple">
-<dt class="field-odd">Parameters</dt>
+<dt class="field-odd">Parameters<span class="colon">:</span></dt>
 <dd class="field-odd"><p><strong>av</strong> – Address vector to free </p>
 </dd>
-<dt class="field-even">Returns</dt>
+<dt class="field-even">Returns<span class="colon">:</span></dt>
 <dd class="field-even"><p>no return value </p>
 </dd>
 </dl>
@@ -135,13 +155,13 @@
 
 <dl class="cpp function">
 <dt class="sig sig-object cpp" id="_CPPv412trfSortAddrV9PTRFAddrV">
-<span id="_CPPv312trfSortAddrV9PTRFAddrV"></span><span id="_CPPv212trfSortAddrV9PTRFAddrV"></span><span id="trfSortAddrV__PTRFAddrV"></span><span class="target" id="trf__interface_8h_1a6f6e6b210267b772018bc29dd59ccaf1"></span><span class="n"><span class="pre">PTRFAddrV</span></span><span class="w"> </span><span class="sig-name descname"><span class="n"><span class="pre">trfSortAddrV</span></span></span><span class="sig-paren">(</span><span class="n"><span class="pre">PTRFAddrV</span></span><span class="w"> </span><span class="n sig-param"><span class="pre">av</span></span><span class="sig-paren">)</span><a class="headerlink" href="#_CPPv412trfSortAddrV9PTRFAddrV" title="Permalink to this definition"></a><br /></dt>
+<span id="_CPPv312trfSortAddrV9PTRFAddrV"></span><span id="_CPPv212trfSortAddrV9PTRFAddrV"></span><span id="trfSortAddrV__PTRFAddrV"></span><span class="target" id="trf__interface_8h_1a6f6e6b210267b772018bc29dd59ccaf1"></span><span class="n"><span class="pre">PTRFAddrV</span></span><span class="w"> </span><span class="sig-name descname"><span class="n"><span class="pre">trfSortAddrV</span></span></span><span class="sig-paren">(</span><span class="n"><span class="pre">PTRFAddrV</span></span><span class="w"> </span><span class="n sig-param"><span class="pre">av</span></span><span class="sig-paren">)</span><a class="headerlink" href="#_CPPv412trfSortAddrV9PTRFAddrV" title="Link to this definition"></a><br /></dt>
 <dd><p>Sort an address vector. </p>
 <dl class="field-list simple">
-<dt class="field-odd">Parameters</dt>
+<dt class="field-odd">Parameters<span class="colon">:</span></dt>
 <dd class="field-odd"><p><strong>av</strong> – Address vector to sort </p>
 </dd>
-<dt class="field-even">Returns</dt>
+<dt class="field-even">Returns<span class="colon">:</span></dt>
 <dd class="field-even"><p>int </p>
 </dd>
 </dl>
@@ -149,17 +169,17 @@
 
 <dl class="cpp function">
 <dt class="sig sig-object cpp" id="_CPPv414trfCreateAddrV13PTRFInterface13PTRFInterfaceP9PTRFAddrV">
-<span id="_CPPv314trfCreateAddrV13PTRFInterface13PTRFInterfaceP9PTRFAddrV"></span><span id="_CPPv214trfCreateAddrV13PTRFInterface13PTRFInterfaceP9PTRFAddrV"></span><span id="trfCreateAddrV__PTRFInterface.PTRFInterface.PTRFAddrVP"></span><span class="target" id="trf__interface_8h_1a82fc24dca6a818e8bb8817d7b306c589"></span><span class="kt"><span class="pre">int</span></span><span class="w"> </span><span class="sig-name descname"><span class="n"><span class="pre">trfCreateAddrV</span></span></span><span class="sig-paren">(</span><span class="n"><span class="pre">PTRFInterface</span></span><span class="w"> </span><span class="n sig-param"><span class="pre">src</span></span>, <span class="n"><span class="pre">PTRFInterface</span></span><span class="w"> </span><span class="n sig-param"><span class="pre">dest</span></span>, <span class="n"><span class="pre">PTRFAddrV</span></span><span class="w"> </span><span class="p"><span class="pre">*</span></span><span class="n sig-param"><span class="pre">av_out</span></span><span class="sig-paren">)</span><a class="headerlink" href="#_CPPv414trfCreateAddrV13PTRFInterface13PTRFInterfaceP9PTRFAddrV" title="Permalink to this definition"></a><br /></dt>
+<span id="_CPPv314trfCreateAddrV13PTRFInterface13PTRFInterfaceP9PTRFAddrV"></span><span id="_CPPv214trfCreateAddrV13PTRFInterface13PTRFInterfaceP9PTRFAddrV"></span><span id="trfCreateAddrV__PTRFInterface.PTRFInterface.PTRFAddrVP"></span><span class="target" id="trf__interface_8h_1a82fc24dca6a818e8bb8817d7b306c589"></span><span class="kt"><span class="pre">int</span></span><span class="w"> </span><span class="sig-name descname"><span class="n"><span class="pre">trfCreateAddrV</span></span></span><span class="sig-paren">(</span><span class="n"><span class="pre">PTRFInterface</span></span><span class="w"> </span><span class="n sig-param"><span class="pre">src</span></span>, <span class="n"><span class="pre">PTRFInterface</span></span><span class="w"> </span><span class="n sig-param"><span class="pre">dest</span></span>, <span class="n"><span class="pre">PTRFAddrV</span></span><span class="w"> </span><span class="p"><span class="pre">*</span></span><span class="n sig-param"><span class="pre">av_out</span></span><span class="sig-paren">)</span><a class="headerlink" href="#_CPPv414trfCreateAddrV13PTRFInterface13PTRFInterfaceP9PTRFAddrV" title="Link to this definition"></a><br /></dt>
 <dd><p>Create an address vector list containing viable links between two interface lists. </p>
 <dl class="field-list simple">
-<dt class="field-odd">Parameters</dt>
+<dt class="field-odd">Parameters<span class="colon">:</span></dt>
 <dd class="field-odd"><ul class="simple">
 <li><p><strong>src</strong> – Souce addresses </p></li>
 <li><p><strong>dest</strong> – Destination addresses </p></li>
 <li><p><strong>av_out</strong> – Output address vector list </p></li>
 </ul>
 </dd>
-<dt class="field-even">Returns</dt>
+<dt class="field-even">Returns<span class="colon">:</span></dt>
 <dd class="field-even"><p>0 on success, -errno on failure </p>
 </dd>
 </dl>
@@ -172,13 +192,13 @@
 <p>
 This call frees a linked list of struct <a class="reference internal" href="trf_def.html#struct_t_r_f_interface"><span class="std std-ref">TRFInterface</span></a>, typically allocated using the <a class="reference internal" href="#trf__interface_8h_1a2d99afc873112937d8e7ff77075b2d91"><span class="std std-ref">trfGetInterfaceList()</span></a> call.</p>
 <dl class="field-list simple">
-<dt class="field-odd">Parameters</dt>
+<dt class="field-odd">Parameters<span class="colon">:</span></dt>
 <dd class="field-odd"><ul class="simple">
 <li><p><strong>ifaces</strong> – Interfaces list to free </p></li>
 <li><p><strong>ifaces</strong> – Interface list to free. </p></li>
 </ul>
 </dd>
-<dt class="field-even">Returns</dt>
+<dt class="field-even">Returns<span class="colon">:</span></dt>
 <dd class="field-even"><p>no return value</p>
 </dd>
 </dl>
@@ -186,17 +206,17 @@ This call frees a linked list of struct <a class="reference internal" href="trf_
 
 <dl class="cpp function">
 <dt class="sig sig-object cpp" id="_CPPv419trfGetInterfaceListP13PTRFInterfaceP8uint32_t8uint64_t">
-<span id="_CPPv319trfGetInterfaceListP13PTRFInterfaceP8uint32_t8uint64_t"></span><span id="_CPPv219trfGetInterfaceListP13PTRFInterfaceP8uint32_t8uint64_t"></span><span id="trfGetInterfaceList__PTRFInterfaceP.uint32_tP.uint64_t"></span><span class="target" id="trf__interface_8h_1a2d99afc873112937d8e7ff77075b2d91"></span><span class="kt"><span class="pre">int</span></span><span class="w"> </span><span class="sig-name descname"><span class="n"><span class="pre">trfGetInterfaceList</span></span></span><span class="sig-paren">(</span><span class="n"><span class="pre">PTRFInterface</span></span><span class="w"> </span><span class="p"><span class="pre">*</span></span><span class="n sig-param"><span class="pre">list_out</span></span>, <span class="n"><span class="pre">uint32_t</span></span><span class="w"> </span><span class="p"><span class="pre">*</span></span><span class="n sig-param"><span class="pre">length</span></span>, <span class="n"><span class="pre">uint64_t</span></span><span class="w"> </span><span class="n sig-param"><span class="pre">flags</span></span><span class="sig-paren">)</span><a class="headerlink" href="#_CPPv419trfGetInterfaceListP13PTRFInterfaceP8uint32_t8uint64_t" title="Permalink to this definition"></a><br /></dt>
+<span id="_CPPv319trfGetInterfaceListP13PTRFInterfaceP8uint32_t8uint64_t"></span><span id="_CPPv219trfGetInterfaceListP13PTRFInterfaceP8uint32_t8uint64_t"></span><span id="trfGetInterfaceList__PTRFInterfaceP.uint32_tP.uint64_t"></span><span class="target" id="trf__interface_8h_1a2d99afc873112937d8e7ff77075b2d91"></span><span class="kt"><span class="pre">int</span></span><span class="w"> </span><span class="sig-name descname"><span class="n"><span class="pre">trfGetInterfaceList</span></span></span><span class="sig-paren">(</span><span class="n"><span class="pre">PTRFInterface</span></span><span class="w"> </span><span class="p"><span class="pre">*</span></span><span class="n sig-param"><span class="pre">list_out</span></span>, <span class="n"><span class="pre">uint32_t</span></span><span class="w"> </span><span class="p"><span class="pre">*</span></span><span class="n sig-param"><span class="pre">length</span></span>, <span class="n"><span class="pre">uint64_t</span></span><span class="w"> </span><span class="n sig-param"><span class="pre">flags</span></span><span class="sig-paren">)</span><a class="headerlink" href="#_CPPv419trfGetInterfaceListP13PTRFInterfaceP8uint32_t8uint64_t" title="Link to this definition"></a><br /></dt>
 <dd><p>Create an interface list containing all interfaces on the system. </p>
 <dl class="field-list simple">
-<dt class="field-odd">Parameters</dt>
+<dt class="field-odd">Parameters<span class="colon">:</span></dt>
 <dd class="field-odd"><ul class="simple">
 <li><p><strong>list_out</strong> – Output interface list </p></li>
 <li><p><strong>length</strong> – Output interface list length </p></li>
 <li><p><strong>flags</strong> – Flags used to limit interfaces returned </p></li>
 </ul>
 </dd>
-<dt class="field-even">Returns</dt>
+<dt class="field-even">Returns<span class="colon">:</span></dt>
 <dd class="field-even"><p>0 on success, negative error code on failure </p>
 </dd>
 </dl>
@@ -204,10 +224,10 @@ This call frees a linked list of struct <a class="reference internal" href="trf_
 
 <dl class="cpp function">
 <dt class="sig sig-object cpp" id="_CPPv420trfSortInterfaceList13PTRFInterface">
-<span id="_CPPv320trfSortInterfaceList13PTRFInterface"></span><span id="_CPPv220trfSortInterfaceList13PTRFInterface"></span><span id="trfSortInterfaceList__PTRFInterface"></span><span class="target" id="trf__interface_8h_1a8698ef997fbd278ca82b31d00ef5aecc"></span><span class="n"><span class="pre">PTRFInterface</span></span><span class="w"> </span><span class="sig-name descname"><span class="n"><span class="pre">trfSortInterfaceList</span></span></span><span class="sig-paren">(</span><span class="n"><span class="pre">PTRFInterface</span></span><span class="w"> </span><span class="n sig-param"><span class="pre">list</span></span><span class="sig-paren">)</span><a class="headerlink" href="#_CPPv420trfSortInterfaceList13PTRFInterface" title="Permalink to this definition"></a><br /></dt>
+<span id="_CPPv320trfSortInterfaceList13PTRFInterface"></span><span id="_CPPv220trfSortInterfaceList13PTRFInterface"></span><span id="trfSortInterfaceList__PTRFInterface"></span><span class="target" id="trf__interface_8h_1a8698ef997fbd278ca82b31d00ef5aecc"></span><span class="n"><span class="pre">PTRFInterface</span></span><span class="w"> </span><span class="sig-name descname"><span class="n"><span class="pre">trfSortInterfaceList</span></span></span><span class="sig-paren">(</span><span class="n"><span class="pre">PTRFInterface</span></span><span class="w"> </span><span class="n sig-param"><span class="pre">list</span></span><span class="sig-paren">)</span><a class="headerlink" href="#_CPPv420trfSortInterfaceList13PTRFInterface" title="Link to this definition"></a><br /></dt>
 <dd><p>Sort an interface list. </p>
 <dl class="field-list simple">
-<dt class="field-odd">Parameters</dt>
+<dt class="field-odd">Parameters<span class="colon">:</span></dt>
 <dd class="field-odd"><p><strong>list</strong> – Interface list </p>
 </dd>
 </dl>
@@ -215,16 +235,16 @@ This call frees a linked list of struct <a class="reference internal" href="trf_
 
 <dl class="cpp function">
 <dt class="sig sig-object cpp" id="_CPPv417trfGetFastestLink9PTRFAddrVP9PTRFAddrV">
-<span id="_CPPv317trfGetFastestLink9PTRFAddrVP9PTRFAddrV"></span><span id="_CPPv217trfGetFastestLink9PTRFAddrVP9PTRFAddrV"></span><span id="trfGetFastestLink__PTRFAddrV.PTRFAddrVP"></span><span class="target" id="trf__interface_8h_1a87460ada2104b8eca8f2a5dec21bd328"></span><span class="kt"><span class="pre">int</span></span><span class="w"> </span><span class="sig-name descname"><span class="n"><span class="pre">trfGetFastestLink</span></span></span><span class="sig-paren">(</span><span class="n"><span class="pre">PTRFAddrV</span></span><span class="w"> </span><span class="n sig-param"><span class="pre">av</span></span>, <span class="n"><span class="pre">PTRFAddrV</span></span><span class="w"> </span><span class="p"><span class="pre">*</span></span><span class="n sig-param"><span class="pre">av_out</span></span><span class="sig-paren">)</span><a class="headerlink" href="#_CPPv417trfGetFastestLink9PTRFAddrVP9PTRFAddrV" title="Permalink to this definition"></a><br /></dt>
+<span id="_CPPv317trfGetFastestLink9PTRFAddrVP9PTRFAddrV"></span><span id="_CPPv217trfGetFastestLink9PTRFAddrVP9PTRFAddrV"></span><span id="trfGetFastestLink__PTRFAddrV.PTRFAddrVP"></span><span class="target" id="trf__interface_8h_1a87460ada2104b8eca8f2a5dec21bd328"></span><span class="kt"><span class="pre">int</span></span><span class="w"> </span><span class="sig-name descname"><span class="n"><span class="pre">trfGetFastestLink</span></span></span><span class="sig-paren">(</span><span class="n"><span class="pre">PTRFAddrV</span></span><span class="w"> </span><span class="n sig-param"><span class="pre">av</span></span>, <span class="n"><span class="pre">PTRFAddrV</span></span><span class="w"> </span><span class="p"><span class="pre">*</span></span><span class="n sig-param"><span class="pre">av_out</span></span><span class="sig-paren">)</span><a class="headerlink" href="#_CPPv417trfGetFastestLink9PTRFAddrVP9PTRFAddrV" title="Link to this definition"></a><br /></dt>
 <dd><p>Determine the fastest interface in the address vector. </p>
 <dl class="field-list simple">
-<dt class="field-odd">Parameters</dt>
+<dt class="field-odd">Parameters<span class="colon">:</span></dt>
 <dd class="field-odd"><ul class="simple">
 <li><p><strong>av</strong> – Addess vector to search </p></li>
 <li><p><strong>av_out</strong> – Pointer to the node inside av containing the fastest interface </p></li>
 </ul>
 </dd>
-<dt class="field-even">Returns</dt>
+<dt class="field-even">Returns<span class="colon">:</span></dt>
 <dd class="field-even"><p>0 on success, negative error code on failure </p>
 </dd>
 </dl>
@@ -232,16 +252,16 @@ This call frees a linked list of struct <a class="reference internal" href="trf_
 
 <dl class="cpp function">
 <dt class="sig sig-object cpp" id="_CPPv415trfGetLinkSpeedPcP7int32_t">
-<span id="_CPPv315trfGetLinkSpeedPcP7int32_t"></span><span id="_CPPv215trfGetLinkSpeedPcP7int32_t"></span><span id="trfGetLinkSpeed__cP.int32_tP"></span><span class="target" id="trf__interface_8h_1abcb9d63db95fd7433e06ee25e631cf55"></span><span class="kt"><span class="pre">int</span></span><span class="w"> </span><span class="sig-name descname"><span class="n"><span class="pre">trfGetLinkSpeed</span></span></span><span class="sig-paren">(</span><span class="kt"><span class="pre">char</span></span><span class="w"> </span><span class="p"><span class="pre">*</span></span><span class="n sig-param"><span class="pre">ifname</span></span>, <span class="n"><span class="pre">int32_t</span></span><span class="w"> </span><span class="p"><span class="pre">*</span></span><span class="n sig-param"><span class="pre">speed_out</span></span><span class="sig-paren">)</span><a class="headerlink" href="#_CPPv415trfGetLinkSpeedPcP7int32_t" title="Permalink to this definition"></a><br /></dt>
+<span id="_CPPv315trfGetLinkSpeedPcP7int32_t"></span><span id="_CPPv215trfGetLinkSpeedPcP7int32_t"></span><span id="trfGetLinkSpeed__cP.int32_tP"></span><span class="target" id="trf__interface_8h_1abcb9d63db95fd7433e06ee25e631cf55"></span><span class="kt"><span class="pre">int</span></span><span class="w"> </span><span class="sig-name descname"><span class="n"><span class="pre">trfGetLinkSpeed</span></span></span><span class="sig-paren">(</span><span class="kt"><span class="pre">char</span></span><span class="w"> </span><span class="p"><span class="pre">*</span></span><span class="n sig-param"><span class="pre">ifname</span></span>, <span class="n"><span class="pre">int32_t</span></span><span class="w"> </span><span class="p"><span class="pre">*</span></span><span class="n sig-param"><span class="pre">speed_out</span></span><span class="sig-paren">)</span><a class="headerlink" href="#_CPPv415trfGetLinkSpeedPcP7int32_t" title="Link to this definition"></a><br /></dt>
 <dd><p>Get the link speed of an interface. </p>
 <dl class="field-list simple">
-<dt class="field-odd">Parameters</dt>
+<dt class="field-odd">Parameters<span class="colon">:</span></dt>
 <dd class="field-odd"><ul class="simple">
 <li><p><strong>iface</strong> – Interface name </p></li>
 <li><p><strong>speed_out</strong> – Speed </p></li>
 </ul>
 </dd>
-<dt class="field-even">Returns</dt>
+<dt class="field-even">Returns<span class="colon">:</span></dt>
 <dd class="field-even"><p>0 on success, negative error code on failure </p>
 </dd>
 </dl>
@@ -249,13 +269,13 @@ This call frees a linked list of struct <a class="reference internal" href="trf_
 
 <dl class="cpp function">
 <dt class="sig sig-object cpp" id="_CPPv425trfGetInterfaceListLength13PTRFInterface">
-<span id="_CPPv325trfGetInterfaceListLength13PTRFInterface"></span><span id="_CPPv225trfGetInterfaceListLength13PTRFInterface"></span><span id="trfGetInterfaceListLength__PTRFInterface"></span><span class="target" id="trf__interface_8h_1a2bbfc90a946abbd981e926a1be6f69d3"></span><span class="k"><span class="pre">static</span></span><span class="w"> </span><span class="k"><span class="pre">inline</span></span><span class="w"> </span><span class="kt"><span class="pre">int</span></span><span class="w"> </span><span class="sig-name descname"><span class="n"><span class="pre">trfGetInterfaceListLength</span></span></span><span class="sig-paren">(</span><span class="n"><span class="pre">PTRFInterface</span></span><span class="w"> </span><span class="n sig-param"><span class="pre">list</span></span><span class="sig-paren">)</span><a class="headerlink" href="#_CPPv425trfGetInterfaceListLength13PTRFInterface" title="Permalink to this definition"></a><br /></dt>
+<span id="_CPPv325trfGetInterfaceListLength13PTRFInterface"></span><span id="_CPPv225trfGetInterfaceListLength13PTRFInterface"></span><span id="trfGetInterfaceListLength__PTRFInterface"></span><span class="target" id="trf__interface_8h_1a2bbfc90a946abbd981e926a1be6f69d3"></span><span class="k"><span class="pre">static</span></span><span class="w"> </span><span class="k"><span class="pre">inline</span></span><span class="w"> </span><span class="kt"><span class="pre">int</span></span><span class="w"> </span><span class="sig-name descname"><span class="n"><span class="pre">trfGetInterfaceListLength</span></span></span><span class="sig-paren">(</span><span class="n"><span class="pre">PTRFInterface</span></span><span class="w"> </span><span class="n sig-param"><span class="pre">list</span></span><span class="sig-paren">)</span><a class="headerlink" href="#_CPPv425trfGetInterfaceListLength13PTRFInterface" title="Link to this definition"></a><br /></dt>
 <dd><p>Get the length of an interface list. </p>
 <dl class="field-list simple">
-<dt class="field-odd">Parameters</dt>
+<dt class="field-odd">Parameters<span class="colon">:</span></dt>
 <dd class="field-odd"><p><strong>list</strong> – </p>
 </dd>
-<dt class="field-even">Returns</dt>
+<dt class="field-even">Returns<span class="colon">:</span></dt>
 <dd class="field-even"><p>int </p>
 </dd>
 </dl>

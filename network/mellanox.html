@@ -1,21 +1,24 @@
 <!DOCTYPE html>
-<html class="writer-html5" lang="en" >
+<html class="writer-html5" lang="en" data-content_root="../">
 <head>
-  <meta charset="utf-8" /><meta name="generator" content="Docutils 0.17.1: http://docutils.sourceforge.net/" />
+  <meta charset="utf-8" /><meta name="viewport" content="width=device-width, initial-scale=1" />
 
   <meta name="viewport" content="width=device-width, initial-scale=1.0" />
   <title>Mellanox NIC configuration &mdash; libtrf  documentation</title>
-      <link rel="stylesheet" href="../_static/pygments.css" type="text/css" />
-      <link rel="stylesheet" href="../_static/css/theme.css" type="text/css" />
-      <link rel="stylesheet" href="../_static/graphviz.css" type="text/css" />
+      <link rel="stylesheet" type="text/css" href="../_static/pygments.css?v=80d5e7a1" />
+      <link rel="stylesheet" type="text/css" href="../_static/css/theme.css?v=19f00094" />
+      <link rel="stylesheet" type="text/css" href="../_static/graphviz.css?v=fd3f3429" />
+
+  
   <!--[if lt IE 9]>
     <script src="../_static/js/html5shiv.min.js"></script>
   <![endif]-->
   
-        <script data-url_root="../" id="documentation_options" src="../_static/documentation_options.js"></script>
-        <script src="../_static/jquery.js"></script>
-        <script src="../_static/underscore.js"></script>
-        <script src="../_static/doctools.js"></script>
+        <script src="../_static/jquery.js?v=5d32c60e"></script>
+        <script src="../_static/_sphinx_javascript_frameworks_compat.js?v=2cd50e6c"></script>
+        <script src="../_static/documentation_options.js?v=5929fcd5"></script>
+        <script src="../_static/doctools.js?v=9a2dae69"></script>
+        <script src="../_static/sphinx_highlight.js?v=dc90522c"></script>
     <script src="../_static/js/theme.js"></script>
     <link rel="index" title="Index" href="../genindex.html" />
     <link rel="search" title="Search" href="../search.html" />
@@ -28,11 +31,15 @@
     <nav data-toggle="wy-nav-shift" class="wy-nav-side">
       <div class="wy-side-scroll">
         <div class="wy-side-nav-search" >
-            <a href="../index.html" class="icon icon-home"> libtrf
+
+          
+          
+          <a href="../index.html" class="icon icon-home">
+            libtrf
           </a>
 <div role="search">
   <form id="rtd-search-form" class="wy-form" action="../search.html" method="get">
-    <input type="text" name="q" placeholder="Search docs" />
+    <input type="text" name="q" placeholder="Search docs" aria-label="Search docs" />
     <input type="hidden" name="check_keywords" value="yes" />
     <input type="hidden" name="area" value="default" />
   </form>
@@ -67,9 +74,9 @@
         <div class="rst-content">
           <div role="navigation" aria-label="Page navigation">
   <ul class="wy-breadcrumbs">
-      <li><a href="../index.html" class="icon icon-home"></a> &raquo;</li>
-          <li><a href="index.html">Network Configuration</a> &raquo;</li>
-      <li>Mellanox NIC configuration</li>
+      <li><a href="../index.html" class="icon icon-home" aria-label="Home"></a></li>
+          <li class="breadcrumb-item"><a href="index.html">Network Configuration</a></li>
+      <li class="breadcrumb-item active">Mellanox NIC configuration</li>
       <li class="wy-breadcrumbs-aside">
             <a href="../_sources/network/mellanox.rst.txt" rel="nofollow"> View page source</a>
       </li>
@@ -80,7 +87,7 @@
            <div itemprop="articleBody">
              
   <section id="mellanox-nic-configuration">
-<span id="network-mellanox"></span><h1>Mellanox NIC configuration<a class="headerlink" href="#mellanox-nic-configuration" title="Permalink to this headline"></a></h1>
+<span id="network-mellanox"></span><h1>Mellanox NIC configuration<a class="headerlink" href="#mellanox-nic-configuration" title="Link to this heading"></a></h1>
 <p>Mellanox NICs usually come in three flavours:</p>
 <ul class="simple">
 <li><p>Connect-IB, which is InfiniBand-only</p></li>
@@ -97,39 +104,39 @@ RDMA acceleration! IB and Ethernet <strong>are not interoperable at the link
 layer.</strong></p>
 </div>
 <p>Determine the NIC you want to query using <code class="docutils literal notranslate"><span class="pre">lspci</span></code>:</p>
-<div class="highlight-c notranslate"><div class="highlight"><pre><span></span>$ lspci | egrep -i &quot;infiniband|ethernet&quot;
-0c:00.0 Infiniband controller: Mellanox Technologies MT28908 Family [ConnectX-6]
-12:00.0 Infiniband controller: Mellanox Technologies MT28908 Family [ConnectX-6]
-4b:00.0 Infiniband controller: Mellanox Technologies MT28908 Family [ConnectX-6]
-54:00.0 Infiniband controller: Mellanox Technologies MT28908 Family [ConnectX-6]
-8d:00.0 Infiniband controller: Mellanox Technologies MT28908 Family [ConnectX-6]
-94:00.0 Infiniband controller: Mellanox Technologies MT28908 Family [ConnectX-6]
-ba:00.0 Infiniband controller: Mellanox Technologies MT28908 Family [ConnectX-6]
-cc:00.0 Infiniband controller: Mellanox Technologies MT28908 Family [ConnectX-6]
-e1:00.0 Ethernet controller: Mellanox Technologies MT28908 Family [ConnectX-6]
-e1:00.1 Ethernet controller: Mellanox Technologies MT28908 Family [ConnectX-6]
-e2:00.0 Ethernet controller: Intel Corporation I210 Gigabit Network Connection (rev 03)
+<div class="highlight-c notranslate"><div class="highlight"><pre><span></span><span class="n">$</span><span class="w"> </span><span class="n">lspci</span><span class="w"> </span><span class="o">|</span><span class="w"> </span><span class="n">egrep</span><span class="w"> </span><span class="o">-</span><span class="n">i</span><span class="w"> </span><span class="s">&quot;infiniband|ethernet&quot;</span>
+<span class="mi">0</span><span class="n">c</span><span class="o">:</span><span class="mf">00.0</span><span class="w"> </span><span class="n">Infiniband</span><span class="w"> </span><span class="n">controller</span><span class="o">:</span><span class="w"> </span><span class="n">Mellanox</span><span class="w"> </span><span class="n">Technologies</span><span class="w"> </span><span class="n">MT28908</span><span class="w"> </span><span class="n">Family</span><span class="w"> </span><span class="p">[</span><span class="n">ConnectX</span><span class="mi">-6</span><span class="p">]</span>
+<span class="mi">12</span><span class="o">:</span><span class="mf">00.0</span><span class="w"> </span><span class="n">Infiniband</span><span class="w"> </span><span class="n">controller</span><span class="o">:</span><span class="w"> </span><span class="n">Mellanox</span><span class="w"> </span><span class="n">Technologies</span><span class="w"> </span><span class="n">MT28908</span><span class="w"> </span><span class="n">Family</span><span class="w"> </span><span class="p">[</span><span class="n">ConnectX</span><span class="mi">-6</span><span class="p">]</span>
+<span class="mi">4</span><span class="n">b</span><span class="o">:</span><span class="mf">00.0</span><span class="w"> </span><span class="n">Infiniband</span><span class="w"> </span><span class="n">controller</span><span class="o">:</span><span class="w"> </span><span class="n">Mellanox</span><span class="w"> </span><span class="n">Technologies</span><span class="w"> </span><span class="n">MT28908</span><span class="w"> </span><span class="n">Family</span><span class="w"> </span><span class="p">[</span><span class="n">ConnectX</span><span class="mi">-6</span><span class="p">]</span>
+<span class="mi">54</span><span class="o">:</span><span class="mf">00.0</span><span class="w"> </span><span class="n">Infiniband</span><span class="w"> </span><span class="n">controller</span><span class="o">:</span><span class="w"> </span><span class="n">Mellanox</span><span class="w"> </span><span class="n">Technologies</span><span class="w"> </span><span class="n">MT28908</span><span class="w"> </span><span class="n">Family</span><span class="w"> </span><span class="p">[</span><span class="n">ConnectX</span><span class="mi">-6</span><span class="p">]</span>
+<span class="mi">8</span><span class="n">d</span><span class="o">:</span><span class="mf">00.0</span><span class="w"> </span><span class="n">Infiniband</span><span class="w"> </span><span class="n">controller</span><span class="o">:</span><span class="w"> </span><span class="n">Mellanox</span><span class="w"> </span><span class="n">Technologies</span><span class="w"> </span><span class="n">MT28908</span><span class="w"> </span><span class="n">Family</span><span class="w"> </span><span class="p">[</span><span class="n">ConnectX</span><span class="mi">-6</span><span class="p">]</span>
+<span class="mi">94</span><span class="o">:</span><span class="mf">00.0</span><span class="w"> </span><span class="n">Infiniband</span><span class="w"> </span><span class="n">controller</span><span class="o">:</span><span class="w"> </span><span class="n">Mellanox</span><span class="w"> </span><span class="n">Technologies</span><span class="w"> </span><span class="n">MT28908</span><span class="w"> </span><span class="n">Family</span><span class="w"> </span><span class="p">[</span><span class="n">ConnectX</span><span class="mi">-6</span><span class="p">]</span>
+<span class="nl">ba</span><span class="p">:</span><span class="mf">00.0</span><span class="w"> </span><span class="n">Infiniband</span><span class="w"> </span><span class="n">controller</span><span class="o">:</span><span class="w"> </span><span class="n">Mellanox</span><span class="w"> </span><span class="n">Technologies</span><span class="w"> </span><span class="n">MT28908</span><span class="w"> </span><span class="n">Family</span><span class="w"> </span><span class="p">[</span><span class="n">ConnectX</span><span class="mi">-6</span><span class="p">]</span>
+<span class="nl">cc</span><span class="p">:</span><span class="mf">00.0</span><span class="w"> </span><span class="n">Infiniband</span><span class="w"> </span><span class="n">controller</span><span class="o">:</span><span class="w"> </span><span class="n">Mellanox</span><span class="w"> </span><span class="n">Technologies</span><span class="w"> </span><span class="n">MT28908</span><span class="w"> </span><span class="n">Family</span><span class="w"> </span><span class="p">[</span><span class="n">ConnectX</span><span class="mi">-6</span><span class="p">]</span>
+<span class="nl">e1</span><span class="p">:</span><span class="mf">00.0</span><span class="w"> </span><span class="n">Ethernet</span><span class="w"> </span><span class="n">controller</span><span class="o">:</span><span class="w"> </span><span class="n">Mellanox</span><span class="w"> </span><span class="n">Technologies</span><span class="w"> </span><span class="n">MT28908</span><span class="w"> </span><span class="n">Family</span><span class="w"> </span><span class="p">[</span><span class="n">ConnectX</span><span class="mi">-6</span><span class="p">]</span>
+<span class="nl">e1</span><span class="p">:</span><span class="mf">00.1</span><span class="w"> </span><span class="n">Ethernet</span><span class="w"> </span><span class="n">controller</span><span class="o">:</span><span class="w"> </span><span class="n">Mellanox</span><span class="w"> </span><span class="n">Technologies</span><span class="w"> </span><span class="n">MT28908</span><span class="w"> </span><span class="n">Family</span><span class="w"> </span><span class="p">[</span><span class="n">ConnectX</span><span class="mi">-6</span><span class="p">]</span>
+<span class="nl">e2</span><span class="p">:</span><span class="mf">00.0</span><span class="w"> </span><span class="n">Ethernet</span><span class="w"> </span><span class="n">controller</span><span class="o">:</span><span class="w"> </span><span class="n">Intel</span><span class="w"> </span><span class="n">Corporation</span><span class="w"> </span><span class="n">I210</span><span class="w"> </span><span class="n">Gigabit</span><span class="w"> </span><span class="n">Network</span><span class="w"> </span><span class="n">Connection</span><span class="w"> </span><span class="p">(</span><span class="n">rev</span><span class="w"> </span><span class="mo">03</span><span class="p">)</span>
 </pre></div>
 </div>
 <p>To change the operating mode, install the <code class="docutils literal notranslate"><span class="pre">mstflint</span></code> package, which should be
 available from your distribution package manager or preinstalled in the
 MLNX-OFED driver, where you may also use <code class="docutils literal notranslate"><span class="pre">mlxconfig</span></code>.</p>
-<div class="highlight-c notranslate"><div class="highlight"><pre><span></span># mstconfig -d 0c:00.0 set LINK_TYPE_P1=ETH
+<div class="highlight-c notranslate"><div class="highlight"><pre><span></span><span class="cp"># mstconfig -d 0c:00.0 set LINK_TYPE_P1=ETH</span>
 
-Device #1:
-----------
+<span class="n">Device</span><span class="w"> </span><span class="err">#</span><span class="mi">1</span><span class="o">:</span>
+<span class="o">----------</span>
 
-Device type:    ConnectX6
-Name:           MCX653105A-HDA_Ax
-Description:    ConnectX-6 VPI adapter card; HDR IB (200Gb/s) and 200GbE; single-port QSFP56; PCIe4.0 x16; tall bracket; ROHS R6
-Device:         0c:00.0
+<span class="n">Device</span><span class="w"> </span><span class="n">type</span><span class="o">:</span><span class="w">    </span><span class="n">ConnectX6</span>
+<span class="nl">Name</span><span class="p">:</span><span class="w">           </span><span class="n">MCX653105A</span><span class="o">-</span><span class="n">HDA_Ax</span>
+<span class="nl">Description</span><span class="p">:</span><span class="w">    </span><span class="n">ConnectX</span><span class="mi">-6</span><span class="w"> </span><span class="n">VPI</span><span class="w"> </span><span class="n">adapter</span><span class="w"> </span><span class="n">card</span><span class="p">;</span><span class="w"> </span><span class="n">HDR</span><span class="w"> </span><span class="nf">IB</span><span class="w"> </span><span class="p">(</span><span class="mi">200</span><span class="n">Gb</span><span class="o">/</span><span class="n">s</span><span class="p">)</span><span class="w"> </span><span class="n">and</span><span class="w"> </span><span class="mi">200</span><span class="n">GbE</span><span class="p">;</span><span class="w"> </span><span class="n">single</span><span class="o">-</span><span class="n">port</span><span class="w"> </span><span class="n">QSFP56</span><span class="p">;</span><span class="w"> </span><span class="n">PCIe4</span><span class="mf">.0</span><span class="w"> </span><span class="n">x16</span><span class="p">;</span><span class="w"> </span><span class="n">tall</span><span class="w"> </span><span class="n">bracket</span><span class="p">;</span><span class="w"> </span><span class="n">ROHS</span><span class="w"> </span><span class="n">R6</span>
+<span class="nl">Device</span><span class="p">:</span><span class="w">         </span><span class="mi">0</span><span class="n">c</span><span class="o">:</span><span class="mf">00.0</span>
 
-Configurations:                              Next Boot       New
-        LINK_TYPE_P1                         IB(1)           ETH(2)
+<span class="nl">Configurations</span><span class="p">:</span><span class="w">                              </span><span class="n">Next</span><span class="w"> </span><span class="n">Boot</span><span class="w">       </span><span class="n">New</span>
+<span class="w">        </span><span class="n">LINK_TYPE_P1</span><span class="w">                         </span><span class="n">IB</span><span class="p">(</span><span class="mi">1</span><span class="p">)</span><span class="w">           </span><span class="n">ETH</span><span class="p">(</span><span class="mi">2</span><span class="p">)</span>
 
-Apply new Configuration? (y/n) [n] : y
-Applying... Done!
--I- Please reboot machine to load new configurations.
+<span class="n">Apply</span><span class="w"> </span><span class="n">new</span><span class="w"> </span><span class="n">Configuration</span><span class="o">?</span><span class="w"> </span><span class="p">(</span><span class="n">y</span><span class="o">/</span><span class="n">n</span><span class="p">)</span><span class="w"> </span><span class="p">[</span><span class="n">n</span><span class="p">]</span><span class="w"> </span><span class="o">:</span><span class="w"> </span><span class="n">y</span>
+<span class="n">Applying</span><span class="p">...</span><span class="w"> </span><span class="n">Done</span><span class="o">!</span>
+<span class="o">-</span><span class="n">I</span><span class="o">-</span><span class="w"> </span><span class="n">Please</span><span class="w"> </span><span class="n">reboot</span><span class="w"> </span><span class="n">machine</span><span class="w"> </span><span class="n">to</span><span class="w"> </span><span class="n">load</span><span class="w"> </span><span class="n">new</span><span class="w"> </span><span class="n">configurations</span><span class="p">.</span>
 </pre></div>
 </div>
 <p>If you are using SR-IOV to pass a VF into a virtual machine, you may also
@@ -152,22 +159,22 @@ this in the FlexBoot option ROM at boot time. In your motherboard UEFI/BIOS,
 you will also have to enable VT-d/IOMMU and SR-IOV support.</p>
 </div>
 <section id="enabling-sr-iov-at-boot-time">
-<h2>Enabling SR-IOV at boot time<a class="headerlink" href="#enabling-sr-iov-at-boot-time" title="Permalink to this headline"></a></h2>
+<h2>Enabling SR-IOV at boot time<a class="headerlink" href="#enabling-sr-iov-at-boot-time" title="Link to this heading"></a></h2>
 <p>Enabling SR-IOV at boot time for mlx4 can be done by adding a file to
 <code class="docutils literal notranslate"><span class="pre">/etc/modprobe.d/</span></code>. As previously mentioned, <code class="docutils literal notranslate"><span class="pre">x</span></code> is your desired virtual NIC
 count.</p>
 <div class="highlight-c notranslate"><div class="highlight"><pre><span></span><span class="cp"># mlx4 and OFED LTS 4.x driver users</span>
-<span class="n">options</span> <span class="n">mlx4_core</span> <span class="n">probe_vf</span><span class="o">=</span><span class="mi">0</span> <span class="n">max_vfs</span><span class="o">=</span><span class="n">x</span>
+<span class="n">options</span><span class="w"> </span><span class="n">mlx4_core</span><span class="w"> </span><span class="n">probe_vf</span><span class="o">=</span><span class="mi">0</span><span class="w"> </span><span class="n">max_vfs</span><span class="o">=</span><span class="n">x</span>
 
 <span class="cp"># mlx5 and current OFED driver users</span>
-<span class="n">options</span> <span class="n">mlx5_core</span> <span class="n">probe_vf</span><span class="o">=</span><span class="mi">0</span> <span class="n">max_vfs</span><span class="o">=</span><span class="n">x</span>
+<span class="n">options</span><span class="w"> </span><span class="n">mlx5_core</span><span class="w"> </span><span class="n">probe_vf</span><span class="o">=</span><span class="mi">0</span><span class="w"> </span><span class="n">max_vfs</span><span class="o">=</span><span class="n">x</span>
 </pre></div>
 </div>
 </section>
 <section id="setting-vf-mac-addresses">
-<h2>Setting VF MAC Addresses<a class="headerlink" href="#setting-vf-mac-addresses" title="Permalink to this headline"></a></h2>
+<h2>Setting VF MAC Addresses<a class="headerlink" href="#setting-vf-mac-addresses" title="Link to this heading"></a></h2>
 <p>Setting VF MACs can be done using the <code class="docutils literal notranslate"><span class="pre">ip</span></code> command. For instance:</p>
-<div class="highlight-c notranslate"><div class="highlight"><pre><span></span><span class="n">ip</span> <span class="n">link</span> <span class="n">set</span> <span class="n">enp225s0f0</span> <span class="n">vf</span> <span class="mi">1</span> <span class="n">mac</span> <span class="mo">00</span><span class="o">:</span><span class="mi">52</span><span class="o">:</span><span class="mi">44</span><span class="o">:</span><span class="mi">11</span><span class="o">:</span><span class="mi">22</span><span class="o">:</span><span class="mi">33</span>
+<div class="highlight-c notranslate"><div class="highlight"><pre><span></span><span class="n">ip</span><span class="w"> </span><span class="n">link</span><span class="w"> </span><span class="n">set</span><span class="w"> </span><span class="n">enp225s0f0</span><span class="w"> </span><span class="n">vf</span><span class="w"> </span><span class="mi">1</span><span class="w"> </span><span class="n">mac</span><span class="w"> </span><span class="mo">00</span><span class="o">:</span><span class="mi">52</span><span class="o">:</span><span class="mi">44</span><span class="o">:</span><span class="mi">11</span><span class="o">:</span><span class="mi">22</span><span class="o">:</span><span class="mi">33</span>
 </pre></div>
 </div>
 </section>

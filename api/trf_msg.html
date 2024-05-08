@@ -1,21 +1,24 @@
 <!DOCTYPE html>
-<html class="writer-html5" lang="en" >
+<html class="writer-html5" lang="en" data-content_root="../">
 <head>
-  <meta charset="utf-8" /><meta name="generator" content="Docutils 0.17.1: http://docutils.sourceforge.net/" />
+  <meta charset="utf-8" /><meta name="viewport" content="width=device-width, initial-scale=1" />
 
   <meta name="viewport" content="width=device-width, initial-scale=1.0" />
   <title>Message Handling Functions &mdash; libtrf  documentation</title>
-      <link rel="stylesheet" href="../_static/pygments.css" type="text/css" />
-      <link rel="stylesheet" href="../_static/css/theme.css" type="text/css" />
-      <link rel="stylesheet" href="../_static/graphviz.css" type="text/css" />
+      <link rel="stylesheet" type="text/css" href="../_static/pygments.css?v=80d5e7a1" />
+      <link rel="stylesheet" type="text/css" href="../_static/css/theme.css?v=19f00094" />
+      <link rel="stylesheet" type="text/css" href="../_static/graphviz.css?v=fd3f3429" />
+
+  
   <!--[if lt IE 9]>
     <script src="../_static/js/html5shiv.min.js"></script>
   <![endif]-->
   
-        <script data-url_root="../" id="documentation_options" src="../_static/documentation_options.js"></script>
-        <script src="../_static/jquery.js"></script>
-        <script src="../_static/underscore.js"></script>
-        <script src="../_static/doctools.js"></script>
+        <script src="../_static/jquery.js?v=5d32c60e"></script>
+        <script src="../_static/_sphinx_javascript_frameworks_compat.js?v=2cd50e6c"></script>
+        <script src="../_static/documentation_options.js?v=5929fcd5"></script>
+        <script src="../_static/doctools.js?v=9a2dae69"></script>
+        <script src="../_static/sphinx_highlight.js?v=dc90522c"></script>
     <script src="../_static/js/theme.js"></script>
     <link rel="index" title="Index" href="../genindex.html" />
     <link rel="search" title="Search" href="../search.html" />
@@ -28,11 +31,15 @@
     <nav data-toggle="wy-nav-shift" class="wy-nav-side">
       <div class="wy-side-scroll">
         <div class="wy-side-nav-search" >
-            <a href="../index.html" class="icon icon-home"> libtrf
+
+          
+          
+          <a href="../index.html" class="icon icon-home">
+            libtrf
           </a>
 <div role="search">
   <form id="rtd-search-form" class="wy-form" action="../search.html" method="get">
-    <input type="text" name="q" placeholder="Search docs" />
+    <input type="text" name="q" placeholder="Search docs" aria-label="Search docs" />
     <input type="hidden" name="check_keywords" value="yes" />
     <input type="hidden" name="area" value="default" />
   </form>
@@ -47,7 +54,15 @@
 <li class="toctree-l2"><a class="reference internal" href="trf_inet.html">Address Handling Functions</a></li>
 <li class="toctree-l2"><a class="reference internal" href="trf_interface.html">Interface &amp; Address Introspection</a></li>
 <li class="toctree-l2"><a class="reference internal" href="trf_internal.html">TRF Internal System Functions</a></li>
-<li class="toctree-l2 current"><a class="current reference internal" href="#">Message Handling Functions</a></li>
+<li class="toctree-l2 current"><a class="current reference internal" href="#">Message Handling Functions</a><ul>
+<li class="toctree-l3"><a class="reference internal" href="#_CPPv410trfMsgPackP22TrfMsg__MessageWrapper8uint32_tP7uint8_t"><code class="docutils literal notranslate"><span class="pre">trfMsgPack()</span></code></a></li>
+<li class="toctree-l3"><a class="reference internal" href="#_CPPv418trfMsgPackProtobufP16ProtobufCMessage8uint32_tP7uint8_t"><code class="docutils literal notranslate"><span class="pre">trfMsgPackProtobuf()</span></code></a></li>
+<li class="toctree-l3"><a class="reference internal" href="#_CPPv412trfMsgUnpackPP22TrfMsg__MessageWrapper8uint32_tP7uint8_t"><code class="docutils literal notranslate"><span class="pre">trfMsgUnpack()</span></code></a></li>
+<li class="toctree-l3"><a class="reference internal" href="#_CPPv420trfMsgUnpackProtobufPP16ProtobufCMessagePK26ProtobufCMessageDescriptor6size_tP7uint8_t"><code class="docutils literal notranslate"><span class="pre">trfMsgUnpackProtobuf()</span></code></a></li>
+<li class="toctree-l3"><a class="reference internal" href="#_CPPv421trfMsgGetPackedLengthP7uint8_t"><code class="docutils literal notranslate"><span class="pre">trfMsgGetPackedLength()</span></code></a></li>
+<li class="toctree-l3"><a class="reference internal" href="#_CPPv416trfMsgGetPayloadP7uint8_t"><code class="docutils literal notranslate"><span class="pre">trfMsgGetPayload()</span></code></a></li>
+</ul>
+</li>
 <li class="toctree-l2"><a class="reference internal" href="trf_ncp.html">Negotiation Channel Protocol - Connection Management Functions</a></li>
 <li class="toctree-l2"><a class="reference internal" href="trf_preflight.html">Preflight Connectivity Check Functions</a></li>
 </ul>
@@ -67,9 +82,9 @@
         <div class="rst-content">
           <div role="navigation" aria-label="Page navigation">
   <ul class="wy-breadcrumbs">
-      <li><a href="../index.html" class="icon icon-home"></a> &raquo;</li>
-          <li><a href="index.html">TRF API Function Documentation</a> &raquo;</li>
-      <li>Message Handling Functions</li>
+      <li><a href="../index.html" class="icon icon-home" aria-label="Home"></a></li>
+          <li class="breadcrumb-item"><a href="index.html">TRF API Function Documentation</a></li>
+      <li class="breadcrumb-item active">Message Handling Functions</li>
       <li class="wy-breadcrumbs-aside">
             <a href="../_sources/api/trf_msg.rst.txt" rel="nofollow"> View page source</a>
       </li>
@@ -80,17 +95,17 @@
            <div itemprop="articleBody">
              
   <section id="message-handling-functions">
-<span id="api-msg"></span><h1>Message Handling Functions<a class="headerlink" href="#message-handling-functions" title="Permalink to this headline"></a></h1>
+<span id="api-msg"></span><h1>Message Handling Functions<a class="headerlink" href="#message-handling-functions" title="Link to this heading"></a></h1>
 <p>Main channel raw data send/receive functions. </p>
 <p>This file contains functions to send and receive delimited messages reliably over a TCP socket. You should not need to use this in your programs, as high level abstractions for TRF messages are provided. </p>
 <div class="breathe-sectiondef docutils container">
 <p class="breathe-sectiondef-title rubric" id="breathe-section-title-functions">Functions</p>
 <dl class="cpp function">
 <dt class="sig sig-object cpp" id="_CPPv410trfMsgPackP22TrfMsg__MessageWrapper8uint32_tP7uint8_t">
-<span id="_CPPv310trfMsgPackP22TrfMsg__MessageWrapper8uint32_tP7uint8_t"></span><span id="_CPPv210trfMsgPackP22TrfMsg__MessageWrapper8uint32_tP7uint8_t"></span><span id="trfMsgPack__TrfMsg__MessageWrapperP.uint32_t.uint8_tP"></span><span class="target" id="trf__msg_8h_1a2719970f31e6ee8bfe2a313a7e39bc6f"></span><span class="n"><span class="pre">ssize_t</span></span><span class="w"> </span><span class="sig-name descname"><span class="n"><span class="pre">trfMsgPack</span></span></span><span class="sig-paren">(</span><a class="reference internal" href="trf_proto.html#_CPPv422TrfMsg__MessageWrapper" title="TrfMsg__MessageWrapper"><span class="n"><span class="pre">TrfMsg__MessageWrapper</span></span></a><span class="w"> </span><span class="p"><span class="pre">*</span></span><span class="n sig-param"><span class="pre">handle</span></span>, <span class="n"><span class="pre">uint32_t</span></span><span class="w"> </span><span class="n sig-param"><span class="pre">size</span></span>, <span class="n"><span class="pre">uint8_t</span></span><span class="w"> </span><span class="p"><span class="pre">*</span></span><span class="n sig-param"><span class="pre">buf</span></span><span class="sig-paren">)</span><a class="headerlink" href="#_CPPv410trfMsgPackP22TrfMsg__MessageWrapper8uint32_tP7uint8_t" title="Permalink to this definition"></a><br /></dt>
+<span id="_CPPv310trfMsgPackP22TrfMsg__MessageWrapper8uint32_tP7uint8_t"></span><span id="_CPPv210trfMsgPackP22TrfMsg__MessageWrapper8uint32_tP7uint8_t"></span><span id="trfMsgPack__TrfMsg__MessageWrapperP.uint32_t.uint8_tP"></span><span class="target" id="trf__msg_8h_1a2719970f31e6ee8bfe2a313a7e39bc6f"></span><span class="n"><span class="pre">ssize_t</span></span><span class="w"> </span><span class="sig-name descname"><span class="n"><span class="pre">trfMsgPack</span></span></span><span class="sig-paren">(</span><a class="reference internal" href="trf_proto.html#_CPPv422TrfMsg__MessageWrapper" title="TrfMsg__MessageWrapper"><span class="n"><span class="pre">TrfMsg__MessageWrapper</span></span></a><span class="w"> </span><span class="p"><span class="pre">*</span></span><span class="n sig-param"><span class="pre">handle</span></span>, <span class="n"><span class="pre">uint32_t</span></span><span class="w"> </span><span class="n sig-param"><span class="pre">size</span></span>, <span class="n"><span class="pre">uint8_t</span></span><span class="w"> </span><span class="p"><span class="pre">*</span></span><span class="n sig-param"><span class="pre">buf</span></span><span class="sig-paren">)</span><a class="headerlink" href="#_CPPv410trfMsgPackP22TrfMsg__MessageWrapper8uint32_tP7uint8_t" title="Link to this definition"></a><br /></dt>
 <dd><p>Pack message into a buffer to be sent. </p>
 <dl class="field-list simple">
-<dt class="field-odd">Parameters</dt>
+<dt class="field-odd">Parameters<span class="colon">:</span></dt>
 <dd class="field-odd"><ul class="simple">
 <li><p><strong>handle</strong> – Handle to message wrapper containing message to be sent</p></li>
 <li><p><strong>size</strong> – Size of provided buffer</p></li>
@@ -98,7 +113,7 @@
 <li><p><strong>size_out</strong> – Output size of packed data in bytes</p></li>
 </ul>
 </dd>
-<dt class="field-even">Returns</dt>
+<dt class="field-even">Returns<span class="colon">:</span></dt>
 <dd class="field-even"><p>Number of bytes written, negative error code on failure. </p>
 </dd>
 </dl>
@@ -106,10 +121,10 @@
 
 <dl class="cpp function">
 <dt class="sig sig-object cpp" id="_CPPv418trfMsgPackProtobufP16ProtobufCMessage8uint32_tP7uint8_t">
-<span id="_CPPv318trfMsgPackProtobufP16ProtobufCMessage8uint32_tP7uint8_t"></span><span id="_CPPv218trfMsgPackProtobufP16ProtobufCMessage8uint32_tP7uint8_t"></span><span id="trfMsgPackProtobuf__ProtobufCMessageP.uint32_t.uint8_tP"></span><span class="target" id="trf__msg_8h_1a648b09f2012c3dc781330cd466ce132d"></span><span class="n"><span class="pre">ssize_t</span></span><span class="w"> </span><span class="sig-name descname"><span class="n"><span class="pre">trfMsgPackProtobuf</span></span></span><span class="sig-paren">(</span><span class="n"><span class="pre">ProtobufCMessage</span></span><span class="w"> </span><span class="p"><span class="pre">*</span></span><span class="n sig-param"><span class="pre">message</span></span>, <span class="n"><span class="pre">uint32_t</span></span><span class="w"> </span><span class="n sig-param"><span class="pre">size</span></span>, <span class="n"><span class="pre">uint8_t</span></span><span class="w"> </span><span class="p"><span class="pre">*</span></span><span class="n sig-param"><span class="pre">buf</span></span><span class="sig-paren">)</span><a class="headerlink" href="#_CPPv418trfMsgPackProtobufP16ProtobufCMessage8uint32_tP7uint8_t" title="Permalink to this definition"></a><br /></dt>
+<span id="_CPPv318trfMsgPackProtobufP16ProtobufCMessage8uint32_tP7uint8_t"></span><span id="_CPPv218trfMsgPackProtobufP16ProtobufCMessage8uint32_tP7uint8_t"></span><span id="trfMsgPackProtobuf__ProtobufCMessageP.uint32_t.uint8_tP"></span><span class="target" id="trf__msg_8h_1a648b09f2012c3dc781330cd466ce132d"></span><span class="n"><span class="pre">ssize_t</span></span><span class="w"> </span><span class="sig-name descname"><span class="n"><span class="pre">trfMsgPackProtobuf</span></span></span><span class="sig-paren">(</span><span class="n"><span class="pre">ProtobufCMessage</span></span><span class="w"> </span><span class="p"><span class="pre">*</span></span><span class="n sig-param"><span class="pre">message</span></span>, <span class="n"><span class="pre">uint32_t</span></span><span class="w"> </span><span class="n sig-param"><span class="pre">size</span></span>, <span class="n"><span class="pre">uint8_t</span></span><span class="w"> </span><span class="p"><span class="pre">*</span></span><span class="n sig-param"><span class="pre">buf</span></span><span class="sig-paren">)</span><a class="headerlink" href="#_CPPv418trfMsgPackProtobufP16ProtobufCMessage8uint32_tP7uint8_t" title="Link to this definition"></a><br /></dt>
 <dd><p>Pack message into a buffer to be sent. Generic version. </p>
 <dl class="field-list simple">
-<dt class="field-odd">Parameters</dt>
+<dt class="field-odd">Parameters<span class="colon">:</span></dt>
 <dd class="field-odd"><ul class="simple">
 <li><p><strong>handle</strong> – Handle to message wrapper containing message to be sent</p></li>
 <li><p><strong>size</strong> – Size of provided buffer</p></li>
@@ -117,7 +132,7 @@
 <li><p><strong>size_out</strong> – Output size of packed data in bytes</p></li>
 </ul>
 </dd>
-<dt class="field-even">Returns</dt>
+<dt class="field-even">Returns<span class="colon">:</span></dt>
 <dd class="field-even"><p>Number of bytes written, negative error code on failure. </p>
 </dd>
 </dl>
@@ -125,17 +140,17 @@
 
 <dl class="cpp function">
 <dt class="sig sig-object cpp" id="_CPPv412trfMsgUnpackPP22TrfMsg__MessageWrapper8uint32_tP7uint8_t">
-<span id="_CPPv312trfMsgUnpackPP22TrfMsg__MessageWrapper8uint32_tP7uint8_t"></span><span id="_CPPv212trfMsgUnpackPP22TrfMsg__MessageWrapper8uint32_tP7uint8_t"></span><span id="trfMsgUnpack__TrfMsg__MessageWrapperPP.uint32_t.uint8_tP"></span><span class="target" id="trf__msg_8h_1ac63c527bf63b1703ee0fc218faa31c26"></span><span class="n"><span class="pre">ssize_t</span></span><span class="w"> </span><span class="sig-name descname"><span class="n"><span class="pre">trfMsgUnpack</span></span></span><span class="sig-paren">(</span><a class="reference internal" href="trf_proto.html#_CPPv422TrfMsg__MessageWrapper" title="TrfMsg__MessageWrapper"><span class="n"><span class="pre">TrfMsg__MessageWrapper</span></span></a><span class="w"> </span><span class="p"><span class="pre">*</span></span><span class="p"><span class="pre">*</span></span><span class="n sig-param"><span class="pre">handle</span></span>, <span class="n"><span class="pre">uint32_t</span></span><span class="w"> </span><span class="n sig-param"><span class="pre">size</span></span>, <span class="n"><span class="pre">uint8_t</span></span><span class="w"> </span><span class="p"><span class="pre">*</span></span><span class="n sig-param"><span class="pre">buf</span></span><span class="sig-paren">)</span><a class="headerlink" href="#_CPPv412trfMsgUnpackPP22TrfMsg__MessageWrapper8uint32_tP7uint8_t" title="Permalink to this definition"></a><br /></dt>
+<span id="_CPPv312trfMsgUnpackPP22TrfMsg__MessageWrapper8uint32_tP7uint8_t"></span><span id="_CPPv212trfMsgUnpackPP22TrfMsg__MessageWrapper8uint32_tP7uint8_t"></span><span id="trfMsgUnpack__TrfMsg__MessageWrapperPP.uint32_t.uint8_tP"></span><span class="target" id="trf__msg_8h_1ac63c527bf63b1703ee0fc218faa31c26"></span><span class="n"><span class="pre">ssize_t</span></span><span class="w"> </span><span class="sig-name descname"><span class="n"><span class="pre">trfMsgUnpack</span></span></span><span class="sig-paren">(</span><a class="reference internal" href="trf_proto.html#_CPPv422TrfMsg__MessageWrapper" title="TrfMsg__MessageWrapper"><span class="n"><span class="pre">TrfMsg__MessageWrapper</span></span></a><span class="w"> </span><span class="p"><span class="pre">*</span></span><span class="p"><span class="pre">*</span></span><span class="n sig-param"><span class="pre">handle</span></span>, <span class="n"><span class="pre">uint32_t</span></span><span class="w"> </span><span class="n sig-param"><span class="pre">size</span></span>, <span class="n"><span class="pre">uint8_t</span></span><span class="w"> </span><span class="p"><span class="pre">*</span></span><span class="n sig-param"><span class="pre">buf</span></span><span class="sig-paren">)</span><a class="headerlink" href="#_CPPv412trfMsgUnpackPP22TrfMsg__MessageWrapper8uint32_tP7uint8_t" title="Link to this definition"></a><br /></dt>
 <dd><p>Unpack delimited message from buffer. </p>
 <dl class="field-list simple">
-<dt class="field-odd">Parameters</dt>
+<dt class="field-odd">Parameters<span class="colon">:</span></dt>
 <dd class="field-odd"><ul class="simple">
 <li><p><strong>handle</strong> – Handle to be set to unpacked message data</p></li>
 <li><p><strong>size</strong> – Length of the serialized message to be decoded</p></li>
 <li><p><strong>buf</strong> – Buffer containing message</p></li>
 </ul>
 </dd>
-<dt class="field-even">Returns</dt>
+<dt class="field-even">Returns<span class="colon">:</span></dt>
 <dd class="field-even"><p>0 on success, negative error code on failure </p>
 </dd>
 </dl>
@@ -143,17 +158,17 @@
 
 <dl class="cpp function">
 <dt class="sig sig-object cpp" id="_CPPv420trfMsgUnpackProtobufPP16ProtobufCMessagePK26ProtobufCMessageDescriptor6size_tP7uint8_t">
-<span id="_CPPv320trfMsgUnpackProtobufPP16ProtobufCMessagePK26ProtobufCMessageDescriptor6size_tP7uint8_t"></span><span id="_CPPv220trfMsgUnpackProtobufPP16ProtobufCMessagePK26ProtobufCMessageDescriptor6size_tP7uint8_t"></span><span id="trfMsgUnpackProtobuf__ProtobufCMessagePP.ProtobufCMessageDescriptorCP.s.uint8_tP"></span><span class="target" id="trf__msg_8h_1afae7a82cd5d887958097a744f0f06423"></span><span class="n"><span class="pre">ssize_t</span></span><span class="w"> </span><span class="sig-name descname"><span class="n"><span class="pre">trfMsgUnpackProtobuf</span></span></span><span class="sig-paren">(</span><span class="n"><span class="pre">ProtobufCMessage</span></span><span class="w"> </span><span class="p"><span class="pre">*</span></span><span class="p"><span class="pre">*</span></span><span class="n sig-param"><span class="pre">out</span></span>, <span class="k"><span class="pre">const</span></span><span class="w"> </span><span class="n"><span class="pre">ProtobufCMessageDescriptor</span></span><span class="w"> </span><span class="p"><span class="pre">*</span></span><span class="n sig-param"><span class="pre">desc</span></span>, <span class="n"><span class="pre">size_t</span></span><span class="w"> </span><span class="n sig-param"><span class="pre">size</span></span>, <span class="n"><span class="pre">uint8_t</span></span><span class="w"> </span><span class="p"><span class="pre">*</span></span><span class="n sig-param"><span class="pre">buf</span></span><span class="sig-paren">)</span><a class="headerlink" href="#_CPPv420trfMsgUnpackProtobufPP16ProtobufCMessagePK26ProtobufCMessageDescriptor6size_tP7uint8_t" title="Permalink to this definition"></a><br /></dt>
+<span id="_CPPv320trfMsgUnpackProtobufPP16ProtobufCMessagePK26ProtobufCMessageDescriptor6size_tP7uint8_t"></span><span id="_CPPv220trfMsgUnpackProtobufPP16ProtobufCMessagePK26ProtobufCMessageDescriptor6size_tP7uint8_t"></span><span id="trfMsgUnpackProtobuf__ProtobufCMessagePP.ProtobufCMessageDescriptorCP.s.uint8_tP"></span><span class="target" id="trf__msg_8h_1afae7a82cd5d887958097a744f0f06423"></span><span class="n"><span class="pre">ssize_t</span></span><span class="w"> </span><span class="sig-name descname"><span class="n"><span class="pre">trfMsgUnpackProtobuf</span></span></span><span class="sig-paren">(</span><span class="n"><span class="pre">ProtobufCMessage</span></span><span class="w"> </span><span class="p"><span class="pre">*</span></span><span class="p"><span class="pre">*</span></span><span class="n sig-param"><span class="pre">out</span></span>, <span class="k"><span class="pre">const</span></span><span class="w"> </span><span class="n"><span class="pre">ProtobufCMessageDescriptor</span></span><span class="w"> </span><span class="p"><span class="pre">*</span></span><span class="n sig-param"><span class="pre">desc</span></span>, <span class="n"><span class="pre">size_t</span></span><span class="w"> </span><span class="n sig-param"><span class="pre">size</span></span>, <span class="n"><span class="pre">uint8_t</span></span><span class="w"> </span><span class="p"><span class="pre">*</span></span><span class="n sig-param"><span class="pre">buf</span></span><span class="sig-paren">)</span><a class="headerlink" href="#_CPPv420trfMsgUnpackProtobufPP16ProtobufCMessagePK26ProtobufCMessageDescriptor6size_tP7uint8_t" title="Link to this definition"></a><br /></dt>
 <dd><p>Unpack delimited message from buffer. Generic version. </p>
 <dl class="field-list simple">
-<dt class="field-odd">Parameters</dt>
+<dt class="field-odd">Parameters<span class="colon">:</span></dt>
 <dd class="field-odd"><ul class="simple">
 <li><p><strong>handle</strong> – Handle to be set to unpacked message data</p></li>
 <li><p><strong>size</strong> – Length of the serialized message to be decoded</p></li>
 <li><p><strong>buf</strong> – Buffer containing message</p></li>
 </ul>
 </dd>
-<dt class="field-even">Returns</dt>
+<dt class="field-even">Returns<span class="colon">:</span></dt>
 <dd class="field-even"><p>0 on success, negative error code on failure </p>
 </dd>
 </dl>
@@ -161,12 +176,12 @@
 
 <dl class="cpp function">
 <dt class="sig sig-object cpp" id="_CPPv421trfMsgGetPackedLengthP7uint8_t">
-<span id="_CPPv321trfMsgGetPackedLengthP7uint8_t"></span><span id="_CPPv221trfMsgGetPackedLengthP7uint8_t"></span><span id="trfMsgGetPackedLength__uint8_tP"></span><span class="target" id="trf__msg_8h_1adcc7894f494d591f1fac9563d8f23ca5"></span><span class="k"><span class="pre">static</span></span><span class="w"> </span><span class="k"><span class="pre">inline</span></span><span class="w"> </span><span class="n"><span class="pre">int32_t</span></span><span class="w"> </span><span class="sig-name descname"><span class="n"><span class="pre">trfMsgGetPackedLength</span></span></span><span class="sig-paren">(</span><span class="n"><span class="pre">uint8_t</span></span><span class="w"> </span><span class="p"><span class="pre">*</span></span><span class="n sig-param"><span class="pre">buf</span></span><span class="sig-paren">)</span><a class="headerlink" href="#_CPPv421trfMsgGetPackedLengthP7uint8_t" title="Permalink to this definition"></a><br /></dt>
+<span id="_CPPv321trfMsgGetPackedLengthP7uint8_t"></span><span id="_CPPv221trfMsgGetPackedLengthP7uint8_t"></span><span id="trfMsgGetPackedLength__uint8_tP"></span><span class="target" id="trf__msg_8h_1adcc7894f494d591f1fac9563d8f23ca5"></span><span class="k"><span class="pre">static</span></span><span class="w"> </span><span class="k"><span class="pre">inline</span></span><span class="w"> </span><span class="n"><span class="pre">int32_t</span></span><span class="w"> </span><span class="sig-name descname"><span class="n"><span class="pre">trfMsgGetPackedLength</span></span></span><span class="sig-paren">(</span><span class="n"><span class="pre">uint8_t</span></span><span class="w"> </span><span class="p"><span class="pre">*</span></span><span class="n sig-param"><span class="pre">buf</span></span><span class="sig-paren">)</span><a class="headerlink" href="#_CPPv421trfMsgGetPackedLengthP7uint8_t" title="Link to this definition"></a><br /></dt>
 <dd></dd></dl>
 
 <dl class="cpp function">
 <dt class="sig sig-object cpp" id="_CPPv416trfMsgGetPayloadP7uint8_t">
-<span id="_CPPv316trfMsgGetPayloadP7uint8_t"></span><span id="_CPPv216trfMsgGetPayloadP7uint8_t"></span><span id="trfMsgGetPayload__uint8_tP"></span><span class="target" id="trf__msg_8h_1a04f98d78b77ae2408a7eda05a56ea9ab"></span><span class="k"><span class="pre">static</span></span><span class="w"> </span><span class="k"><span class="pre">inline</span></span><span class="w"> </span><span class="n"><span class="pre">uint8_t</span></span><span class="w"> </span><span class="p"><span class="pre">*</span></span><span class="sig-name descname"><span class="n"><span class="pre">trfMsgGetPayload</span></span></span><span class="sig-paren">(</span><span class="n"><span class="pre">uint8_t</span></span><span class="w"> </span><span class="p"><span class="pre">*</span></span><span class="n sig-param"><span class="pre">buf</span></span><span class="sig-paren">)</span><a class="headerlink" href="#_CPPv416trfMsgGetPayloadP7uint8_t" title="Permalink to this definition"></a><br /></dt>
+<span id="_CPPv316trfMsgGetPayloadP7uint8_t"></span><span id="_CPPv216trfMsgGetPayloadP7uint8_t"></span><span id="trfMsgGetPayload__uint8_tP"></span><span class="target" id="trf__msg_8h_1a04f98d78b77ae2408a7eda05a56ea9ab"></span><span class="k"><span class="pre">static</span></span><span class="w"> </span><span class="k"><span class="pre">inline</span></span><span class="w"> </span><span class="n"><span class="pre">uint8_t</span></span><span class="w"> </span><span class="p"><span class="pre">*</span></span><span class="sig-name descname"><span class="n"><span class="pre">trfMsgGetPayload</span></span></span><span class="sig-paren">(</span><span class="n"><span class="pre">uint8_t</span></span><span class="w"> </span><span class="p"><span class="pre">*</span></span><span class="n sig-param"><span class="pre">buf</span></span><span class="sig-paren">)</span><a class="headerlink" href="#_CPPv416trfMsgGetPayloadP7uint8_t" title="Link to this definition"></a><br /></dt>
 <dd></dd></dl>
 
 </div>

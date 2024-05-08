@@ -1,21 +1,24 @@
 <!DOCTYPE html>
-<html class="writer-html5" lang="en" >
+<html class="writer-html5" lang="en" data-content_root="../">
 <head>
-  <meta charset="utf-8" /><meta name="generator" content="Docutils 0.17.1: http://docutils.sourceforge.net/" />
+  <meta charset="utf-8" /><meta name="viewport" content="width=device-width, initial-scale=1" />
 
   <meta name="viewport" content="width=device-width, initial-scale=1.0" />
   <title>TRF Core Functionality &mdash; libtrf  documentation</title>
-      <link rel="stylesheet" href="../_static/pygments.css" type="text/css" />
-      <link rel="stylesheet" href="../_static/css/theme.css" type="text/css" />
-      <link rel="stylesheet" href="../_static/graphviz.css" type="text/css" />
+      <link rel="stylesheet" type="text/css" href="../_static/pygments.css?v=80d5e7a1" />
+      <link rel="stylesheet" type="text/css" href="../_static/css/theme.css?v=19f00094" />
+      <link rel="stylesheet" type="text/css" href="../_static/graphviz.css?v=fd3f3429" />
+
+  
   <!--[if lt IE 9]>
     <script src="../_static/js/html5shiv.min.js"></script>
   <![endif]-->
   
-        <script data-url_root="../" id="documentation_options" src="../_static/documentation_options.js"></script>
-        <script src="../_static/jquery.js"></script>
-        <script src="../_static/underscore.js"></script>
-        <script src="../_static/doctools.js"></script>
+        <script src="../_static/jquery.js?v=5d32c60e"></script>
+        <script src="../_static/_sphinx_javascript_frameworks_compat.js?v=2cd50e6c"></script>
+        <script src="../_static/documentation_options.js?v=5929fcd5"></script>
+        <script src="../_static/doctools.js?v=9a2dae69"></script>
+        <script src="../_static/sphinx_highlight.js?v=dc90522c"></script>
     <script src="../_static/js/theme.js"></script>
     <link rel="index" title="Index" href="../genindex.html" />
     <link rel="search" title="Search" href="../search.html" />
@@ -28,11 +31,15 @@
     <nav data-toggle="wy-nav-shift" class="wy-nav-side">
       <div class="wy-side-scroll">
         <div class="wy-side-nav-search" >
-            <a href="../index.html" class="icon icon-home"> libtrf
+
+          
+          
+          <a href="../index.html" class="icon icon-home">
+            libtrf
           </a>
 <div role="search">
   <form id="rtd-search-form" class="wy-form" action="../search.html" method="get">
-    <input type="text" name="q" placeholder="Search docs" />
+    <input type="text" name="q" placeholder="Search docs" aria-label="Search docs" />
     <input type="hidden" name="check_keywords" value="yes" />
     <input type="hidden" name="area" value="default" />
   </form>
@@ -42,7 +49,59 @@
 <li class="toctree-l1"><a class="reference internal" href="../network/index.html">Network Configuration</a></li>
 <li class="toctree-l1"><a class="reference internal" href="../system/index.html">System Configuration</a></li>
 <li class="toctree-l1 current"><a class="reference internal" href="index.html">TRF API Function Documentation</a><ul class="current">
-<li class="toctree-l2 current"><a class="current reference internal" href="#">TRF Core Functionality</a></li>
+<li class="toctree-l2 current"><a class="current reference internal" href="#">TRF Core Functionality</a><ul>
+<li class="toctree-l3"><a class="reference internal" href="#_CPPv414trfGetDeadlineP8timespeci"><code class="docutils literal notranslate"><span class="pre">trfGetDeadline()</span></code></a></li>
+<li class="toctree-l3"><a class="reference internal" href="#_CPPv419trfCreateSubchannel11PTRFContextP11PTRFContext8uint32_t"><code class="docutils literal notranslate"><span class="pre">trfCreateSubchannel()</span></code></a></li>
+<li class="toctree-l3"><a class="reference internal" href="#_CPPv423trfProcessSubchannelReq11PTRFContextP11PTRFContextP22TrfMsg__MessageWrapper"><code class="docutils literal notranslate"><span class="pre">trfProcessSubchannelReq()</span></code></a></li>
+<li class="toctree-l3"><a class="reference internal" href="#_CPPv417trfBindSubchannel11PTRFContext11PTRFContext"><code class="docutils literal notranslate"><span class="pre">trfBindSubchannel()</span></code></a></li>
+<li class="toctree-l3"><a class="reference internal" href="#_CPPv419trfUnbindSubchannel11PTRFContext8uint32_t"><code class="docutils literal notranslate"><span class="pre">trfUnbindSubchannel()</span></code></a></li>
+<li class="toctree-l3"><a class="reference internal" href="#_CPPv416trfAllocActiveEP11PTRFXFabricP7fi_infoPv6size_t"><code class="docutils literal notranslate"><span class="pre">trfAllocActiveEP()</span></code></a></li>
+<li class="toctree-l3"><a class="reference internal" href="#_CPPv421trfInsertAVSerialized11PTRFXFabricPcP9fi_addr_t"><code class="docutils literal notranslate"><span class="pre">trfInsertAVSerialized()</span></code></a></li>
+<li class="toctree-l3"><a class="reference internal" href="#_CPPv423trfDeserializeWireProtoPKcP8uint32_t"><code class="docutils literal notranslate"><span class="pre">trfDeserializeWireProto()</span></code></a></li>
+<li class="toctree-l3"><a class="reference internal" href="#_CPPv421trfSerializeWireProto8uint32_tPPc"><code class="docutils literal notranslate"><span class="pre">trfSerializeWireProto()</span></code></a></li>
+<li class="toctree-l3"><a class="reference internal" href="#_CPPv415trfAllocContextv"><code class="docutils literal notranslate"><span class="pre">trfAllocContext()</span></code></a></li>
+<li class="toctree-l3"><a class="reference internal" href="#_CPPv421trfGetFabricProvidersPKcPKc9TRFEPTypePP7fi_info"><code class="docutils literal notranslate"><span class="pre">trfGetFabricProviders()</span></code></a></li>
+<li class="toctree-l3"><a class="reference internal" href="#_CPPv420trfFreeInterfaceList13PTRFInterface"><code class="docutils literal notranslate"><span class="pre">trfFreeInterfaceList()</span></code></a></li>
+<li class="toctree-l3"><a class="reference internal" href="#_CPPv416trfCreateChannel11PTRFContextP7fi_infoPv6size_t"><code class="docutils literal notranslate"><span class="pre">trfCreateChannel()</span></code></a></li>
+<li class="toctree-l3"><a class="reference internal" href="#_CPPv411trfGetRoutePKcPKcPKcPP7fi_info"><code class="docutils literal notranslate"><span class="pre">trfGetRoute()</span></code></a></li>
+<li class="toctree-l3"><a class="reference internal" href="#_CPPv418trfConvertFabricAF8uint32_t"><code class="docutils literal notranslate"><span class="pre">trfConvertFabricAF()</span></code></a></li>
+<li class="toctree-l3"><a class="reference internal" href="#_CPPv420trfConvertInternalAF8uint32_t"><code class="docutils literal notranslate"><span class="pre">trfConvertInternalAF()</span></code></a></li>
+<li class="toctree-l3"><a class="reference internal" href="#_CPPv419trfSerializeAddressPv8TRFXAddrPPc"><code class="docutils literal notranslate"><span class="pre">trfSerializeAddress()</span></code></a></li>
+<li class="toctree-l3"><a class="reference internal" href="#_CPPv421trfDeserializeAddressPKciPPvPi"><code class="docutils literal notranslate"><span class="pre">trfDeserializeAddress()</span></code></a></li>
+<li class="toctree-l3"><a class="reference internal" href="#_CPPv49trfRegBuf11PTRFXFabricPv6size_t8uint64_tPP6fid_mr"><code class="docutils literal notranslate"><span class="pre">trfRegBuf()</span></code></a></li>
+<li class="toctree-l3"><a class="reference internal" href="#_CPPv420trfRegInternalMsgBuf11PTRFContextPv6size_t"><code class="docutils literal notranslate"><span class="pre">trfRegInternalMsgBuf()</span></code></a></li>
+<li class="toctree-l3"><a class="reference internal" href="#_CPPv418trfGetEndpointName11PTRFContextPPc"><code class="docutils literal notranslate"><span class="pre">trfGetEndpointName()</span></code></a></li>
+<li class="toctree-l3"><a class="reference internal" href="#_CPPv423trfDestroyFabricContext11PTRFContext"><code class="docutils literal notranslate"><span class="pre">trfDestroyFabricContext()</span></code></a></li>
+<li class="toctree-l3"><a class="reference internal" href="#_CPPv420trfSendDisconnectMsgi8uint64_t"><code class="docutils literal notranslate"><span class="pre">trfSendDisconnectMsg()</span></code></a></li>
+<li class="toctree-l3"><a class="reference internal" href="#_CPPv417trfDestroyContext11PTRFContext"><code class="docutils literal notranslate"><span class="pre">trfDestroyContext()</span></code></a></li>
+<li class="toctree-l3"><a class="reference internal" href="#_CPPv415trfAllocAligned6size_t6size_t"><code class="docutils literal notranslate"><span class="pre">trfAllocAligned()</span></code></a></li>
+<li class="toctree-l3"><a class="reference internal" href="#_CPPv418trfBindDisplayList11PTRFContext11PTRFDisplay"><code class="docutils literal notranslate"><span class="pre">trfBindDisplayList()</span></code></a></li>
+<li class="toctree-l3"><a class="reference internal" href="#_CPPv420trfUpdateDisplayAddr11PTRFContext11PTRFDisplayPv"><code class="docutils literal notranslate"><span class="pre">trfUpdateDisplayAddr()</span></code></a></li>
+<li class="toctree-l3"><a class="reference internal" href="#_CPPv418trfGetTextureBytes6size_t6size_t12TRFTexFormat"><code class="docutils literal notranslate"><span class="pre">trfGetTextureBytes()</span></code></a></li>
+<li class="toctree-l3"><a class="reference internal" href="#_CPPv418trfGetDisplayBytes11PTRFDisplay"><code class="docutils literal notranslate"><span class="pre">trfGetDisplayBytes()</span></code></a></li>
+<li class="toctree-l3"><a class="reference internal" href="#_CPPv417trfGetCursorBytes10PTRFCursor"><code class="docutils literal notranslate"><span class="pre">trfGetCursorBytes()</span></code></a></li>
+<li class="toctree-l3"><a class="reference internal" href="#_CPPv422trfTextureIsCompressed12TRFTexFormat"><code class="docutils literal notranslate"><span class="pre">trfTextureIsCompressed()</span></code></a></li>
+<li class="toctree-l3"><a class="reference internal" href="#_CPPv418trfFreeDisplayList11PTRFDisplayi"><code class="docutils literal notranslate"><span class="pre">trfFreeDisplayList()</span></code></a></li>
+<li class="toctree-l3"><a class="reference internal" href="#_CPPv417trfGetMessageAuto11PTRFContext8uint64_tP8uint64_tPPvPi"><code class="docutils literal notranslate"><span class="pre">trfGetMessageAuto()</span></code></a></li>
+<li class="toctree-l3"><a class="reference internal" href="#_CPPv419trfRegDisplaySource11PTRFContext11PTRFDisplay"><code class="docutils literal notranslate"><span class="pre">trfRegDisplaySource()</span></code></a></li>
+<li class="toctree-l3"><a class="reference internal" href="#_CPPv417trfRegDisplaySink11PTRFContext11PTRFDisplay"><code class="docutils literal notranslate"><span class="pre">trfRegDisplaySink()</span></code></a></li>
+<li class="toctree-l3"><a class="reference internal" href="#_CPPv419trfRegDisplayCustom11PTRFContext11PTRFDisplay6size_t6size_t8uint64_t"><code class="docutils literal notranslate"><span class="pre">trfRegDisplayCustom()</span></code></a></li>
+<li class="toctree-l3"><a class="reference internal" href="#_CPPv417trfGetDisplayByID11PTRFDisplayi"><code class="docutils literal notranslate"><span class="pre">trfGetDisplayByID()</span></code></a></li>
+<li class="toctree-l3"><a class="reference internal" href="#_CPPv415trfAckClientReq11PTRFContextP8uint32_ti"><code class="docutils literal notranslate"><span class="pre">trfAckClientReq()</span></code></a></li>
+<li class="toctree-l3"><a class="reference internal" href="#_CPPv411trfGetFBPtr11PTRFDisplay"><code class="docutils literal notranslate"><span class="pre">trfGetFBPtr()</span></code></a></li>
+<li class="toctree-l3"><a class="reference internal" href="#_CPPv412trfSendFrame11PTRFContext11PTRFDisplay8uint64_t8uint64_t"><code class="docutils literal notranslate"><span class="pre">trfSendFrame()</span></code></a></li>
+<li class="toctree-l3"><a class="reference internal" href="#_CPPv416trfSendFramePart11PTRFContext11PTRFDisplay8uint64_t8uint64_tP7TRFRect6size_t"><code class="docutils literal notranslate"><span class="pre">trfSendFramePart()</span></code></a></li>
+<li class="toctree-l3"><a class="reference internal" href="#_CPPv417trfSendFrameChunk11PTRFContext11PTRFDisplay6size_t6size_t8uint64_t8uint64_t"><code class="docutils literal notranslate"><span class="pre">trfSendFrameChunk()</span></code></a></li>
+<li class="toctree-l3"><a class="reference internal" href="#_CPPv412trfRecvFrame11PTRFContext11PTRFDisplay"><code class="docutils literal notranslate"><span class="pre">trfRecvFrame()</span></code></a></li>
+<li class="toctree-l3"><a class="reference internal" href="#_CPPv420trfGetServerDisplays11PTRFContextP11PTRFDisplay"><code class="docutils literal notranslate"><span class="pre">trfGetServerDisplays()</span></code></a></li>
+<li class="toctree-l3"><a class="reference internal" href="#_CPPv418trfSendDisplayList11PTRFContext"><code class="docutils literal notranslate"><span class="pre">trfSendDisplayList()</span></code></a></li>
+<li class="toctree-l3"><a class="reference internal" href="#_CPPv416trfSendClientReq11PTRFContext11PTRFDisplay"><code class="docutils literal notranslate"><span class="pre">trfSendClientReq()</span></code></a></li>
+<li class="toctree-l3"><a class="reference internal" href="#_CPPv414trfAckFrameReq11PTRFContext11PTRFDisplay"><code class="docutils literal notranslate"><span class="pre">trfAckFrameReq()</span></code></a></li>
+<li class="toctree-l3"><a class="reference internal" href="#_CPPv416trfSendKeepAlive11PTRFContext"><code class="docutils literal notranslate"><span class="pre">trfSendKeepAlive()</span></code></a></li>
+<li class="toctree-l3"><a class="reference internal" href="#_CPPv418trfGetSendProgress11PTRFContextP16fi_cq_data_entryP15fi_cq_err_entry6size_t15PTRFContextOpts"><code class="docutils literal notranslate"><span class="pre">trfGetSendProgress()</span></code></a></li>
+<li class="toctree-l3"><a class="reference internal" href="#_CPPv418trfGetRecvProgress11PTRFContextP16fi_cq_data_entryP15fi_cq_err_entry6size_t15PTRFContextOpts"><code class="docutils literal notranslate"><span class="pre">trfGetRecvProgress()</span></code></a></li>
+</ul>
+</li>
 <li class="toctree-l2"><a class="reference internal" href="trf_def.html">System Data Structures</a></li>
 <li class="toctree-l2"><a class="reference internal" href="trf_inet.html">Address Handling Functions</a></li>
 <li class="toctree-l2"><a class="reference internal" href="trf_interface.html">Interface &amp; Address Introspection</a></li>
@@ -67,9 +126,9 @@
         <div class="rst-content">
           <div role="navigation" aria-label="Page navigation">
   <ul class="wy-breadcrumbs">
-      <li><a href="../index.html" class="icon icon-home"></a> &raquo;</li>
-          <li><a href="index.html">TRF API Function Documentation</a> &raquo;</li>
-      <li>TRF Core Functionality</li>
+      <li><a href="../index.html" class="icon icon-home" aria-label="Home"></a></li>
+          <li class="breadcrumb-item"><a href="index.html">TRF API Function Documentation</a></li>
+      <li class="breadcrumb-item active">TRF Core Functionality</li>
       <li class="wy-breadcrumbs-aside">
             <a href="../_sources/api/trf.rst.txt" rel="nofollow"> View page source</a>
       </li>
@@ -80,33 +139,33 @@
            <div itemprop="articleBody">
              
   <section id="trf-core-functionality">
-<span id="api-trf"></span><h1>TRF Core Functionality<a class="headerlink" href="#trf-core-functionality" title="Permalink to this headline"></a></h1>
+<span id="api-trf"></span><h1>TRF Core Functionality<a class="headerlink" href="#trf-core-functionality" title="Link to this heading"></a></h1>
 <p>Telescope Remote Framebuffer Library. </p>
 <div class="breathe-sectiondef docutils container">
 <p class="breathe-sectiondef-title rubric" id="breathe-section-title-defines">Defines</p>
 <dl class="cpp macro">
 <dt class="sig sig-object cpp" id="c.TRF_RECV_CQ">
-<span class="target" id="trf_8h_1a431e96a44140b9f78ad8a5147bd9a798"></span><span class="sig-name descname"><span class="n"><span class="pre">TRF_RECV_CQ</span></span></span><a class="headerlink" href="#c.TRF_RECV_CQ" title="Permalink to this definition"></a><br /></dt>
+<span class="target" id="trf_8h_1a431e96a44140b9f78ad8a5147bd9a798"></span><span class="sig-name descname"><span class="n"><span class="pre">TRF_RECV_CQ</span></span></span><a class="headerlink" href="#c.TRF_RECV_CQ" title="Link to this definition"></a><br /></dt>
 <dd></dd></dl>
 
 <dl class="cpp macro">
 <dt class="sig sig-object cpp" id="c.TRF_SEND_CQ">
-<span class="target" id="trf_8h_1ae2b97cd1140bff6d4a51ae0a3918191f"></span><span class="sig-name descname"><span class="n"><span class="pre">TRF_SEND_CQ</span></span></span><a class="headerlink" href="#c.TRF_SEND_CQ" title="Permalink to this definition"></a><br /></dt>
+<span class="target" id="trf_8h_1ae2b97cd1140bff6d4a51ae0a3918191f"></span><span class="sig-name descname"><span class="n"><span class="pre">TRF_SEND_CQ</span></span></span><a class="headerlink" href="#c.TRF_SEND_CQ" title="Link to this definition"></a><br /></dt>
 <dd></dd></dl>
 
 <dl class="cpp macro">
 <dt class="sig sig-object cpp" id="c.TRF_FI_MIN_VER">
-<span class="target" id="trf_8h_1a3ea82ddd3786e0fda0952b7b6504bf93"></span><span class="sig-name descname"><span class="n"><span class="pre">TRF_FI_MIN_VER</span></span></span><a class="headerlink" href="#c.TRF_FI_MIN_VER" title="Permalink to this definition"></a><br /></dt>
+<span class="target" id="trf_8h_1a3ea82ddd3786e0fda0952b7b6504bf93"></span><span class="sig-name descname"><span class="n"><span class="pre">TRF_FI_MIN_VER</span></span></span><a class="headerlink" href="#c.TRF_FI_MIN_VER" title="Link to this definition"></a><br /></dt>
 <dd></dd></dl>
 
 <dl class="cpp macro">
 <dt class="sig sig-object cpp" id="c.TRF_FI_MAX_VER">
-<span class="target" id="trf_8h_1ac27c24539787fe5ac037c8be4f37aebd"></span><span class="sig-name descname"><span class="n"><span class="pre">TRF_FI_MAX_VER</span></span></span><a class="headerlink" href="#c.TRF_FI_MAX_VER" title="Permalink to this definition"></a><br /></dt>
+<span class="target" id="trf_8h_1ac27c24539787fe5ac037c8be4f37aebd"></span><span class="sig-name descname"><span class="n"><span class="pre">TRF_FI_MAX_VER</span></span></span><a class="headerlink" href="#c.TRF_FI_MAX_VER" title="Link to this definition"></a><br /></dt>
 <dd></dd></dl>
 
 <dl class="cpp macro">
 <dt class="sig sig-object cpp" id="c.TRF_FI_CUR_VER">
-<span class="target" id="trf_8h_1a8927eda8d48d20f9855c7faff400049e"></span><span class="sig-name descname"><span class="n"><span class="pre">TRF_FI_CUR_VER</span></span></span><a class="headerlink" href="#c.TRF_FI_CUR_VER" title="Permalink to this definition"></a><br /></dt>
+<span class="target" id="trf_8h_1a8927eda8d48d20f9855c7faff400049e"></span><span class="sig-name descname"><span class="n"><span class="pre">TRF_FI_CUR_VER</span></span></span><a class="headerlink" href="#c.TRF_FI_CUR_VER" title="Link to this definition"></a><br /></dt>
 <dd></dd></dl>
 
 </div>
@@ -114,16 +173,16 @@
 <p class="breathe-sectiondef-title rubric" id="breathe-section-title-functions">Functions</p>
 <dl class="cpp function">
 <dt class="sig sig-object cpp" id="_CPPv414trfGetDeadlineP8timespeci">
-<span id="_CPPv314trfGetDeadlineP8timespeci"></span><span id="_CPPv214trfGetDeadlineP8timespeci"></span><span id="trfGetDeadline__timespecP.i"></span><span class="target" id="trf_8h_1a72497de1145ef596dd6aa781ab7ddba7"></span><span class="k"><span class="pre">static</span></span><span class="w"> </span><span class="k"><span class="pre">inline</span></span><span class="w"> </span><span class="kt"><span class="pre">int</span></span><span class="w"> </span><span class="sig-name descname"><span class="n"><span class="pre">trfGetDeadline</span></span></span><span class="sig-paren">(</span><span class="k"><span class="pre">struct</span></span><span class="w"> </span><span class="n"><span class="pre">timespec</span></span><span class="w"> </span><span class="p"><span class="pre">*</span></span><span class="n sig-param"><span class="pre">out</span></span>, <span class="kt"><span class="pre">int</span></span><span class="w"> </span><span class="n sig-param"><span class="pre">delay_ms</span></span><span class="sig-paren">)</span><a class="headerlink" href="#_CPPv414trfGetDeadlineP8timespeci" title="Permalink to this definition"></a><br /></dt>
+<span id="_CPPv314trfGetDeadlineP8timespeci"></span><span id="_CPPv214trfGetDeadlineP8timespeci"></span><span id="trfGetDeadline__timespecP.i"></span><span class="target" id="trf_8h_1a72497de1145ef596dd6aa781ab7ddba7"></span><span class="k"><span class="pre">static</span></span><span class="w"> </span><span class="k"><span class="pre">inline</span></span><span class="w"> </span><span class="kt"><span class="pre">int</span></span><span class="w"> </span><span class="sig-name descname"><span class="n"><span class="pre">trfGetDeadline</span></span></span><span class="sig-paren">(</span><span class="k"><span class="pre">struct</span></span><span class="w"> </span><span class="n"><span class="pre">timespec</span></span><span class="w"> </span><span class="p"><span class="pre">*</span></span><span class="n sig-param"><span class="pre">out</span></span>, <span class="kt"><span class="pre">int</span></span><span class="w"> </span><span class="n sig-param"><span class="pre">delay_ms</span></span><span class="sig-paren">)</span><a class="headerlink" href="#_CPPv414trfGetDeadlineP8timespeci" title="Link to this definition"></a><br /></dt>
 <dd><p>Get a timespec corresponding to a deadline in the future. </p>
 <dl class="field-list simple">
-<dt class="field-odd">Parameters</dt>
+<dt class="field-odd">Parameters<span class="colon">:</span></dt>
 <dd class="field-odd"><ul class="simple">
 <li><p><strong>out</strong> – Pointer to timespec to be filled in </p></li>
 <li><p><strong>delay_ms</strong> – Delay in milliseconds </p></li>
 </ul>
 </dd>
-<dt class="field-even">Returns</dt>
+<dt class="field-even">Returns<span class="colon">:</span></dt>
 <dd class="field-even"><p>0 on success, negative error code on failure. </p>
 </dd>
 </dl>
@@ -131,17 +190,17 @@
 
 <dl class="cpp function">
 <dt class="sig sig-object cpp" id="_CPPv419trfCreateSubchannel11PTRFContextP11PTRFContext8uint32_t">
-<span id="_CPPv319trfCreateSubchannel11PTRFContextP11PTRFContext8uint32_t"></span><span id="_CPPv219trfCreateSubchannel11PTRFContextP11PTRFContext8uint32_t"></span><span id="trfCreateSubchannel__PTRFContext.PTRFContextP.uint32_t"></span><span class="target" id="trf_8h_1a8a7f3bfa9f69cf61cf6bd705b17877bf"></span><span class="kt"><span class="pre">int</span></span><span class="w"> </span><span class="sig-name descname"><span class="n"><span class="pre">trfCreateSubchannel</span></span></span><span class="sig-paren">(</span><span class="n"><span class="pre">PTRFContext</span></span><span class="w"> </span><span class="n sig-param"><span class="pre">ctx</span></span>, <span class="n"><span class="pre">PTRFContext</span></span><span class="w"> </span><span class="p"><span class="pre">*</span></span><span class="n sig-param"><span class="pre">ctx_out</span></span>, <span class="n"><span class="pre">uint32_t</span></span><span class="w"> </span><span class="n sig-param"><span class="pre">id</span></span><span class="sig-paren">)</span><a class="headerlink" href="#_CPPv419trfCreateSubchannel11PTRFContextP11PTRFContext8uint32_t" title="Permalink to this definition"></a><br /></dt>
+<span id="_CPPv319trfCreateSubchannel11PTRFContextP11PTRFContext8uint32_t"></span><span id="_CPPv219trfCreateSubchannel11PTRFContextP11PTRFContext8uint32_t"></span><span id="trfCreateSubchannel__PTRFContext.PTRFContextP.uint32_t"></span><span class="target" id="trf_8h_1a8a7f3bfa9f69cf61cf6bd705b17877bf"></span><span class="kt"><span class="pre">int</span></span><span class="w"> </span><span class="sig-name descname"><span class="n"><span class="pre">trfCreateSubchannel</span></span></span><span class="sig-paren">(</span><span class="n"><span class="pre">PTRFContext</span></span><span class="w"> </span><span class="n sig-param"><span class="pre">ctx</span></span>, <span class="n"><span class="pre">PTRFContext</span></span><span class="w"> </span><span class="p"><span class="pre">*</span></span><span class="n sig-param"><span class="pre">ctx_out</span></span>, <span class="n"><span class="pre">uint32_t</span></span><span class="w"> </span><span class="n sig-param"><span class="pre">id</span></span><span class="sig-paren">)</span><a class="headerlink" href="#_CPPv419trfCreateSubchannel11PTRFContextP11PTRFContext8uint32_t" title="Link to this definition"></a><br /></dt>
 <dd><p>Create a subchannel. </p>
 <dl class="field-list simple">
-<dt class="field-odd">Parameters</dt>
+<dt class="field-odd">Parameters<span class="colon">:</span></dt>
 <dd class="field-odd"><ul class="simple">
 <li><p><strong>ctx</strong> – Allocated context containing the main channel.</p></li>
 <li><p><strong>ctx_out</strong> – Subchannel output.</p></li>
 <li><p><strong>id</strong> – Subchannel ID. Must be unique to the main context.</p></li>
 </ul>
 </dd>
-<dt class="field-even">Returns</dt>
+<dt class="field-even">Returns<span class="colon">:</span></dt>
 <dd class="field-even"><p>0 on success, negative error code on failure. </p>
 </dd>
 </dl>
@@ -149,17 +208,17 @@
 
 <dl class="cpp function">
 <dt class="sig sig-object cpp" id="_CPPv423trfProcessSubchannelReq11PTRFContextP11PTRFContextP22TrfMsg__MessageWrapper">
-<span id="_CPPv323trfProcessSubchannelReq11PTRFContextP11PTRFContextP22TrfMsg__MessageWrapper"></span><span id="_CPPv223trfProcessSubchannelReq11PTRFContextP11PTRFContextP22TrfMsg__MessageWrapper"></span><span id="trfProcessSubchannelReq__PTRFContext.PTRFContextP.TrfMsg__MessageWrapperP"></span><span class="target" id="trf_8h_1ae4fea55a3ac8671ddde23bea595cefef"></span><span class="kt"><span class="pre">int</span></span><span class="w"> </span><span class="sig-name descname"><span class="n"><span class="pre">trfProcessSubchannelReq</span></span></span><span class="sig-paren">(</span><span class="n"><span class="pre">PTRFContext</span></span><span class="w"> </span><span class="n sig-param"><span class="pre">ctx</span></span>, <span class="n"><span class="pre">PTRFContext</span></span><span class="w"> </span><span class="p"><span class="pre">*</span></span><span class="n sig-param"><span class="pre">ctx_out</span></span>, <a class="reference internal" href="trf_proto.html#_CPPv422TrfMsg__MessageWrapper" title="TrfMsg__MessageWrapper"><span class="n"><span class="pre">TrfMsg__MessageWrapper</span></span></a><span class="w"> </span><span class="p"><span class="pre">*</span></span><span class="n sig-param"><span class="pre">req</span></span><span class="sig-paren">)</span><a class="headerlink" href="#_CPPv423trfProcessSubchannelReq11PTRFContextP11PTRFContextP22TrfMsg__MessageWrapper" title="Permalink to this definition"></a><br /></dt>
+<span id="_CPPv323trfProcessSubchannelReq11PTRFContextP11PTRFContextP22TrfMsg__MessageWrapper"></span><span id="_CPPv223trfProcessSubchannelReq11PTRFContextP11PTRFContextP22TrfMsg__MessageWrapper"></span><span id="trfProcessSubchannelReq__PTRFContext.PTRFContextP.TrfMsg__MessageWrapperP"></span><span class="target" id="trf_8h_1ae4fea55a3ac8671ddde23bea595cefef"></span><span class="kt"><span class="pre">int</span></span><span class="w"> </span><span class="sig-name descname"><span class="n"><span class="pre">trfProcessSubchannelReq</span></span></span><span class="sig-paren">(</span><span class="n"><span class="pre">PTRFContext</span></span><span class="w"> </span><span class="n sig-param"><span class="pre">ctx</span></span>, <span class="n"><span class="pre">PTRFContext</span></span><span class="w"> </span><span class="p"><span class="pre">*</span></span><span class="n sig-param"><span class="pre">ctx_out</span></span>, <a class="reference internal" href="trf_proto.html#_CPPv422TrfMsg__MessageWrapper" title="TrfMsg__MessageWrapper"><span class="n"><span class="pre">TrfMsg__MessageWrapper</span></span></a><span class="w"> </span><span class="p"><span class="pre">*</span></span><span class="n sig-param"><span class="pre">req</span></span><span class="sig-paren">)</span><a class="headerlink" href="#_CPPv423trfProcessSubchannelReq11PTRFContextP11PTRFContextP22TrfMsg__MessageWrapper" title="Link to this definition"></a><br /></dt>
 <dd><p>Process a subchannel creation request from the peer. </p>
 <dl class="field-list simple">
-<dt class="field-odd">Parameters</dt>
+<dt class="field-odd">Parameters<span class="colon">:</span></dt>
 <dd class="field-odd"><ul class="simple">
 <li><p><strong>ctx</strong> – Allocated context containing the main channel.</p></li>
 <li><p><strong>ctx_out</strong> – Subchannel output.</p></li>
 <li><p><strong>req</strong> – TRF control message containing the subchannel creation request.</p></li>
 </ul>
 </dd>
-<dt class="field-even">Returns</dt>
+<dt class="field-even">Returns<span class="colon">:</span></dt>
 <dd class="field-even"><p>0 on success, negative error code on failure. </p>
 </dd>
 </dl>
@@ -167,16 +226,16 @@
 
 <dl class="cpp function">
 <dt class="sig sig-object cpp" id="_CPPv417trfBindSubchannel11PTRFContext11PTRFContext">
-<span id="_CPPv317trfBindSubchannel11PTRFContext11PTRFContext"></span><span id="_CPPv217trfBindSubchannel11PTRFContext11PTRFContext"></span><span id="trfBindSubchannel__PTRFContext.PTRFContext"></span><span class="target" id="trf_8h_1afea4f4d24a216accf21daffa8e239abe"></span><span class="kt"><span class="pre">int</span></span><span class="w"> </span><span class="sig-name descname"><span class="n"><span class="pre">trfBindSubchannel</span></span></span><span class="sig-paren">(</span><span class="n"><span class="pre">PTRFContext</span></span><span class="w"> </span><span class="n sig-param"><span class="pre">main</span></span>, <span class="n"><span class="pre">PTRFContext</span></span><span class="w"> </span><span class="n sig-param"><span class="pre">sub</span></span><span class="sig-paren">)</span><a class="headerlink" href="#_CPPv417trfBindSubchannel11PTRFContext11PTRFContext" title="Permalink to this definition"></a><br /></dt>
+<span id="_CPPv317trfBindSubchannel11PTRFContext11PTRFContext"></span><span id="_CPPv217trfBindSubchannel11PTRFContext11PTRFContext"></span><span id="trfBindSubchannel__PTRFContext.PTRFContext"></span><span class="target" id="trf_8h_1afea4f4d24a216accf21daffa8e239abe"></span><span class="kt"><span class="pre">int</span></span><span class="w"> </span><span class="sig-name descname"><span class="n"><span class="pre">trfBindSubchannel</span></span></span><span class="sig-paren">(</span><span class="n"><span class="pre">PTRFContext</span></span><span class="w"> </span><span class="n sig-param"><span class="pre">main</span></span>, <span class="n"><span class="pre">PTRFContext</span></span><span class="w"> </span><span class="n sig-param"><span class="pre">sub</span></span><span class="sig-paren">)</span><a class="headerlink" href="#_CPPv417trfBindSubchannel11PTRFContext11PTRFContext" title="Link to this definition"></a><br /></dt>
 <dd><p>Bind the subchannel to the main context. This ensures that the subchannel is closed when the main context is destroyed. </p>
 <dl class="field-list simple">
-<dt class="field-odd">Parameters</dt>
+<dt class="field-odd">Parameters<span class="colon">:</span></dt>
 <dd class="field-odd"><ul class="simple">
 <li><p><strong>main</strong> – Main channel.</p></li>
 <li><p><strong>sub</strong> – Subchannel.</p></li>
 </ul>
 </dd>
-<dt class="field-even">Returns</dt>
+<dt class="field-even">Returns<span class="colon">:</span></dt>
 <dd class="field-even"><p>0 on success, negative error code on failure. </p>
 </dd>
 </dl>
@@ -184,16 +243,16 @@
 
 <dl class="cpp function">
 <dt class="sig sig-object cpp" id="_CPPv419trfUnbindSubchannel11PTRFContext8uint32_t">
-<span id="_CPPv319trfUnbindSubchannel11PTRFContext8uint32_t"></span><span id="_CPPv219trfUnbindSubchannel11PTRFContext8uint32_t"></span><span id="trfUnbindSubchannel__PTRFContext.uint32_t"></span><span class="target" id="trf_8h_1aa9aec03ff3aa201c1d7bfb05907127f5"></span><span class="kt"><span class="pre">int</span></span><span class="w"> </span><span class="sig-name descname"><span class="n"><span class="pre">trfUnbindSubchannel</span></span></span><span class="sig-paren">(</span><span class="n"><span class="pre">PTRFContext</span></span><span class="w"> </span><span class="n sig-param"><span class="pre">main</span></span>, <span class="n"><span class="pre">uint32_t</span></span><span class="w"> </span><span class="n sig-param"><span class="pre">id</span></span><span class="sig-paren">)</span><a class="headerlink" href="#_CPPv419trfUnbindSubchannel11PTRFContext8uint32_t" title="Permalink to this definition"></a><br /></dt>
+<span id="_CPPv319trfUnbindSubchannel11PTRFContext8uint32_t"></span><span id="_CPPv219trfUnbindSubchannel11PTRFContext8uint32_t"></span><span id="trfUnbindSubchannel__PTRFContext.uint32_t"></span><span class="target" id="trf_8h_1aa9aec03ff3aa201c1d7bfb05907127f5"></span><span class="kt"><span class="pre">int</span></span><span class="w"> </span><span class="sig-name descname"><span class="n"><span class="pre">trfUnbindSubchannel</span></span></span><span class="sig-paren">(</span><span class="n"><span class="pre">PTRFContext</span></span><span class="w"> </span><span class="n sig-param"><span class="pre">main</span></span>, <span class="n"><span class="pre">uint32_t</span></span><span class="w"> </span><span class="n sig-param"><span class="pre">id</span></span><span class="sig-paren">)</span><a class="headerlink" href="#_CPPv419trfUnbindSubchannel11PTRFContext8uint32_t" title="Link to this definition"></a><br /></dt>
 <dd><p>Unbind the subchannel from the main context. This is required if the channel disconnects, to prevent invalid memory accesses. </p>
 <dl class="field-list simple">
-<dt class="field-odd">Parameters</dt>
+<dt class="field-odd">Parameters<span class="colon">:</span></dt>
 <dd class="field-odd"><ul class="simple">
 <li><p><strong>main</strong> – Main channel</p></li>
 <li><p><strong>id</strong> – Subchannel ID</p></li>
 </ul>
 </dd>
-<dt class="field-even">Returns</dt>
+<dt class="field-even">Returns<span class="colon">:</span></dt>
 <dd class="field-even"><p>0 on success, negative error code on failure. </p>
 </dd>
 </dl>
@@ -201,7 +260,7 @@
 
 <dl class="cpp function">
 <dt class="sig sig-object cpp" id="_CPPv416trfAllocActiveEP11PTRFXFabricP7fi_infoPv6size_t">
-<span id="_CPPv316trfAllocActiveEP11PTRFXFabricP7fi_infoPv6size_t"></span><span id="_CPPv216trfAllocActiveEP11PTRFXFabricP7fi_infoPv6size_t"></span><span id="trfAllocActiveEP__PTRFXFabric.fi_infoP.voidP.s"></span><span class="target" id="trf_8h_1a403a009d04c39297a474f75f1cba7be5"></span><span class="kt"><span class="pre">int</span></span><span class="w"> </span><span class="sig-name descname"><span class="n"><span class="pre">trfAllocActiveEP</span></span></span><span class="sig-paren">(</span><span class="n"><span class="pre">PTRFXFabric</span></span><span class="w"> </span><span class="n sig-param"><span class="pre">ctx</span></span>, <span class="k"><span class="pre">struct</span></span><span class="w"> </span><span class="n"><span class="pre">fi_info</span></span><span class="w"> </span><span class="p"><span class="pre">*</span></span><span class="n sig-param"><span class="pre">fi</span></span>, <span class="kt"><span class="pre">void</span></span><span class="w"> </span><span class="p"><span class="pre">*</span></span><span class="n sig-param"><span class="pre">data</span></span>, <span class="n"><span class="pre">size_t</span></span><span class="w"> </span><span class="n sig-param"><span class="pre">size</span></span><span class="sig-paren">)</span><a class="headerlink" href="#_CPPv416trfAllocActiveEP11PTRFXFabricP7fi_infoPv6size_t" title="Permalink to this definition"></a><br /></dt>
+<span id="_CPPv316trfAllocActiveEP11PTRFXFabricP7fi_infoPv6size_t"></span><span id="_CPPv216trfAllocActiveEP11PTRFXFabricP7fi_infoPv6size_t"></span><span id="trfAllocActiveEP__PTRFXFabric.fi_infoP.voidP.s"></span><span class="target" id="trf_8h_1a403a009d04c39297a474f75f1cba7be5"></span><span class="kt"><span class="pre">int</span></span><span class="w"> </span><span class="sig-name descname"><span class="n"><span class="pre">trfAllocActiveEP</span></span></span><span class="sig-paren">(</span><span class="n"><span class="pre">PTRFXFabric</span></span><span class="w"> </span><span class="n sig-param"><span class="pre">ctx</span></span>, <span class="k"><span class="pre">struct</span></span><span class="w"> </span><span class="n"><span class="pre">fi_info</span></span><span class="w"> </span><span class="p"><span class="pre">*</span></span><span class="n sig-param"><span class="pre">fi</span></span>, <span class="kt"><span class="pre">void</span></span><span class="w"> </span><span class="p"><span class="pre">*</span></span><span class="n sig-param"><span class="pre">data</span></span>, <span class="n"><span class="pre">size_t</span></span><span class="w"> </span><span class="n sig-param"><span class="pre">size</span></span><span class="sig-paren">)</span><a class="headerlink" href="#_CPPv416trfAllocActiveEP11PTRFXFabricP7fi_infoPv6size_t" title="Link to this definition"></a><br /></dt>
 <dd><p>Allocate an active endpoint. </p>
 <p><div class="admonition seealso">
 <p class="admonition-title">See also</p>
@@ -209,7 +268,7 @@
 </div>
 </p>
 <dl class="field-list simple">
-<dt class="field-odd">Parameters</dt>
+<dt class="field-odd">Parameters<span class="colon">:</span></dt>
 <dd class="field-odd"><ul class="simple">
 <li><p><strong>ctx</strong> – Context in which to store the allocated endpoint.</p></li>
 <li><p><strong>fi</strong> – Endpoint parameters, returned by fi_getinfo()</p></li>
@@ -217,7 +276,7 @@
 <li><p><strong>size</strong> – Size of the data buffer</p></li>
 </ul>
 </dd>
-<dt class="field-even">Returns</dt>
+<dt class="field-even">Returns<span class="colon">:</span></dt>
 <dd class="field-even"><p>0 on success, -errno on failure. </p>
 </dd>
 </dl>
@@ -225,17 +284,17 @@
 
 <dl class="cpp function">
 <dt class="sig sig-object cpp" id="_CPPv421trfInsertAVSerialized11PTRFXFabricPcP9fi_addr_t">
-<span id="_CPPv321trfInsertAVSerialized11PTRFXFabricPcP9fi_addr_t"></span><span id="_CPPv221trfInsertAVSerialized11PTRFXFabricPcP9fi_addr_t"></span><span id="trfInsertAVSerialized__PTRFXFabric.cP.fi_addr_tP"></span><span class="target" id="trf_8h_1aae420e3ed81f36637b34e39881df221d"></span><span class="kt"><span class="pre">int</span></span><span class="w"> </span><span class="sig-name descname"><span class="n"><span class="pre">trfInsertAVSerialized</span></span></span><span class="sig-paren">(</span><span class="n"><span class="pre">PTRFXFabric</span></span><span class="w"> </span><span class="n sig-param"><span class="pre">ctx</span></span>, <span class="kt"><span class="pre">char</span></span><span class="w"> </span><span class="p"><span class="pre">*</span></span><span class="n sig-param"><span class="pre">addr</span></span>, <span class="n"><span class="pre">fi_addr_t</span></span><span class="w"> </span><span class="p"><span class="pre">*</span></span><span class="n sig-param"><span class="pre">out</span></span><span class="sig-paren">)</span><a class="headerlink" href="#_CPPv421trfInsertAVSerialized11PTRFXFabricPcP9fi_addr_t" title="Permalink to this definition"></a><br /></dt>
+<span id="_CPPv321trfInsertAVSerialized11PTRFXFabricPcP9fi_addr_t"></span><span id="_CPPv221trfInsertAVSerialized11PTRFXFabricPcP9fi_addr_t"></span><span id="trfInsertAVSerialized__PTRFXFabric.cP.fi_addr_tP"></span><span class="target" id="trf_8h_1aae420e3ed81f36637b34e39881df221d"></span><span class="kt"><span class="pre">int</span></span><span class="w"> </span><span class="sig-name descname"><span class="n"><span class="pre">trfInsertAVSerialized</span></span></span><span class="sig-paren">(</span><span class="n"><span class="pre">PTRFXFabric</span></span><span class="w"> </span><span class="n sig-param"><span class="pre">ctx</span></span>, <span class="kt"><span class="pre">char</span></span><span class="w"> </span><span class="p"><span class="pre">*</span></span><span class="n sig-param"><span class="pre">addr</span></span>, <span class="n"><span class="pre">fi_addr_t</span></span><span class="w"> </span><span class="p"><span class="pre">*</span></span><span class="n sig-param"><span class="pre">out</span></span><span class="sig-paren">)</span><a class="headerlink" href="#_CPPv421trfInsertAVSerialized11PTRFXFabricPcP9fi_addr_t" title="Link to this definition"></a><br /></dt>
 <dd><p>Insert a serialized address in FI_ADDR_STR or TRF format into the context’s address vector. </p>
 <dl class="field-list simple">
-<dt class="field-odd">Parameters</dt>
+<dt class="field-odd">Parameters<span class="colon">:</span></dt>
 <dd class="field-odd"><ul class="simple">
 <li><p><strong>ctx</strong> – Context in which to store the address.</p></li>
 <li><p><strong>addr</strong> – Serialized address to insert.</p></li>
 <li><p><strong>out</strong> – If the address is successfully inserted, this parameter will be set to an address identifier.</p></li>
 </ul>
 </dd>
-<dt class="field-even">Returns</dt>
+<dt class="field-even">Returns<span class="colon">:</span></dt>
 <dd class="field-even"><p>0 on success, negative error code on failure. </p>
 </dd>
 </dl>
@@ -243,16 +302,16 @@
 
 <dl class="cpp function">
 <dt class="sig sig-object cpp" id="_CPPv423trfDeserializeWireProtoPKcP8uint32_t">
-<span id="_CPPv323trfDeserializeWireProtoPKcP8uint32_t"></span><span id="_CPPv223trfDeserializeWireProtoPKcP8uint32_t"></span><span id="trfDeserializeWireProto__cCP.uint32_tP"></span><span class="target" id="trf_8h_1a689bd804702369b6cafca7f1682fc4a9"></span><span class="kt"><span class="pre">int</span></span><span class="w"> </span><span class="sig-name descname"><span class="n"><span class="pre">trfDeserializeWireProto</span></span></span><span class="sig-paren">(</span><span class="k"><span class="pre">const</span></span><span class="w"> </span><span class="kt"><span class="pre">char</span></span><span class="w"> </span><span class="p"><span class="pre">*</span></span><span class="n sig-param"><span class="pre">proto</span></span>, <span class="n"><span class="pre">uint32_t</span></span><span class="w"> </span><span class="p"><span class="pre">*</span></span><span class="n sig-param"><span class="pre">out</span></span><span class="sig-paren">)</span><a class="headerlink" href="#_CPPv423trfDeserializeWireProtoPKcP8uint32_t" title="Permalink to this definition"></a><br /></dt>
+<span id="_CPPv323trfDeserializeWireProtoPKcP8uint32_t"></span><span id="_CPPv223trfDeserializeWireProtoPKcP8uint32_t"></span><span id="trfDeserializeWireProto__cCP.uint32_tP"></span><span class="target" id="trf_8h_1a689bd804702369b6cafca7f1682fc4a9"></span><span class="kt"><span class="pre">int</span></span><span class="w"> </span><span class="sig-name descname"><span class="n"><span class="pre">trfDeserializeWireProto</span></span></span><span class="sig-paren">(</span><span class="k"><span class="pre">const</span></span><span class="w"> </span><span class="kt"><span class="pre">char</span></span><span class="w"> </span><span class="p"><span class="pre">*</span></span><span class="n sig-param"><span class="pre">proto</span></span>, <span class="n"><span class="pre">uint32_t</span></span><span class="w"> </span><span class="p"><span class="pre">*</span></span><span class="n sig-param"><span class="pre">out</span></span><span class="sig-paren">)</span><a class="headerlink" href="#_CPPv423trfDeserializeWireProtoPKcP8uint32_t" title="Link to this definition"></a><br /></dt>
 <dd><p>Deserialize a TRF wire protocol string into a format understood by the fabric transport. </p>
 <dl class="field-list simple">
-<dt class="field-odd">Parameters</dt>
+<dt class="field-odd">Parameters<span class="colon">:</span></dt>
 <dd class="field-odd"><ul class="simple">
 <li><p><strong>proto</strong> – Serialized protocol string</p></li>
 <li><p><strong>out</strong> – Output fabric protocol indentifier</p></li>
 </ul>
 </dd>
-<dt class="field-even">Returns</dt>
+<dt class="field-even">Returns<span class="colon">:</span></dt>
 <dd class="field-even"><p>0 on success, negative error code on failure. </p>
 </dd>
 </dl>
@@ -260,16 +319,16 @@
 
 <dl class="cpp function">
 <dt class="sig sig-object cpp" id="_CPPv421trfSerializeWireProto8uint32_tPPc">
-<span id="_CPPv321trfSerializeWireProto8uint32_tPPc"></span><span id="_CPPv221trfSerializeWireProto8uint32_tPPc"></span><span id="trfSerializeWireProto__uint32_t.cPP"></span><span class="target" id="trf_8h_1a421386389c1b5a89a1bfd30b5b2636f5"></span><span class="kt"><span class="pre">int</span></span><span class="w"> </span><span class="sig-name descname"><span class="n"><span class="pre">trfSerializeWireProto</span></span></span><span class="sig-paren">(</span><span class="n"><span class="pre">uint32_t</span></span><span class="w"> </span><span class="n sig-param"><span class="pre">proto</span></span>, <span class="kt"><span class="pre">char</span></span><span class="w"> </span><span class="p"><span class="pre">*</span></span><span class="p"><span class="pre">*</span></span><span class="n sig-param"><span class="pre">out</span></span><span class="sig-paren">)</span><a class="headerlink" href="#_CPPv421trfSerializeWireProto8uint32_tPPc" title="Permalink to this definition"></a><br /></dt>
+<span id="_CPPv321trfSerializeWireProto8uint32_tPPc"></span><span id="_CPPv221trfSerializeWireProto8uint32_tPPc"></span><span id="trfSerializeWireProto__uint32_t.cPP"></span><span class="target" id="trf_8h_1a421386389c1b5a89a1bfd30b5b2636f5"></span><span class="kt"><span class="pre">int</span></span><span class="w"> </span><span class="sig-name descname"><span class="n"><span class="pre">trfSerializeWireProto</span></span></span><span class="sig-paren">(</span><span class="n"><span class="pre">uint32_t</span></span><span class="w"> </span><span class="n sig-param"><span class="pre">proto</span></span>, <span class="kt"><span class="pre">char</span></span><span class="w"> </span><span class="p"><span class="pre">*</span></span><span class="p"><span class="pre">*</span></span><span class="n sig-param"><span class="pre">out</span></span><span class="sig-paren">)</span><a class="headerlink" href="#_CPPv421trfSerializeWireProto8uint32_tPPc" title="Link to this definition"></a><br /></dt>
 <dd><p>Serialize a fabric transport protocol name into a string for transmission over the network. </p>
 <dl class="field-list simple">
-<dt class="field-odd">Parameters</dt>
+<dt class="field-odd">Parameters<span class="colon">:</span></dt>
 <dd class="field-odd"><ul class="simple">
 <li><p><strong>proto</strong> – Protocol identifier.</p></li>
 <li><p><strong>out</strong> – Output string.</p></li>
 </ul>
 </dd>
-<dt class="field-even">Returns</dt>
+<dt class="field-even">Returns<span class="colon">:</span></dt>
 <dd class="field-even"><p>0 on success, negative error code on failure. </p>
 </dd>
 </dl>
@@ -277,11 +336,11 @@
 
 <dl class="cpp function">
 <dt class="sig sig-object cpp" id="_CPPv415trfAllocContextv">
-<span id="_CPPv315trfAllocContextv"></span><span id="_CPPv215trfAllocContextv"></span><span id="trfAllocContext"></span><span class="target" id="trf_8h_1af11acdebab1c5f2b86ad6fa3ddb76458"></span><span class="n"><span class="pre">PTRFContext</span></span><span class="w"> </span><span class="sig-name descname"><span class="n"><span class="pre">trfAllocContext</span></span></span><span class="sig-paren">(</span><span class="sig-paren">)</span><a class="headerlink" href="#_CPPv415trfAllocContextv" title="Permalink to this definition"></a><br /></dt>
+<span id="_CPPv315trfAllocContextv"></span><span id="_CPPv215trfAllocContextv"></span><span id="trfAllocContext"></span><span class="target" id="trf_8h_1af11acdebab1c5f2b86ad6fa3ddb76458"></span><span class="n"><span class="pre">PTRFContext</span></span><span class="w"> </span><span class="sig-name descname"><span class="n"><span class="pre">trfAllocContext</span></span></span><span class="sig-paren">(</span><span class="sig-paren">)</span><a class="headerlink" href="#_CPPv415trfAllocContextv" title="Link to this definition"></a><br /></dt>
 <dd><p>Allocate a <a class="reference internal" href="trf_def.html#struct_t_r_f_context"><span class="std std-ref">TRFContext</span></a>. </p>
 <p>This does not allocate any resources within the context; you must use other libtrf functions such as trfNCClientInit() to allocate resources.</p>
 <dl class="field-list simple">
-<dt class="field-odd">Returns</dt>
+<dt class="field-odd">Returns<span class="colon">:</span></dt>
 <dd class="field-odd"><p>PTRFContext </p>
 </dd>
 </dl>
@@ -289,7 +348,7 @@
 
 <dl class="cpp function">
 <dt class="sig sig-object cpp" id="_CPPv421trfGetFabricProvidersPKcPKc9TRFEPTypePP7fi_info">
-<span id="_CPPv321trfGetFabricProvidersPKcPKc9TRFEPTypePP7fi_info"></span><span id="_CPPv221trfGetFabricProvidersPKcPKc9TRFEPTypePP7fi_info"></span><span id="trfGetFabricProviders__cCP.cCP.TRFEPType.fi_infoPP"></span><span class="target" id="trf_8h_1a5dc9acea904862e5f8c995cf9d17d681"></span><span class="kt"><span class="pre">int</span></span><span class="w"> </span><span class="sig-name descname"><span class="n"><span class="pre">trfGetFabricProviders</span></span></span><span class="sig-paren">(</span><span class="k"><span class="pre">const</span></span><span class="w"> </span><span class="kt"><span class="pre">char</span></span><span class="w"> </span><span class="p"><span class="pre">*</span></span><span class="n sig-param"><span class="pre">host</span></span>, <span class="k"><span class="pre">const</span></span><span class="w"> </span><span class="kt"><span class="pre">char</span></span><span class="w"> </span><span class="p"><span class="pre">*</span></span><span class="n sig-param"><span class="pre">port</span></span>, <span class="k"><span class="pre">enum</span></span><span class="w"> </span><a class="reference internal" href="trf_def.html#_CPPv49TRFEPType" title="TRFEPType"><span class="n"><span class="pre">TRFEPType</span></span></a><span class="w"> </span><span class="n sig-param"><span class="pre">req_type</span></span>, <span class="k"><span class="pre">struct</span></span><span class="w"> </span><span class="n"><span class="pre">fi_info</span></span><span class="w"> </span><span class="p"><span class="pre">*</span></span><span class="p"><span class="pre">*</span></span><span class="n sig-param"><span class="pre">fi_out</span></span><span class="sig-paren">)</span><a class="headerlink" href="#_CPPv421trfGetFabricProvidersPKcPKc9TRFEPTypePP7fi_info" title="Permalink to this definition"></a><br /></dt>
+<span id="_CPPv321trfGetFabricProvidersPKcPKc9TRFEPTypePP7fi_info"></span><span id="_CPPv221trfGetFabricProvidersPKcPKc9TRFEPTypePP7fi_info"></span><span id="trfGetFabricProviders__cCP.cCP.TRFEPType.fi_infoPP"></span><span class="target" id="trf_8h_1a5dc9acea904862e5f8c995cf9d17d681"></span><span class="kt"><span class="pre">int</span></span><span class="w"> </span><span class="sig-name descname"><span class="n"><span class="pre">trfGetFabricProviders</span></span></span><span class="sig-paren">(</span><span class="k"><span class="pre">const</span></span><span class="w"> </span><span class="kt"><span class="pre">char</span></span><span class="w"> </span><span class="p"><span class="pre">*</span></span><span class="n sig-param"><span class="pre">host</span></span>, <span class="k"><span class="pre">const</span></span><span class="w"> </span><span class="kt"><span class="pre">char</span></span><span class="w"> </span><span class="p"><span class="pre">*</span></span><span class="n sig-param"><span class="pre">port</span></span>, <span class="k"><span class="pre">enum</span></span><span class="w"> </span><a class="reference internal" href="trf_def.html#_CPPv49TRFEPType" title="TRFEPType"><span class="n"><span class="pre">TRFEPType</span></span></a><span class="w"> </span><span class="n sig-param"><span class="pre">req_type</span></span>, <span class="k"><span class="pre">struct</span></span><span class="w"> </span><span class="n"><span class="pre">fi_info</span></span><span class="w"> </span><span class="p"><span class="pre">*</span></span><span class="p"><span class="pre">*</span></span><span class="n sig-param"><span class="pre">fi_out</span></span><span class="sig-paren">)</span><a class="headerlink" href="#_CPPv421trfGetFabricProvidersPKcPKc9TRFEPTypePP7fi_info" title="Link to this definition"></a><br /></dt>
 <dd><p>Get the list of available fabric providers which can reach the target. </p>
 <p><div class="admonition seealso">
 <p class="admonition-title">See also</p>
@@ -297,7 +356,7 @@
 </div>
 </p>
 <dl class="field-list simple">
-<dt class="field-odd">Parameters</dt>
+<dt class="field-odd">Parameters<span class="colon">:</span></dt>
 <dd class="field-odd"><ul class="simple">
 <li><p><strong>host</strong> – Hostname of the target</p></li>
 <li><p><strong>port</strong> – Port or service name of the target</p></li>
@@ -305,7 +364,7 @@
 <li><p><strong>fi_out</strong> – Output list of available fabric providers</p></li>
 </ul>
 </dd>
-<dt class="field-even">Returns</dt>
+<dt class="field-even">Returns<span class="colon">:</span></dt>
 <dd class="field-even"><p>0 on success, negative error code on failure. </p>
 </dd>
 </dl>
@@ -313,11 +372,11 @@
 
 <dl class="cpp function">
 <dt class="sig sig-object cpp" id="_CPPv420trfFreeInterfaceList13PTRFInterface">
-<span id="_CPPv320trfFreeInterfaceList13PTRFInterface"></span><span id="_CPPv220trfFreeInterfaceList13PTRFInterface"></span><span id="trfFreeInterfaceList__PTRFInterface"></span><span class="target" id="trf_8h_1aba0d2dc92c90444a30071f38dc09d096"></span><span class="kt"><span class="pre">void</span></span><span class="w"> </span><span class="sig-name descname"><span class="n"><span class="pre">trfFreeInterfaceList</span></span></span><span class="sig-paren">(</span><span class="n"><span class="pre">PTRFInterface</span></span><span class="w"> </span><span class="n sig-param"><span class="pre">ifaces</span></span><span class="sig-paren">)</span><a class="headerlink" href="#_CPPv420trfFreeInterfaceList13PTRFInterface" title="Permalink to this definition"></a><br /></dt>
+<span id="_CPPv320trfFreeInterfaceList13PTRFInterface"></span><span id="_CPPv220trfFreeInterfaceList13PTRFInterface"></span><span id="trfFreeInterfaceList__PTRFInterface"></span><span class="target" id="trf_8h_1aba0d2dc92c90444a30071f38dc09d096"></span><span class="kt"><span class="pre">void</span></span><span class="w"> </span><span class="sig-name descname"><span class="n"><span class="pre">trfFreeInterfaceList</span></span></span><span class="sig-paren">(</span><span class="n"><span class="pre">PTRFInterface</span></span><span class="w"> </span><span class="n sig-param"><span class="pre">ifaces</span></span><span class="sig-paren">)</span><a class="headerlink" href="#_CPPv420trfFreeInterfaceList13PTRFInterface" title="Link to this definition"></a><br /></dt>
 <dd><p>Free an interface list. </p>
 <p>This call frees a linked list of struct <a class="reference internal" href="trf_def.html#struct_t_r_f_interface"><span class="std std-ref">TRFInterface</span></a>, typically allocated using the <a class="reference internal" href="trf_interface.html#trf__interface_8h_1a2d99afc873112937d8e7ff77075b2d91"><span class="std std-ref">trfGetInterfaceList()</span></a> call.</p>
 <dl class="field-list simple">
-<dt class="field-odd">Parameters</dt>
+<dt class="field-odd">Parameters<span class="colon">:</span></dt>
 <dd class="field-odd"><p><strong>ifaces</strong> – Interface list to free. </p>
 </dd>
 </dl>
@@ -325,7 +384,7 @@
 
 <dl class="cpp function">
 <dt class="sig sig-object cpp" id="_CPPv416trfCreateChannel11PTRFContextP7fi_infoPv6size_t">
-<span id="_CPPv316trfCreateChannel11PTRFContextP7fi_infoPv6size_t"></span><span id="_CPPv216trfCreateChannel11PTRFContextP7fi_infoPv6size_t"></span><span id="trfCreateChannel__PTRFContext.fi_infoP.voidP.s"></span><span class="target" id="trf_8h_1a4ee159efa44b4c2c90ad14df79d6d6e6"></span><span class="kt"><span class="pre">int</span></span><span class="w"> </span><span class="sig-name descname"><span class="n"><span class="pre">trfCreateChannel</span></span></span><span class="sig-paren">(</span><span class="n"><span class="pre">PTRFContext</span></span><span class="w"> </span><span class="n sig-param"><span class="pre">ctx</span></span>, <span class="k"><span class="pre">struct</span></span><span class="w"> </span><span class="n"><span class="pre">fi_info</span></span><span class="w"> </span><span class="p"><span class="pre">*</span></span><span class="n sig-param"><span class="pre">fi</span></span>, <span class="kt"><span class="pre">void</span></span><span class="w"> </span><span class="p"><span class="pre">*</span></span><span class="n sig-param"><span class="pre">data</span></span>, <span class="n"><span class="pre">size_t</span></span><span class="w"> </span><span class="n sig-param"><span class="pre">size</span></span><span class="sig-paren">)</span><a class="headerlink" href="#_CPPv416trfCreateChannel11PTRFContextP7fi_infoPv6size_t" title="Permalink to this definition"></a><br /></dt>
+<span id="_CPPv316trfCreateChannel11PTRFContextP7fi_infoPv6size_t"></span><span id="_CPPv216trfCreateChannel11PTRFContextP7fi_infoPv6size_t"></span><span id="trfCreateChannel__PTRFContext.fi_infoP.voidP.s"></span><span class="target" id="trf_8h_1a4ee159efa44b4c2c90ad14df79d6d6e6"></span><span class="kt"><span class="pre">int</span></span><span class="w"> </span><span class="sig-name descname"><span class="n"><span class="pre">trfCreateChannel</span></span></span><span class="sig-paren">(</span><span class="n"><span class="pre">PTRFContext</span></span><span class="w"> </span><span class="n sig-param"><span class="pre">ctx</span></span>, <span class="k"><span class="pre">struct</span></span><span class="w"> </span><span class="n"><span class="pre">fi_info</span></span><span class="w"> </span><span class="p"><span class="pre">*</span></span><span class="n sig-param"><span class="pre">fi</span></span>, <span class="kt"><span class="pre">void</span></span><span class="w"> </span><span class="p"><span class="pre">*</span></span><span class="n sig-param"><span class="pre">data</span></span>, <span class="n"><span class="pre">size_t</span></span><span class="w"> </span><span class="n sig-param"><span class="pre">size</span></span><span class="sig-paren">)</span><a class="headerlink" href="#_CPPv416trfCreateChannel11PTRFContextP7fi_infoPv6size_t" title="Link to this definition"></a><br /></dt>
 <dd><p>Allocate RD communication channel. </p>
 <p>This call creates one side of a FI_EP_RDM channel from Libfabric according to the supplied arguments.</p>
 <p><div class="admonition seealso">
@@ -334,7 +393,7 @@
 </div>
 </p>
 <dl class="field-list simple">
-<dt class="field-odd">Parameters</dt>
+<dt class="field-odd">Parameters<span class="colon">:</span></dt>
 <dd class="field-odd"><ul class="simple">
 <li><p><strong>ctx</strong> – Allocated context to store the channel. The context is stored within ctx-&gt;xfer.fabric. </p></li>
 <li><p><strong>fi</strong> – Fabric provider to use, returned from a fi_getinfo() or <a class="reference internal" href="#trf_8h_1a5dc9acea904862e5f8c995cf9d17d681"><span class="std std-ref">trfGetFabricProviders()</span></a> call.</p></li>
@@ -342,7 +401,7 @@
 <li><p><strong>size</strong> – Size of the data buffer.</p></li>
 </ul>
 </dd>
-<dt class="field-even">Returns</dt>
+<dt class="field-even">Returns<span class="colon">:</span></dt>
 <dd class="field-even"><p>0 on success, negative error code on failure. </p>
 </dd>
 </dl>
@@ -350,11 +409,11 @@
 
 <dl class="cpp function">
 <dt class="sig sig-object cpp" id="_CPPv411trfGetRoutePKcPKcPKcPP7fi_info">
-<span id="_CPPv311trfGetRoutePKcPKcPKcPP7fi_info"></span><span id="_CPPv211trfGetRoutePKcPKcPKcPP7fi_info"></span><span id="trfGetRoute__cCP.cCP.cCP.fi_infoPP"></span><span class="target" id="trf_8h_1a6801d2a16ef9e345ff4a4b0b19c532ba"></span><span class="kt"><span class="pre">int</span></span><span class="w"> </span><span class="sig-name descname"><span class="n"><span class="pre">trfGetRoute</span></span></span><span class="sig-paren">(</span><span class="k"><span class="pre">const</span></span><span class="w"> </span><span class="kt"><span class="pre">char</span></span><span class="w"> </span><span class="p"><span class="pre">*</span></span><span class="n sig-param"><span class="pre">dst</span></span>, <span class="k"><span class="pre">const</span></span><span class="w"> </span><span class="kt"><span class="pre">char</span></span><span class="w"> </span><span class="p"><span class="pre">*</span></span><span class="n sig-param"><span class="pre">prov</span></span>, <span class="k"><span class="pre">const</span></span><span class="w"> </span><span class="kt"><span class="pre">char</span></span><span class="w"> </span><span class="p"><span class="pre">*</span></span><span class="n sig-param"><span class="pre">proto</span></span>, <span class="k"><span class="pre">struct</span></span><span class="w"> </span><span class="n"><span class="pre">fi_info</span></span><span class="w"> </span><span class="p"><span class="pre">*</span></span><span class="p"><span class="pre">*</span></span><span class="n sig-param"><span class="pre">fi</span></span><span class="sig-paren">)</span><a class="headerlink" href="#_CPPv411trfGetRoutePKcPKcPKcPP7fi_info" title="Permalink to this definition"></a><br /></dt>
+<span id="_CPPv311trfGetRoutePKcPKcPKcPP7fi_info"></span><span id="_CPPv211trfGetRoutePKcPKcPKcPP7fi_info"></span><span id="trfGetRoute__cCP.cCP.cCP.fi_infoPP"></span><span class="target" id="trf_8h_1a6801d2a16ef9e345ff4a4b0b19c532ba"></span><span class="kt"><span class="pre">int</span></span><span class="w"> </span><span class="sig-name descname"><span class="n"><span class="pre">trfGetRoute</span></span></span><span class="sig-paren">(</span><span class="k"><span class="pre">const</span></span><span class="w"> </span><span class="kt"><span class="pre">char</span></span><span class="w"> </span><span class="p"><span class="pre">*</span></span><span class="n sig-param"><span class="pre">dst</span></span>, <span class="k"><span class="pre">const</span></span><span class="w"> </span><span class="kt"><span class="pre">char</span></span><span class="w"> </span><span class="p"><span class="pre">*</span></span><span class="n sig-param"><span class="pre">prov</span></span>, <span class="k"><span class="pre">const</span></span><span class="w"> </span><span class="kt"><span class="pre">char</span></span><span class="w"> </span><span class="p"><span class="pre">*</span></span><span class="n sig-param"><span class="pre">proto</span></span>, <span class="k"><span class="pre">struct</span></span><span class="w"> </span><span class="n"><span class="pre">fi_info</span></span><span class="w"> </span><span class="p"><span class="pre">*</span></span><span class="p"><span class="pre">*</span></span><span class="n sig-param"><span class="pre">fi</span></span><span class="sig-paren">)</span><a class="headerlink" href="#_CPPv411trfGetRoutePKcPKcPKcPP7fi_info" title="Link to this definition"></a><br /></dt>
 <dd><p>Determine fabrics which might reach the specified route. </p>
 <p>Note: This function is designed for dynamic port allocation, and as such does not assign a source address to the returned fi_info list.</p>
 <dl class="field-list simple">
-<dt class="field-odd">Parameters</dt>
+<dt class="field-odd">Parameters<span class="colon">:</span></dt>
 <dd class="field-odd"><ul class="simple">
 <li><p><strong>dst</strong> – Destination address to use, in TRF Serialized format.</p></li>
 <li><p><strong>prov</strong> – Provider name, e.g. “verbs;ofi_rxm”</p></li>
@@ -362,7 +421,7 @@
 <li><p><strong>fi</strong> – Output list of available fabrics.</p></li>
 </ul>
 </dd>
-<dt class="field-even">Returns</dt>
+<dt class="field-even">Returns<span class="colon">:</span></dt>
 <dd class="field-even"><p>0 on success, negative error code on failure. </p>
 </dd>
 </dl>
@@ -370,13 +429,13 @@
 
 <dl class="cpp function">
 <dt class="sig sig-object cpp" id="_CPPv418trfConvertFabricAF8uint32_t">
-<span id="_CPPv318trfConvertFabricAF8uint32_t"></span><span id="_CPPv218trfConvertFabricAF8uint32_t"></span><span id="trfConvertFabricAF__uint32_t"></span><span class="target" id="trf_8h_1a8a36569a0d3e88faf3f5d798487280a3"></span><span class="kt"><span class="pre">int</span></span><span class="w"> </span><span class="sig-name descname"><span class="n"><span class="pre">trfConvertFabricAF</span></span></span><span class="sig-paren">(</span><span class="n"><span class="pre">uint32_t</span></span><span class="w"> </span><span class="n sig-param"><span class="pre">fi_addr_format</span></span><span class="sig-paren">)</span><a class="headerlink" href="#_CPPv418trfConvertFabricAF8uint32_t" title="Permalink to this definition"></a><br /></dt>
+<span id="_CPPv318trfConvertFabricAF8uint32_t"></span><span id="_CPPv218trfConvertFabricAF8uint32_t"></span><span id="trfConvertFabricAF__uint32_t"></span><span class="target" id="trf_8h_1a8a36569a0d3e88faf3f5d798487280a3"></span><span class="kt"><span class="pre">int</span></span><span class="w"> </span><span class="sig-name descname"><span class="n"><span class="pre">trfConvertFabricAF</span></span></span><span class="sig-paren">(</span><span class="n"><span class="pre">uint32_t</span></span><span class="w"> </span><span class="n sig-param"><span class="pre">fi_addr_format</span></span><span class="sig-paren">)</span><a class="headerlink" href="#_CPPv418trfConvertFabricAF8uint32_t" title="Link to this definition"></a><br /></dt>
 <dd><p>Convert internal Libfabric address format identifier into a TRF format identifier to be sent over the network. </p>
 <dl class="field-list simple">
-<dt class="field-odd">Parameters</dt>
+<dt class="field-odd">Parameters<span class="colon">:</span></dt>
 <dd class="field-odd"><p><strong>fi_addr_format</strong> – Libfabric address format identifier e.g. FI_ADDR_STR</p>
 </dd>
-<dt class="field-even">Returns</dt>
+<dt class="field-even">Returns<span class="colon">:</span></dt>
 <dd class="field-even"><p>TRF address format identifier e.g. TRFX_SOCKADDR </p>
 </dd>
 </dl>
@@ -384,13 +443,13 @@
 
 <dl class="cpp function">
 <dt class="sig sig-object cpp" id="_CPPv420trfConvertInternalAF8uint32_t">
-<span id="_CPPv320trfConvertInternalAF8uint32_t"></span><span id="_CPPv220trfConvertInternalAF8uint32_t"></span><span id="trfConvertInternalAF__uint32_t"></span><span class="target" id="trf_8h_1aa644e212c4bd5d34e9a2bb51b489c20f"></span><span class="kt"><span class="pre">int</span></span><span class="w"> </span><span class="sig-name descname"><span class="n"><span class="pre">trfConvertInternalAF</span></span></span><span class="sig-paren">(</span><span class="n"><span class="pre">uint32_t</span></span><span class="w"> </span><span class="n sig-param"><span class="pre">trf_addr_format</span></span><span class="sig-paren">)</span><a class="headerlink" href="#_CPPv420trfConvertInternalAF8uint32_t" title="Permalink to this definition"></a><br /></dt>
+<span id="_CPPv320trfConvertInternalAF8uint32_t"></span><span id="_CPPv220trfConvertInternalAF8uint32_t"></span><span id="trfConvertInternalAF__uint32_t"></span><span class="target" id="trf_8h_1aa644e212c4bd5d34e9a2bb51b489c20f"></span><span class="kt"><span class="pre">int</span></span><span class="w"> </span><span class="sig-name descname"><span class="n"><span class="pre">trfConvertInternalAF</span></span></span><span class="sig-paren">(</span><span class="n"><span class="pre">uint32_t</span></span><span class="w"> </span><span class="n sig-param"><span class="pre">trf_addr_format</span></span><span class="sig-paren">)</span><a class="headerlink" href="#_CPPv420trfConvertInternalAF8uint32_t" title="Link to this definition"></a><br /></dt>
 <dd><p>Convert TRF address format identifier into Libfabric address format. </p>
 <dl class="field-list simple">
-<dt class="field-odd">Parameters</dt>
+<dt class="field-odd">Parameters<span class="colon">:</span></dt>
 <dd class="field-odd"><p><strong>trf_addr_format</strong> – TRF address format identifier e.g. TRFX_SOCKADDR</p>
 </dd>
-<dt class="field-even">Returns</dt>
+<dt class="field-even">Returns<span class="colon">:</span></dt>
 <dd class="field-even"><p>Libfabric address format identifier e.g. FI_ADDR_STR </p>
 </dd>
 </dl>
@@ -398,10 +457,10 @@
 
 <dl class="cpp function">
 <dt class="sig sig-object cpp" id="_CPPv419trfSerializeAddressPv8TRFXAddrPPc">
-<span id="_CPPv319trfSerializeAddressPv8TRFXAddrPPc"></span><span id="_CPPv219trfSerializeAddressPv8TRFXAddrPPc"></span><span id="trfSerializeAddress__voidP.TRFXAddr.cPP"></span><span class="target" id="trf_8h_1aaab15ce8c1f51818e61228925e23643a"></span><span class="kt"><span class="pre">int</span></span><span class="w"> </span><span class="sig-name descname"><span class="n"><span class="pre">trfSerializeAddress</span></span></span><span class="sig-paren">(</span><span class="kt"><span class="pre">void</span></span><span class="w"> </span><span class="p"><span class="pre">*</span></span><span class="n sig-param"><span class="pre">data</span></span>, <span class="k"><span class="pre">enum</span></span><span class="w"> </span><a class="reference internal" href="trf_def.html#_CPPv48TRFXAddr" title="TRFXAddr"><span class="n"><span class="pre">TRFXAddr</span></span></a><span class="w"> </span><span class="n sig-param"><span class="pre">format</span></span>, <span class="kt"><span class="pre">char</span></span><span class="w"> </span><span class="p"><span class="pre">*</span></span><span class="p"><span class="pre">*</span></span><span class="n sig-param"><span class="pre">out</span></span><span class="sig-paren">)</span><a class="headerlink" href="#_CPPv419trfSerializeAddressPv8TRFXAddrPPc" title="Permalink to this definition"></a><br /></dt>
+<span id="_CPPv319trfSerializeAddressPv8TRFXAddrPPc"></span><span id="_CPPv219trfSerializeAddressPv8TRFXAddrPPc"></span><span id="trfSerializeAddress__voidP.TRFXAddr.cPP"></span><span class="target" id="trf_8h_1aaab15ce8c1f51818e61228925e23643a"></span><span class="kt"><span class="pre">int</span></span><span class="w"> </span><span class="sig-name descname"><span class="n"><span class="pre">trfSerializeAddress</span></span></span><span class="sig-paren">(</span><span class="kt"><span class="pre">void</span></span><span class="w"> </span><span class="p"><span class="pre">*</span></span><span class="n sig-param"><span class="pre">data</span></span>, <span class="k"><span class="pre">enum</span></span><span class="w"> </span><a class="reference internal" href="trf_def.html#_CPPv48TRFXAddr" title="TRFXAddr"><span class="n"><span class="pre">TRFXAddr</span></span></a><span class="w"> </span><span class="n sig-param"><span class="pre">format</span></span>, <span class="kt"><span class="pre">char</span></span><span class="w"> </span><span class="p"><span class="pre">*</span></span><span class="p"><span class="pre">*</span></span><span class="n sig-param"><span class="pre">out</span></span><span class="sig-paren">)</span><a class="headerlink" href="#_CPPv419trfSerializeAddressPv8TRFXAddrPPc" title="Link to this definition"></a><br /></dt>
 <dd><p>Serialize an address from an internal format, such as struct sockaddr, into the TRF network transmission format. </p>
 <dl class="field-list simple">
-<dt class="field-odd">Parameters</dt>
+<dt class="field-odd">Parameters<span class="colon">:</span></dt>
 <dd class="field-odd"><ul class="simple">
 <li><p><strong>data</strong> – Address to serialize, in the raw format</p></li>
 <li><p><strong>format</strong> – The format of the data referenced by the data pointer</p></li>
@@ -413,10 +472,10 @@
 
 <dl class="cpp function">
 <dt class="sig sig-object cpp" id="_CPPv421trfDeserializeAddressPKciPPvPi">
-<span id="_CPPv321trfDeserializeAddressPKciPPvPi"></span><span id="_CPPv221trfDeserializeAddressPKciPPvPi"></span><span id="trfDeserializeAddress__cCP.i.voidPP.iP"></span><span class="target" id="trf_8h_1a3073fc93d9aa57badb8654a7423c5446"></span><span class="kt"><span class="pre">int</span></span><span class="w"> </span><span class="sig-name descname"><span class="n"><span class="pre">trfDeserializeAddress</span></span></span><span class="sig-paren">(</span><span class="k"><span class="pre">const</span></span><span class="w"> </span><span class="kt"><span class="pre">char</span></span><span class="w"> </span><span class="p"><span class="pre">*</span></span><span class="n sig-param"><span class="pre">ser_addr</span></span>, <span class="kt"><span class="pre">int</span></span><span class="w"> </span><span class="n sig-param"><span class="pre">data_len</span></span>, <span class="kt"><span class="pre">void</span></span><span class="w"> </span><span class="p"><span class="pre">*</span></span><span class="p"><span class="pre">*</span></span><span class="n sig-param"><span class="pre">data</span></span>, <span class="kt"><span class="pre">int</span></span><span class="w"> </span><span class="p"><span class="pre">*</span></span><span class="n sig-param"><span class="pre">format</span></span><span class="sig-paren">)</span><a class="headerlink" href="#_CPPv421trfDeserializeAddressPKciPPvPi" title="Permalink to this definition"></a><br /></dt>
+<span id="_CPPv321trfDeserializeAddressPKciPPvPi"></span><span id="_CPPv221trfDeserializeAddressPKciPPvPi"></span><span id="trfDeserializeAddress__cCP.i.voidPP.iP"></span><span class="target" id="trf_8h_1a3073fc93d9aa57badb8654a7423c5446"></span><span class="kt"><span class="pre">int</span></span><span class="w"> </span><span class="sig-name descname"><span class="n"><span class="pre">trfDeserializeAddress</span></span></span><span class="sig-paren">(</span><span class="k"><span class="pre">const</span></span><span class="w"> </span><span class="kt"><span class="pre">char</span></span><span class="w"> </span><span class="p"><span class="pre">*</span></span><span class="n sig-param"><span class="pre">ser_addr</span></span>, <span class="kt"><span class="pre">int</span></span><span class="w"> </span><span class="n sig-param"><span class="pre">data_len</span></span>, <span class="kt"><span class="pre">void</span></span><span class="w"> </span><span class="p"><span class="pre">*</span></span><span class="p"><span class="pre">*</span></span><span class="n sig-param"><span class="pre">data</span></span>, <span class="kt"><span class="pre">int</span></span><span class="w"> </span><span class="p"><span class="pre">*</span></span><span class="n sig-param"><span class="pre">format</span></span><span class="sig-paren">)</span><a class="headerlink" href="#_CPPv421trfDeserializeAddressPKciPPvPi" title="Link to this definition"></a><br /></dt>
 <dd><p>Deserialize a TRF address into an internal format, such as struct sockaddr. </p>
 <dl class="field-list simple">
-<dt class="field-odd">Parameters</dt>
+<dt class="field-odd">Parameters<span class="colon">:</span></dt>
 <dd class="field-odd"><ul class="simple">
 <li><p><strong>ser_addr</strong> – Serialized address </p></li>
 <li><p><strong>data_len</strong> – Length of the serialized address </p></li>
@@ -424,7 +483,7 @@
 <li><p><strong>format</strong> – Detected format of the output data </p></li>
 </ul>
 </dd>
-<dt class="field-even">Returns</dt>
+<dt class="field-even">Returns<span class="colon">:</span></dt>
 <dd class="field-even"><p>int </p>
 </dd>
 </dl>
@@ -432,10 +491,10 @@
 
 <dl class="cpp function">
 <dt class="sig sig-object cpp" id="_CPPv49trfRegBuf11PTRFXFabricPv6size_t8uint64_tPP6fid_mr">
-<span id="_CPPv39trfRegBuf11PTRFXFabricPv6size_t8uint64_tPP6fid_mr"></span><span id="_CPPv29trfRegBuf11PTRFXFabricPv6size_t8uint64_tPP6fid_mr"></span><span id="trfRegBuf__PTRFXFabric.voidP.s.uint64_t.fid_mrPP"></span><span class="target" id="trf_8h_1a0fc81bdd7f198156afe12df60e86508d"></span><span class="kt"><span class="pre">int</span></span><span class="w"> </span><span class="sig-name descname"><span class="n"><span class="pre">trfRegBuf</span></span></span><span class="sig-paren">(</span><span class="n"><span class="pre">PTRFXFabric</span></span><span class="w"> </span><span class="n sig-param"><span class="pre">ctx</span></span>, <span class="kt"><span class="pre">void</span></span><span class="w"> </span><span class="p"><span class="pre">*</span></span><span class="n sig-param"><span class="pre">addr</span></span>, <span class="n"><span class="pre">size_t</span></span><span class="w"> </span><span class="n sig-param"><span class="pre">len</span></span>, <span class="n"><span class="pre">uint64_t</span></span><span class="w"> </span><span class="n sig-param"><span class="pre">flags</span></span>, <span class="k"><span class="pre">struct</span></span><span class="w"> </span><span class="n"><span class="pre">fid_mr</span></span><span class="w"> </span><span class="p"><span class="pre">*</span></span><span class="p"><span class="pre">*</span></span><span class="n sig-param"><span class="pre">mr_out</span></span><span class="sig-paren">)</span><a class="headerlink" href="#_CPPv49trfRegBuf11PTRFXFabricPv6size_t8uint64_tPP6fid_mr" title="Permalink to this definition"></a><br /></dt>
+<span id="_CPPv39trfRegBuf11PTRFXFabricPv6size_t8uint64_tPP6fid_mr"></span><span id="_CPPv29trfRegBuf11PTRFXFabricPv6size_t8uint64_tPP6fid_mr"></span><span id="trfRegBuf__PTRFXFabric.voidP.s.uint64_t.fid_mrPP"></span><span class="target" id="trf_8h_1a0fc81bdd7f198156afe12df60e86508d"></span><span class="kt"><span class="pre">int</span></span><span class="w"> </span><span class="sig-name descname"><span class="n"><span class="pre">trfRegBuf</span></span></span><span class="sig-paren">(</span><span class="n"><span class="pre">PTRFXFabric</span></span><span class="w"> </span><span class="n sig-param"><span class="pre">ctx</span></span>, <span class="kt"><span class="pre">void</span></span><span class="w"> </span><span class="p"><span class="pre">*</span></span><span class="n sig-param"><span class="pre">addr</span></span>, <span class="n"><span class="pre">size_t</span></span><span class="w"> </span><span class="n sig-param"><span class="pre">len</span></span>, <span class="n"><span class="pre">uint64_t</span></span><span class="w"> </span><span class="n sig-param"><span class="pre">flags</span></span>, <span class="k"><span class="pre">struct</span></span><span class="w"> </span><span class="n"><span class="pre">fid_mr</span></span><span class="w"> </span><span class="p"><span class="pre">*</span></span><span class="p"><span class="pre">*</span></span><span class="n sig-param"><span class="pre">mr_out</span></span><span class="sig-paren">)</span><a class="headerlink" href="#_CPPv49trfRegBuf11PTRFXFabricPv6size_t8uint64_tPP6fid_mr" title="Link to this definition"></a><br /></dt>
 <dd><p>Register a memory buffer. </p>
 <dl class="field-list simple">
-<dt class="field-odd">Parameters</dt>
+<dt class="field-odd">Parameters<span class="colon">:</span></dt>
 <dd class="field-odd"><ul class="simple">
 <li><p><strong>ctx</strong> – Allocated context to store the memory region. The context must have been initialized, with a fabric and domain.</p></li>
 <li><p><strong>addr</strong> – Address of the memory buffer to register.</p></li>
@@ -444,7 +503,7 @@
 <li><p><strong>mr_out</strong> – Output pointer to the memory region.</p></li>
 </ul>
 </dd>
-<dt class="field-even">Returns</dt>
+<dt class="field-even">Returns<span class="colon">:</span></dt>
 <dd class="field-even"><p>0 on success, negative error code on failure. </p>
 </dd>
 </dl>
@@ -452,17 +511,17 @@
 
 <dl class="cpp function">
 <dt class="sig sig-object cpp" id="_CPPv420trfRegInternalMsgBuf11PTRFContextPv6size_t">
-<span id="_CPPv320trfRegInternalMsgBuf11PTRFContextPv6size_t"></span><span id="_CPPv220trfRegInternalMsgBuf11PTRFContextPv6size_t"></span><span id="trfRegInternalMsgBuf__PTRFContext.voidP.s"></span><span class="target" id="trf_8h_1a0bbff735bc13a3f7f95152c69e970782"></span><span class="kt"><span class="pre">int</span></span><span class="w"> </span><span class="sig-name descname"><span class="n"><span class="pre">trfRegInternalMsgBuf</span></span></span><span class="sig-paren">(</span><span class="n"><span class="pre">PTRFContext</span></span><span class="w"> </span><span class="n sig-param"><span class="pre">ctx</span></span>, <span class="kt"><span class="pre">void</span></span><span class="w"> </span><span class="p"><span class="pre">*</span></span><span class="n sig-param"><span class="pre">addr</span></span>, <span class="n"><span class="pre">size_t</span></span><span class="w"> </span><span class="n sig-param"><span class="pre">len</span></span><span class="sig-paren">)</span><a class="headerlink" href="#_CPPv420trfRegInternalMsgBuf11PTRFContextPv6size_t" title="Permalink to this definition"></a><br /></dt>
+<span id="_CPPv320trfRegInternalMsgBuf11PTRFContextPv6size_t"></span><span id="_CPPv220trfRegInternalMsgBuf11PTRFContextPv6size_t"></span><span id="trfRegInternalMsgBuf__PTRFContext.voidP.s"></span><span class="target" id="trf_8h_1a0bbff735bc13a3f7f95152c69e970782"></span><span class="kt"><span class="pre">int</span></span><span class="w"> </span><span class="sig-name descname"><span class="n"><span class="pre">trfRegInternalMsgBuf</span></span></span><span class="sig-paren">(</span><span class="n"><span class="pre">PTRFContext</span></span><span class="w"> </span><span class="n sig-param"><span class="pre">ctx</span></span>, <span class="kt"><span class="pre">void</span></span><span class="w"> </span><span class="p"><span class="pre">*</span></span><span class="n sig-param"><span class="pre">addr</span></span>, <span class="n"><span class="pre">size_t</span></span><span class="w"> </span><span class="n sig-param"><span class="pre">len</span></span><span class="sig-paren">)</span><a class="headerlink" href="#_CPPv420trfRegInternalMsgBuf11PTRFContextPv6size_t" title="Link to this definition"></a><br /></dt>
 <dd><p>Register a memory buffer for sending and receiving messages. </p>
 <dl class="field-list simple">
-<dt class="field-odd">Parameters</dt>
+<dt class="field-odd">Parameters<span class="colon">:</span></dt>
 <dd class="field-odd"><ul class="simple">
 <li><p><strong>ctx</strong> – Allocated context to store the memory region. The context must have been initialized, with a fabric and domain.</p></li>
 <li><p><strong>addr</strong> – Address of the memory buffer to register.</p></li>
 <li><p><strong>len</strong> – Length of the memory buffer.</p></li>
 </ul>
 </dd>
-<dt class="field-even">Returns</dt>
+<dt class="field-even">Returns<span class="colon">:</span></dt>
 <dd class="field-even"><p>0 on success, negative error code on failure. </p>
 </dd>
 </dl>
@@ -470,16 +529,16 @@
 
 <dl class="cpp function">
 <dt class="sig sig-object cpp" id="_CPPv418trfGetEndpointName11PTRFContextPPc">
-<span id="_CPPv318trfGetEndpointName11PTRFContextPPc"></span><span id="_CPPv218trfGetEndpointName11PTRFContextPPc"></span><span id="trfGetEndpointName__PTRFContext.cPP"></span><span class="target" id="trf_8h_1a0819fd034ca05580c5b568f9ae07753c"></span><span class="kt"><span class="pre">int</span></span><span class="w"> </span><span class="sig-name descname"><span class="n"><span class="pre">trfGetEndpointName</span></span></span><span class="sig-paren">(</span><span class="n"><span class="pre">PTRFContext</span></span><span class="w"> </span><span class="n sig-param"><span class="pre">ctx</span></span>, <span class="kt"><span class="pre">char</span></span><span class="w"> </span><span class="p"><span class="pre">*</span></span><span class="p"><span class="pre">*</span></span><span class="n sig-param"><span class="pre">sas_buf</span></span><span class="sig-paren">)</span><a class="headerlink" href="#_CPPv418trfGetEndpointName11PTRFContextPPc" title="Permalink to this definition"></a><br /></dt>
+<span id="_CPPv318trfGetEndpointName11PTRFContextPPc"></span><span id="_CPPv218trfGetEndpointName11PTRFContextPPc"></span><span id="trfGetEndpointName__PTRFContext.cPP"></span><span class="target" id="trf_8h_1a0819fd034ca05580c5b568f9ae07753c"></span><span class="kt"><span class="pre">int</span></span><span class="w"> </span><span class="sig-name descname"><span class="n"><span class="pre">trfGetEndpointName</span></span></span><span class="sig-paren">(</span><span class="n"><span class="pre">PTRFContext</span></span><span class="w"> </span><span class="n sig-param"><span class="pre">ctx</span></span>, <span class="kt"><span class="pre">char</span></span><span class="w"> </span><span class="p"><span class="pre">*</span></span><span class="p"><span class="pre">*</span></span><span class="n sig-param"><span class="pre">sas_buf</span></span><span class="sig-paren">)</span><a class="headerlink" href="#_CPPv418trfGetEndpointName11PTRFContextPPc" title="Link to this definition"></a><br /></dt>
 <dd><p>Get Libfabric endpoint name. </p>
 <dl class="field-list simple">
-<dt class="field-odd">Parameters</dt>
+<dt class="field-odd">Parameters<span class="colon">:</span></dt>
 <dd class="field-odd"><ul class="simple">
 <li><p><strong>ctx</strong> – Context containing initialized fabric context.</p></li>
 <li><p><strong>sas_buf</strong> – Pointer to a buffer to be allocated and set.</p></li>
 </ul>
 </dd>
-<dt class="field-even">Returns</dt>
+<dt class="field-even">Returns<span class="colon">:</span></dt>
 <dd class="field-even"><p>0 on success, negative error code on failure </p>
 </dd>
 </dl>
@@ -487,10 +546,10 @@
 
 <dl class="cpp function">
 <dt class="sig sig-object cpp" id="_CPPv423trfDestroyFabricContext11PTRFContext">
-<span id="_CPPv323trfDestroyFabricContext11PTRFContext"></span><span id="_CPPv223trfDestroyFabricContext11PTRFContext"></span><span id="trfDestroyFabricContext__PTRFContext"></span><span class="target" id="trf_8h_1a79948fc2e5fa9e25a15863f6a2d648fc"></span><span class="kt"><span class="pre">void</span></span><span class="w"> </span><span class="sig-name descname"><span class="n"><span class="pre">trfDestroyFabricContext</span></span></span><span class="sig-paren">(</span><span class="n"><span class="pre">PTRFContext</span></span><span class="w"> </span><span class="n sig-param"><span class="pre">ctx</span></span><span class="sig-paren">)</span><a class="headerlink" href="#_CPPv423trfDestroyFabricContext11PTRFContext" title="Permalink to this definition"></a><br /></dt>
+<span id="_CPPv323trfDestroyFabricContext11PTRFContext"></span><span id="_CPPv223trfDestroyFabricContext11PTRFContext"></span><span id="trfDestroyFabricContext__PTRFContext"></span><span class="target" id="trf_8h_1a79948fc2e5fa9e25a15863f6a2d648fc"></span><span class="kt"><span class="pre">void</span></span><span class="w"> </span><span class="sig-name descname"><span class="n"><span class="pre">trfDestroyFabricContext</span></span></span><span class="sig-paren">(</span><span class="n"><span class="pre">PTRFContext</span></span><span class="w"> </span><span class="n sig-param"><span class="pre">ctx</span></span><span class="sig-paren">)</span><a class="headerlink" href="#_CPPv423trfDestroyFabricContext11PTRFContext" title="Link to this definition"></a><br /></dt>
 <dd><p>Destroys and frees all fabric context items stored within a TRF context object. </p>
 <dl class="field-list simple">
-<dt class="field-odd">Parameters</dt>
+<dt class="field-odd">Parameters<span class="colon">:</span></dt>
 <dd class="field-odd"><p><strong>ctx</strong> – Context containing an initialized fabric context. </p>
 </dd>
 </dl>
@@ -498,16 +557,16 @@
 
 <dl class="cpp function">
 <dt class="sig sig-object cpp" id="_CPPv420trfSendDisconnectMsgi8uint64_t">
-<span id="_CPPv320trfSendDisconnectMsgi8uint64_t"></span><span id="_CPPv220trfSendDisconnectMsgi8uint64_t"></span><span id="trfSendDisconnectMsg__i.uint64_t"></span><span class="target" id="trf_8h_1a3bc688129cdb1774439ba4661306d4dd"></span><span class="kt"><span class="pre">void</span></span><span class="w"> </span><span class="sig-name descname"><span class="n"><span class="pre">trfSendDisconnectMsg</span></span></span><span class="sig-paren">(</span><span class="kt"><span class="pre">int</span></span><span class="w"> </span><span class="n sig-param"><span class="pre">fd</span></span>, <span class="n"><span class="pre">uint64_t</span></span><span class="w"> </span><span class="n sig-param"><span class="pre">session_id</span></span><span class="sig-paren">)</span><a class="headerlink" href="#_CPPv420trfSendDisconnectMsgi8uint64_t" title="Permalink to this definition"></a><br /></dt>
+<span id="_CPPv320trfSendDisconnectMsgi8uint64_t"></span><span id="_CPPv220trfSendDisconnectMsgi8uint64_t"></span><span id="trfSendDisconnectMsg__i.uint64_t"></span><span class="target" id="trf_8h_1a3bc688129cdb1774439ba4661306d4dd"></span><span class="kt"><span class="pre">void</span></span><span class="w"> </span><span class="sig-name descname"><span class="n"><span class="pre">trfSendDisconnectMsg</span></span></span><span class="sig-paren">(</span><span class="kt"><span class="pre">int</span></span><span class="w"> </span><span class="n sig-param"><span class="pre">fd</span></span>, <span class="n"><span class="pre">uint64_t</span></span><span class="w"> </span><span class="n sig-param"><span class="pre">session_id</span></span><span class="sig-paren">)</span><a class="headerlink" href="#_CPPv420trfSendDisconnectMsgi8uint64_t" title="Link to this definition"></a><br /></dt>
 <dd><p>Sends a disconnect Message. </p>
 <dl class="field-list simple">
-<dt class="field-odd">Parameters</dt>
+<dt class="field-odd">Parameters<span class="colon">:</span></dt>
 <dd class="field-odd"><ul class="simple">
 <li><p><strong>fd</strong> – File descriptor to send disconnect message on </p></li>
 <li><p><strong>session_id</strong> – Session_ID </p></li>
 </ul>
 </dd>
-<dt class="field-even">Returns</dt>
+<dt class="field-even">Returns<span class="colon">:</span></dt>
 <dd class="field-even"><p>nothing is returned </p>
 </dd>
 </dl>
@@ -515,13 +574,13 @@
 
 <dl class="cpp function">
 <dt class="sig sig-object cpp" id="_CPPv417trfDestroyContext11PTRFContext">
-<span id="_CPPv317trfDestroyContext11PTRFContext"></span><span id="_CPPv217trfDestroyContext11PTRFContext"></span><span id="trfDestroyContext__PTRFContext"></span><span class="target" id="trf_8h_1a48c24e23e0d01f1b956307689c10a190"></span><span class="kt"><span class="pre">void</span></span><span class="w"> </span><span class="sig-name descname"><span class="n"><span class="pre">trfDestroyContext</span></span></span><span class="sig-paren">(</span><span class="n"><span class="pre">PTRFContext</span></span><span class="w"> </span><span class="n sig-param"><span class="pre">ctx</span></span><span class="sig-paren">)</span><a class="headerlink" href="#_CPPv417trfDestroyContext11PTRFContext" title="Permalink to this definition"></a><br /></dt>
+<span id="_CPPv317trfDestroyContext11PTRFContext"></span><span id="_CPPv217trfDestroyContext11PTRFContext"></span><span id="trfDestroyContext__PTRFContext"></span><span class="target" id="trf_8h_1a48c24e23e0d01f1b956307689c10a190"></span><span class="kt"><span class="pre">void</span></span><span class="w"> </span><span class="sig-name descname"><span class="n"><span class="pre">trfDestroyContext</span></span></span><span class="sig-paren">(</span><span class="n"><span class="pre">PTRFContext</span></span><span class="w"> </span><span class="n sig-param"><span class="pre">ctx</span></span><span class="sig-paren">)</span><a class="headerlink" href="#_CPPv417trfDestroyContext11PTRFContext" title="Link to this definition"></a><br /></dt>
 <dd><p>Destroy PTRFContext and free memory. </p>
 <dl class="field-list simple">
-<dt class="field-odd">Parameters</dt>
+<dt class="field-odd">Parameters<span class="colon">:</span></dt>
 <dd class="field-odd"><p><strong>ctx</strong> – PTRFContext to destroy </p>
 </dd>
-<dt class="field-even">Returns</dt>
+<dt class="field-even">Returns<span class="colon">:</span></dt>
 <dd class="field-even"><p>nothing is retured </p>
 </dd>
 </dl>
@@ -529,16 +588,16 @@
 
 <dl class="cpp function">
 <dt class="sig sig-object cpp" id="_CPPv415trfAllocAligned6size_t6size_t">
-<span id="_CPPv315trfAllocAligned6size_t6size_t"></span><span id="_CPPv215trfAllocAligned6size_t6size_t"></span><span id="trfAllocAligned__s.s"></span><span class="target" id="trf_8h_1a47354f377fc860464fb4584118544cc2"></span><span class="kt"><span class="pre">void</span></span><span class="w"> </span><span class="p"><span class="pre">*</span></span><span class="sig-name descname"><span class="n"><span class="pre">trfAllocAligned</span></span></span><span class="sig-paren">(</span><span class="n"><span class="pre">size_t</span></span><span class="w"> </span><span class="n sig-param"><span class="pre">size</span></span>, <span class="n"><span class="pre">size_t</span></span><span class="w"> </span><span class="n sig-param"><span class="pre">alignment</span></span><span class="sig-paren">)</span><a class="headerlink" href="#_CPPv415trfAllocAligned6size_t6size_t" title="Permalink to this definition"></a><br /></dt>
+<span id="_CPPv315trfAllocAligned6size_t6size_t"></span><span id="_CPPv215trfAllocAligned6size_t6size_t"></span><span id="trfAllocAligned__s.s"></span><span class="target" id="trf_8h_1a47354f377fc860464fb4584118544cc2"></span><span class="kt"><span class="pre">void</span></span><span class="w"> </span><span class="p"><span class="pre">*</span></span><span class="sig-name descname"><span class="n"><span class="pre">trfAllocAligned</span></span></span><span class="sig-paren">(</span><span class="n"><span class="pre">size_t</span></span><span class="w"> </span><span class="n sig-param"><span class="pre">size</span></span>, <span class="n"><span class="pre">size_t</span></span><span class="w"> </span><span class="n sig-param"><span class="pre">alignment</span></span><span class="sig-paren">)</span><a class="headerlink" href="#_CPPv415trfAllocAligned6size_t6size_t" title="Link to this definition"></a><br /></dt>
 <dd><p>Allocate an aligned block of memory. </p>
 <dl class="field-list simple">
-<dt class="field-odd">Parameters</dt>
+<dt class="field-odd">Parameters<span class="colon">:</span></dt>
 <dd class="field-odd"><ul class="simple">
 <li><p><strong>size</strong> – Size of the memory block to allocate. </p></li>
 <li><p><strong>alignment</strong> – Alignment of the memory block. </p></li>
 </ul>
 </dd>
-<dt class="field-even">Returns</dt>
+<dt class="field-even">Returns<span class="colon">:</span></dt>
 <dd class="field-even"><p>Pointer to the allocated memory block, or NULL on failure. </p>
 </dd>
 </dl>
@@ -546,16 +605,16 @@
 
 <dl class="cpp function">
 <dt class="sig sig-object cpp" id="_CPPv418trfBindDisplayList11PTRFContext11PTRFDisplay">
-<span id="_CPPv318trfBindDisplayList11PTRFContext11PTRFDisplay"></span><span id="_CPPv218trfBindDisplayList11PTRFContext11PTRFDisplay"></span><span id="trfBindDisplayList__PTRFContext.PTRFDisplay"></span><span class="target" id="trf_8h_1ac9aeea683222994584a5d1eca7c6ba64"></span><span class="kt"><span class="pre">int</span></span><span class="w"> </span><span class="sig-name descname"><span class="n"><span class="pre">trfBindDisplayList</span></span></span><span class="sig-paren">(</span><span class="n"><span class="pre">PTRFContext</span></span><span class="w"> </span><span class="n sig-param"><span class="pre">ctx</span></span>, <span class="n"><span class="pre">PTRFDisplay</span></span><span class="w"> </span><span class="n sig-param"><span class="pre">list</span></span><span class="sig-paren">)</span><a class="headerlink" href="#_CPPv418trfBindDisplayList11PTRFContext11PTRFDisplay" title="Permalink to this definition"></a><br /></dt>
+<span id="_CPPv318trfBindDisplayList11PTRFContext11PTRFDisplay"></span><span id="_CPPv218trfBindDisplayList11PTRFContext11PTRFDisplay"></span><span id="trfBindDisplayList__PTRFContext.PTRFDisplay"></span><span class="target" id="trf_8h_1ac9aeea683222994584a5d1eca7c6ba64"></span><span class="kt"><span class="pre">int</span></span><span class="w"> </span><span class="sig-name descname"><span class="n"><span class="pre">trfBindDisplayList</span></span></span><span class="sig-paren">(</span><span class="n"><span class="pre">PTRFContext</span></span><span class="w"> </span><span class="n sig-param"><span class="pre">ctx</span></span>, <span class="n"><span class="pre">PTRFDisplay</span></span><span class="w"> </span><span class="n sig-param"><span class="pre">list</span></span><span class="sig-paren">)</span><a class="headerlink" href="#_CPPv418trfBindDisplayList11PTRFContext11PTRFDisplay" title="Link to this definition"></a><br /></dt>
 <dd><p>Bind list of displays to context. </p>
 <dl class="field-list simple">
-<dt class="field-odd">Parameters</dt>
+<dt class="field-odd">Parameters<span class="colon">:</span></dt>
 <dd class="field-odd"><ul class="simple">
 <li><p><strong>ctx</strong> – Context to bind displays to </p></li>
 <li><p><strong>list</strong> – List of displays to bind </p></li>
 </ul>
 </dd>
-<dt class="field-even">Returns</dt>
+<dt class="field-even">Returns<span class="colon">:</span></dt>
 <dd class="field-even"><p>return 0 if successful, negative error code on failure </p>
 </dd>
 </dl>
@@ -563,18 +622,18 @@
 
 <dl class="cpp function">
 <dt class="sig sig-object cpp" id="_CPPv420trfUpdateDisplayAddr11PTRFContext11PTRFDisplayPv">
-<span id="_CPPv320trfUpdateDisplayAddr11PTRFContext11PTRFDisplayPv"></span><span id="_CPPv220trfUpdateDisplayAddr11PTRFContext11PTRFDisplayPv"></span><span id="trfUpdateDisplayAddr__PTRFContext.PTRFDisplay.voidP"></span><span class="target" id="trf_8h_1aa85110ffaa3ef88b88aed162177df482"></span><span class="kt"><span class="pre">int</span></span><span class="w"> </span><span class="sig-name descname"><span class="n"><span class="pre">trfUpdateDisplayAddr</span></span></span><span class="sig-paren">(</span><span class="n"><span class="pre">PTRFContext</span></span><span class="w"> </span><span class="n sig-param"><span class="pre">ctx</span></span>, <span class="n"><span class="pre">PTRFDisplay</span></span><span class="w"> </span><span class="n sig-param"><span class="pre">disp</span></span>, <span class="kt"><span class="pre">void</span></span><span class="w"> </span><span class="p"><span class="pre">*</span></span><span class="n sig-param"><span class="pre">addr</span></span><span class="sig-paren">)</span><a class="headerlink" href="#_CPPv420trfUpdateDisplayAddr11PTRFContext11PTRFDisplayPv" title="Permalink to this definition"></a><br /></dt>
+<span id="_CPPv320trfUpdateDisplayAddr11PTRFContext11PTRFDisplayPv"></span><span id="_CPPv220trfUpdateDisplayAddr11PTRFContext11PTRFDisplayPv"></span><span id="trfUpdateDisplayAddr__PTRFContext.PTRFDisplay.voidP"></span><span class="target" id="trf_8h_1aa85110ffaa3ef88b88aed162177df482"></span><span class="kt"><span class="pre">int</span></span><span class="w"> </span><span class="sig-name descname"><span class="n"><span class="pre">trfUpdateDisplayAddr</span></span></span><span class="sig-paren">(</span><span class="n"><span class="pre">PTRFContext</span></span><span class="w"> </span><span class="n sig-param"><span class="pre">ctx</span></span>, <span class="n"><span class="pre">PTRFDisplay</span></span><span class="w"> </span><span class="n sig-param"><span class="pre">disp</span></span>, <span class="kt"><span class="pre">void</span></span><span class="w"> </span><span class="p"><span class="pre">*</span></span><span class="n sig-param"><span class="pre">addr</span></span><span class="sig-paren">)</span><a class="headerlink" href="#_CPPv420trfUpdateDisplayAddr11PTRFContext11PTRFDisplayPv" title="Link to this definition"></a><br /></dt>
 <dd><p>Update the memory address of the referenced display’s framebuffer, performing memory deregistration and re-registration. </p>
 <p>Note: This only disables RMA access to the old framebuffer, and does not free the old framebuffer’s memory. It is the responsibility of the caller to do so after calling this function.</p>
 <dl class="field-list simple">
-<dt class="field-odd">Parameters</dt>
+<dt class="field-odd">Parameters<span class="colon">:</span></dt>
 <dd class="field-odd"><ul class="simple">
 <li><p><strong>ctx</strong> – Context the display is bound to </p></li>
 <li><p><strong>disp</strong> – Display to update </p></li>
 <li><p><strong>addr</strong> – New address </p></li>
 </ul>
 </dd>
-<dt class="field-even">Returns</dt>
+<dt class="field-even">Returns<span class="colon">:</span></dt>
 <dd class="field-even"><p>0 on success, negative error code on failure </p>
 </dd>
 </dl>
@@ -582,17 +641,17 @@
 
 <dl class="cpp function">
 <dt class="sig sig-object cpp" id="_CPPv418trfGetTextureBytes6size_t6size_t12TRFTexFormat">
-<span id="_CPPv318trfGetTextureBytes6size_t6size_t12TRFTexFormat"></span><span id="_CPPv218trfGetTextureBytes6size_t6size_t12TRFTexFormat"></span><span id="trfGetTextureBytes__s.s.TRFTexFormat"></span><span class="target" id="trf_8h_1a691096e8780548e5a26a4b57aab1eee4"></span><span class="k"><span class="pre">static</span></span><span class="w"> </span><span class="k"><span class="pre">inline</span></span><span class="w"> </span><span class="n"><span class="pre">ssize_t</span></span><span class="w"> </span><span class="sig-name descname"><span class="n"><span class="pre">trfGetTextureBytes</span></span></span><span class="sig-paren">(</span><span class="n"><span class="pre">size_t</span></span><span class="w"> </span><span class="n sig-param"><span class="pre">width</span></span>, <span class="n"><span class="pre">size_t</span></span><span class="w"> </span><span class="n sig-param"><span class="pre">height</span></span>, <span class="k"><span class="pre">enum</span></span><span class="w"> </span><a class="reference internal" href="trf_def.html#_CPPv412TRFTexFormat" title="TRFTexFormat"><span class="n"><span class="pre">TRFTexFormat</span></span></a><span class="w"> </span><span class="n sig-param"><span class="pre">fmt</span></span><span class="sig-paren">)</span><a class="headerlink" href="#_CPPv418trfGetTextureBytes6size_t6size_t12TRFTexFormat" title="Permalink to this definition"></a><br /></dt>
+<span id="_CPPv318trfGetTextureBytes6size_t6size_t12TRFTexFormat"></span><span id="_CPPv218trfGetTextureBytes6size_t6size_t12TRFTexFormat"></span><span id="trfGetTextureBytes__s.s.TRFTexFormat"></span><span class="target" id="trf_8h_1a691096e8780548e5a26a4b57aab1eee4"></span><span class="k"><span class="pre">static</span></span><span class="w"> </span><span class="k"><span class="pre">inline</span></span><span class="w"> </span><span class="n"><span class="pre">ssize_t</span></span><span class="w"> </span><span class="sig-name descname"><span class="n"><span class="pre">trfGetTextureBytes</span></span></span><span class="sig-paren">(</span><span class="n"><span class="pre">size_t</span></span><span class="w"> </span><span class="n sig-param"><span class="pre">width</span></span>, <span class="n"><span class="pre">size_t</span></span><span class="w"> </span><span class="n sig-param"><span class="pre">height</span></span>, <span class="k"><span class="pre">enum</span></span><span class="w"> </span><a class="reference internal" href="trf_def.html#_CPPv412TRFTexFormat" title="TRFTexFormat"><span class="n"><span class="pre">TRFTexFormat</span></span></a><span class="w"> </span><span class="n sig-param"><span class="pre">fmt</span></span><span class="sig-paren">)</span><a class="headerlink" href="#_CPPv418trfGetTextureBytes6size_t6size_t12TRFTexFormat" title="Link to this definition"></a><br /></dt>
 <dd><p>Determine the number of bytes required to store a given texture. </p>
 <dl class="field-list simple">
-<dt class="field-odd">Parameters</dt>
+<dt class="field-odd">Parameters<span class="colon">:</span></dt>
 <dd class="field-odd"><ul class="simple">
 <li><p><strong>width</strong> – Width </p></li>
 <li><p><strong>height</strong> – Height </p></li>
 <li><p><strong>fmt</strong> – Texture format. </p></li>
 </ul>
 </dd>
-<dt class="field-even">Returns</dt>
+<dt class="field-even">Returns<span class="colon">:</span></dt>
 <dd class="field-even"><p>Number of bytes required to store the texture. Negative error code on failure. </p>
 </dd>
 </dl>
@@ -600,13 +659,13 @@
 
 <dl class="cpp function">
 <dt class="sig sig-object cpp" id="_CPPv418trfGetDisplayBytes11PTRFDisplay">
-<span id="_CPPv318trfGetDisplayBytes11PTRFDisplay"></span><span id="_CPPv218trfGetDisplayBytes11PTRFDisplay"></span><span id="trfGetDisplayBytes__PTRFDisplay"></span><span class="target" id="trf_8h_1ac3875ba762e9848c25d33bec041c4992"></span><span class="k"><span class="pre">static</span></span><span class="w"> </span><span class="k"><span class="pre">inline</span></span><span class="w"> </span><span class="n"><span class="pre">ssize_t</span></span><span class="w"> </span><span class="sig-name descname"><span class="n"><span class="pre">trfGetDisplayBytes</span></span></span><span class="sig-paren">(</span><span class="n"><span class="pre">PTRFDisplay</span></span><span class="w"> </span><span class="n sig-param"><span class="pre">disp</span></span><span class="sig-paren">)</span><a class="headerlink" href="#_CPPv418trfGetDisplayBytes11PTRFDisplay" title="Permalink to this definition"></a><br /></dt>
+<span id="_CPPv318trfGetDisplayBytes11PTRFDisplay"></span><span id="_CPPv218trfGetDisplayBytes11PTRFDisplay"></span><span id="trfGetDisplayBytes__PTRFDisplay"></span><span class="target" id="trf_8h_1ac3875ba762e9848c25d33bec041c4992"></span><span class="k"><span class="pre">static</span></span><span class="w"> </span><span class="k"><span class="pre">inline</span></span><span class="w"> </span><span class="n"><span class="pre">ssize_t</span></span><span class="w"> </span><span class="sig-name descname"><span class="n"><span class="pre">trfGetDisplayBytes</span></span></span><span class="sig-paren">(</span><span class="n"><span class="pre">PTRFDisplay</span></span><span class="w"> </span><span class="n sig-param"><span class="pre">disp</span></span><span class="sig-paren">)</span><a class="headerlink" href="#_CPPv418trfGetDisplayBytes11PTRFDisplay" title="Link to this definition"></a><br /></dt>
 <dd><p>Get number of bytes needed to store the contents of the display. </p>
 <dl class="field-list simple">
-<dt class="field-odd">Parameters</dt>
+<dt class="field-odd">Parameters<span class="colon">:</span></dt>
 <dd class="field-odd"><p><strong>disp</strong> – Display </p>
 </dd>
-<dt class="field-even">Returns</dt>
+<dt class="field-even">Returns<span class="colon">:</span></dt>
 <dd class="field-even"><p>ssize_t </p>
 </dd>
 </dl>
@@ -614,20 +673,20 @@
 
 <dl class="cpp function">
 <dt class="sig sig-object cpp" id="_CPPv417trfGetCursorBytes10PTRFCursor">
-<span id="_CPPv317trfGetCursorBytes10PTRFCursor"></span><span id="_CPPv217trfGetCursorBytes10PTRFCursor"></span><span id="trfGetCursorBytes__PTRFCursor"></span><span class="target" id="trf_8h_1a4a966d25da5b8b65ebbc9b4bf8aaa04f"></span><span class="k"><span class="pre">static</span></span><span class="w"> </span><span class="k"><span class="pre">inline</span></span><span class="w"> </span><span class="n"><span class="pre">size_t</span></span><span class="w"> </span><span class="sig-name descname"><span class="n"><span class="pre">trfGetCursorBytes</span></span></span><span class="sig-paren">(</span><span class="n"><span class="pre">PTRFCursor</span></span><span class="w"> </span><span class="n sig-param"><span class="pre">cur</span></span><span class="sig-paren">)</span><a class="headerlink" href="#_CPPv417trfGetCursorBytes10PTRFCursor" title="Permalink to this definition"></a><br /></dt>
+<span id="_CPPv317trfGetCursorBytes10PTRFCursor"></span><span id="_CPPv217trfGetCursorBytes10PTRFCursor"></span><span id="trfGetCursorBytes__PTRFCursor"></span><span class="target" id="trf_8h_1a4a966d25da5b8b65ebbc9b4bf8aaa04f"></span><span class="k"><span class="pre">static</span></span><span class="w"> </span><span class="k"><span class="pre">inline</span></span><span class="w"> </span><span class="n"><span class="pre">size_t</span></span><span class="w"> </span><span class="sig-name descname"><span class="n"><span class="pre">trfGetCursorBytes</span></span></span><span class="sig-paren">(</span><span class="n"><span class="pre">PTRFCursor</span></span><span class="w"> </span><span class="n sig-param"><span class="pre">cur</span></span><span class="sig-paren">)</span><a class="headerlink" href="#_CPPv417trfGetCursorBytes10PTRFCursor" title="Link to this definition"></a><br /></dt>
 <dd></dd></dl>
 
 <dl class="cpp function">
 <dt class="sig sig-object cpp" id="_CPPv422trfTextureIsCompressed12TRFTexFormat">
-<span id="_CPPv322trfTextureIsCompressed12TRFTexFormat"></span><span id="_CPPv222trfTextureIsCompressed12TRFTexFormat"></span><span id="trfTextureIsCompressed__TRFTexFormat"></span><span class="target" id="trf_8h_1a76eb6b804c96a418aa117c3c3b183768"></span><span class="k"><span class="pre">static</span></span><span class="w"> </span><span class="k"><span class="pre">inline</span></span><span class="w"> </span><span class="n"><span class="pre">uint8_t</span></span><span class="w"> </span><span class="sig-name descname"><span class="n"><span class="pre">trfTextureIsCompressed</span></span></span><span class="sig-paren">(</span><span class="k"><span class="pre">enum</span></span><span class="w"> </span><a class="reference internal" href="trf_def.html#_CPPv412TRFTexFormat" title="TRFTexFormat"><span class="n"><span class="pre">TRFTexFormat</span></span></a><span class="w"> </span><span class="n sig-param"><span class="pre">fmt</span></span><span class="sig-paren">)</span><a class="headerlink" href="#_CPPv422trfTextureIsCompressed12TRFTexFormat" title="Permalink to this definition"></a><br /></dt>
+<span id="_CPPv322trfTextureIsCompressed12TRFTexFormat"></span><span id="_CPPv222trfTextureIsCompressed12TRFTexFormat"></span><span id="trfTextureIsCompressed__TRFTexFormat"></span><span class="target" id="trf_8h_1a76eb6b804c96a418aa117c3c3b183768"></span><span class="k"><span class="pre">static</span></span><span class="w"> </span><span class="k"><span class="pre">inline</span></span><span class="w"> </span><span class="n"><span class="pre">uint8_t</span></span><span class="w"> </span><span class="sig-name descname"><span class="n"><span class="pre">trfTextureIsCompressed</span></span></span><span class="sig-paren">(</span><span class="k"><span class="pre">enum</span></span><span class="w"> </span><a class="reference internal" href="trf_def.html#_CPPv412TRFTexFormat" title="TRFTexFormat"><span class="n"><span class="pre">TRFTexFormat</span></span></a><span class="w"> </span><span class="n sig-param"><span class="pre">fmt</span></span><span class="sig-paren">)</span><a class="headerlink" href="#_CPPv422trfTextureIsCompressed12TRFTexFormat" title="Link to this definition"></a><br /></dt>
 <dd></dd></dl>
 
 <dl class="cpp function">
 <dt class="sig sig-object cpp" id="_CPPv418trfFreeDisplayList11PTRFDisplayi">
-<span id="_CPPv318trfFreeDisplayList11PTRFDisplayi"></span><span id="_CPPv218trfFreeDisplayList11PTRFDisplayi"></span><span id="trfFreeDisplayList__PTRFDisplay.i"></span><span class="target" id="trf_8h_1ae64188ab5c6fdf6921446a2e4ef37009"></span><span class="kt"><span class="pre">void</span></span><span class="w"> </span><span class="sig-name descname"><span class="n"><span class="pre">trfFreeDisplayList</span></span></span><span class="sig-paren">(</span><span class="n"><span class="pre">PTRFDisplay</span></span><span class="w"> </span><span class="n sig-param"><span class="pre">disp</span></span>, <span class="kt"><span class="pre">int</span></span><span class="w"> </span><span class="n sig-param"><span class="pre">dealloc</span></span><span class="sig-paren">)</span><a class="headerlink" href="#_CPPv418trfFreeDisplayList11PTRFDisplayi" title="Permalink to this definition"></a><br /></dt>
+<span id="_CPPv318trfFreeDisplayList11PTRFDisplayi"></span><span id="_CPPv218trfFreeDisplayList11PTRFDisplayi"></span><span id="trfFreeDisplayList__PTRFDisplay.i"></span><span class="target" id="trf_8h_1ae64188ab5c6fdf6921446a2e4ef37009"></span><span class="kt"><span class="pre">void</span></span><span class="w"> </span><span class="sig-name descname"><span class="n"><span class="pre">trfFreeDisplayList</span></span></span><span class="sig-paren">(</span><span class="n"><span class="pre">PTRFDisplay</span></span><span class="w"> </span><span class="n sig-param"><span class="pre">disp</span></span>, <span class="kt"><span class="pre">int</span></span><span class="w"> </span><span class="n sig-param"><span class="pre">dealloc</span></span><span class="sig-paren">)</span><a class="headerlink" href="#_CPPv418trfFreeDisplayList11PTRFDisplayi" title="Link to this definition"></a><br /></dt>
 <dd><p>Free a display list. </p>
 <dl class="field-list simple">
-<dt class="field-odd">Parameters</dt>
+<dt class="field-odd">Parameters<span class="colon">:</span></dt>
 <dd class="field-odd"><ul class="simple">
 <li><p><strong>disp</strong> – Display list to free</p></li>
 <li><p><strong>dealloc</strong> – Whether to deallocate and deregister memory occupied by framebuffer data. If this display list contains shared buffer resources, it is advised to set this to 0. </p></li>
@@ -638,10 +697,10 @@
 
 <dl class="cpp function">
 <dt class="sig sig-object cpp" id="_CPPv417trfGetMessageAuto11PTRFContext8uint64_tP8uint64_tPPvPi">
-<span id="_CPPv317trfGetMessageAuto11PTRFContext8uint64_tP8uint64_tPPvPi"></span><span id="_CPPv217trfGetMessageAuto11PTRFContext8uint64_tP8uint64_tPPvPi"></span><span id="trfGetMessageAuto__PTRFContext.uint64_t.uint64_tP.voidPP.iP"></span><span class="target" id="trf_8h_1aea788a26046a58d6c05c410b69ddb839"></span><span class="kt"><span class="pre">int</span></span><span class="w"> </span><span class="sig-name descname"><span class="n"><span class="pre">trfGetMessageAuto</span></span></span><span class="sig-paren">(</span><span class="n"><span class="pre">PTRFContext</span></span><span class="w"> </span><span class="n sig-param"><span class="pre">ctx</span></span>, <span class="n"><span class="pre">uint64_t</span></span><span class="w"> </span><span class="n sig-param"><span class="pre">flags</span></span>, <span class="n"><span class="pre">uint64_t</span></span><span class="w"> </span><span class="p"><span class="pre">*</span></span><span class="n sig-param"><span class="pre">processed</span></span>, <span class="kt"><span class="pre">void</span></span><span class="w"> </span><span class="p"><span class="pre">*</span></span><span class="p"><span class="pre">*</span></span><span class="n sig-param"><span class="pre">data_out</span></span>, <span class="kt"><span class="pre">int</span></span><span class="w"> </span><span class="p"><span class="pre">*</span></span><span class="n sig-param"><span class="pre">opaque</span></span><span class="sig-paren">)</span><a class="headerlink" href="#_CPPv417trfGetMessageAuto11PTRFContext8uint64_tP8uint64_tPPvPi" title="Permalink to this definition"></a><br /></dt>
+<span id="_CPPv317trfGetMessageAuto11PTRFContext8uint64_tP8uint64_tPPvPi"></span><span id="_CPPv217trfGetMessageAuto11PTRFContext8uint64_tP8uint64_tPPvPi"></span><span id="trfGetMessageAuto__PTRFContext.uint64_t.uint64_tP.voidPP.iP"></span><span class="target" id="trf_8h_1aea788a26046a58d6c05c410b69ddb839"></span><span class="kt"><span class="pre">int</span></span><span class="w"> </span><span class="sig-name descname"><span class="n"><span class="pre">trfGetMessageAuto</span></span></span><span class="sig-paren">(</span><span class="n"><span class="pre">PTRFContext</span></span><span class="w"> </span><span class="n sig-param"><span class="pre">ctx</span></span>, <span class="n"><span class="pre">uint64_t</span></span><span class="w"> </span><span class="n sig-param"><span class="pre">flags</span></span>, <span class="n"><span class="pre">uint64_t</span></span><span class="w"> </span><span class="p"><span class="pre">*</span></span><span class="n sig-param"><span class="pre">processed</span></span>, <span class="kt"><span class="pre">void</span></span><span class="w"> </span><span class="p"><span class="pre">*</span></span><span class="p"><span class="pre">*</span></span><span class="n sig-param"><span class="pre">data_out</span></span>, <span class="kt"><span class="pre">int</span></span><span class="w"> </span><span class="p"><span class="pre">*</span></span><span class="n sig-param"><span class="pre">opaque</span></span><span class="sig-paren">)</span><a class="headerlink" href="#_CPPv417trfGetMessageAuto11PTRFContext8uint64_tP8uint64_tPPvPi" title="Link to this definition"></a><br /></dt>
 <dd><p>Automatically process messages internally based on the message type. </p>
 <dl class="field-list simple">
-<dt class="field-odd">Parameters</dt>
+<dt class="field-odd">Parameters<span class="colon">:</span></dt>
 <dd class="field-odd"><ul class="simple">
 <li><p><strong>ctx</strong> – Context to use</p></li>
 <li><p><strong>flags</strong> – Messages to process internally</p></li>
@@ -650,7 +709,7 @@
 <li><p><strong>opaque</strong> – Opaque pointer, used internally for state tracking. Do not modify. Before the first call, the initial value of this variable should be set to 0.</p></li>
 </ul>
 </dd>
-<dt class="field-even">Returns</dt>
+<dt class="field-even">Returns<span class="colon">:</span></dt>
 <dd class="field-even"><p>Number of messages processed internally, negative error code if an error occurred. </p>
 </dd>
 </dl>
@@ -658,16 +717,16 @@
 
 <dl class="cpp function">
 <dt class="sig sig-object cpp" id="_CPPv419trfRegDisplaySource11PTRFContext11PTRFDisplay">
-<span id="_CPPv319trfRegDisplaySource11PTRFContext11PTRFDisplay"></span><span id="_CPPv219trfRegDisplaySource11PTRFContext11PTRFDisplay"></span><span id="trfRegDisplaySource__PTRFContext.PTRFDisplay"></span><span class="target" id="trf_8h_1a95a573acc7c7b291c818879d8e4a1212"></span><span class="kt"><span class="pre">int</span></span><span class="w"> </span><span class="sig-name descname"><span class="n"><span class="pre">trfRegDisplaySource</span></span></span><span class="sig-paren">(</span><span class="n"><span class="pre">PTRFContext</span></span><span class="w"> </span><span class="n sig-param"><span class="pre">ctx</span></span>, <span class="n"><span class="pre">PTRFDisplay</span></span><span class="w"> </span><span class="n sig-param"><span class="pre">disp</span></span><span class="sig-paren">)</span><a class="headerlink" href="#_CPPv419trfRegDisplaySource11PTRFContext11PTRFDisplay" title="Permalink to this definition"></a><br /></dt>
+<span id="_CPPv319trfRegDisplaySource11PTRFContext11PTRFDisplay"></span><span id="_CPPv219trfRegDisplaySource11PTRFContext11PTRFDisplay"></span><span id="trfRegDisplaySource__PTRFContext.PTRFDisplay"></span><span class="target" id="trf_8h_1a95a573acc7c7b291c818879d8e4a1212"></span><span class="kt"><span class="pre">int</span></span><span class="w"> </span><span class="sig-name descname"><span class="n"><span class="pre">trfRegDisplaySource</span></span></span><span class="sig-paren">(</span><span class="n"><span class="pre">PTRFContext</span></span><span class="w"> </span><span class="n sig-param"><span class="pre">ctx</span></span>, <span class="n"><span class="pre">PTRFDisplay</span></span><span class="w"> </span><span class="n sig-param"><span class="pre">disp</span></span><span class="sig-paren">)</span><a class="headerlink" href="#_CPPv419trfRegDisplaySource11PTRFContext11PTRFDisplay" title="Link to this definition"></a><br /></dt>
 <dd><p>Make the referenced display buffer available for use, as the source (server) buffer. </p>
 <dl class="field-list simple">
-<dt class="field-odd">Parameters</dt>
+<dt class="field-odd">Parameters<span class="colon">:</span></dt>
 <dd class="field-odd"><ul class="simple">
 <li><p><strong>ctx</strong> – Initialized context to make the display buffer available to.</p></li>
 <li><p><strong>disp</strong> – Display to make available. Note: if this contains multiple displays, only the first display will be made available.</p></li>
 </ul>
 </dd>
-<dt class="field-even">Returns</dt>
+<dt class="field-even">Returns<span class="colon">:</span></dt>
 <dd class="field-even"><p>0 on success, negative error code on failure. </p>
 </dd>
 </dl>
@@ -675,16 +734,16 @@
 
 <dl class="cpp function">
 <dt class="sig sig-object cpp" id="_CPPv417trfRegDisplaySink11PTRFContext11PTRFDisplay">
-<span id="_CPPv317trfRegDisplaySink11PTRFContext11PTRFDisplay"></span><span id="_CPPv217trfRegDisplaySink11PTRFContext11PTRFDisplay"></span><span id="trfRegDisplaySink__PTRFContext.PTRFDisplay"></span><span class="target" id="trf_8h_1aa660657b547b66d9458ca6012ef7efbc"></span><span class="kt"><span class="pre">int</span></span><span class="w"> </span><span class="sig-name descname"><span class="n"><span class="pre">trfRegDisplaySink</span></span></span><span class="sig-paren">(</span><span class="n"><span class="pre">PTRFContext</span></span><span class="w"> </span><span class="n sig-param"><span class="pre">ctx</span></span>, <span class="n"><span class="pre">PTRFDisplay</span></span><span class="w"> </span><span class="n sig-param"><span class="pre">disp</span></span><span class="sig-paren">)</span><a class="headerlink" href="#_CPPv417trfRegDisplaySink11PTRFContext11PTRFDisplay" title="Permalink to this definition"></a><br /></dt>
+<span id="_CPPv317trfRegDisplaySink11PTRFContext11PTRFDisplay"></span><span id="_CPPv217trfRegDisplaySink11PTRFContext11PTRFDisplay"></span><span id="trfRegDisplaySink__PTRFContext.PTRFDisplay"></span><span class="target" id="trf_8h_1aa660657b547b66d9458ca6012ef7efbc"></span><span class="kt"><span class="pre">int</span></span><span class="w"> </span><span class="sig-name descname"><span class="n"><span class="pre">trfRegDisplaySink</span></span></span><span class="sig-paren">(</span><span class="n"><span class="pre">PTRFContext</span></span><span class="w"> </span><span class="n sig-param"><span class="pre">ctx</span></span>, <span class="n"><span class="pre">PTRFDisplay</span></span><span class="w"> </span><span class="n sig-param"><span class="pre">disp</span></span><span class="sig-paren">)</span><a class="headerlink" href="#_CPPv417trfRegDisplaySink11PTRFContext11PTRFDisplay" title="Link to this definition"></a><br /></dt>
 <dd><p>Make the referenced display buffer available for use, as the sink (client) buffer. </p>
 <dl class="field-list simple">
-<dt class="field-odd">Parameters</dt>
+<dt class="field-odd">Parameters<span class="colon">:</span></dt>
 <dd class="field-odd"><ul class="simple">
 <li><p><strong>ctx</strong> – Initialized context to make the display buffer available to.</p></li>
 <li><p><strong>disp</strong> – Display to make available. Note: if this contains multiple displays, only the first display will be made available.</p></li>
 </ul>
 </dd>
-<dt class="field-even">Returns</dt>
+<dt class="field-even">Returns<span class="colon">:</span></dt>
 <dd class="field-even"><p>0 on success, negative error code on failure. </p>
 </dd>
 </dl>
@@ -692,10 +751,10 @@
 
 <dl class="cpp function">
 <dt class="sig sig-object cpp" id="_CPPv419trfRegDisplayCustom11PTRFContext11PTRFDisplay6size_t6size_t8uint64_t">
-<span id="_CPPv319trfRegDisplayCustom11PTRFContext11PTRFDisplay6size_t6size_t8uint64_t"></span><span id="_CPPv219trfRegDisplayCustom11PTRFContext11PTRFDisplay6size_t6size_t8uint64_t"></span><span id="trfRegDisplayCustom__PTRFContext.PTRFDisplay.s.s.uint64_t"></span><span class="target" id="trf_8h_1a8b40a8044a6feb939e00f4825a84c58d"></span><span class="kt"><span class="pre">int</span></span><span class="w"> </span><span class="sig-name descname"><span class="n"><span class="pre">trfRegDisplayCustom</span></span></span><span class="sig-paren">(</span><span class="n"><span class="pre">PTRFContext</span></span><span class="w"> </span><span class="n sig-param"><span class="pre">ctx</span></span>, <span class="n"><span class="pre">PTRFDisplay</span></span><span class="w"> </span><span class="n sig-param"><span class="pre">disp</span></span>, <span class="n"><span class="pre">size_t</span></span><span class="w"> </span><span class="n sig-param"><span class="pre">size</span></span>, <span class="n"><span class="pre">size_t</span></span><span class="w"> </span><span class="n sig-param"><span class="pre">offset</span></span>, <span class="n"><span class="pre">uint64_t</span></span><span class="w"> </span><span class="n sig-param"><span class="pre">flags</span></span><span class="sig-paren">)</span><a class="headerlink" href="#_CPPv419trfRegDisplayCustom11PTRFContext11PTRFDisplay6size_t6size_t8uint64_t" title="Permalink to this definition"></a><br /></dt>
+<span id="_CPPv319trfRegDisplayCustom11PTRFContext11PTRFDisplay6size_t6size_t8uint64_t"></span><span id="_CPPv219trfRegDisplayCustom11PTRFContext11PTRFDisplay6size_t6size_t8uint64_t"></span><span id="trfRegDisplayCustom__PTRFContext.PTRFDisplay.s.s.uint64_t"></span><span class="target" id="trf_8h_1a8b40a8044a6feb939e00f4825a84c58d"></span><span class="kt"><span class="pre">int</span></span><span class="w"> </span><span class="sig-name descname"><span class="n"><span class="pre">trfRegDisplayCustom</span></span></span><span class="sig-paren">(</span><span class="n"><span class="pre">PTRFContext</span></span><span class="w"> </span><span class="n sig-param"><span class="pre">ctx</span></span>, <span class="n"><span class="pre">PTRFDisplay</span></span><span class="w"> </span><span class="n sig-param"><span class="pre">disp</span></span>, <span class="n"><span class="pre">size_t</span></span><span class="w"> </span><span class="n sig-param"><span class="pre">size</span></span>, <span class="n"><span class="pre">size_t</span></span><span class="w"> </span><span class="n sig-param"><span class="pre">offset</span></span>, <span class="n"><span class="pre">uint64_t</span></span><span class="w"> </span><span class="n sig-param"><span class="pre">flags</span></span><span class="sig-paren">)</span><a class="headerlink" href="#_CPPv419trfRegDisplayCustom11PTRFContext11PTRFDisplay6size_t6size_t8uint64_t" title="Link to this definition"></a><br /></dt>
 <dd><p>Custom registration routine. This is used when the framebuffer memory region contains other data. </p>
 <dl class="field-list simple">
-<dt class="field-odd">Parameters</dt>
+<dt class="field-odd">Parameters<span class="colon">:</span></dt>
 <dd class="field-odd"><ul class="simple">
 <li><p><strong>ctx</strong> – Initialized context to make the display buffer available to.</p></li>
 <li><p><strong>disp</strong> – Display to make available.</p></li>
@@ -708,16 +767,16 @@
 
 <dl class="cpp function">
 <dt class="sig sig-object cpp" id="_CPPv417trfGetDisplayByID11PTRFDisplayi">
-<span id="_CPPv317trfGetDisplayByID11PTRFDisplayi"></span><span id="_CPPv217trfGetDisplayByID11PTRFDisplayi"></span><span id="trfGetDisplayByID__PTRFDisplay.i"></span><span class="target" id="trf_8h_1a3cf07f630eb63858afe5363d3eb41892"></span><span class="n"><span class="pre">PTRFDisplay</span></span><span class="w"> </span><span class="sig-name descname"><span class="n"><span class="pre">trfGetDisplayByID</span></span></span><span class="sig-paren">(</span><span class="n"><span class="pre">PTRFDisplay</span></span><span class="w"> </span><span class="n sig-param"><span class="pre">disp_list</span></span>, <span class="kt"><span class="pre">int</span></span><span class="w"> </span><span class="n sig-param"><span class="pre">id</span></span><span class="sig-paren">)</span><a class="headerlink" href="#_CPPv417trfGetDisplayByID11PTRFDisplayi" title="Permalink to this definition"></a><br /></dt>
+<span id="_CPPv317trfGetDisplayByID11PTRFDisplayi"></span><span id="_CPPv217trfGetDisplayByID11PTRFDisplayi"></span><span id="trfGetDisplayByID__PTRFDisplay.i"></span><span class="target" id="trf_8h_1a3cf07f630eb63858afe5363d3eb41892"></span><span class="n"><span class="pre">PTRFDisplay</span></span><span class="w"> </span><span class="sig-name descname"><span class="n"><span class="pre">trfGetDisplayByID</span></span></span><span class="sig-paren">(</span><span class="n"><span class="pre">PTRFDisplay</span></span><span class="w"> </span><span class="n sig-param"><span class="pre">disp_list</span></span>, <span class="kt"><span class="pre">int</span></span><span class="w"> </span><span class="n sig-param"><span class="pre">id</span></span><span class="sig-paren">)</span><a class="headerlink" href="#_CPPv417trfGetDisplayByID11PTRFDisplayi" title="Link to this definition"></a><br /></dt>
 <dd><p>Get display by ID. </p>
 <dl class="field-list simple">
-<dt class="field-odd">Parameters</dt>
+<dt class="field-odd">Parameters<span class="colon">:</span></dt>
 <dd class="field-odd"><ul class="simple">
 <li><p><strong>disp_list</strong> – Display list </p></li>
 <li><p><strong>id</strong> – ID </p></li>
 </ul>
 </dd>
-<dt class="field-even">Returns</dt>
+<dt class="field-even">Returns<span class="colon">:</span></dt>
 <dd class="field-even"><p>Pointer to item in linked list with specified ID. If NULL, the operation failed and errno will be set to indicate the reason. </p>
 </dd>
 </dl>
@@ -725,17 +784,17 @@
 
 <dl class="cpp function">
 <dt class="sig sig-object cpp" id="_CPPv415trfAckClientReq11PTRFContextP8uint32_ti">
-<span id="_CPPv315trfAckClientReq11PTRFContextP8uint32_ti"></span><span id="_CPPv215trfAckClientReq11PTRFContextP8uint32_ti"></span><span id="trfAckClientReq__PTRFContext.uint32_tP.i"></span><span class="target" id="trf_8h_1a5b32dbc3a9a73e0a01a197031e88fd41"></span><span class="kt"><span class="pre">int</span></span><span class="w"> </span><span class="sig-name descname"><span class="n"><span class="pre">trfAckClientReq</span></span></span><span class="sig-paren">(</span><span class="n"><span class="pre">PTRFContext</span></span><span class="w"> </span><span class="n sig-param"><span class="pre">ctx</span></span>, <span class="n"><span class="pre">uint32_t</span></span><span class="w"> </span><span class="p"><span class="pre">*</span></span><span class="n sig-param"><span class="pre">disp_ids</span></span>, <span class="kt"><span class="pre">int</span></span><span class="w"> </span><span class="n sig-param"><span class="pre">n_disp_ids</span></span><span class="sig-paren">)</span><a class="headerlink" href="#_CPPv415trfAckClientReq11PTRFContextP8uint32_ti" title="Permalink to this definition"></a><br /></dt>
+<span id="_CPPv315trfAckClientReq11PTRFContextP8uint32_ti"></span><span id="_CPPv215trfAckClientReq11PTRFContextP8uint32_ti"></span><span id="trfAckClientReq__PTRFContext.uint32_tP.i"></span><span class="target" id="trf_8h_1a5b32dbc3a9a73e0a01a197031e88fd41"></span><span class="kt"><span class="pre">int</span></span><span class="w"> </span><span class="sig-name descname"><span class="n"><span class="pre">trfAckClientReq</span></span></span><span class="sig-paren">(</span><span class="n"><span class="pre">PTRFContext</span></span><span class="w"> </span><span class="n sig-param"><span class="pre">ctx</span></span>, <span class="n"><span class="pre">uint32_t</span></span><span class="w"> </span><span class="p"><span class="pre">*</span></span><span class="n sig-param"><span class="pre">disp_ids</span></span>, <span class="kt"><span class="pre">int</span></span><span class="w"> </span><span class="n sig-param"><span class="pre">n_disp_ids</span></span><span class="sig-paren">)</span><a class="headerlink" href="#_CPPv415trfAckClientReq11PTRFContextP8uint32_ti" title="Link to this definition"></a><br /></dt>
 <dd><p>Acknowledge the client’s display initialization request. </p>
 <dl class="field-list simple">
-<dt class="field-odd">Parameters</dt>
+<dt class="field-odd">Parameters<span class="colon">:</span></dt>
 <dd class="field-odd"><ul class="simple">
 <li><p><strong>ctx</strong> – Context to use </p></li>
 <li><p><strong>disp_ids</strong> – Initialized display ID array </p></li>
 <li><p><strong>n_disp_ids</strong> – Number of display IDs in the array </p></li>
 </ul>
 </dd>
-<dt class="field-even">Returns</dt>
+<dt class="field-even">Returns<span class="colon">:</span></dt>
 <dd class="field-even"><p>0 on success, negative error code on failure </p>
 </dd>
 </dl>
@@ -743,13 +802,13 @@
 
 <dl class="cpp function">
 <dt class="sig sig-object cpp" id="_CPPv411trfGetFBPtr11PTRFDisplay">
-<span id="_CPPv311trfGetFBPtr11PTRFDisplay"></span><span id="_CPPv211trfGetFBPtr11PTRFDisplay"></span><span id="trfGetFBPtr__PTRFDisplay"></span><span class="target" id="trf_8h_1a58d144aec185dd73904be7be5055897b"></span><span class="k"><span class="pre">static</span></span><span class="w"> </span><span class="k"><span class="pre">inline</span></span><span class="w"> </span><span class="kt"><span class="pre">void</span></span><span class="w"> </span><span class="p"><span class="pre">*</span></span><span class="sig-name descname"><span class="n"><span class="pre">trfGetFBPtr</span></span></span><span class="sig-paren">(</span><span class="n"><span class="pre">PTRFDisplay</span></span><span class="w"> </span><span class="n sig-param"><span class="pre">disp</span></span><span class="sig-paren">)</span><a class="headerlink" href="#_CPPv411trfGetFBPtr11PTRFDisplay" title="Permalink to this definition"></a><br /></dt>
+<span id="_CPPv311trfGetFBPtr11PTRFDisplay"></span><span id="_CPPv211trfGetFBPtr11PTRFDisplay"></span><span id="trfGetFBPtr__PTRFDisplay"></span><span class="target" id="trf_8h_1a58d144aec185dd73904be7be5055897b"></span><span class="k"><span class="pre">static</span></span><span class="w"> </span><span class="k"><span class="pre">inline</span></span><span class="w"> </span><span class="kt"><span class="pre">void</span></span><span class="w"> </span><span class="p"><span class="pre">*</span></span><span class="sig-name descname"><span class="n"><span class="pre">trfGetFBPtr</span></span></span><span class="sig-paren">(</span><span class="n"><span class="pre">PTRFDisplay</span></span><span class="w"> </span><span class="n sig-param"><span class="pre">disp</span></span><span class="sig-paren">)</span><a class="headerlink" href="#_CPPv411trfGetFBPtr11PTRFDisplay" title="Link to this definition"></a><br /></dt>
 <dd><p>Get the actual framebuffer data pointer after offsets. </p>
 <dl class="field-list simple">
-<dt class="field-odd">Parameters</dt>
+<dt class="field-odd">Parameters<span class="colon">:</span></dt>
 <dd class="field-odd"><p><strong>disp</strong> – Display to use. </p>
 </dd>
-<dt class="field-even">Returns</dt>
+<dt class="field-even">Returns<span class="colon">:</span></dt>
 <dd class="field-even"><p>void * </p>
 </dd>
 </dl>
@@ -757,10 +816,10 @@
 
 <dl class="cpp function">
 <dt class="sig sig-object cpp" id="_CPPv412trfSendFrame11PTRFContext11PTRFDisplay8uint64_t8uint64_t">
-<span id="_CPPv312trfSendFrame11PTRFContext11PTRFDisplay8uint64_t8uint64_t"></span><span id="_CPPv212trfSendFrame11PTRFContext11PTRFDisplay8uint64_t8uint64_t"></span><span id="trfSendFrame__PTRFContext.PTRFDisplay.uint64_t.uint64_t"></span><span class="target" id="trf_8h_1a19f4497d96a21aef4d4518411c112ec2"></span><span class="k"><span class="pre">static</span></span><span class="w"> </span><span class="k"><span class="pre">inline</span></span><span class="w"> </span><span class="n"><span class="pre">ssize_t</span></span><span class="w"> </span><span class="sig-name descname"><span class="n"><span class="pre">trfSendFrame</span></span></span><span class="sig-paren">(</span><span class="n"><span class="pre">PTRFContext</span></span><span class="w"> </span><span class="n sig-param"><span class="pre">ctx</span></span>, <span class="n"><span class="pre">PTRFDisplay</span></span><span class="w"> </span><span class="n sig-param"><span class="pre">disp</span></span>, <span class="n"><span class="pre">uint64_t</span></span><span class="w"> </span><span class="n sig-param"><span class="pre">rbuf</span></span>, <span class="n"><span class="pre">uint64_t</span></span><span class="w"> </span><span class="n sig-param"><span class="pre">rkey</span></span><span class="sig-paren">)</span><a class="headerlink" href="#_CPPv412trfSendFrame11PTRFContext11PTRFDisplay8uint64_t8uint64_t" title="Permalink to this definition"></a><br /></dt>
+<span id="_CPPv312trfSendFrame11PTRFContext11PTRFDisplay8uint64_t8uint64_t"></span><span id="_CPPv212trfSendFrame11PTRFContext11PTRFDisplay8uint64_t8uint64_t"></span><span id="trfSendFrame__PTRFContext.PTRFDisplay.uint64_t.uint64_t"></span><span class="target" id="trf_8h_1a19f4497d96a21aef4d4518411c112ec2"></span><span class="k"><span class="pre">static</span></span><span class="w"> </span><span class="k"><span class="pre">inline</span></span><span class="w"> </span><span class="n"><span class="pre">ssize_t</span></span><span class="w"> </span><span class="sig-name descname"><span class="n"><span class="pre">trfSendFrame</span></span></span><span class="sig-paren">(</span><span class="n"><span class="pre">PTRFContext</span></span><span class="w"> </span><span class="n sig-param"><span class="pre">ctx</span></span>, <span class="n"><span class="pre">PTRFDisplay</span></span><span class="w"> </span><span class="n sig-param"><span class="pre">disp</span></span>, <span class="n"><span class="pre">uint64_t</span></span><span class="w"> </span><span class="n sig-param"><span class="pre">rbuf</span></span>, <span class="n"><span class="pre">uint64_t</span></span><span class="w"> </span><span class="n sig-param"><span class="pre">rkey</span></span><span class="sig-paren">)</span><a class="headerlink" href="#_CPPv412trfSendFrame11PTRFContext11PTRFDisplay8uint64_t8uint64_t" title="Link to this definition"></a><br /></dt>
 <dd><p>Send a frame to the client. </p>
 <dl class="field-list simple">
-<dt class="field-odd">Parameters</dt>
+<dt class="field-odd">Parameters<span class="colon">:</span></dt>
 <dd class="field-odd"><ul class="simple">
 <li><p><strong>ctx</strong> – Initialized context to send the frame to. </p></li>
 <li><p><strong>disp</strong> – Display identifier. </p></li>
@@ -768,7 +827,7 @@
 <li><p><strong>rkey</strong> – Remote access key. </p></li>
 </ul>
 </dd>
-<dt class="field-even">Returns</dt>
+<dt class="field-even">Returns<span class="colon">:</span></dt>
 <dd class="field-even"><p>0 on success, negative error code on failure. </p>
 </dd>
 </dl>
@@ -776,12 +835,12 @@
 
 <dl class="cpp function">
 <dt class="sig sig-object cpp" id="_CPPv416trfSendFramePart11PTRFContext11PTRFDisplay8uint64_t8uint64_tP7TRFRect6size_t">
-<span id="_CPPv316trfSendFramePart11PTRFContext11PTRFDisplay8uint64_t8uint64_tP7TRFRect6size_t"></span><span id="_CPPv216trfSendFramePart11PTRFContext11PTRFDisplay8uint64_t8uint64_tP7TRFRect6size_t"></span><span id="trfSendFramePart__PTRFContext.PTRFDisplay.uint64_t.uint64_t.TRFRectP.s"></span><span class="target" id="trf_8h_1a5659177a075999e1a78ef61c8b722e70"></span><span class="n"><span class="pre">ssize_t</span></span><span class="w"> </span><span class="sig-name descname"><span class="n"><span class="pre">trfSendFramePart</span></span></span><span class="sig-paren">(</span><span class="n"><span class="pre">PTRFContext</span></span><span class="w"> </span><span class="n sig-param"><span class="pre">ctx</span></span>, <span class="n"><span class="pre">PTRFDisplay</span></span><span class="w"> </span><span class="n sig-param"><span class="pre">disp</span></span>, <span class="n"><span class="pre">uint64_t</span></span><span class="w"> </span><span class="n sig-param"><span class="pre">rbuf</span></span>, <span class="n"><span class="pre">uint64_t</span></span><span class="w"> </span><span class="n sig-param"><span class="pre">rkey</span></span>, <span class="k"><span class="pre">struct</span></span><span class="w"> </span><a class="reference internal" href="trf_def.html#_CPPv47TRFRect" title="TRFRect"><span class="n"><span class="pre">TRFRect</span></span></a><span class="w"> </span><span class="p"><span class="pre">*</span></span><span class="n sig-param"><span class="pre">rects</span></span>, <span class="n"><span class="pre">size_t</span></span><span class="w"> </span><span class="n sig-param"><span class="pre">num_rects</span></span><span class="sig-paren">)</span><a class="headerlink" href="#_CPPv416trfSendFramePart11PTRFContext11PTRFDisplay8uint64_t8uint64_tP7TRFRect6size_t" title="Permalink to this definition"></a><br /></dt>
+<span id="_CPPv316trfSendFramePart11PTRFContext11PTRFDisplay8uint64_t8uint64_tP7TRFRect6size_t"></span><span id="_CPPv216trfSendFramePart11PTRFContext11PTRFDisplay8uint64_t8uint64_tP7TRFRect6size_t"></span><span id="trfSendFramePart__PTRFContext.PTRFDisplay.uint64_t.uint64_t.TRFRectP.s"></span><span class="target" id="trf_8h_1a5659177a075999e1a78ef61c8b722e70"></span><span class="n"><span class="pre">ssize_t</span></span><span class="w"> </span><span class="sig-name descname"><span class="n"><span class="pre">trfSendFramePart</span></span></span><span class="sig-paren">(</span><span class="n"><span class="pre">PTRFContext</span></span><span class="w"> </span><span class="n sig-param"><span class="pre">ctx</span></span>, <span class="n"><span class="pre">PTRFDisplay</span></span><span class="w"> </span><span class="n sig-param"><span class="pre">disp</span></span>, <span class="n"><span class="pre">uint64_t</span></span><span class="w"> </span><span class="n sig-param"><span class="pre">rbuf</span></span>, <span class="n"><span class="pre">uint64_t</span></span><span class="w"> </span><span class="n sig-param"><span class="pre">rkey</span></span>, <span class="k"><span class="pre">struct</span></span><span class="w"> </span><a class="reference internal" href="trf_def.html#_CPPv47TRFRect" title="TRFRect"><span class="n"><span class="pre">TRFRect</span></span></a><span class="w"> </span><span class="p"><span class="pre">*</span></span><span class="n sig-param"><span class="pre">rects</span></span>, <span class="n"><span class="pre">size_t</span></span><span class="w"> </span><span class="n sig-param"><span class="pre">num_rects</span></span><span class="sig-paren">)</span><a class="headerlink" href="#_CPPv416trfSendFramePart11PTRFContext11PTRFDisplay8uint64_t8uint64_tP7TRFRect6size_t" title="Link to this definition"></a><br /></dt>
 <dd><p>Send a partial frame update. </p>
 <p>Performs a fabric RMA write operation to the destination buffer. The client is not informed of the operation status; once the operation completes, the server should send an acknowledgement.</p>
 <p>Compressed textures are not supported.</p>
 <dl class="field-list simple">
-<dt class="field-odd">Parameters</dt>
+<dt class="field-odd">Parameters<span class="colon">:</span></dt>
 <dd class="field-odd"><ul class="simple">
 <li><p><strong>ctx</strong> – Initialized context to send the frame to. </p></li>
 <li><p><strong>disp</strong> – Display identifier. </p></li>
@@ -791,7 +850,7 @@
 <li><p><strong>num_rects</strong> – Number of rectangles in the list. </p></li>
 </ul>
 </dd>
-<dt class="field-even">Returns</dt>
+<dt class="field-even">Returns<span class="colon">:</span></dt>
 <dd class="field-even"><p>0 on success, negative error code on failure. </p>
 </dd>
 </dl>
@@ -799,12 +858,12 @@
 
 <dl class="cpp function">
 <dt class="sig sig-object cpp" id="_CPPv417trfSendFrameChunk11PTRFContext11PTRFDisplay6size_t6size_t8uint64_t8uint64_t">
-<span id="_CPPv317trfSendFrameChunk11PTRFContext11PTRFDisplay6size_t6size_t8uint64_t8uint64_t"></span><span id="_CPPv217trfSendFrameChunk11PTRFContext11PTRFDisplay6size_t6size_t8uint64_t8uint64_t"></span><span id="trfSendFrameChunk__PTRFContext.PTRFDisplay.s.s.uint64_t.uint64_t"></span><span class="target" id="trf_8h_1a6a10271d8da991c614914eeb632395ef"></span><span class="n"><span class="pre">ssize_t</span></span><span class="w"> </span><span class="sig-name descname"><span class="n"><span class="pre">trfSendFrameChunk</span></span></span><span class="sig-paren">(</span><span class="n"><span class="pre">PTRFContext</span></span><span class="w"> </span><span class="n sig-param"><span class="pre">ctx</span></span>, <span class="n"><span class="pre">PTRFDisplay</span></span><span class="w"> </span><span class="n sig-param"><span class="pre">disp</span></span>, <span class="n"><span class="pre">size_t</span></span><span class="w"> </span><span class="n sig-param"><span class="pre">start</span></span>, <span class="n"><span class="pre">size_t</span></span><span class="w"> </span><span class="n sig-param"><span class="pre">end</span></span>, <span class="n"><span class="pre">uint64_t</span></span><span class="w"> </span><span class="n sig-param"><span class="pre">rbuf</span></span>, <span class="n"><span class="pre">uint64_t</span></span><span class="w"> </span><span class="n sig-param"><span class="pre">rkey</span></span><span class="sig-paren">)</span><a class="headerlink" href="#_CPPv417trfSendFrameChunk11PTRFContext11PTRFDisplay6size_t6size_t8uint64_t8uint64_t" title="Permalink to this definition"></a><br /></dt>
+<span id="_CPPv317trfSendFrameChunk11PTRFContext11PTRFDisplay6size_t6size_t8uint64_t8uint64_t"></span><span id="_CPPv217trfSendFrameChunk11PTRFContext11PTRFDisplay6size_t6size_t8uint64_t8uint64_t"></span><span id="trfSendFrameChunk__PTRFContext.PTRFDisplay.s.s.uint64_t.uint64_t"></span><span class="target" id="trf_8h_1a6a10271d8da991c614914eeb632395ef"></span><span class="n"><span class="pre">ssize_t</span></span><span class="w"> </span><span class="sig-name descname"><span class="n"><span class="pre">trfSendFrameChunk</span></span></span><span class="sig-paren">(</span><span class="n"><span class="pre">PTRFContext</span></span><span class="w"> </span><span class="n sig-param"><span class="pre">ctx</span></span>, <span class="n"><span class="pre">PTRFDisplay</span></span><span class="w"> </span><span class="n sig-param"><span class="pre">disp</span></span>, <span class="n"><span class="pre">size_t</span></span><span class="w"> </span><span class="n sig-param"><span class="pre">start</span></span>, <span class="n"><span class="pre">size_t</span></span><span class="w"> </span><span class="n sig-param"><span class="pre">end</span></span>, <span class="n"><span class="pre">uint64_t</span></span><span class="w"> </span><span class="n sig-param"><span class="pre">rbuf</span></span>, <span class="n"><span class="pre">uint64_t</span></span><span class="w"> </span><span class="n sig-param"><span class="pre">rkey</span></span><span class="sig-paren">)</span><a class="headerlink" href="#_CPPv417trfSendFrameChunk11PTRFContext11PTRFDisplay6size_t6size_t8uint64_t8uint64_t" title="Link to this definition"></a><br /></dt>
 <dd><p>Send a partial frame update, based on byte offsets. </p>
 <p>Performs a fabric RMA write operation to the destination buffer. The client is not informed of the operation status; once the operation completes, the server should send an acknowledgement.</p>
 <p>Compressed textures are not supported.</p>
 <dl class="field-list simple">
-<dt class="field-odd">Parameters</dt>
+<dt class="field-odd">Parameters<span class="colon">:</span></dt>
 <dd class="field-odd"><ul class="simple">
 <li><p><strong>ctx</strong> – Initialized context to send the frame to.</p></li>
 <li><p><strong>disp</strong> – Display identifier.</p></li>
@@ -814,7 +873,7 @@
 <li><p><strong>rkey</strong> – Remote access key.</p></li>
 </ul>
 </dd>
-<dt class="field-even">Returns</dt>
+<dt class="field-even">Returns<span class="colon">:</span></dt>
 <dd class="field-even"><p>0 on success, negative error code on failure. </p>
 </dd>
 </dl>
@@ -822,16 +881,16 @@
 
 <dl class="cpp function">
 <dt class="sig sig-object cpp" id="_CPPv412trfRecvFrame11PTRFContext11PTRFDisplay">
-<span id="_CPPv312trfRecvFrame11PTRFContext11PTRFDisplay"></span><span id="_CPPv212trfRecvFrame11PTRFContext11PTRFDisplay"></span><span id="trfRecvFrame__PTRFContext.PTRFDisplay"></span><span class="target" id="trf_8h_1a9b5e9e74e48e183932aed3709f9671c4"></span><span class="n"><span class="pre">ssize_t</span></span><span class="w"> </span><span class="sig-name descname"><span class="n"><span class="pre">trfRecvFrame</span></span></span><span class="sig-paren">(</span><span class="n"><span class="pre">PTRFContext</span></span><span class="w"> </span><span class="n sig-param"><span class="pre">ctx</span></span>, <span class="n"><span class="pre">PTRFDisplay</span></span><span class="w"> </span><span class="n sig-param"><span class="pre">disp</span></span><span class="sig-paren">)</span><a class="headerlink" href="#_CPPv412trfRecvFrame11PTRFContext11PTRFDisplay" title="Permalink to this definition"></a><br /></dt>
+<span id="_CPPv312trfRecvFrame11PTRFContext11PTRFDisplay"></span><span id="_CPPv212trfRecvFrame11PTRFContext11PTRFDisplay"></span><span id="trfRecvFrame__PTRFContext.PTRFDisplay"></span><span class="target" id="trf_8h_1a9b5e9e74e48e183932aed3709f9671c4"></span><span class="n"><span class="pre">ssize_t</span></span><span class="w"> </span><span class="sig-name descname"><span class="n"><span class="pre">trfRecvFrame</span></span></span><span class="sig-paren">(</span><span class="n"><span class="pre">PTRFContext</span></span><span class="w"> </span><span class="n sig-param"><span class="pre">ctx</span></span>, <span class="n"><span class="pre">PTRFDisplay</span></span><span class="w"> </span><span class="n sig-param"><span class="pre">disp</span></span><span class="sig-paren">)</span><a class="headerlink" href="#_CPPv412trfRecvFrame11PTRFContext11PTRFDisplay" title="Link to this definition"></a><br /></dt>
 <dd><p>Send a frame receive request. Non-blocking operation. </p>
 <dl class="field-list simple">
-<dt class="field-odd">Parameters</dt>
+<dt class="field-odd">Parameters<span class="colon">:</span></dt>
 <dd class="field-odd"><ul class="simple">
 <li><p><strong>ctx</strong> – Initialized context.</p></li>
 <li><p><strong>disp</strong> – Display identifier, containing registered framebuffer region.</p></li>
 </ul>
 </dd>
-<dt class="field-even">Returns</dt>
+<dt class="field-even">Returns<span class="colon">:</span></dt>
 <dd class="field-even"><p>0 on success, negative error code on failure. </p>
 </dd>
 </dl>
@@ -839,16 +898,16 @@
 
 <dl class="cpp function">
 <dt class="sig sig-object cpp" id="_CPPv420trfGetServerDisplays11PTRFContextP11PTRFDisplay">
-<span id="_CPPv320trfGetServerDisplays11PTRFContextP11PTRFDisplay"></span><span id="_CPPv220trfGetServerDisplays11PTRFContextP11PTRFDisplay"></span><span id="trfGetServerDisplays__PTRFContext.PTRFDisplayP"></span><span class="target" id="trf_8h_1a2ee59e189076950a1a947e97b398809d"></span><span class="kt"><span class="pre">int</span></span><span class="w"> </span><span class="sig-name descname"><span class="n"><span class="pre">trfGetServerDisplays</span></span></span><span class="sig-paren">(</span><span class="n"><span class="pre">PTRFContext</span></span><span class="w"> </span><span class="n sig-param"><span class="pre">ctx</span></span>, <span class="n"><span class="pre">PTRFDisplay</span></span><span class="w"> </span><span class="p"><span class="pre">*</span></span><span class="n sig-param"><span class="pre">out</span></span><span class="sig-paren">)</span><a class="headerlink" href="#_CPPv420trfGetServerDisplays11PTRFContextP11PTRFDisplay" title="Permalink to this definition"></a><br /></dt>
+<span id="_CPPv320trfGetServerDisplays11PTRFContextP11PTRFDisplay"></span><span id="_CPPv220trfGetServerDisplays11PTRFContextP11PTRFDisplay"></span><span id="trfGetServerDisplays__PTRFContext.PTRFDisplayP"></span><span class="target" id="trf_8h_1a2ee59e189076950a1a947e97b398809d"></span><span class="kt"><span class="pre">int</span></span><span class="w"> </span><span class="sig-name descname"><span class="n"><span class="pre">trfGetServerDisplays</span></span></span><span class="sig-paren">(</span><span class="n"><span class="pre">PTRFContext</span></span><span class="w"> </span><span class="n sig-param"><span class="pre">ctx</span></span>, <span class="n"><span class="pre">PTRFDisplay</span></span><span class="w"> </span><span class="p"><span class="pre">*</span></span><span class="n sig-param"><span class="pre">out</span></span><span class="sig-paren">)</span><a class="headerlink" href="#_CPPv420trfGetServerDisplays11PTRFContextP11PTRFDisplay" title="Link to this definition"></a><br /></dt>
 <dd><p>Get the list of displays available to the client from the server. </p>
 <dl class="field-list simple">
-<dt class="field-odd">Parameters</dt>
+<dt class="field-odd">Parameters<span class="colon">:</span></dt>
 <dd class="field-odd"><ul class="simple">
 <li><p><strong>ctx</strong> – Context</p></li>
 <li><p><strong>out</strong> – Server display list to be allocated and filled.</p></li>
 </ul>
 </dd>
-<dt class="field-even">Returns</dt>
+<dt class="field-even">Returns<span class="colon">:</span></dt>
 <dd class="field-even"><p>0 on success, negative error code on failure. </p>
 </dd>
 </dl>
@@ -856,14 +915,14 @@
 
 <dl class="cpp function">
 <dt class="sig sig-object cpp" id="_CPPv418trfSendDisplayList11PTRFContext">
-<span id="_CPPv318trfSendDisplayList11PTRFContext"></span><span id="_CPPv218trfSendDisplayList11PTRFContext"></span><span id="trfSendDisplayList__PTRFContext"></span><span class="target" id="trf_8h_1ad55ddf7432bf66fad4645fb234c62d04"></span><span class="kt"><span class="pre">int</span></span><span class="w"> </span><span class="sig-name descname"><span class="n"><span class="pre">trfSendDisplayList</span></span></span><span class="sig-paren">(</span><span class="n"><span class="pre">PTRFContext</span></span><span class="w"> </span><span class="n sig-param"><span class="pre">ctx</span></span><span class="sig-paren">)</span><a class="headerlink" href="#_CPPv418trfSendDisplayList11PTRFContext" title="Permalink to this definition"></a><br /></dt>
+<span id="_CPPv318trfSendDisplayList11PTRFContext"></span><span id="_CPPv218trfSendDisplayList11PTRFContext"></span><span id="trfSendDisplayList__PTRFContext"></span><span class="target" id="trf_8h_1ad55ddf7432bf66fad4645fb234c62d04"></span><span class="kt"><span class="pre">int</span></span><span class="w"> </span><span class="sig-name descname"><span class="n"><span class="pre">trfSendDisplayList</span></span></span><span class="sig-paren">(</span><span class="n"><span class="pre">PTRFContext</span></span><span class="w"> </span><span class="n sig-param"><span class="pre">ctx</span></span><span class="sig-paren">)</span><a class="headerlink" href="#_CPPv418trfSendDisplayList11PTRFContext" title="Link to this definition"></a><br /></dt>
 <dd><p>Send a display list to the client contained within the current context. </p>
 <p>The client should have requested display metadata from the server.</p>
 <dl class="field-list simple">
-<dt class="field-odd">Parameters</dt>
+<dt class="field-odd">Parameters<span class="colon">:</span></dt>
 <dd class="field-odd"><p><strong>ctx</strong> – Initialized context containing display list.</p>
 </dd>
-<dt class="field-even">Returns</dt>
+<dt class="field-even">Returns<span class="colon">:</span></dt>
 <dd class="field-even"><p>0 on success, negative error code on failure. </p>
 </dd>
 </dl>
@@ -871,16 +930,16 @@
 
 <dl class="cpp function">
 <dt class="sig sig-object cpp" id="_CPPv416trfSendClientReq11PTRFContext11PTRFDisplay">
-<span id="_CPPv316trfSendClientReq11PTRFContext11PTRFDisplay"></span><span id="_CPPv216trfSendClientReq11PTRFContext11PTRFDisplay"></span><span id="trfSendClientReq__PTRFContext.PTRFDisplay"></span><span class="target" id="trf_8h_1a4bcd0c89bc2d76c93c5ea5d090a776b1"></span><span class="kt"><span class="pre">int</span></span><span class="w"> </span><span class="sig-name descname"><span class="n"><span class="pre">trfSendClientReq</span></span></span><span class="sig-paren">(</span><span class="n"><span class="pre">PTRFContext</span></span><span class="w"> </span><span class="n sig-param"><span class="pre">ctx</span></span>, <span class="n"><span class="pre">PTRFDisplay</span></span><span class="w"> </span><span class="n sig-param"><span class="pre">disp</span></span><span class="sig-paren">)</span><a class="headerlink" href="#_CPPv416trfSendClientReq11PTRFContext11PTRFDisplay" title="Permalink to this definition"></a><br /></dt>
+<span id="_CPPv316trfSendClientReq11PTRFContext11PTRFDisplay"></span><span id="_CPPv216trfSendClientReq11PTRFContext11PTRFDisplay"></span><span id="trfSendClientReq__PTRFContext.PTRFDisplay"></span><span class="target" id="trf_8h_1a4bcd0c89bc2d76c93c5ea5d090a776b1"></span><span class="kt"><span class="pre">int</span></span><span class="w"> </span><span class="sig-name descname"><span class="n"><span class="pre">trfSendClientReq</span></span></span><span class="sig-paren">(</span><span class="n"><span class="pre">PTRFContext</span></span><span class="w"> </span><span class="n sig-param"><span class="pre">ctx</span></span>, <span class="n"><span class="pre">PTRFDisplay</span></span><span class="w"> </span><span class="n sig-param"><span class="pre">disp</span></span><span class="sig-paren">)</span><a class="headerlink" href="#_CPPv416trfSendClientReq11PTRFContext11PTRFDisplay" title="Link to this definition"></a><br /></dt>
 <dd><p>Send a display initialization request to the server. </p>
 <dl class="field-list simple">
-<dt class="field-odd">Parameters</dt>
+<dt class="field-odd">Parameters<span class="colon">:</span></dt>
 <dd class="field-odd"><ul class="simple">
 <li><p><strong>ctx</strong> – Initialized context.</p></li>
 <li><p><strong>disp</strong> – Display to initialize.</p></li>
 </ul>
 </dd>
-<dt class="field-even">Returns</dt>
+<dt class="field-even">Returns<span class="colon">:</span></dt>
 <dd class="field-even"><p>0 on success, negative error code on failure. </p>
 </dd>
 </dl>
@@ -888,16 +947,16 @@
 
 <dl class="cpp function">
 <dt class="sig sig-object cpp" id="_CPPv414trfAckFrameReq11PTRFContext11PTRFDisplay">
-<span id="_CPPv314trfAckFrameReq11PTRFContext11PTRFDisplay"></span><span id="_CPPv214trfAckFrameReq11PTRFContext11PTRFDisplay"></span><span id="trfAckFrameReq__PTRFContext.PTRFDisplay"></span><span class="target" id="trf_8h_1ab83c0c607167455da70a13590d613b54"></span><span class="kt"><span class="pre">int</span></span><span class="w"> </span><span class="sig-name descname"><span class="n"><span class="pre">trfAckFrameReq</span></span></span><span class="sig-paren">(</span><span class="n"><span class="pre">PTRFContext</span></span><span class="w"> </span><span class="n sig-param"><span class="pre">ctx</span></span>, <span class="n"><span class="pre">PTRFDisplay</span></span><span class="w"> </span><span class="n sig-param"><span class="pre">display</span></span><span class="sig-paren">)</span><a class="headerlink" href="#_CPPv414trfAckFrameReq11PTRFContext11PTRFDisplay" title="Permalink to this definition"></a><br /></dt>
+<span id="_CPPv314trfAckFrameReq11PTRFContext11PTRFDisplay"></span><span id="_CPPv214trfAckFrameReq11PTRFContext11PTRFDisplay"></span><span id="trfAckFrameReq__PTRFContext.PTRFDisplay"></span><span class="target" id="trf_8h_1ab83c0c607167455da70a13590d613b54"></span><span class="kt"><span class="pre">int</span></span><span class="w"> </span><span class="sig-name descname"><span class="n"><span class="pre">trfAckFrameReq</span></span></span><span class="sig-paren">(</span><span class="n"><span class="pre">PTRFContext</span></span><span class="w"> </span><span class="n sig-param"><span class="pre">ctx</span></span>, <span class="n"><span class="pre">PTRFDisplay</span></span><span class="w"> </span><span class="n sig-param"><span class="pre">display</span></span><span class="sig-paren">)</span><a class="headerlink" href="#_CPPv414trfAckFrameReq11PTRFContext11PTRFDisplay" title="Link to this definition"></a><br /></dt>
 <dd><p>Send an confirmation to the client that a frame has been updated. </p>
 <dl class="field-list simple">
-<dt class="field-odd">Parameters</dt>
+<dt class="field-odd">Parameters<span class="colon">:</span></dt>
 <dd class="field-odd"><ul class="simple">
 <li><p><strong>ctx</strong> – Context to use.</p></li>
 <li><p><strong>display</strong> – Display the acknowledgement is for.</p></li>
 </ul>
 </dd>
-<dt class="field-even">Returns</dt>
+<dt class="field-even">Returns<span class="colon">:</span></dt>
 <dd class="field-even"><p>0 on success, negative error code on failure. </p>
 </dd>
 </dl>
@@ -905,13 +964,13 @@
 
 <dl class="cpp function">
 <dt class="sig sig-object cpp" id="_CPPv416trfSendKeepAlive11PTRFContext">
-<span id="_CPPv316trfSendKeepAlive11PTRFContext"></span><span id="_CPPv216trfSendKeepAlive11PTRFContext"></span><span id="trfSendKeepAlive__PTRFContext"></span><span class="target" id="trf_8h_1a0d93048b2c1977ca48c76f2c820b9bb0"></span><span class="kt"><span class="pre">int</span></span><span class="w"> </span><span class="sig-name descname"><span class="n"><span class="pre">trfSendKeepAlive</span></span></span><span class="sig-paren">(</span><span class="n"><span class="pre">PTRFContext</span></span><span class="w"> </span><span class="n sig-param"><span class="pre">ctx</span></span><span class="sig-paren">)</span><a class="headerlink" href="#_CPPv416trfSendKeepAlive11PTRFContext" title="Permalink to this definition"></a><br /></dt>
+<span id="_CPPv316trfSendKeepAlive11PTRFContext"></span><span id="_CPPv216trfSendKeepAlive11PTRFContext"></span><span id="trfSendKeepAlive__PTRFContext"></span><span class="target" id="trf_8h_1a0d93048b2c1977ca48c76f2c820b9bb0"></span><span class="kt"><span class="pre">int</span></span><span class="w"> </span><span class="sig-name descname"><span class="n"><span class="pre">trfSendKeepAlive</span></span></span><span class="sig-paren">(</span><span class="n"><span class="pre">PTRFContext</span></span><span class="w"> </span><span class="n sig-param"><span class="pre">ctx</span></span><span class="sig-paren">)</span><a class="headerlink" href="#_CPPv416trfSendKeepAlive11PTRFContext" title="Link to this definition"></a><br /></dt>
 <dd><p>Send Keep alive message. </p>
 <dl class="field-list simple">
-<dt class="field-odd">Parameters</dt>
+<dt class="field-odd">Parameters<span class="colon">:</span></dt>
 <dd class="field-odd"><p><strong>ctx</strong> – Context to use </p>
 </dd>
-<dt class="field-even">Returns</dt>
+<dt class="field-even">Returns<span class="colon">:</span></dt>
 <dd class="field-even"><p>0 on success, negative error code </p>
 </dd>
 </dl>
@@ -919,10 +978,10 @@
 
 <dl class="cpp function">
 <dt class="sig sig-object cpp" id="_CPPv418trfGetSendProgress11PTRFContextP16fi_cq_data_entryP15fi_cq_err_entry6size_t15PTRFContextOpts">
-<span id="_CPPv318trfGetSendProgress11PTRFContextP16fi_cq_data_entryP15fi_cq_err_entry6size_t15PTRFContextOpts"></span><span id="_CPPv218trfGetSendProgress11PTRFContextP16fi_cq_data_entryP15fi_cq_err_entry6size_t15PTRFContextOpts"></span><span id="trfGetSendProgress__PTRFContext.fi_cq_data_entryP.fi_cq_err_entryP.s.PTRFContextOpts"></span><span class="target" id="trf_8h_1ae388419658fcf37b1e88ea2afb154721"></span><span class="n"><span class="pre">ssize_t</span></span><span class="w"> </span><span class="sig-name descname"><span class="n"><span class="pre">trfGetSendProgress</span></span></span><span class="sig-paren">(</span><span class="n"><span class="pre">PTRFContext</span></span><span class="w"> </span><span class="n sig-param"><span class="pre">ctx</span></span>, <span class="k"><span class="pre">struct</span></span><span class="w"> </span><span class="n"><span class="pre">fi_cq_data_entry</span></span><span class="w"> </span><span class="p"><span class="pre">*</span></span><span class="n sig-param"><span class="pre">de</span></span>, <span class="k"><span class="pre">struct</span></span><span class="w"> </span><span class="n"><span class="pre">fi_cq_err_entry</span></span><span class="w"> </span><span class="p"><span class="pre">*</span></span><span class="n sig-param"><span class="pre">err</span></span>, <span class="n"><span class="pre">size_t</span></span><span class="w"> </span><span class="n sig-param"><span class="pre">count</span></span>, <span class="n"><span class="pre">PTRFContextOpts</span></span><span class="w"> </span><span class="n sig-param"><span class="pre">opts</span></span><span class="sig-paren">)</span><a class="headerlink" href="#_CPPv418trfGetSendProgress11PTRFContextP16fi_cq_data_entryP15fi_cq_err_entry6size_t15PTRFContextOpts" title="Permalink to this definition"></a><br /></dt>
+<span id="_CPPv318trfGetSendProgress11PTRFContextP16fi_cq_data_entryP15fi_cq_err_entry6size_t15PTRFContextOpts"></span><span id="_CPPv218trfGetSendProgress11PTRFContextP16fi_cq_data_entryP15fi_cq_err_entry6size_t15PTRFContextOpts"></span><span id="trfGetSendProgress__PTRFContext.fi_cq_data_entryP.fi_cq_err_entryP.s.PTRFContextOpts"></span><span class="target" id="trf_8h_1ae388419658fcf37b1e88ea2afb154721"></span><span class="n"><span class="pre">ssize_t</span></span><span class="w"> </span><span class="sig-name descname"><span class="n"><span class="pre">trfGetSendProgress</span></span></span><span class="sig-paren">(</span><span class="n"><span class="pre">PTRFContext</span></span><span class="w"> </span><span class="n sig-param"><span class="pre">ctx</span></span>, <span class="k"><span class="pre">struct</span></span><span class="w"> </span><span class="n"><span class="pre">fi_cq_data_entry</span></span><span class="w"> </span><span class="p"><span class="pre">*</span></span><span class="n sig-param"><span class="pre">de</span></span>, <span class="k"><span class="pre">struct</span></span><span class="w"> </span><span class="n"><span class="pre">fi_cq_err_entry</span></span><span class="w"> </span><span class="p"><span class="pre">*</span></span><span class="n sig-param"><span class="pre">err</span></span>, <span class="n"><span class="pre">size_t</span></span><span class="w"> </span><span class="n sig-param"><span class="pre">count</span></span>, <span class="n"><span class="pre">PTRFContextOpts</span></span><span class="w"> </span><span class="n sig-param"><span class="pre">opts</span></span><span class="sig-paren">)</span><a class="headerlink" href="#_CPPv418trfGetSendProgress11PTRFContextP16fi_cq_data_entryP15fi_cq_err_entry6size_t15PTRFContextOpts" title="Link to this definition"></a><br /></dt>
 <dd><p>Get the progress of all send operations. </p>
 <dl class="field-list simple">
-<dt class="field-odd">Parameters</dt>
+<dt class="field-odd">Parameters<span class="colon">:</span></dt>
 <dd class="field-odd"><ul class="simple">
 <li><p><strong>ctx</strong> – Context to use.</p></li>
 <li><p><strong>de</strong> – Data entry containing successful completion details.</p></li>
@@ -931,7 +990,7 @@
 <li><p><strong>opts</strong> – Optional options to override the default context behaviours.</p></li>
 </ul>
 </dd>
-<dt class="field-even">Returns</dt>
+<dt class="field-even">Returns<span class="colon">:</span></dt>
 <dd class="field-even"><p>Number of completed operations. Negative error code on failure. </p>
 </dd>
 </dl>
@@ -939,10 +998,10 @@
 
 <dl class="cpp function">
 <dt class="sig sig-object cpp" id="_CPPv418trfGetRecvProgress11PTRFContextP16fi_cq_data_entryP15fi_cq_err_entry6size_t15PTRFContextOpts">
-<span id="_CPPv318trfGetRecvProgress11PTRFContextP16fi_cq_data_entryP15fi_cq_err_entry6size_t15PTRFContextOpts"></span><span id="_CPPv218trfGetRecvProgress11PTRFContextP16fi_cq_data_entryP15fi_cq_err_entry6size_t15PTRFContextOpts"></span><span id="trfGetRecvProgress__PTRFContext.fi_cq_data_entryP.fi_cq_err_entryP.s.PTRFContextOpts"></span><span class="target" id="trf_8h_1a88973ba4fa0d28d35f0a786f909d2a17"></span><span class="n"><span class="pre">ssize_t</span></span><span class="w"> </span><span class="sig-name descname"><span class="n"><span class="pre">trfGetRecvProgress</span></span></span><span class="sig-paren">(</span><span class="n"><span class="pre">PTRFContext</span></span><span class="w"> </span><span class="n sig-param"><span class="pre">ctx</span></span>, <span class="k"><span class="pre">struct</span></span><span class="w"> </span><span class="n"><span class="pre">fi_cq_data_entry</span></span><span class="w"> </span><span class="p"><span class="pre">*</span></span><span class="n sig-param"><span class="pre">de</span></span>, <span class="k"><span class="pre">struct</span></span><span class="w"> </span><span class="n"><span class="pre">fi_cq_err_entry</span></span><span class="w"> </span><span class="p"><span class="pre">*</span></span><span class="n sig-param"><span class="pre">err</span></span>, <span class="n"><span class="pre">size_t</span></span><span class="w"> </span><span class="n sig-param"><span class="pre">count</span></span>, <span class="n"><span class="pre">PTRFContextOpts</span></span><span class="w"> </span><span class="n sig-param"><span class="pre">opts</span></span><span class="sig-paren">)</span><a class="headerlink" href="#_CPPv418trfGetRecvProgress11PTRFContextP16fi_cq_data_entryP15fi_cq_err_entry6size_t15PTRFContextOpts" title="Permalink to this definition"></a><br /></dt>
+<span id="_CPPv318trfGetRecvProgress11PTRFContextP16fi_cq_data_entryP15fi_cq_err_entry6size_t15PTRFContextOpts"></span><span id="_CPPv218trfGetRecvProgress11PTRFContextP16fi_cq_data_entryP15fi_cq_err_entry6size_t15PTRFContextOpts"></span><span id="trfGetRecvProgress__PTRFContext.fi_cq_data_entryP.fi_cq_err_entryP.s.PTRFContextOpts"></span><span class="target" id="trf_8h_1a88973ba4fa0d28d35f0a786f909d2a17"></span><span class="n"><span class="pre">ssize_t</span></span><span class="w"> </span><span class="sig-name descname"><span class="n"><span class="pre">trfGetRecvProgress</span></span></span><span class="sig-paren">(</span><span class="n"><span class="pre">PTRFContext</span></span><span class="w"> </span><span class="n sig-param"><span class="pre">ctx</span></span>, <span class="k"><span class="pre">struct</span></span><span class="w"> </span><span class="n"><span class="pre">fi_cq_data_entry</span></span><span class="w"> </span><span class="p"><span class="pre">*</span></span><span class="n sig-param"><span class="pre">de</span></span>, <span class="k"><span class="pre">struct</span></span><span class="w"> </span><span class="n"><span class="pre">fi_cq_err_entry</span></span><span class="w"> </span><span class="p"><span class="pre">*</span></span><span class="n sig-param"><span class="pre">err</span></span>, <span class="n"><span class="pre">size_t</span></span><span class="w"> </span><span class="n sig-param"><span class="pre">count</span></span>, <span class="n"><span class="pre">PTRFContextOpts</span></span><span class="w"> </span><span class="n sig-param"><span class="pre">opts</span></span><span class="sig-paren">)</span><a class="headerlink" href="#_CPPv418trfGetRecvProgress11PTRFContextP16fi_cq_data_entryP15fi_cq_err_entry6size_t15PTRFContextOpts" title="Link to this definition"></a><br /></dt>
 <dd><p>Get the progress of all receive operations. </p>
 <dl class="field-list simple">
-<dt class="field-odd">Parameters</dt>
+<dt class="field-odd">Parameters<span class="colon">:</span></dt>
 <dd class="field-odd"><ul class="simple">
 <li><p><strong>ctx</strong> – Context to use.</p></li>
 <li><p><strong>de</strong> – Data entry containing successful completion details.</p></li>
@@ -951,7 +1010,7 @@
 <li><p><strong>opts</strong> – Optional options to override the default context behaviours.</p></li>
 </ul>
 </dd>
-<dt class="field-even">Returns</dt>
+<dt class="field-even">Returns<span class="colon">:</span></dt>
 <dd class="field-even"><p>Number of completed operations. Negative error code on failure. </p>
 </dd>
 </dl>

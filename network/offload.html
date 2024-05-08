@@ -1,21 +1,24 @@
 <!DOCTYPE html>
-<html class="writer-html5" lang="en" >
+<html class="writer-html5" lang="en" data-content_root="../">
 <head>
-  <meta charset="utf-8" /><meta name="generator" content="Docutils 0.17.1: http://docutils.sourceforge.net/" />
+  <meta charset="utf-8" /><meta name="viewport" content="width=device-width, initial-scale=1" />
 
   <meta name="viewport" content="width=device-width, initial-scale=1.0" />
   <title>Hardware Offload Configuration &mdash; libtrf  documentation</title>
-      <link rel="stylesheet" href="../_static/pygments.css" type="text/css" />
-      <link rel="stylesheet" href="../_static/css/theme.css" type="text/css" />
-      <link rel="stylesheet" href="../_static/graphviz.css" type="text/css" />
+      <link rel="stylesheet" type="text/css" href="../_static/pygments.css?v=80d5e7a1" />
+      <link rel="stylesheet" type="text/css" href="../_static/css/theme.css?v=19f00094" />
+      <link rel="stylesheet" type="text/css" href="../_static/graphviz.css?v=fd3f3429" />
+
+  
   <!--[if lt IE 9]>
     <script src="../_static/js/html5shiv.min.js"></script>
   <![endif]-->
   
-        <script data-url_root="../" id="documentation_options" src="../_static/documentation_options.js"></script>
-        <script src="../_static/jquery.js"></script>
-        <script src="../_static/underscore.js"></script>
-        <script src="../_static/doctools.js"></script>
+        <script src="../_static/jquery.js?v=5d32c60e"></script>
+        <script src="../_static/_sphinx_javascript_frameworks_compat.js?v=2cd50e6c"></script>
+        <script src="../_static/documentation_options.js?v=5929fcd5"></script>
+        <script src="../_static/doctools.js?v=9a2dae69"></script>
+        <script src="../_static/sphinx_highlight.js?v=dc90522c"></script>
     <script src="../_static/js/theme.js"></script>
     <link rel="index" title="Index" href="../genindex.html" />
     <link rel="search" title="Search" href="../search.html" />
@@ -28,11 +31,15 @@
     <nav data-toggle="wy-nav-shift" class="wy-nav-side">
       <div class="wy-side-scroll">
         <div class="wy-side-nav-search" >
-            <a href="../index.html" class="icon icon-home"> libtrf
+
+          
+          
+          <a href="../index.html" class="icon icon-home">
+            libtrf
           </a>
 <div role="search">
   <form id="rtd-search-form" class="wy-form" action="../search.html" method="get">
-    <input type="text" name="q" placeholder="Search docs" />
+    <input type="text" name="q" placeholder="Search docs" aria-label="Search docs" />
     <input type="hidden" name="check_keywords" value="yes" />
     <input type="hidden" name="area" value="default" />
   </form>
@@ -63,9 +70,9 @@
         <div class="rst-content">
           <div role="navigation" aria-label="Page navigation">
   <ul class="wy-breadcrumbs">
-      <li><a href="../index.html" class="icon icon-home"></a> &raquo;</li>
-          <li><a href="index.html">Network Configuration</a> &raquo;</li>
-      <li>Hardware Offload Configuration</li>
+      <li><a href="../index.html" class="icon icon-home" aria-label="Home"></a></li>
+          <li class="breadcrumb-item"><a href="index.html">Network Configuration</a></li>
+      <li class="breadcrumb-item active">Hardware Offload Configuration</li>
       <li class="wy-breadcrumbs-aside">
             <a href="../_sources/network/offload.rst.txt" rel="nofollow"> View page source</a>
       </li>
@@ -76,34 +83,34 @@
            <div itemprop="articleBody">
              
   <section id="hardware-offload-configuration">
-<span id="network-offload"></span><h1>Hardware Offload Configuration<a class="headerlink" href="#hardware-offload-configuration" title="Permalink to this headline"></a></h1>
+<span id="network-offload"></span><h1>Hardware Offload Configuration<a class="headerlink" href="#hardware-offload-configuration" title="Link to this heading"></a></h1>
 <p>Many NICs support hardware offload. Some do it well, and some may end up
 reducing performance at high packet rates. In general, leaving the defaults as
 is is fine, as long as performance is acceptable.</p>
 <p>On Linux, you may use the <code class="docutils literal notranslate"><span class="pre">ethtool</span></code> package to view and enable/disable
 offloads.</p>
-<div class="highlight-c notranslate"><div class="highlight"><pre><span></span>$ ethtool -k enp225s0f0
-Features for enp225s0f0:
-rx-checksumming: on
-tx-checksumming: on
-        tx-checksum-ipv4: off [fixed]
-        tx-checksum-ip-generic: on
-        tx-checksum-ipv6: off [fixed]
-        tx-checksum-fcoe-crc: off [fixed]
-        tx-checksum-sctp: off [fixed]
-scatter-gather: on
-        tx-scatter-gather: on
-        tx-scatter-gather-fraglist: off [fixed]
-tcp-segmentation-offload: on
-        tx-tcp-segmentation: on
-        tx-tcp-ecn-segmentation: off [fixed]
-        tx-tcp-mangleid-segmentation: off
-        tx-tcp6-segmentation: on
-generic-segmentation-offload: on
-generic-receive-offload: on
-large-receive-offload: off
-rx-vlan-offload: on
-tx-vlan-offload: on
+<div class="highlight-c notranslate"><div class="highlight"><pre><span></span><span class="n">$</span><span class="w"> </span><span class="n">ethtool</span><span class="w"> </span><span class="o">-</span><span class="n">k</span><span class="w"> </span><span class="n">enp225s0f0</span>
+<span class="n">Features</span><span class="w"> </span><span class="k">for</span><span class="w"> </span><span class="n">enp225s0f0</span><span class="o">:</span>
+<span class="n">rx</span><span class="o">-</span><span class="n">checksumming</span><span class="o">:</span><span class="w"> </span><span class="n">on</span>
+<span class="n">tx</span><span class="o">-</span><span class="n">checksumming</span><span class="o">:</span><span class="w"> </span><span class="n">on</span>
+<span class="w">        </span><span class="n">tx</span><span class="o">-</span><span class="n">checksum</span><span class="o">-</span><span class="n">ipv4</span><span class="o">:</span><span class="w"> </span><span class="n">off</span><span class="w"> </span><span class="p">[</span><span class="n">fixed</span><span class="p">]</span>
+<span class="w">        </span><span class="n">tx</span><span class="o">-</span><span class="n">checksum</span><span class="o">-</span><span class="n">ip</span><span class="o">-</span><span class="n">generic</span><span class="o">:</span><span class="w"> </span><span class="n">on</span>
+<span class="w">        </span><span class="n">tx</span><span class="o">-</span><span class="n">checksum</span><span class="o">-</span><span class="n">ipv6</span><span class="o">:</span><span class="w"> </span><span class="n">off</span><span class="w"> </span><span class="p">[</span><span class="n">fixed</span><span class="p">]</span>
+<span class="w">        </span><span class="n">tx</span><span class="o">-</span><span class="n">checksum</span><span class="o">-</span><span class="n">fcoe</span><span class="o">-</span><span class="n">crc</span><span class="o">:</span><span class="w"> </span><span class="n">off</span><span class="w"> </span><span class="p">[</span><span class="n">fixed</span><span class="p">]</span>
+<span class="w">        </span><span class="n">tx</span><span class="o">-</span><span class="n">checksum</span><span class="o">-</span><span class="n">sctp</span><span class="o">:</span><span class="w"> </span><span class="n">off</span><span class="w"> </span><span class="p">[</span><span class="n">fixed</span><span class="p">]</span>
+<span class="n">scatter</span><span class="o">-</span><span class="n">gather</span><span class="o">:</span><span class="w"> </span><span class="n">on</span>
+<span class="w">        </span><span class="n">tx</span><span class="o">-</span><span class="n">scatter</span><span class="o">-</span><span class="n">gather</span><span class="o">:</span><span class="w"> </span><span class="n">on</span>
+<span class="w">        </span><span class="n">tx</span><span class="o">-</span><span class="n">scatter</span><span class="o">-</span><span class="n">gather</span><span class="o">-</span><span class="n">fraglist</span><span class="o">:</span><span class="w"> </span><span class="n">off</span><span class="w"> </span><span class="p">[</span><span class="n">fixed</span><span class="p">]</span>
+<span class="n">tcp</span><span class="o">-</span><span class="n">segmentation</span><span class="o">-</span><span class="n">offload</span><span class="o">:</span><span class="w"> </span><span class="n">on</span>
+<span class="w">        </span><span class="n">tx</span><span class="o">-</span><span class="n">tcp</span><span class="o">-</span><span class="n">segmentation</span><span class="o">:</span><span class="w"> </span><span class="n">on</span>
+<span class="w">        </span><span class="n">tx</span><span class="o">-</span><span class="n">tcp</span><span class="o">-</span><span class="n">ecn</span><span class="o">-</span><span class="n">segmentation</span><span class="o">:</span><span class="w"> </span><span class="n">off</span><span class="w"> </span><span class="p">[</span><span class="n">fixed</span><span class="p">]</span>
+<span class="w">        </span><span class="n">tx</span><span class="o">-</span><span class="n">tcp</span><span class="o">-</span><span class="n">mangleid</span><span class="o">-</span><span class="n">segmentation</span><span class="o">:</span><span class="w"> </span><span class="n">off</span>
+<span class="w">        </span><span class="n">tx</span><span class="o">-</span><span class="n">tcp6</span><span class="o">-</span><span class="n">segmentation</span><span class="o">:</span><span class="w"> </span><span class="n">on</span>
+<span class="n">generic</span><span class="o">-</span><span class="n">segmentation</span><span class="o">-</span><span class="n">offload</span><span class="o">:</span><span class="w"> </span><span class="n">on</span>
+<span class="n">generic</span><span class="o">-</span><span class="n">receive</span><span class="o">-</span><span class="n">offload</span><span class="o">:</span><span class="w"> </span><span class="n">on</span>
+<span class="n">large</span><span class="o">-</span><span class="n">receive</span><span class="o">-</span><span class="n">offload</span><span class="o">:</span><span class="w"> </span><span class="n">off</span>
+<span class="n">rx</span><span class="o">-</span><span class="n">vlan</span><span class="o">-</span><span class="n">offload</span><span class="o">:</span><span class="w"> </span><span class="n">on</span>
+<span class="n">tx</span><span class="o">-</span><span class="n">vlan</span><span class="o">-</span><span class="n">offload</span><span class="o">:</span><span class="w"> </span><span class="n">on</span>
 </pre></div>
 </div>
 <p>Some of the key offloads that may want to be toggled on/off are shown above.

@@ -1,21 +1,24 @@
 <!DOCTYPE html>
-<html class="writer-html5" lang="en" >
+<html class="writer-html5" lang="en" data-content_root="../">
 <head>
-  <meta charset="utf-8" /><meta name="generator" content="Docutils 0.17.1: http://docutils.sourceforge.net/" />
+  <meta charset="utf-8" /><meta name="viewport" content="width=device-width, initial-scale=1" />
 
   <meta name="viewport" content="width=device-width, initial-scale=1.0" />
   <title>Network Setup &amp; Usage Guide &mdash; libtrf  documentation</title>
-      <link rel="stylesheet" href="../_static/pygments.css" type="text/css" />
-      <link rel="stylesheet" href="../_static/css/theme.css" type="text/css" />
-      <link rel="stylesheet" href="../_static/graphviz.css" type="text/css" />
+      <link rel="stylesheet" type="text/css" href="../_static/pygments.css?v=80d5e7a1" />
+      <link rel="stylesheet" type="text/css" href="../_static/css/theme.css?v=19f00094" />
+      <link rel="stylesheet" type="text/css" href="../_static/graphviz.css?v=fd3f3429" />
+
+  
   <!--[if lt IE 9]>
     <script src="../_static/js/html5shiv.min.js"></script>
   <![endif]-->
   
-        <script data-url_root="../" id="documentation_options" src="../_static/documentation_options.js"></script>
-        <script src="../_static/jquery.js"></script>
-        <script src="../_static/underscore.js"></script>
-        <script src="../_static/doctools.js"></script>
+        <script src="../_static/jquery.js?v=5d32c60e"></script>
+        <script src="../_static/_sphinx_javascript_frameworks_compat.js?v=2cd50e6c"></script>
+        <script src="../_static/documentation_options.js?v=5929fcd5"></script>
+        <script src="../_static/doctools.js?v=9a2dae69"></script>
+        <script src="../_static/sphinx_highlight.js?v=dc90522c"></script>
     <script src="../_static/js/theme.js"></script>
     <link rel="index" title="Index" href="../genindex.html" />
     <link rel="search" title="Search" href="../search.html" />
@@ -28,11 +31,15 @@
     <nav data-toggle="wy-nav-shift" class="wy-nav-side">
       <div class="wy-side-scroll">
         <div class="wy-side-nav-search" >
-            <a href="../index.html" class="icon icon-home"> libtrf
+
+          
+          
+          <a href="../index.html" class="icon icon-home">
+            libtrf
           </a>
 <div role="search">
   <form id="rtd-search-form" class="wy-form" action="../search.html" method="get">
-    <input type="text" name="q" placeholder="Search docs" />
+    <input type="text" name="q" placeholder="Search docs" aria-label="Search docs" />
     <input type="hidden" name="check_keywords" value="yes" />
     <input type="hidden" name="area" value="default" />
   </form>
@@ -75,9 +82,9 @@
         <div class="rst-content">
           <div role="navigation" aria-label="Page navigation">
   <ul class="wy-breadcrumbs">
-      <li><a href="../index.html" class="icon icon-home"></a> &raquo;</li>
-          <li><a href="index.html">Network Configuration</a> &raquo;</li>
-      <li>Network Setup &amp; Usage Guide</li>
+      <li><a href="../index.html" class="icon icon-home" aria-label="Home"></a></li>
+          <li class="breadcrumb-item"><a href="index.html">Network Configuration</a></li>
+      <li class="breadcrumb-item active">Network Setup &amp; Usage Guide</li>
       <li class="wy-breadcrumbs-aside">
             <a href="../_sources/network/setup.rst.txt" rel="nofollow"> View page source</a>
       </li>
@@ -88,12 +95,12 @@
            <div itemprop="articleBody">
              
   <section id="network-setup-usage-guide">
-<span id="network-setup"></span><h1>Network Setup &amp; Usage Guide<a class="headerlink" href="#network-setup-usage-guide" title="Permalink to this headline"></a></h1>
+<span id="network-setup"></span><h1>Network Setup &amp; Usage Guide<a class="headerlink" href="#network-setup-usage-guide" title="Link to this heading"></a></h1>
 <p>Using the LibTRF APIs with RDMA NICs may require additional configuration for
 optimal performance. Please see below for setup considerations depending on the
 fabric provider.</p>
 <section id="general-configuration">
-<h2>General Configuration<a class="headerlink" href="#general-configuration" title="Permalink to this headline"></a></h2>
+<h2>General Configuration<a class="headerlink" href="#general-configuration" title="Link to this heading"></a></h2>
 <p>For all transports, the use of jumbo frames is highly recommended. Be wary of
 the limitations of both your switches and network cards. A safe bet is a 4KB
 MTU, and most newer hardware supports 9KB+ MTUs. Try reducing the MTU if you
@@ -101,14 +108,14 @@ experience packet loss.</p>
 <p>A quick check to determine whether your MTU is set too high is to ping the peer
 address with PMTUD enabled. For instance, if your MTU is set to 4000 bytes and
 my peer address is 203.0.113.0, you may do the following:</p>
-<div class="highlight-c notranslate"><div class="highlight"><pre><span></span>ping -M do -s $((4000-28)) 203.0.113.10
+<div class="highlight-c notranslate"><div class="highlight"><pre><span></span><span class="n">ping</span><span class="w"> </span><span class="o">-</span><span class="n">M</span><span class="w"> </span><span class="k">do</span><span class="w"> </span><span class="o">-</span><span class="n">s</span><span class="w"> </span><span class="n">$</span><span class="p">((</span><span class="mi">4000-28</span><span class="p">))</span><span class="w"> </span><span class="mf">203.0.113.10</span>
 </pre></div>
 </div>
 </section>
 <section id="transport-specific-configuration">
-<h2>Transport-specific configuration<a class="headerlink" href="#transport-specific-configuration" title="Permalink to this headline"></a></h2>
+<h2>Transport-specific configuration<a class="headerlink" href="#transport-specific-configuration" title="Link to this heading"></a></h2>
 <section id="tcp">
-<h3>TCP<a class="headerlink" href="#tcp" title="Permalink to this headline"></a></h3>
+<h3>TCP<a class="headerlink" href="#tcp" title="Link to this heading"></a></h3>
 <ul class="simple">
 <li><p>Practically all network hardware</p></li>
 </ul>
@@ -120,7 +127,7 @@ recommended.</p>
 hardware offloads if poor performance is experienced. See <a class="reference internal" href="offload.html"><span class="doc">Hardware Offload Configuration</span></a>.</p>
 </section>
 <section id="rdma-over-converged-ethernet-roce-v1">
-<h3>RDMA over Converged Ethernet (RoCE) v1<a class="headerlink" href="#rdma-over-converged-ethernet-roce-v1" title="Permalink to this headline"></a></h3>
+<h3>RDMA over Converged Ethernet (RoCE) v1<a class="headerlink" href="#rdma-over-converged-ethernet-roce-v1" title="Link to this heading"></a></h3>
 <ul class="simple">
 <li><p>Mellanox ConnectX-2 EN / VPI</p></li>
 <li><p>Mellanox ConnectX-3 EN / VPI</p></li>
@@ -130,7 +137,7 @@ hardware offloads if poor performance is experienced. See <a class="reference in
 configured.</p>
 </section>
 <section id="rdma-over-converged-ethernet-roce-v2">
-<h3>RDMA over Converged Ethernet (RoCE) v2<a class="headerlink" href="#rdma-over-converged-ethernet-roce-v2" title="Permalink to this headline"></a></h3>
+<h3>RDMA over Converged Ethernet (RoCE) v2<a class="headerlink" href="#rdma-over-converged-ethernet-roce-v2" title="Link to this heading"></a></h3>
 <p><strong>Not interoperable</strong> with RoCE v1. However, some NICs, such as Mellanox NICs,
 may be toggled between RoCE v1 and RoCE v2 operating modes.</p>
 <ul class="simple">
@@ -146,7 +153,7 @@ port must either be dedicated for RDMA traffic with regular flow control
 configured.</p>
 </section>
 <section id="iwarp">
-<h3>iWARP<a class="headerlink" href="#iwarp" title="Permalink to this headline"></a></h3>
+<h3>iWARP<a class="headerlink" href="#iwarp" title="Link to this heading"></a></h3>
 <ul class="simple">
 <li><p>Chelsio Terminator 3 or later</p></li>
 <li><p>Chelsio T520-CR</p></li>
@@ -158,7 +165,7 @@ configured.</p>
 frames and ECN may improve performance.</p>
 </section>
 <section id="infiniband">
-<h3>InfiniBand<a class="headerlink" href="#infiniband" title="Permalink to this headline"></a></h3>
+<h3>InfiniBand<a class="headerlink" href="#infiniband" title="Link to this heading"></a></h3>
 <p><strong>Not interoperable with Ethernet.</strong> All InfiniBand versions should support RDMA
 traffic.</p>
 <ul class="simple">
@@ -172,7 +179,7 @@ switch configuration as by design, InfiniBand is a lossless fabric. See
 </section>
 </section>
 <section id="unsupported-transports">
-<h2>Unsupported Transports<a class="headerlink" href="#unsupported-transports" title="Permalink to this headline"></a></h2>
+<h2>Unsupported Transports<a class="headerlink" href="#unsupported-transports" title="Link to this heading"></a></h2>
 <p>Some transports supported by Libfabric, but unsupported by LibTRF are as
 follows:</p>
 <ul class="simple">

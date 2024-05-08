@@ -1,21 +1,24 @@
 <!DOCTYPE html>
-<html class="writer-html5" lang="en" >
+<html class="writer-html5" lang="en" data-content_root="../">
 <head>
-  <meta charset="utf-8" /><meta name="generator" content="Docutils 0.17.1: http://docutils.sourceforge.net/" />
+  <meta charset="utf-8" /><meta name="viewport" content="width=device-width, initial-scale=1" />
 
   <meta name="viewport" content="width=device-width, initial-scale=1.0" />
   <title>InfiniBand Configuration &mdash; libtrf  documentation</title>
-      <link rel="stylesheet" href="../_static/pygments.css" type="text/css" />
-      <link rel="stylesheet" href="../_static/css/theme.css" type="text/css" />
-      <link rel="stylesheet" href="../_static/graphviz.css" type="text/css" />
+      <link rel="stylesheet" type="text/css" href="../_static/pygments.css?v=80d5e7a1" />
+      <link rel="stylesheet" type="text/css" href="../_static/css/theme.css?v=19f00094" />
+      <link rel="stylesheet" type="text/css" href="../_static/graphviz.css?v=fd3f3429" />
+
+  
   <!--[if lt IE 9]>
     <script src="../_static/js/html5shiv.min.js"></script>
   <![endif]-->
   
-        <script data-url_root="../" id="documentation_options" src="../_static/documentation_options.js"></script>
-        <script src="../_static/jquery.js"></script>
-        <script src="../_static/underscore.js"></script>
-        <script src="../_static/doctools.js"></script>
+        <script src="../_static/jquery.js?v=5d32c60e"></script>
+        <script src="../_static/_sphinx_javascript_frameworks_compat.js?v=2cd50e6c"></script>
+        <script src="../_static/documentation_options.js?v=5929fcd5"></script>
+        <script src="../_static/doctools.js?v=9a2dae69"></script>
+        <script src="../_static/sphinx_highlight.js?v=dc90522c"></script>
     <script src="../_static/js/theme.js"></script>
     <link rel="index" title="Index" href="../genindex.html" />
     <link rel="search" title="Search" href="../search.html" />
@@ -28,11 +31,15 @@
     <nav data-toggle="wy-nav-shift" class="wy-nav-side">
       <div class="wy-side-scroll">
         <div class="wy-side-nav-search" >
-            <a href="../index.html" class="icon icon-home"> libtrf
+
+          
+          
+          <a href="../index.html" class="icon icon-home">
+            libtrf
           </a>
 <div role="search">
   <form id="rtd-search-form" class="wy-form" action="../search.html" method="get">
-    <input type="text" name="q" placeholder="Search docs" />
+    <input type="text" name="q" placeholder="Search docs" aria-label="Search docs" />
     <input type="hidden" name="check_keywords" value="yes" />
     <input type="hidden" name="area" value="default" />
   </form>
@@ -66,9 +73,9 @@
         <div class="rst-content">
           <div role="navigation" aria-label="Page navigation">
   <ul class="wy-breadcrumbs">
-      <li><a href="../index.html" class="icon icon-home"></a> &raquo;</li>
-          <li><a href="index.html">Network Configuration</a> &raquo;</li>
-      <li>InfiniBand Configuration</li>
+      <li><a href="../index.html" class="icon icon-home" aria-label="Home"></a></li>
+          <li class="breadcrumb-item"><a href="index.html">Network Configuration</a></li>
+      <li class="breadcrumb-item active">InfiniBand Configuration</li>
       <li class="wy-breadcrumbs-aside">
             <a href="../_sources/network/infiniband.rst.txt" rel="nofollow"> View page source</a>
       </li>
@@ -79,36 +86,36 @@
            <div itemprop="articleBody">
              
   <section id="infiniband-configuration">
-<span id="network-infiniband"></span><h1>InfiniBand Configuration<a class="headerlink" href="#infiniband-configuration" title="Permalink to this headline"></a></h1>
+<span id="network-infiniband"></span><h1>InfiniBand Configuration<a class="headerlink" href="#infiniband-configuration" title="Link to this heading"></a></h1>
 <p>Infiniband ports, unlike Ethernet, will not automatically come up on a
 connection - an SM, or Subnet Manager, is required. OpenSM may run on the
 switch, or on any one of the nodes in the network, but only one OpenSM instance
 may be active per subnet.</p>
 <p>OpenSM should be available via your distribution package manager as <code class="docutils literal notranslate"><span class="pre">opensm</span></code>.
 Once installed, ensure the service is started.</p>
-<div class="highlight-c notranslate"><div class="highlight"><pre><span></span>$ sudo systemctl status opensm
-● opensm.service - Starts the OpenSM InfiniBand fabric Subnet Manager
-    Loaded: loaded (/usr/lib/systemd/system/opensm.service; disabled; vendor preset: disabled)
-    Active: active (running) since Tue 2022-03-29 10:09:59 +07; 1s ago
-    Docs: man:opensm
-    Process: 50756 ExecStart=/usr/libexec/opensm-launch (code=exited, status=0/SUCCESS)
-Main PID: 50757 (opensm-launch)
-    Tasks: 2 (limit: 56452)
-    Memory: 640.0K
-        CPU: 14ms
-    CGroup: /system.slice/opensm.service
-            ├─50757 /usr/bin/bash /usr/libexec/opensm-launch
-            └─50769 sleep 30
+<div class="highlight-c notranslate"><div class="highlight"><pre><span></span><span class="n">$</span><span class="w"> </span><span class="n">sudo</span><span class="w"> </span><span class="n">systemctl</span><span class="w"> </span><span class="n">status</span><span class="w"> </span><span class="n">opensm</span>
+<span class="err">●</span><span class="w"> </span><span class="n">opensm</span><span class="p">.</span><span class="n">service</span><span class="w"> </span><span class="o">-</span><span class="w"> </span><span class="n">Starts</span><span class="w"> </span><span class="n">the</span><span class="w"> </span><span class="n">OpenSM</span><span class="w"> </span><span class="n">InfiniBand</span><span class="w"> </span><span class="n">fabric</span><span class="w"> </span><span class="n">Subnet</span><span class="w"> </span><span class="n">Manager</span>
+<span class="w">    </span><span class="nl">Loaded</span><span class="p">:</span><span class="w"> </span><span class="n">loaded</span><span class="w"> </span><span class="p">(</span><span class="o">/</span><span class="n">usr</span><span class="o">/</span><span class="n">lib</span><span class="o">/</span><span class="n">systemd</span><span class="o">/</span><span class="n">system</span><span class="o">/</span><span class="n">opensm</span><span class="p">.</span><span class="n">service</span><span class="p">;</span><span class="w"> </span><span class="n">disabled</span><span class="p">;</span><span class="w"> </span><span class="n">vendor</span><span class="w"> </span><span class="n">preset</span><span class="o">:</span><span class="w"> </span><span class="n">disabled</span><span class="p">)</span>
+<span class="w">    </span><span class="nl">Active</span><span class="p">:</span><span class="w"> </span><span class="n">active</span><span class="w"> </span><span class="p">(</span><span class="n">running</span><span class="p">)</span><span class="w"> </span><span class="n">since</span><span class="w"> </span><span class="n">Tue</span><span class="w"> </span><span class="mi">2022</span><span class="mo">-03</span><span class="mi">-29</span><span class="w"> </span><span class="mi">10</span><span class="o">:</span><span class="mi">09</span><span class="o">:</span><span class="mi">59</span><span class="w"> </span><span class="o">+</span><span class="mo">07</span><span class="p">;</span><span class="w"> </span><span class="mi">1</span><span class="n">s</span><span class="w"> </span><span class="n">ago</span>
+<span class="w">    </span><span class="nl">Docs</span><span class="p">:</span><span class="w"> </span><span class="n">man</span><span class="o">:</span><span class="n">opensm</span>
+<span class="w">    </span><span class="nl">Process</span><span class="p">:</span><span class="w"> </span><span class="mi">50756</span><span class="w"> </span><span class="n">ExecStart</span><span class="o">=/</span><span class="n">usr</span><span class="o">/</span><span class="n">libexec</span><span class="o">/</span><span class="n">opensm</span><span class="o">-</span><span class="n">launch</span><span class="w"> </span><span class="p">(</span><span class="n">code</span><span class="o">=</span><span class="n">exited</span><span class="p">,</span><span class="w"> </span><span class="n">status</span><span class="o">=</span><span class="mi">0</span><span class="o">/</span><span class="n">SUCCESS</span><span class="p">)</span>
+<span class="n">Main</span><span class="w"> </span><span class="n">PID</span><span class="o">:</span><span class="w"> </span><span class="mi">50757</span><span class="w"> </span><span class="p">(</span><span class="n">opensm</span><span class="o">-</span><span class="n">launch</span><span class="p">)</span>
+<span class="w">    </span><span class="nl">Tasks</span><span class="p">:</span><span class="w"> </span><span class="mi">2</span><span class="w"> </span><span class="p">(</span><span class="n">limit</span><span class="o">:</span><span class="w"> </span><span class="mi">56452</span><span class="p">)</span>
+<span class="w">    </span><span class="nl">Memory</span><span class="p">:</span><span class="w"> </span><span class="mf">640.0</span><span class="n">K</span>
+<span class="w">        </span><span class="nl">CPU</span><span class="p">:</span><span class="w"> </span><span class="mi">14</span><span class="n">ms</span>
+<span class="w">    </span><span class="nl">CGroup</span><span class="p">:</span><span class="w"> </span><span class="o">/</span><span class="n">system</span><span class="p">.</span><span class="n">slice</span><span class="o">/</span><span class="n">opensm</span><span class="p">.</span><span class="n">service</span>
+<span class="w">            </span><span class="err">├─</span><span class="mi">50757</span><span class="w"> </span><span class="o">/</span><span class="n">usr</span><span class="o">/</span><span class="n">bin</span><span class="o">/</span><span class="n">bash</span><span class="w"> </span><span class="o">/</span><span class="n">usr</span><span class="o">/</span><span class="n">libexec</span><span class="o">/</span><span class="n">opensm</span><span class="o">-</span><span class="n">launch</span>
+<span class="w">            </span><span class="err">└─</span><span class="mi">50769</span><span class="w"> </span><span class="n">sleep</span><span class="w"> </span><span class="mi">30</span>
 
-Mar 29 10:09:59 tls-1 opensm-launch[50758]: -------------------------------------------------
-Mar 29 10:09:59 tls-1 opensm-launch[50758]: OpenSM 3.3.24
-Mar 29 10:09:59 tls-1 opensm-launch[50758]:  Reading Cached Option File: /etc/rdma/opensm.conf
-Mar 29 10:09:59 tls-1 opensm-launch[50758]: Command Line Arguments:
-Mar 29 10:09:59 tls-1 opensm-launch[50758]:  Log File: /var/log/opensm.log
-Mar 29 10:09:59 tls-1 opensm-launch[50758]: -------------------------------------------------
-Mar 29 10:09:59 tls-1 OpenSM[50758]: /var/log/opensm.log log file opened
-Mar 29 10:09:59 tls-1 OpenSM[50758]: OpenSM 3.3.24
-Mar 29 10:09:59 tls-1 opensm-launch[50758]: OpenSM 3.3.24
+<span class="n">Mar</span><span class="w"> </span><span class="mi">29</span><span class="w"> </span><span class="mi">10</span><span class="o">:</span><span class="mi">09</span><span class="o">:</span><span class="mi">59</span><span class="w"> </span><span class="n">tls</span><span class="mi">-1</span><span class="w"> </span><span class="n">opensm</span><span class="o">-</span><span class="n">launch</span><span class="p">[</span><span class="mi">50758</span><span class="p">]</span><span class="o">:</span><span class="w"> </span><span class="o">-------------------------------------------------</span>
+<span class="n">Mar</span><span class="w"> </span><span class="mi">29</span><span class="w"> </span><span class="mi">10</span><span class="o">:</span><span class="mi">09</span><span class="o">:</span><span class="mi">59</span><span class="w"> </span><span class="n">tls</span><span class="mi">-1</span><span class="w"> </span><span class="n">opensm</span><span class="o">-</span><span class="n">launch</span><span class="p">[</span><span class="mi">50758</span><span class="p">]</span><span class="o">:</span><span class="w"> </span><span class="n">OpenSM</span><span class="w"> </span><span class="mf">3.3.24</span>
+<span class="n">Mar</span><span class="w"> </span><span class="mi">29</span><span class="w"> </span><span class="mi">10</span><span class="o">:</span><span class="mi">09</span><span class="o">:</span><span class="mi">59</span><span class="w"> </span><span class="n">tls</span><span class="mi">-1</span><span class="w"> </span><span class="n">opensm</span><span class="o">-</span><span class="n">launch</span><span class="p">[</span><span class="mi">50758</span><span class="p">]</span><span class="o">:</span><span class="w">  </span><span class="n">Reading</span><span class="w"> </span><span class="n">Cached</span><span class="w"> </span><span class="n">Option</span><span class="w"> </span><span class="n">File</span><span class="o">:</span><span class="w"> </span><span class="o">/</span><span class="n">etc</span><span class="o">/</span><span class="n">rdma</span><span class="o">/</span><span class="n">opensm</span><span class="p">.</span><span class="n">conf</span>
+<span class="n">Mar</span><span class="w"> </span><span class="mi">29</span><span class="w"> </span><span class="mi">10</span><span class="o">:</span><span class="mi">09</span><span class="o">:</span><span class="mi">59</span><span class="w"> </span><span class="n">tls</span><span class="mi">-1</span><span class="w"> </span><span class="n">opensm</span><span class="o">-</span><span class="n">launch</span><span class="p">[</span><span class="mi">50758</span><span class="p">]</span><span class="o">:</span><span class="w"> </span><span class="n">Command</span><span class="w"> </span><span class="n">Line</span><span class="w"> </span><span class="n">Arguments</span><span class="o">:</span>
+<span class="n">Mar</span><span class="w"> </span><span class="mi">29</span><span class="w"> </span><span class="mi">10</span><span class="o">:</span><span class="mi">09</span><span class="o">:</span><span class="mi">59</span><span class="w"> </span><span class="n">tls</span><span class="mi">-1</span><span class="w"> </span><span class="n">opensm</span><span class="o">-</span><span class="n">launch</span><span class="p">[</span><span class="mi">50758</span><span class="p">]</span><span class="o">:</span><span class="w">  </span><span class="n">Log</span><span class="w"> </span><span class="n">File</span><span class="o">:</span><span class="w"> </span><span class="o">/</span><span class="n">var</span><span class="o">/</span><span class="n">log</span><span class="o">/</span><span class="n">opensm</span><span class="p">.</span><span class="n">log</span>
+<span class="n">Mar</span><span class="w"> </span><span class="mi">29</span><span class="w"> </span><span class="mi">10</span><span class="o">:</span><span class="mi">09</span><span class="o">:</span><span class="mi">59</span><span class="w"> </span><span class="n">tls</span><span class="mi">-1</span><span class="w"> </span><span class="n">opensm</span><span class="o">-</span><span class="n">launch</span><span class="p">[</span><span class="mi">50758</span><span class="p">]</span><span class="o">:</span><span class="w"> </span><span class="o">-------------------------------------------------</span>
+<span class="n">Mar</span><span class="w"> </span><span class="mi">29</span><span class="w"> </span><span class="mi">10</span><span class="o">:</span><span class="mi">09</span><span class="o">:</span><span class="mi">59</span><span class="w"> </span><span class="n">tls</span><span class="mi">-1</span><span class="w"> </span><span class="n">OpenSM</span><span class="p">[</span><span class="mi">50758</span><span class="p">]</span><span class="o">:</span><span class="w"> </span><span class="o">/</span><span class="n">var</span><span class="o">/</span><span class="n">log</span><span class="o">/</span><span class="n">opensm</span><span class="p">.</span><span class="n">log</span><span class="w"> </span><span class="n">log</span><span class="w"> </span><span class="n">file</span><span class="w"> </span><span class="n">opened</span>
+<span class="n">Mar</span><span class="w"> </span><span class="mi">29</span><span class="w"> </span><span class="mi">10</span><span class="o">:</span><span class="mi">09</span><span class="o">:</span><span class="mi">59</span><span class="w"> </span><span class="n">tls</span><span class="mi">-1</span><span class="w"> </span><span class="n">OpenSM</span><span class="p">[</span><span class="mi">50758</span><span class="p">]</span><span class="o">:</span><span class="w"> </span><span class="n">OpenSM</span><span class="w"> </span><span class="mf">3.3.24</span>
+<span class="n">Mar</span><span class="w"> </span><span class="mi">29</span><span class="w"> </span><span class="mi">10</span><span class="o">:</span><span class="mi">09</span><span class="o">:</span><span class="mi">59</span><span class="w"> </span><span class="n">tls</span><span class="mi">-1</span><span class="w"> </span><span class="n">opensm</span><span class="o">-</span><span class="n">launch</span><span class="p">[</span><span class="mi">50758</span><span class="p">]</span><span class="o">:</span><span class="w"> </span><span class="n">OpenSM</span><span class="w"> </span><span class="mf">3.3.24</span>
 </pre></div>
 </div>
 <p>For most users, the default configuration is fine. If you are using SR-IOV VFs,
@@ -120,22 +127,22 @@ line:</p>
 <p><code class="docutils literal notranslate"><span class="pre">virt_enabled</span> <span class="pre">2</span></code></p>
 <p>Save and restart OpenSM.</p>
 <section id="sr-iov-configuration">
-<h2>SR-IOV Configuration<a class="headerlink" href="#sr-iov-configuration" title="Permalink to this headline"></a></h2>
+<h2>SR-IOV Configuration<a class="headerlink" href="#sr-iov-configuration" title="Link to this heading"></a></h2>
 <p>You should ensure the Port GUIDs are set before passing through a VF, as the
 guest is not usually allowed to change this value. Unlike a MAC address, a GUID
 is <strong>64 bits</strong>. A sample configuration is provided below for the mlx5 driver
 (run as the root user):</p>
 <div class="highlight-bash notranslate"><div class="highlight"><pre><span></span><span class="c1"># If you haven&#39;t enabled SR-IOV, you can do this now</span>
-<span class="nb">echo</span> <span class="m">1</span> &gt; /sys/class/infiniband/mlx5_0/device/mlx5_num_vfs
+<span class="nb">echo</span><span class="w"> </span><span class="m">1</span><span class="w"> </span>&gt;<span class="w"> </span>/sys/class/infiniband/mlx5_0/device/mlx5_num_vfs
 
 <span class="c1"># Verify the number of VFs</span>
-cat /sys/class/infiniband/mlx5_0/device/mlx5_num_vfs
+cat<span class="w"> </span>/sys/class/infiniband/mlx5_0/device/mlx5_num_vfs
 <span class="m">1</span>
 
 <span class="c1"># Set node &amp; port GUIDs</span>
-<span class="nb">echo</span> ad:3a:73:c4:06:29:20:f5 &gt; /sys/class/infiniband/mlx5_0/device/sriov/0/node
-<span class="nb">echo</span> ad:3a:73:c4:06:29:20:f6 &gt; /sys/class/infiniband/mlx5_0/device/sriov/0/port
-<span class="nb">echo</span> Follow &gt; /sys/class/infiniband/mlx5_0/device/sriov/0/policy
+<span class="nb">echo</span><span class="w"> </span>ad:3a:73:c4:06:29:20:f5<span class="w"> </span>&gt;<span class="w"> </span>/sys/class/infiniband/mlx5_0/device/sriov/0/node
+<span class="nb">echo</span><span class="w"> </span>ad:3a:73:c4:06:29:20:f6<span class="w"> </span>&gt;<span class="w"> </span>/sys/class/infiniband/mlx5_0/device/sriov/0/port
+<span class="nb">echo</span><span class="w"> </span>Follow<span class="w"> </span>&gt;<span class="w"> </span>/sys/class/infiniband/mlx5_0/device/sriov/0/policy
 </pre></div>
 </div>
 </section>

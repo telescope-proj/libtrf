@@ -1,21 +1,24 @@
 <!DOCTYPE html>
-<html class="writer-html5" lang="en" >
+<html class="writer-html5" lang="en" data-content_root="../">
 <head>
-  <meta charset="utf-8" /><meta name="generator" content="Docutils 0.17.1: http://docutils.sourceforge.net/" />
+  <meta charset="utf-8" /><meta name="viewport" content="width=device-width, initial-scale=1" />
 
   <meta name="viewport" content="width=device-width, initial-scale=1.0" />
   <title>TRF API Function Documentation &mdash; libtrf  documentation</title>
-      <link rel="stylesheet" href="../_static/pygments.css" type="text/css" />
-      <link rel="stylesheet" href="../_static/css/theme.css" type="text/css" />
-      <link rel="stylesheet" href="../_static/graphviz.css" type="text/css" />
+      <link rel="stylesheet" type="text/css" href="../_static/pygments.css?v=80d5e7a1" />
+      <link rel="stylesheet" type="text/css" href="../_static/css/theme.css?v=19f00094" />
+      <link rel="stylesheet" type="text/css" href="../_static/graphviz.css?v=fd3f3429" />
+
+  
   <!--[if lt IE 9]>
     <script src="../_static/js/html5shiv.min.js"></script>
   <![endif]-->
   
-        <script data-url_root="../" id="documentation_options" src="../_static/documentation_options.js"></script>
-        <script src="../_static/jquery.js"></script>
-        <script src="../_static/underscore.js"></script>
-        <script src="../_static/doctools.js"></script>
+        <script src="../_static/jquery.js?v=5d32c60e"></script>
+        <script src="../_static/_sphinx_javascript_frameworks_compat.js?v=2cd50e6c"></script>
+        <script src="../_static/documentation_options.js?v=5929fcd5"></script>
+        <script src="../_static/doctools.js?v=9a2dae69"></script>
+        <script src="../_static/sphinx_highlight.js?v=dc90522c"></script>
     <script src="../_static/js/theme.js"></script>
     <link rel="index" title="Index" href="../genindex.html" />
     <link rel="search" title="Search" href="../search.html" />
@@ -28,11 +31,15 @@
     <nav data-toggle="wy-nav-shift" class="wy-nav-side">
       <div class="wy-side-scroll">
         <div class="wy-side-nav-search" >
-            <a href="../index.html" class="icon icon-home"> libtrf
+
+          
+          
+          <a href="../index.html" class="icon icon-home">
+            libtrf
           </a>
 <div role="search">
   <form id="rtd-search-form" class="wy-form" action="../search.html" method="get">
-    <input type="text" name="q" placeholder="Search docs" />
+    <input type="text" name="q" placeholder="Search docs" aria-label="Search docs" />
     <input type="hidden" name="check_keywords" value="yes" />
     <input type="hidden" name="area" value="default" />
   </form>
@@ -67,8 +74,8 @@
         <div class="rst-content">
           <div role="navigation" aria-label="Page navigation">
   <ul class="wy-breadcrumbs">
-      <li><a href="../index.html" class="icon icon-home"></a> &raquo;</li>
-      <li>TRF API Function Documentation</li>
+      <li><a href="../index.html" class="icon icon-home" aria-label="Home"></a></li>
+      <li class="breadcrumb-item active">TRF API Function Documentation</li>
       <li class="wy-breadcrumbs-aside">
             <a href="../_sources/api/index.rst.txt" rel="nofollow"> View page source</a>
       </li>
@@ -79,17 +86,329 @@
            <div itemprop="articleBody">
              
   <section id="trf-api-function-documentation">
-<span id="api"></span><h1>TRF API Function Documentation<a class="headerlink" href="#trf-api-function-documentation" title="Permalink to this headline"></a></h1>
+<span id="api"></span><h1>TRF API Function Documentation<a class="headerlink" href="#trf-api-function-documentation" title="Link to this heading"></a></h1>
 <div class="toctree-wrapper compound">
 <ul>
-<li class="toctree-l1"><a class="reference internal" href="trf.html">TRF Core Functionality</a></li>
-<li class="toctree-l1"><a class="reference internal" href="trf_def.html">System Data Structures</a></li>
-<li class="toctree-l1"><a class="reference internal" href="trf_inet.html">Address Handling Functions</a></li>
-<li class="toctree-l1"><a class="reference internal" href="trf_interface.html">Interface &amp; Address Introspection</a></li>
-<li class="toctree-l1"><a class="reference internal" href="trf_internal.html">TRF Internal System Functions</a></li>
-<li class="toctree-l1"><a class="reference internal" href="trf_msg.html">Message Handling Functions</a></li>
-<li class="toctree-l1"><a class="reference internal" href="trf_ncp.html">Negotiation Channel Protocol - Connection Management Functions</a></li>
-<li class="toctree-l1"><a class="reference internal" href="trf_preflight.html">Preflight Connectivity Check Functions</a></li>
+<li class="toctree-l1"><a class="reference internal" href="trf.html">TRF Core Functionality</a><ul>
+<li class="toctree-l2"><a class="reference internal" href="trf.html#_CPPv414trfGetDeadlineP8timespeci"><code class="docutils literal notranslate"><span class="pre">trfGetDeadline()</span></code></a></li>
+<li class="toctree-l2"><a class="reference internal" href="trf.html#_CPPv419trfCreateSubchannel11PTRFContextP11PTRFContext8uint32_t"><code class="docutils literal notranslate"><span class="pre">trfCreateSubchannel()</span></code></a></li>
+<li class="toctree-l2"><a class="reference internal" href="trf.html#_CPPv423trfProcessSubchannelReq11PTRFContextP11PTRFContextP22TrfMsg__MessageWrapper"><code class="docutils literal notranslate"><span class="pre">trfProcessSubchannelReq()</span></code></a></li>
+<li class="toctree-l2"><a class="reference internal" href="trf.html#_CPPv417trfBindSubchannel11PTRFContext11PTRFContext"><code class="docutils literal notranslate"><span class="pre">trfBindSubchannel()</span></code></a></li>
+<li class="toctree-l2"><a class="reference internal" href="trf.html#_CPPv419trfUnbindSubchannel11PTRFContext8uint32_t"><code class="docutils literal notranslate"><span class="pre">trfUnbindSubchannel()</span></code></a></li>
+<li class="toctree-l2"><a class="reference internal" href="trf.html#_CPPv416trfAllocActiveEP11PTRFXFabricP7fi_infoPv6size_t"><code class="docutils literal notranslate"><span class="pre">trfAllocActiveEP()</span></code></a></li>
+<li class="toctree-l2"><a class="reference internal" href="trf.html#_CPPv421trfInsertAVSerialized11PTRFXFabricPcP9fi_addr_t"><code class="docutils literal notranslate"><span class="pre">trfInsertAVSerialized()</span></code></a></li>
+<li class="toctree-l2"><a class="reference internal" href="trf.html#_CPPv423trfDeserializeWireProtoPKcP8uint32_t"><code class="docutils literal notranslate"><span class="pre">trfDeserializeWireProto()</span></code></a></li>
+<li class="toctree-l2"><a class="reference internal" href="trf.html#_CPPv421trfSerializeWireProto8uint32_tPPc"><code class="docutils literal notranslate"><span class="pre">trfSerializeWireProto()</span></code></a></li>
+<li class="toctree-l2"><a class="reference internal" href="trf.html#_CPPv415trfAllocContextv"><code class="docutils literal notranslate"><span class="pre">trfAllocContext()</span></code></a></li>
+<li class="toctree-l2"><a class="reference internal" href="trf.html#_CPPv421trfGetFabricProvidersPKcPKc9TRFEPTypePP7fi_info"><code class="docutils literal notranslate"><span class="pre">trfGetFabricProviders()</span></code></a></li>
+<li class="toctree-l2"><a class="reference internal" href="trf.html#_CPPv420trfFreeInterfaceList13PTRFInterface"><code class="docutils literal notranslate"><span class="pre">trfFreeInterfaceList()</span></code></a></li>
+<li class="toctree-l2"><a class="reference internal" href="trf.html#_CPPv416trfCreateChannel11PTRFContextP7fi_infoPv6size_t"><code class="docutils literal notranslate"><span class="pre">trfCreateChannel()</span></code></a></li>
+<li class="toctree-l2"><a class="reference internal" href="trf.html#_CPPv411trfGetRoutePKcPKcPKcPP7fi_info"><code class="docutils literal notranslate"><span class="pre">trfGetRoute()</span></code></a></li>
+<li class="toctree-l2"><a class="reference internal" href="trf.html#_CPPv418trfConvertFabricAF8uint32_t"><code class="docutils literal notranslate"><span class="pre">trfConvertFabricAF()</span></code></a></li>
+<li class="toctree-l2"><a class="reference internal" href="trf.html#_CPPv420trfConvertInternalAF8uint32_t"><code class="docutils literal notranslate"><span class="pre">trfConvertInternalAF()</span></code></a></li>
+<li class="toctree-l2"><a class="reference internal" href="trf.html#_CPPv419trfSerializeAddressPv8TRFXAddrPPc"><code class="docutils literal notranslate"><span class="pre">trfSerializeAddress()</span></code></a></li>
+<li class="toctree-l2"><a class="reference internal" href="trf.html#_CPPv421trfDeserializeAddressPKciPPvPi"><code class="docutils literal notranslate"><span class="pre">trfDeserializeAddress()</span></code></a></li>
+<li class="toctree-l2"><a class="reference internal" href="trf.html#_CPPv49trfRegBuf11PTRFXFabricPv6size_t8uint64_tPP6fid_mr"><code class="docutils literal notranslate"><span class="pre">trfRegBuf()</span></code></a></li>
+<li class="toctree-l2"><a class="reference internal" href="trf.html#_CPPv420trfRegInternalMsgBuf11PTRFContextPv6size_t"><code class="docutils literal notranslate"><span class="pre">trfRegInternalMsgBuf()</span></code></a></li>
+<li class="toctree-l2"><a class="reference internal" href="trf.html#_CPPv418trfGetEndpointName11PTRFContextPPc"><code class="docutils literal notranslate"><span class="pre">trfGetEndpointName()</span></code></a></li>
+<li class="toctree-l2"><a class="reference internal" href="trf.html#_CPPv423trfDestroyFabricContext11PTRFContext"><code class="docutils literal notranslate"><span class="pre">trfDestroyFabricContext()</span></code></a></li>
+<li class="toctree-l2"><a class="reference internal" href="trf.html#_CPPv420trfSendDisconnectMsgi8uint64_t"><code class="docutils literal notranslate"><span class="pre">trfSendDisconnectMsg()</span></code></a></li>
+<li class="toctree-l2"><a class="reference internal" href="trf.html#_CPPv417trfDestroyContext11PTRFContext"><code class="docutils literal notranslate"><span class="pre">trfDestroyContext()</span></code></a></li>
+<li class="toctree-l2"><a class="reference internal" href="trf.html#_CPPv415trfAllocAligned6size_t6size_t"><code class="docutils literal notranslate"><span class="pre">trfAllocAligned()</span></code></a></li>
+<li class="toctree-l2"><a class="reference internal" href="trf.html#_CPPv418trfBindDisplayList11PTRFContext11PTRFDisplay"><code class="docutils literal notranslate"><span class="pre">trfBindDisplayList()</span></code></a></li>
+<li class="toctree-l2"><a class="reference internal" href="trf.html#_CPPv420trfUpdateDisplayAddr11PTRFContext11PTRFDisplayPv"><code class="docutils literal notranslate"><span class="pre">trfUpdateDisplayAddr()</span></code></a></li>
+<li class="toctree-l2"><a class="reference internal" href="trf.html#_CPPv418trfGetTextureBytes6size_t6size_t12TRFTexFormat"><code class="docutils literal notranslate"><span class="pre">trfGetTextureBytes()</span></code></a></li>
+<li class="toctree-l2"><a class="reference internal" href="trf.html#_CPPv418trfGetDisplayBytes11PTRFDisplay"><code class="docutils literal notranslate"><span class="pre">trfGetDisplayBytes()</span></code></a></li>
+<li class="toctree-l2"><a class="reference internal" href="trf.html#_CPPv417trfGetCursorBytes10PTRFCursor"><code class="docutils literal notranslate"><span class="pre">trfGetCursorBytes()</span></code></a></li>
+<li class="toctree-l2"><a class="reference internal" href="trf.html#_CPPv422trfTextureIsCompressed12TRFTexFormat"><code class="docutils literal notranslate"><span class="pre">trfTextureIsCompressed()</span></code></a></li>
+<li class="toctree-l2"><a class="reference internal" href="trf.html#_CPPv418trfFreeDisplayList11PTRFDisplayi"><code class="docutils literal notranslate"><span class="pre">trfFreeDisplayList()</span></code></a></li>
+<li class="toctree-l2"><a class="reference internal" href="trf.html#_CPPv417trfGetMessageAuto11PTRFContext8uint64_tP8uint64_tPPvPi"><code class="docutils literal notranslate"><span class="pre">trfGetMessageAuto()</span></code></a></li>
+<li class="toctree-l2"><a class="reference internal" href="trf.html#_CPPv419trfRegDisplaySource11PTRFContext11PTRFDisplay"><code class="docutils literal notranslate"><span class="pre">trfRegDisplaySource()</span></code></a></li>
+<li class="toctree-l2"><a class="reference internal" href="trf.html#_CPPv417trfRegDisplaySink11PTRFContext11PTRFDisplay"><code class="docutils literal notranslate"><span class="pre">trfRegDisplaySink()</span></code></a></li>
+<li class="toctree-l2"><a class="reference internal" href="trf.html#_CPPv419trfRegDisplayCustom11PTRFContext11PTRFDisplay6size_t6size_t8uint64_t"><code class="docutils literal notranslate"><span class="pre">trfRegDisplayCustom()</span></code></a></li>
+<li class="toctree-l2"><a class="reference internal" href="trf.html#_CPPv417trfGetDisplayByID11PTRFDisplayi"><code class="docutils literal notranslate"><span class="pre">trfGetDisplayByID()</span></code></a></li>
+<li class="toctree-l2"><a class="reference internal" href="trf.html#_CPPv415trfAckClientReq11PTRFContextP8uint32_ti"><code class="docutils literal notranslate"><span class="pre">trfAckClientReq()</span></code></a></li>
+<li class="toctree-l2"><a class="reference internal" href="trf.html#_CPPv411trfGetFBPtr11PTRFDisplay"><code class="docutils literal notranslate"><span class="pre">trfGetFBPtr()</span></code></a></li>
+<li class="toctree-l2"><a class="reference internal" href="trf.html#_CPPv412trfSendFrame11PTRFContext11PTRFDisplay8uint64_t8uint64_t"><code class="docutils literal notranslate"><span class="pre">trfSendFrame()</span></code></a></li>
+<li class="toctree-l2"><a class="reference internal" href="trf.html#_CPPv416trfSendFramePart11PTRFContext11PTRFDisplay8uint64_t8uint64_tP7TRFRect6size_t"><code class="docutils literal notranslate"><span class="pre">trfSendFramePart()</span></code></a></li>
+<li class="toctree-l2"><a class="reference internal" href="trf.html#_CPPv417trfSendFrameChunk11PTRFContext11PTRFDisplay6size_t6size_t8uint64_t8uint64_t"><code class="docutils literal notranslate"><span class="pre">trfSendFrameChunk()</span></code></a></li>
+<li class="toctree-l2"><a class="reference internal" href="trf.html#_CPPv412trfRecvFrame11PTRFContext11PTRFDisplay"><code class="docutils literal notranslate"><span class="pre">trfRecvFrame()</span></code></a></li>
+<li class="toctree-l2"><a class="reference internal" href="trf.html#_CPPv420trfGetServerDisplays11PTRFContextP11PTRFDisplay"><code class="docutils literal notranslate"><span class="pre">trfGetServerDisplays()</span></code></a></li>
+<li class="toctree-l2"><a class="reference internal" href="trf.html#_CPPv418trfSendDisplayList11PTRFContext"><code class="docutils literal notranslate"><span class="pre">trfSendDisplayList()</span></code></a></li>
+<li class="toctree-l2"><a class="reference internal" href="trf.html#_CPPv416trfSendClientReq11PTRFContext11PTRFDisplay"><code class="docutils literal notranslate"><span class="pre">trfSendClientReq()</span></code></a></li>
+<li class="toctree-l2"><a class="reference internal" href="trf.html#_CPPv414trfAckFrameReq11PTRFContext11PTRFDisplay"><code class="docutils literal notranslate"><span class="pre">trfAckFrameReq()</span></code></a></li>
+<li class="toctree-l2"><a class="reference internal" href="trf.html#_CPPv416trfSendKeepAlive11PTRFContext"><code class="docutils literal notranslate"><span class="pre">trfSendKeepAlive()</span></code></a></li>
+<li class="toctree-l2"><a class="reference internal" href="trf.html#_CPPv418trfGetSendProgress11PTRFContextP16fi_cq_data_entryP15fi_cq_err_entry6size_t15PTRFContextOpts"><code class="docutils literal notranslate"><span class="pre">trfGetSendProgress()</span></code></a></li>
+<li class="toctree-l2"><a class="reference internal" href="trf.html#_CPPv418trfGetRecvProgress11PTRFContextP16fi_cq_data_entryP15fi_cq_err_entry6size_t15PTRFContextOpts"><code class="docutils literal notranslate"><span class="pre">trfGetRecvProgress()</span></code></a></li>
+</ul>
+</li>
+<li class="toctree-l1"><a class="reference internal" href="trf_def.html">System Data Structures</a><ul>
+<li class="toctree-l2"><a class="reference internal" href="trf_def.html#_CPPv410TRFMemType"><code class="docutils literal notranslate"><span class="pre">TRFMemType</span></code></a><ul>
+<li class="toctree-l3"><a class="reference internal" href="trf_def.html#_CPPv4N10TRFMemType20TRF_MEM_TYPE_INVALIDE"><code class="docutils literal notranslate"><span class="pre">TRFMemType::TRF_MEM_TYPE_INVALID</span></code></a></li>
+<li class="toctree-l3"><a class="reference internal" href="trf_def.html#_CPPv4N10TRFMemType16TRF_MEM_TYPE_RAWE"><code class="docutils literal notranslate"><span class="pre">TRFMemType::TRF_MEM_TYPE_RAW</span></code></a></li>
+<li class="toctree-l3"><a class="reference internal" href="trf_def.html#_CPPv4N10TRFMemType18TRF_MEM_TYPE_LF_MRE"><code class="docutils literal notranslate"><span class="pre">TRFMemType::TRF_MEM_TYPE_LF_MR</span></code></a></li>
+<li class="toctree-l3"><a class="reference internal" href="trf_def.html#_CPPv4N10TRFMemType16TRF_MEM_TYPE_MAXE"><code class="docutils literal notranslate"><span class="pre">TRFMemType::TRF_MEM_TYPE_MAX</span></code></a></li>
+</ul>
+</li>
+<li class="toctree-l2"><a class="reference internal" href="trf_def.html#_CPPv49TRFEPType"><code class="docutils literal notranslate"><span class="pre">TRFEPType</span></code></a><ul>
+<li class="toctree-l3"><a class="reference internal" href="trf_def.html#_CPPv4N9TRFEPType14TRF_EP_INVALIDE"><code class="docutils literal notranslate"><span class="pre">TRFEPType::TRF_EP_INVALID</span></code></a></li>
+<li class="toctree-l3"><a class="reference internal" href="trf_def.html#_CPPv4N9TRFEPType11TRF_EP_FREEE"><code class="docutils literal notranslate"><span class="pre">TRFEPType::TRF_EP_FREE</span></code></a></li>
+<li class="toctree-l3"><a class="reference internal" href="trf_def.html#_CPPv4N9TRFEPType11TRF_EP_SINKE"><code class="docutils literal notranslate"><span class="pre">TRFEPType::TRF_EP_SINK</span></code></a></li>
+<li class="toctree-l3"><a class="reference internal" href="trf_def.html#_CPPv4N9TRFEPType13TRF_EP_SOURCEE"><code class="docutils literal notranslate"><span class="pre">TRFEPType::TRF_EP_SOURCE</span></code></a></li>
+<li class="toctree-l3"><a class="reference internal" href="trf_def.html#_CPPv4N9TRFEPType14TRF_EP_CONN_IDE"><code class="docutils literal notranslate"><span class="pre">TRFEPType::TRF_EP_CONN_ID</span></code></a></li>
+<li class="toctree-l3"><a class="reference internal" href="trf_def.html#_CPPv4N9TRFEPType10TRF_EP_MAXE"><code class="docutils literal notranslate"><span class="pre">TRFEPType::TRF_EP_MAX</span></code></a></li>
+</ul>
+</li>
+<li class="toctree-l2"><a class="reference internal" href="trf_def.html#_CPPv48TRFXType"><code class="docutils literal notranslate"><span class="pre">TRFXType</span></code></a><ul>
+<li class="toctree-l3"><a class="reference internal" href="trf_def.html#_CPPv4N8TRFXType17TRFX_TYPE_INVALIDE"><code class="docutils literal notranslate"><span class="pre">TRFXType::TRFX_TYPE_INVALID</span></code></a></li>
+<li class="toctree-l3"><a class="reference internal" href="trf_def.html#_CPPv4N8TRFXType19TRFX_TYPE_LIBFABRICE"><code class="docutils literal notranslate"><span class="pre">TRFXType::TRFX_TYPE_LIBFABRIC</span></code></a></li>
+<li class="toctree-l3"><a class="reference internal" href="trf_def.html#_CPPv4N8TRFXType16TRFX_TYPE_RDMACME"><code class="docutils literal notranslate"><span class="pre">TRFXType::TRFX_TYPE_RDMACM</span></code></a></li>
+<li class="toctree-l3"><a class="reference internal" href="trf_def.html#_CPPv4N8TRFXType13TRFX_TYPE_MAXE"><code class="docutils literal notranslate"><span class="pre">TRFXType::TRFX_TYPE_MAX</span></code></a></li>
+</ul>
+</li>
+<li class="toctree-l2"><a class="reference internal" href="trf_def.html#_CPPv48TRFXAddr"><code class="docutils literal notranslate"><span class="pre">TRFXAddr</span></code></a><ul>
+<li class="toctree-l3"><a class="reference internal" href="trf_def.html#_CPPv4N8TRFXAddr17TRFX_ADDR_INVALIDE"><code class="docutils literal notranslate"><span class="pre">TRFXAddr::TRFX_ADDR_INVALID</span></code></a></li>
+<li class="toctree-l3"><a class="reference internal" href="trf_def.html#_CPPv4N8TRFXAddr16TRFX_ADDR_FI_STRE"><code class="docutils literal notranslate"><span class="pre">TRFXAddr::TRFX_ADDR_FI_STR</span></code></a></li>
+<li class="toctree-l3"><a class="reference internal" href="trf_def.html#_CPPv4N8TRFXAddr18TRFX_ADDR_SOCKADDRE"><code class="docutils literal notranslate"><span class="pre">TRFXAddr::TRFX_ADDR_SOCKADDR</span></code></a></li>
+<li class="toctree-l3"><a class="reference internal" href="trf_def.html#_CPPv4N8TRFXAddr21TRFX_ADDR_SOCKADDR_INE"><code class="docutils literal notranslate"><span class="pre">TRFXAddr::TRFX_ADDR_SOCKADDR_IN</span></code></a></li>
+<li class="toctree-l3"><a class="reference internal" href="trf_def.html#_CPPv4N8TRFXAddr22TRFX_ADDR_SOCKADDR_IN6E"><code class="docutils literal notranslate"><span class="pre">TRFXAddr::TRFX_ADDR_SOCKADDR_IN6</span></code></a></li>
+<li class="toctree-l3"><a class="reference internal" href="trf_def.html#_CPPv4N8TRFXAddr16TRFX_ADDR_IB_GIDE"><code class="docutils literal notranslate"><span class="pre">TRFXAddr::TRFX_ADDR_IB_GID</span></code></a></li>
+<li class="toctree-l3"><a class="reference internal" href="trf_def.html#_CPPv4N8TRFXAddr15TRFX_ADDR_IB_UDE"><code class="docutils literal notranslate"><span class="pre">TRFXAddr::TRFX_ADDR_IB_UD</span></code></a></li>
+<li class="toctree-l3"><a class="reference internal" href="trf_def.html#_CPPv4N8TRFXAddr14TRFX_ADDR_PSMXE"><code class="docutils literal notranslate"><span class="pre">TRFXAddr::TRFX_ADDR_PSMX</span></code></a></li>
+<li class="toctree-l3"><a class="reference internal" href="trf_def.html#_CPPv4N8TRFXAddr15TRFX_ADDR_PSMX2E"><code class="docutils literal notranslate"><span class="pre">TRFXAddr::TRFX_ADDR_PSMX2</span></code></a></li>
+<li class="toctree-l3"><a class="reference internal" href="trf_def.html#_CPPv4N8TRFXAddr15TRFX_ADDR_PSMX3E"><code class="docutils literal notranslate"><span class="pre">TRFXAddr::TRFX_ADDR_PSMX3</span></code></a></li>
+<li class="toctree-l3"><a class="reference internal" href="trf_def.html#_CPPv4N8TRFXAddr13TRFX_ADDR_MAXE"><code class="docutils literal notranslate"><span class="pre">TRFXAddr::TRFX_ADDR_MAX</span></code></a></li>
+</ul>
+</li>
+<li class="toctree-l2"><a class="reference internal" href="trf_def.html#_CPPv412TRFTexFormat"><code class="docutils literal notranslate"><span class="pre">TRFTexFormat</span></code></a><ul>
+<li class="toctree-l3"><a class="reference internal" href="trf_def.html#_CPPv4N12TRFTexFormat15TRF_TEX_INVALIDE"><code class="docutils literal notranslate"><span class="pre">TRFTexFormat::TRF_TEX_INVALID</span></code></a></li>
+<li class="toctree-l3"><a class="reference internal" href="trf_def.html#_CPPv4N12TRFTexFormat17TRF_TEX_RGBA_8888E"><code class="docutils literal notranslate"><span class="pre">TRFTexFormat::TRF_TEX_RGBA_8888</span></code></a></li>
+<li class="toctree-l3"><a class="reference internal" href="trf_def.html#_CPPv4N12TRFTexFormat15TRF_TEX_RGB_888E"><code class="docutils literal notranslate"><span class="pre">TRFTexFormat::TRF_TEX_RGB_888</span></code></a></li>
+<li class="toctree-l3"><a class="reference internal" href="trf_def.html#_CPPv4N12TRFTexFormat17TRF_TEX_BGRA_8888E"><code class="docutils literal notranslate"><span class="pre">TRFTexFormat::TRF_TEX_BGRA_8888</span></code></a></li>
+<li class="toctree-l3"><a class="reference internal" href="trf_def.html#_CPPv4N12TRFTexFormat15TRF_TEX_BGR_888E"><code class="docutils literal notranslate"><span class="pre">TRFTexFormat::TRF_TEX_BGR_888</span></code></a></li>
+<li class="toctree-l3"><a class="reference internal" href="trf_def.html#_CPPv4N12TRFTexFormat14TRF_TEX_RGB_32E"><code class="docutils literal notranslate"><span class="pre">TRFTexFormat::TRF_TEX_RGB_32</span></code></a></li>
+<li class="toctree-l3"><a class="reference internal" href="trf_def.html#_CPPv4N12TRFTexFormat22TRF_TEX_RGBA_16161616FE"><code class="docutils literal notranslate"><span class="pre">TRFTexFormat::TRF_TEX_RGBA_16161616F</span></code></a></li>
+<li class="toctree-l3"><a class="reference internal" href="trf_def.html#_CPPv4N12TRFTexFormat21TRF_TEX_RGBA_16161616E"><code class="docutils literal notranslate"><span class="pre">TRFTexFormat::TRF_TEX_RGBA_16161616</span></code></a></li>
+<li class="toctree-l3"><a class="reference internal" href="trf_def.html#_CPPv4N12TRFTexFormat22TRF_TEX_BGRA_16161616FE"><code class="docutils literal notranslate"><span class="pre">TRFTexFormat::TRF_TEX_BGRA_16161616F</span></code></a></li>
+<li class="toctree-l3"><a class="reference internal" href="trf_def.html#_CPPv4N12TRFTexFormat21TRF_TEX_BGRA_16161616E"><code class="docutils literal notranslate"><span class="pre">TRFTexFormat::TRF_TEX_BGRA_16161616</span></code></a></li>
+<li class="toctree-l3"><a class="reference internal" href="trf_def.html#_CPPv4N12TRFTexFormat20TRF_TEX_RGBA_1010102E"><code class="docutils literal notranslate"><span class="pre">TRFTexFormat::TRF_TEX_RGBA_1010102</span></code></a></li>
+<li class="toctree-l3"><a class="reference internal" href="trf_def.html#_CPPv4N12TRFTexFormat14TRF_TEX_MONO_8E"><code class="docutils literal notranslate"><span class="pre">TRFTexFormat::TRF_TEX_MONO_8</span></code></a></li>
+<li class="toctree-l3"><a class="reference internal" href="trf_def.html#_CPPv4N12TRFTexFormat11TRF_TEX_MAXE"><code class="docutils literal notranslate"><span class="pre">TRFTexFormat::TRF_TEX_MAX</span></code></a></li>
+</ul>
+</li>
+<li class="toctree-l2"><a class="reference internal" href="trf_def.html#_CPPv49TRFMAType"><code class="docutils literal notranslate"><span class="pre">TRFMAType</span></code></a><ul>
+<li class="toctree-l3"><a class="reference internal" href="trf_def.html#_CPPv4N9TRFMAType14TRF_MA_INVALIDE"><code class="docutils literal notranslate"><span class="pre">TRFMAType::TRF_MA_INVALID</span></code></a></li>
+<li class="toctree-l3"><a class="reference internal" href="trf_def.html#_CPPv4N9TRFMAType12TRF_MA_VADDRE"><code class="docutils literal notranslate"><span class="pre">TRFMAType::TRF_MA_VADDR</span></code></a></li>
+<li class="toctree-l3"><a class="reference internal" href="trf_def.html#_CPPv4N9TRFMAType13TRF_MA_OFFSETE"><code class="docutils literal notranslate"><span class="pre">TRFMAType::TRF_MA_OFFSET</span></code></a></li>
+<li class="toctree-l3"><a class="reference internal" href="trf_def.html#_CPPv4N9TRFMAType10TRF_MA_TAGE"><code class="docutils literal notranslate"><span class="pre">TRFMAType::TRF_MA_TAG</span></code></a></li>
+<li class="toctree-l3"><a class="reference internal" href="trf_def.html#_CPPv4N9TRFMAType14TRF_MA_64B_KEYE"><code class="docutils literal notranslate"><span class="pre">TRFMAType::TRF_MA_64B_KEY</span></code></a></li>
+<li class="toctree-l3"><a class="reference internal" href="trf_def.html#_CPPv4N9TRFMAType14TRF_MA_RAW_KEYE"><code class="docutils literal notranslate"><span class="pre">TRFMAType::TRF_MA_RAW_KEY</span></code></a></li>
+</ul>
+</li>
+<li class="toctree-l2"><a class="reference internal" href="trf_def.html#_CPPv49trfMemPtr7PTRFMem"><code class="docutils literal notranslate"><span class="pre">trfMemPtr()</span></code></a></li>
+<li class="toctree-l2"><a class="reference internal" href="trf_def.html#_CPPv410trfMemSize7PTRFMem"><code class="docutils literal notranslate"><span class="pre">trfMemSize()</span></code></a></li>
+<li class="toctree-l2"><a class="reference internal" href="trf_def.html#_CPPv410trfMemType7PTRFMem"><code class="docutils literal notranslate"><span class="pre">trfMemType()</span></code></a></li>
+<li class="toctree-l2"><a class="reference internal" href="trf_def.html#_CPPv414trfMemFabricMR7PTRFMem"><code class="docutils literal notranslate"><span class="pre">trfMemFabricMR()</span></code></a></li>
+<li class="toctree-l2"><a class="reference internal" href="trf_def.html#_CPPv415trfMemFabricKey7PTRFMem"><code class="docutils literal notranslate"><span class="pre">trfMemFabricKey()</span></code></a></li>
+<li class="toctree-l2"><a class="reference internal" href="trf_def.html#_CPPv416trfMemFabricDesc7PTRFMem"><code class="docutils literal notranslate"><span class="pre">trfMemFabricDesc()</span></code></a></li>
+<li class="toctree-l2"><a class="reference internal" href="trf_def.html#_CPPv416trf__GetPageSizev"><code class="docutils literal notranslate"><span class="pre">trf__GetPageSize()</span></code></a></li>
+<li class="toctree-l2"><a class="reference internal" href="trf_def.html#_CPPv417trfSetDefaultOpts15PTRFContextOpts"><code class="docutils literal notranslate"><span class="pre">trfSetDefaultOpts()</span></code></a></li>
+<li class="toctree-l2"><a class="reference internal" href="trf_def.html#_CPPv416trfDuplicateOpts15PTRFContextOpts15PTRFContextOpts"><code class="docutils literal notranslate"><span class="pre">trfDuplicateOpts()</span></code></a></li>
+<li class="toctree-l2"><a class="reference internal" href="trf_def.html#_CPPv417trfDuplicateAddrV9PTRFAddrV"><code class="docutils literal notranslate"><span class="pre">trfDuplicateAddrV()</span></code></a></li>
+<li class="toctree-l2"><a class="reference internal" href="trf_def.html#_CPPv415trfTimespecToMsP8timespec"><code class="docutils literal notranslate"><span class="pre">trfTimespecToMs()</span></code></a></li>
+<li class="toctree-l2"><a class="reference internal" href="trf_def.html#_CPPv415trfMsToTimespeci"><code class="docutils literal notranslate"><span class="pre">trfMsToTimespec()</span></code></a></li>
+<li class="toctree-l2"><a class="reference internal" href="trf_def.html#_CPPv414trfSumTimespecP8timespecP8timespec"><code class="docutils literal notranslate"><span class="pre">trfSumTimespec()</span></code></a></li>
+<li class="toctree-l2"><a class="reference internal" href="trf_def.html#_CPPv412TRFTCQFabric"><code class="docutils literal notranslate"><span class="pre">TRFTCQFabric</span></code></a><ul>
+<li class="toctree-l3"><a class="reference internal" href="trf_def.html#_CPPv4N12TRFTCQFabric2cqE"><code class="docutils literal notranslate"><span class="pre">TRFTCQFabric::cq</span></code></a></li>
+<li class="toctree-l3"><a class="reference internal" href="trf_def.html#_CPPv4N12TRFTCQFabric7entriesE"><code class="docutils literal notranslate"><span class="pre">TRFTCQFabric::entries</span></code></a></li>
+</ul>
+</li>
+<li class="toctree-l2"><a class="reference internal" href="trf_def.html#_CPPv46TRFMem"><code class="docutils literal notranslate"><span class="pre">TRFMem</span></code></a><ul>
+<li class="toctree-l3"><a class="reference internal" href="trf_def.html#_CPPv4N6TRFMem3ptrE"><code class="docutils literal notranslate"><span class="pre">TRFMem::ptr</span></code></a></li>
+<li class="toctree-l3"><a class="reference internal" href="trf_def.html#_CPPv4N6TRFMem4sizeE"><code class="docutils literal notranslate"><span class="pre">TRFMem::size</span></code></a></li>
+<li class="toctree-l3"><a class="reference internal" href="trf_def.html#_CPPv4N6TRFMem4typeE"><code class="docutils literal notranslate"><span class="pre">TRFMem::type</span></code></a></li>
+<li class="toctree-l3"><a class="reference internal" href="trf_def.html#_CPPv4N6TRFMem9fabric_mrE"><code class="docutils literal notranslate"><span class="pre">TRFMem::fabric_mr</span></code></a></li>
+<li class="toctree-l3"><a class="reference internal" href="trf_def.html#_CPPv4N6TRFMemUt1_2E"><code class="docutils literal notranslate"><span class="pre">TRFMem::&#64;2</span></code></a></li>
+</ul>
+</li>
+<li class="toctree-l2"><a class="reference internal" href="trf_def.html#_CPPv47TRFRKey"><code class="docutils literal notranslate"><span class="pre">TRFRKey</span></code></a><ul>
+<li class="toctree-l3"><a class="reference internal" href="trf_def.html#_CPPv4N7TRFRKey4rkeyE"><code class="docutils literal notranslate"><span class="pre">TRFRKey::rkey</span></code></a></li>
+<li class="toctree-l3"><a class="reference internal" href="trf_def.html#_CPPv4N7TRFRKey7raw_keyE"><code class="docutils literal notranslate"><span class="pre">TRFRKey::raw_key</span></code></a></li>
+<li class="toctree-l3"><a class="reference internal" href="trf_def.html#_CPPv4N7TRFRKey11raw_key_lenE"><code class="docutils literal notranslate"><span class="pre">TRFRKey::raw_key_len</span></code></a></li>
+<li class="toctree-l3"><a class="reference internal" href="trf_def.html#_CPPv4N7TRFRKey14raw_key_mappedE"><code class="docutils literal notranslate"><span class="pre">TRFRKey::raw_key_mapped</span></code></a></li>
+</ul>
+</li>
+<li class="toctree-l2"><a class="reference internal" href="trf_def.html#_CPPv412TRFInterface"><code class="docutils literal notranslate"><span class="pre">TRFInterface</span></code></a><ul>
+<li class="toctree-l3"><a class="reference internal" href="trf_def.html#_CPPv4N12TRFInterface4addrE"><code class="docutils literal notranslate"><span class="pre">TRFInterface::addr</span></code></a></li>
+<li class="toctree-l3"><a class="reference internal" href="trf_def.html#_CPPv4N12TRFInterface7netmaskE"><code class="docutils literal notranslate"><span class="pre">TRFInterface::netmask</span></code></a></li>
+<li class="toctree-l3"><a class="reference internal" href="trf_def.html#_CPPv4N12TRFInterface5speedE"><code class="docutils literal notranslate"><span class="pre">TRFInterface::speed</span></code></a></li>
+<li class="toctree-l3"><a class="reference internal" href="trf_def.html#_CPPv4N12TRFInterface4portE"><code class="docutils literal notranslate"><span class="pre">TRFInterface::port</span></code></a></li>
+<li class="toctree-l3"><a class="reference internal" href="trf_def.html#_CPPv4N12TRFInterface5flagsE"><code class="docutils literal notranslate"><span class="pre">TRFInterface::flags</span></code></a></li>
+<li class="toctree-l3"><a class="reference internal" href="trf_def.html#_CPPv4N12TRFInterface4nextE"><code class="docutils literal notranslate"><span class="pre">TRFInterface::next</span></code></a></li>
+</ul>
+</li>
+<li class="toctree-l2"><a class="reference internal" href="trf_def.html#_CPPv48TRFAddrV"><code class="docutils literal notranslate"><span class="pre">TRFAddrV</span></code></a><ul>
+<li class="toctree-l3"><a class="reference internal" href="trf_def.html#_CPPv4N8TRFAddrV8src_addrE"><code class="docutils literal notranslate"><span class="pre">TRFAddrV::src_addr</span></code></a></li>
+<li class="toctree-l3"><a class="reference internal" href="trf_def.html#_CPPv4N8TRFAddrV8dst_addrE"><code class="docutils literal notranslate"><span class="pre">TRFAddrV::dst_addr</span></code></a></li>
+<li class="toctree-l3"><a class="reference internal" href="trf_def.html#_CPPv4N8TRFAddrV10pair_speedE"><code class="docutils literal notranslate"><span class="pre">TRFAddrV::pair_speed</span></code></a></li>
+<li class="toctree-l3"><a class="reference internal" href="trf_def.html#_CPPv4N8TRFAddrV4nextE"><code class="docutils literal notranslate"><span class="pre">TRFAddrV::next</span></code></a></li>
+</ul>
+</li>
+<li class="toctree-l2"><a class="reference internal" href="trf_def.html#_CPPv410TRFXFabric"><code class="docutils literal notranslate"><span class="pre">TRFXFabric</span></code></a><ul>
+<li class="toctree-l3"><a class="reference internal" href="trf_def.html#_CPPv4N10TRFXFabric8src_addrE"><code class="docutils literal notranslate"><span class="pre">TRFXFabric::src_addr</span></code></a></li>
+<li class="toctree-l3"><a class="reference internal" href="trf_def.html#_CPPv4N10TRFXFabric9peer_addrE"><code class="docutils literal notranslate"><span class="pre">TRFXFabric::peer_addr</span></code></a></li>
+<li class="toctree-l3"><a class="reference internal" href="trf_def.html#_CPPv4N10TRFXFabric8addr_fmtE"><code class="docutils literal notranslate"><span class="pre">TRFXFabric::addr_fmt</span></code></a></li>
+<li class="toctree-l3"><a class="reference internal" href="trf_def.html#_CPPv4N10TRFXFabric2fiE"><code class="docutils literal notranslate"><span class="pre">TRFXFabric::fi</span></code></a></li>
+<li class="toctree-l3"><a class="reference internal" href="trf_def.html#_CPPv4N10TRFXFabric2epE"><code class="docutils literal notranslate"><span class="pre">TRFXFabric::ep</span></code></a></li>
+<li class="toctree-l3"><a class="reference internal" href="trf_def.html#_CPPv4N10TRFXFabric6fabricE"><code class="docutils literal notranslate"><span class="pre">TRFXFabric::fabric</span></code></a></li>
+<li class="toctree-l3"><a class="reference internal" href="trf_def.html#_CPPv4N10TRFXFabric6domainE"><code class="docutils literal notranslate"><span class="pre">TRFXFabric::domain</span></code></a></li>
+<li class="toctree-l3"><a class="reference internal" href="trf_def.html#_CPPv4N10TRFXFabric2eqE"><code class="docutils literal notranslate"><span class="pre">TRFXFabric::eq</span></code></a></li>
+<li class="toctree-l3"><a class="reference internal" href="trf_def.html#_CPPv4N10TRFXFabric5tx_cqE"><code class="docutils literal notranslate"><span class="pre">TRFXFabric::tx_cq</span></code></a></li>
+<li class="toctree-l3"><a class="reference internal" href="trf_def.html#_CPPv4N10TRFXFabric5rx_cqE"><code class="docutils literal notranslate"><span class="pre">TRFXFabric::rx_cq</span></code></a></li>
+<li class="toctree-l3"><a class="reference internal" href="trf_def.html#_CPPv4N10TRFXFabric2avE"><code class="docutils literal notranslate"><span class="pre">TRFXFabric::av</span></code></a></li>
+<li class="toctree-l3"><a class="reference internal" href="trf_def.html#_CPPv4N10TRFXFabric7msg_memE"><code class="docutils literal notranslate"><span class="pre">TRFXFabric::msg_mem</span></code></a></li>
+<li class="toctree-l3"><a class="reference internal" href="trf_def.html#_CPPv4N10TRFXFabric5intrvE"><code class="docutils literal notranslate"><span class="pre">TRFXFabric::intrv</span></code></a></li>
+</ul>
+</li>
+<li class="toctree-l2"><a class="reference internal" href="trf_def.html#_CPPv410TRFDisplay"><code class="docutils literal notranslate"><span class="pre">TRFDisplay</span></code></a><ul>
+<li class="toctree-l3"><a class="reference internal" href="trf_def.html#_CPPv4N10TRFDisplay2idE"><code class="docutils literal notranslate"><span class="pre">TRFDisplay::id</span></code></a></li>
+<li class="toctree-l3"><a class="reference internal" href="trf_def.html#_CPPv4N10TRFDisplay4nameE"><code class="docutils literal notranslate"><span class="pre">TRFDisplay::name</span></code></a></li>
+<li class="toctree-l3"><a class="reference internal" href="trf_def.html#_CPPv4N10TRFDisplay5widthE"><code class="docutils literal notranslate"><span class="pre">TRFDisplay::width</span></code></a></li>
+<li class="toctree-l3"><a class="reference internal" href="trf_def.html#_CPPv4N10TRFDisplay6heightE"><code class="docutils literal notranslate"><span class="pre">TRFDisplay::height</span></code></a></li>
+<li class="toctree-l3"><a class="reference internal" href="trf_def.html#_CPPv4N10TRFDisplay4rateE"><code class="docutils literal notranslate"><span class="pre">TRFDisplay::rate</span></code></a></li>
+<li class="toctree-l3"><a class="reference internal" href="trf_def.html#_CPPv4N10TRFDisplay6formatE"><code class="docutils literal notranslate"><span class="pre">TRFDisplay::format</span></code></a></li>
+<li class="toctree-l3"><a class="reference internal" href="trf_def.html#_CPPv4N10TRFDisplay4dgidE"><code class="docutils literal notranslate"><span class="pre">TRFDisplay::dgid</span></code></a></li>
+<li class="toctree-l3"><a class="reference internal" href="trf_def.html#_CPPv4N10TRFDisplay8x_offsetE"><code class="docutils literal notranslate"><span class="pre">TRFDisplay::x_offset</span></code></a></li>
+<li class="toctree-l3"><a class="reference internal" href="trf_def.html#_CPPv4N10TRFDisplay8y_offsetE"><code class="docutils literal notranslate"><span class="pre">TRFDisplay::y_offset</span></code></a></li>
+<li class="toctree-l3"><a class="reference internal" href="trf_def.html#_CPPv4N10TRFDisplay3memE"><code class="docutils literal notranslate"><span class="pre">TRFDisplay::mem</span></code></a></li>
+<li class="toctree-l3"><a class="reference internal" href="trf_def.html#_CPPv4N10TRFDisplay9fb_offsetE"><code class="docutils literal notranslate"><span class="pre">TRFDisplay::fb_offset</span></code></a></li>
+<li class="toctree-l3"><a class="reference internal" href="trf_def.html#_CPPv4N10TRFDisplay10frame_cntrE"><code class="docutils literal notranslate"><span class="pre">TRFDisplay::frame_cntr</span></code></a></li>
+<li class="toctree-l3"><a class="reference internal" href="trf_def.html#_CPPv4N10TRFDisplay4nextE"><code class="docutils literal notranslate"><span class="pre">TRFDisplay::next</span></code></a></li>
+</ul>
+</li>
+<li class="toctree-l2"><a class="reference internal" href="trf_def.html#_CPPv414TRFContextOpts"><code class="docutils literal notranslate"><span class="pre">TRFContextOpts</span></code></a><ul>
+<li class="toctree-l3"><a class="reference internal" href="trf_def.html#_CPPv4N14TRFContextOpts12nc_snd_timeoE"><code class="docutils literal notranslate"><span class="pre">TRFContextOpts::nc_snd_timeo</span></code></a></li>
+<li class="toctree-l3"><a class="reference internal" href="trf_def.html#_CPPv4N14TRFContextOpts12nc_rcv_timeoE"><code class="docutils literal notranslate"><span class="pre">TRFContextOpts::nc_rcv_timeo</span></code></a></li>
+<li class="toctree-l3"><a class="reference internal" href="trf_def.html#_CPPv4N14TRFContextOpts14nc_snd_bufsizeE"><code class="docutils literal notranslate"><span class="pre">TRFContextOpts::nc_snd_bufsize</span></code></a></li>
+<li class="toctree-l3"><a class="reference internal" href="trf_def.html#_CPPv4N14TRFContextOpts14nc_rcv_bufsizeE"><code class="docutils literal notranslate"><span class="pre">TRFContextOpts::nc_rcv_bufsize</span></code></a></li>
+<li class="toctree-l3"><a class="reference internal" href="trf_def.html#_CPPv4N14TRFContextOpts13fab_snd_timeoE"><code class="docutils literal notranslate"><span class="pre">TRFContextOpts::fab_snd_timeo</span></code></a></li>
+<li class="toctree-l3"><a class="reference internal" href="trf_def.html#_CPPv4N14TRFContextOpts13fab_rcv_timeoE"><code class="docutils literal notranslate"><span class="pre">TRFContextOpts::fab_rcv_timeo</span></code></a></li>
+<li class="toctree-l3"><a class="reference internal" href="trf_def.html#_CPPv4N14TRFContextOpts15fab_snd_bufsizeE"><code class="docutils literal notranslate"><span class="pre">TRFContextOpts::fab_snd_bufsize</span></code></a></li>
+<li class="toctree-l3"><a class="reference internal" href="trf_def.html#_CPPv4N14TRFContextOpts15fab_rcv_bufsizeE"><code class="docutils literal notranslate"><span class="pre">TRFContextOpts::fab_rcv_bufsize</span></code></a></li>
+<li class="toctree-l3"><a class="reference internal" href="trf_def.html#_CPPv4N14TRFContextOpts13fab_poll_rateE"><code class="docutils literal notranslate"><span class="pre">TRFContextOpts::fab_poll_rate</span></code></a></li>
+<li class="toctree-l3"><a class="reference internal" href="trf_def.html#_CPPv4N14TRFContextOpts11fab_cq_syncE"><code class="docutils literal notranslate"><span class="pre">TRFContextOpts::fab_cq_sync</span></code></a></li>
+<li class="toctree-l3"><a class="reference internal" href="trf_def.html#_CPPv4N14TRFContextOpts11fab_api_verE"><code class="docutils literal notranslate"><span class="pre">TRFContextOpts::fab_api_ver</span></code></a></li>
+<li class="toctree-l3"><a class="reference internal" href="trf_def.html#_CPPv4N14TRFContextOpts11iface_flagsE"><code class="docutils literal notranslate"><span class="pre">TRFContextOpts::iface_flags</span></code></a></li>
+<li class="toctree-l3"><a class="reference internal" href="trf_def.html#_CPPv4N14TRFContextOpts11max_clientsE"><code class="docutils literal notranslate"><span class="pre">TRFContextOpts::max_clients</span></code></a></li>
+<li class="toctree-l3"><a class="reference internal" href="trf_def.html#_CPPv4N14TRFContextOpts15max_subchannelsE"><code class="docutils literal notranslate"><span class="pre">TRFContextOpts::max_subchannels</span></code></a></li>
+</ul>
+</li>
+<li class="toctree-l2"><a class="reference internal" href="trf_def.html#_CPPv410TRFContext"><code class="docutils literal notranslate"><span class="pre">TRFContext</span></code></a><ul>
+<li class="toctree-l3"><a class="reference internal" href="trf_def.html#_CPPv4N10TRFContext4typeE"><code class="docutils literal notranslate"><span class="pre">TRFContext::type</span></code></a></li>
+<li class="toctree-l3"><a class="reference internal" href="trf_def.html#_CPPv4N10TRFContext10channel_idE"><code class="docutils literal notranslate"><span class="pre">TRFContext::channel_id</span></code></a></li>
+<li class="toctree-l3"><a class="reference internal" href="trf_def.html#_CPPv4N10TRFContext9listen_fdE"><code class="docutils literal notranslate"><span class="pre">TRFContext::listen_fd</span></code></a></li>
+<li class="toctree-l3"><a class="reference internal" href="trf_def.html#_CPPv4N10TRFContext7clientsE"><code class="docutils literal notranslate"><span class="pre">TRFContext::clients</span></code></a></li>
+<li class="toctree-l3"><a class="reference internal" href="trf_def.html#_CPPv4N10TRFContext11max_clientsE"><code class="docutils literal notranslate"><span class="pre">TRFContext::max_clients</span></code></a></li>
+<li class="toctree-l3"><a class="reference internal" href="trf_def.html#_CPPv4N10TRFContext3svrE"><code class="docutils literal notranslate"><span class="pre">TRFContext::svr</span></code></a></li>
+<li class="toctree-l3"><a class="reference internal" href="trf_def.html#_CPPv4N10TRFContext10session_idE"><code class="docutils literal notranslate"><span class="pre">TRFContext::session_id</span></code></a></li>
+<li class="toctree-l3"><a class="reference internal" href="trf_def.html#_CPPv4N10TRFContext9client_fdE"><code class="docutils literal notranslate"><span class="pre">TRFContext::client_fd</span></code></a></li>
+<li class="toctree-l3"><a class="reference internal" href="trf_def.html#_CPPv4N10TRFContext8channelsE"><code class="docutils literal notranslate"><span class="pre">TRFContext::channels</span></code></a></li>
+<li class="toctree-l3"><a class="reference internal" href="trf_def.html#_CPPv4N10TRFContext12max_channelsE"><code class="docutils literal notranslate"><span class="pre">TRFContext::max_channels</span></code></a></li>
+<li class="toctree-l3"><a class="reference internal" href="trf_def.html#_CPPv4N10TRFContext3cliE"><code class="docutils literal notranslate"><span class="pre">TRFContext::cli</span></code></a></li>
+<li class="toctree-l3"><a class="reference internal" href="trf_def.html#_CPPv4N10TRFContextUt1_4E"><code class="docutils literal notranslate"><span class="pre">TRFContext::&#64;4</span></code></a></li>
+<li class="toctree-l3"><a class="reference internal" href="trf_def.html#_CPPv4N10TRFContext9xfer_typeE"><code class="docutils literal notranslate"><span class="pre">TRFContext::xfer_type</span></code></a></li>
+<li class="toctree-l3"><a class="reference internal" href="trf_def.html#_CPPv4N10TRFContext6fabricE"><code class="docutils literal notranslate"><span class="pre">TRFContext::fabric</span></code></a></li>
+<li class="toctree-l3"><a class="reference internal" href="trf_def.html#_CPPv4N10TRFContext4xferE"><code class="docutils literal notranslate"><span class="pre">TRFContext::xfer</span></code></a></li>
+<li class="toctree-l3"><a class="reference internal" href="trf_def.html#_CPPv4N10TRFContext8displaysE"><code class="docutils literal notranslate"><span class="pre">TRFContext::displays</span></code></a></li>
+<li class="toctree-l3"><a class="reference internal" href="trf_def.html#_CPPv4N10TRFContext4optsE"><code class="docutils literal notranslate"><span class="pre">TRFContext::opts</span></code></a></li>
+<li class="toctree-l3"><a class="reference internal" href="trf_def.html#_CPPv4N10TRFContext12disconnectedE"><code class="docutils literal notranslate"><span class="pre">TRFContext::disconnected</span></code></a></li>
+</ul>
+</li>
+<li class="toctree-l2"><a class="reference internal" href="trf_def.html#_CPPv47TRFRect"><code class="docutils literal notranslate"><span class="pre">TRFRect</span></code></a><ul>
+<li class="toctree-l3"><a class="reference internal" href="trf_def.html#_CPPv4N7TRFRect1xE"><code class="docutils literal notranslate"><span class="pre">TRFRect::x</span></code></a></li>
+<li class="toctree-l3"><a class="reference internal" href="trf_def.html#_CPPv4N7TRFRect1yE"><code class="docutils literal notranslate"><span class="pre">TRFRect::y</span></code></a></li>
+<li class="toctree-l3"><a class="reference internal" href="trf_def.html#_CPPv4N7TRFRect5widthE"><code class="docutils literal notranslate"><span class="pre">TRFRect::width</span></code></a></li>
+<li class="toctree-l3"><a class="reference internal" href="trf_def.html#_CPPv4N7TRFRect6heightE"><code class="docutils literal notranslate"><span class="pre">TRFRect::height</span></code></a></li>
+</ul>
+</li>
+<li class="toctree-l2"><a class="reference internal" href="trf_def.html#_CPPv49TRFCursor"><code class="docutils literal notranslate"><span class="pre">TRFCursor</span></code></a><ul>
+<li class="toctree-l3"><a class="reference internal" href="trf_def.html#_CPPv4N9TRFCursor5widthE"><code class="docutils literal notranslate"><span class="pre">TRFCursor::width</span></code></a></li>
+<li class="toctree-l3"><a class="reference internal" href="trf_def.html#_CPPv4N9TRFCursor6heightE"><code class="docutils literal notranslate"><span class="pre">TRFCursor::height</span></code></a></li>
+<li class="toctree-l3"><a class="reference internal" href="trf_def.html#_CPPv4N9TRFCursor5pos_xE"><code class="docutils literal notranslate"><span class="pre">TRFCursor::pos_x</span></code></a></li>
+<li class="toctree-l3"><a class="reference internal" href="trf_def.html#_CPPv4N9TRFCursor5pos_yE"><code class="docutils literal notranslate"><span class="pre">TRFCursor::pos_y</span></code></a></li>
+<li class="toctree-l3"><a class="reference internal" href="trf_def.html#_CPPv4N9TRFCursor9hotspot_xE"><code class="docutils literal notranslate"><span class="pre">TRFCursor::hotspot_x</span></code></a></li>
+<li class="toctree-l3"><a class="reference internal" href="trf_def.html#_CPPv4N9TRFCursor9hotspot_yE"><code class="docutils literal notranslate"><span class="pre">TRFCursor::hotspot_y</span></code></a></li>
+<li class="toctree-l3"><a class="reference internal" href="trf_def.html#_CPPv4N9TRFCursor6formatE"><code class="docutils literal notranslate"><span class="pre">TRFCursor::format</span></code></a></li>
+<li class="toctree-l3"><a class="reference internal" href="trf_def.html#_CPPv4N9TRFCursor4dataE"><code class="docutils literal notranslate"><span class="pre">TRFCursor::data</span></code></a></li>
+</ul>
+</li>
+</ul>
+</li>
+<li class="toctree-l1"><a class="reference internal" href="trf_inet.html">Address Handling Functions</a><ul>
+<li class="toctree-l2"><a class="reference internal" href="trf_inet.html#_CPPv417trfCheckIPVersionPc"><code class="docutils literal notranslate"><span class="pre">trfCheckIPVersion()</span></code></a></li>
+<li class="toctree-l2"><a class="reference internal" href="trf_inet.html#_CPPv420trfGetMappedIPv4addrP12sockaddr_in6Pc"><code class="docutils literal notranslate"><span class="pre">trfGetMappedIPv4addr()</span></code></a></li>
+<li class="toctree-l2"><a class="reference internal" href="trf_inet.html#_CPPv412trfGetIPaddrP8sockaddrPc"><code class="docutils literal notranslate"><span class="pre">trfGetIPaddr()</span></code></a></li>
+<li class="toctree-l2"><a class="reference internal" href="trf_inet.html#_CPPv420trfConvertCharToAddrPcP8sockaddr"><code class="docutils literal notranslate"><span class="pre">trfConvertCharToAddr()</span></code></a></li>
+<li class="toctree-l2"><a class="reference internal" href="trf_inet.html#_CPPv417trfGetNodeServiceP8sockaddrPc"><code class="docutils literal notranslate"><span class="pre">trfGetNodeService()</span></code></a></li>
+<li class="toctree-l2"><a class="reference internal" href="trf_inet.html#_CPPv420trfNodeServiceToAddrPKcP8sockaddr"><code class="docutils literal notranslate"><span class="pre">trfNodeServiceToAddr()</span></code></a></li>
+<li class="toctree-l2"><a class="reference internal" href="trf_inet.html#_CPPv415trfCheckNetworkP8sockaddr6int8_tP8sockaddr6int8_t"><code class="docutils literal notranslate"><span class="pre">trfCheckNetwork()</span></code></a></li>
+</ul>
+</li>
+<li class="toctree-l1"><a class="reference internal" href="trf_interface.html">Interface &amp; Address Introspection</a><ul>
+<li class="toctree-l2"><a class="reference internal" href="trf_interface.html#_CPPv419trfValidRouteUpdate13PTRFInterfacePc"><code class="docutils literal notranslate"><span class="pre">trfValidRouteUpdate()</span></code></a></li>
+<li class="toctree-l2"><a class="reference internal" href="trf_interface.html#_CPPv416trfRemoveInvalid13PTRFInterfaceP13PTRFInterfacePi"><code class="docutils literal notranslate"><span class="pre">trfRemoveInvalid()</span></code></a></li>
+<li class="toctree-l2"><a class="reference internal" href="trf_interface.html#_CPPv412trfFreeAddrV9PTRFAddrV"><code class="docutils literal notranslate"><span class="pre">trfFreeAddrV()</span></code></a></li>
+<li class="toctree-l2"><a class="reference internal" href="trf_interface.html#_CPPv412trfSortAddrV9PTRFAddrV"><code class="docutils literal notranslate"><span class="pre">trfSortAddrV()</span></code></a></li>
+<li class="toctree-l2"><a class="reference internal" href="trf_interface.html#_CPPv414trfCreateAddrV13PTRFInterface13PTRFInterfaceP9PTRFAddrV"><code class="docutils literal notranslate"><span class="pre">trfCreateAddrV()</span></code></a></li>
+<li class="toctree-l2"><a class="reference internal" href="trf_interface.html#_CPPv420trfFreeInterfaceList13PTRFInterface"><code class="docutils literal notranslate"><span class="pre">trfFreeInterfaceList()</span></code></a></li>
+<li class="toctree-l2"><a class="reference internal" href="trf_interface.html#_CPPv419trfGetInterfaceListP13PTRFInterfaceP8uint32_t8uint64_t"><code class="docutils literal notranslate"><span class="pre">trfGetInterfaceList()</span></code></a></li>
+<li class="toctree-l2"><a class="reference internal" href="trf_interface.html#_CPPv420trfSortInterfaceList13PTRFInterface"><code class="docutils literal notranslate"><span class="pre">trfSortInterfaceList()</span></code></a></li>
+<li class="toctree-l2"><a class="reference internal" href="trf_interface.html#_CPPv417trfGetFastestLink9PTRFAddrVP9PTRFAddrV"><code class="docutils literal notranslate"><span class="pre">trfGetFastestLink()</span></code></a></li>
+<li class="toctree-l2"><a class="reference internal" href="trf_interface.html#_CPPv415trfGetLinkSpeedPcP7int32_t"><code class="docutils literal notranslate"><span class="pre">trfGetLinkSpeed()</span></code></a></li>
+<li class="toctree-l2"><a class="reference internal" href="trf_interface.html#_CPPv425trfGetInterfaceListLength13PTRFInterface"><code class="docutils literal notranslate"><span class="pre">trfGetInterfaceListLength()</span></code></a></li>
+</ul>
+</li>
+<li class="toctree-l1"><a class="reference internal" href="trf_internal.html">TRF Internal System Functions</a><ul>
+<li class="toctree-l2"><a class="reference internal" href="trf_internal.html#_CPPv413trf__CreateCQ11PTRFXFabricP13PTRFTCQFabricP10fi_cq_attrPv"><code class="docutils literal notranslate"><span class="pre">trf__CreateCQ()</span></code></a></li>
+<li class="toctree-l2"><a class="reference internal" href="trf_internal.html#_CPPv414trf__DestroyCQ13PTRFTCQFabric"><code class="docutils literal notranslate"><span class="pre">trf__DestroyCQ()</span></code></a></li>
+<li class="toctree-l2"><a class="reference internal" href="trf_internal.html#_CPPv416trf__DecrementCQ13PTRFTCQFabric8uint64_t"><code class="docutils literal notranslate"><span class="pre">trf__DecrementCQ()</span></code></a></li>
+<li class="toctree-l2"><a class="reference internal" href="trf_internal.html#_CPPv416trf__IncrementCQ13PTRFTCQFabric8uint64_t"><code class="docutils literal notranslate"><span class="pre">trf__IncrementCQ()</span></code></a></li>
+<li class="toctree-l2"><a class="reference internal" href="trf_internal.html#_CPPv419trf__CheckSessionID11PTRFContext8uint64_t"><code class="docutils literal notranslate"><span class="pre">trf__CheckSessionID()</span></code></a></li>
+<li class="toctree-l2"><a class="reference internal" href="trf_internal.html#_CPPv426trf__AllocSessionForClient11PTRFContext8uint64_tP11PTRFContext"><code class="docutils literal notranslate"><span class="pre">trf__AllocSessionForClient()</span></code></a></li>
+<li class="toctree-l2"><a class="reference internal" href="trf_internal.html#_CPPv411trf__Rand64v"><code class="docutils literal notranslate"><span class="pre">trf__Rand64()</span></code></a></li>
+<li class="toctree-l2"><a class="reference internal" href="trf_internal.html#_CPPv420trf__HammingWeight648uint64_t"><code class="docutils literal notranslate"><span class="pre">trf__HammingWeight64()</span></code></a></li>
+<li class="toctree-l2"><a class="reference internal" href="trf_internal.html#_CPPv49trfStrdupPc"><code class="docutils literal notranslate"><span class="pre">trfStrdup()</span></code></a></li>
+<li class="toctree-l2"><a class="reference internal" href="trf_internal.html#_CPPv48trfSleep8uint32_t"><code class="docutils literal notranslate"><span class="pre">trfSleep()</span></code></a></li>
+<li class="toctree-l2"><a class="reference internal" href="trf_internal.html#_CPPv412trfNanoSleep8uint64_t"><code class="docutils literal notranslate"><span class="pre">trfNanoSleep()</span></code></a></li>
+<li class="toctree-l2"><a class="reference internal" href="trf_internal.html#_CPPv413trf__GetDelayP8timespecP8timespec8uint64_t"><code class="docutils literal notranslate"><span class="pre">trf__GetDelay()</span></code></a></li>
+<li class="toctree-l2"><a class="reference internal" href="trf_internal.html#_CPPv416trf__RemainingMSP8timespec"><code class="docutils literal notranslate"><span class="pre">trf__RemainingMS()</span></code></a></li>
+<li class="toctree-l2"><a class="reference internal" href="trf_internal.html#_CPPv414trf__HasPassed9clockid_tP8timespec"><code class="docutils literal notranslate"><span class="pre">trf__HasPassed()</span></code></a></li>
+</ul>
+</li>
+<li class="toctree-l1"><a class="reference internal" href="trf_msg.html">Message Handling Functions</a><ul>
+<li class="toctree-l2"><a class="reference internal" href="trf_msg.html#_CPPv410trfMsgPackP22TrfMsg__MessageWrapper8uint32_tP7uint8_t"><code class="docutils literal notranslate"><span class="pre">trfMsgPack()</span></code></a></li>
+<li class="toctree-l2"><a class="reference internal" href="trf_msg.html#_CPPv418trfMsgPackProtobufP16ProtobufCMessage8uint32_tP7uint8_t"><code class="docutils literal notranslate"><span class="pre">trfMsgPackProtobuf()</span></code></a></li>
+<li class="toctree-l2"><a class="reference internal" href="trf_msg.html#_CPPv412trfMsgUnpackPP22TrfMsg__MessageWrapper8uint32_tP7uint8_t"><code class="docutils literal notranslate"><span class="pre">trfMsgUnpack()</span></code></a></li>
+<li class="toctree-l2"><a class="reference internal" href="trf_msg.html#_CPPv420trfMsgUnpackProtobufPP16ProtobufCMessagePK26ProtobufCMessageDescriptor6size_tP7uint8_t"><code class="docutils literal notranslate"><span class="pre">trfMsgUnpackProtobuf()</span></code></a></li>
+<li class="toctree-l2"><a class="reference internal" href="trf_msg.html#_CPPv421trfMsgGetPackedLengthP7uint8_t"><code class="docutils literal notranslate"><span class="pre">trfMsgGetPackedLength()</span></code></a></li>
+<li class="toctree-l2"><a class="reference internal" href="trf_msg.html#_CPPv416trfMsgGetPayloadP7uint8_t"><code class="docutils literal notranslate"><span class="pre">trfMsgGetPayload()</span></code></a></li>
+</ul>
+</li>
+<li class="toctree-l1"><a class="reference internal" href="trf_ncp.html">Negotiation Channel Protocol - Connection Management Functions</a><ul>
+<li class="toctree-l2"><a class="reference internal" href="trf_ncp.html#_CPPv412trfNCPollMsg7TRFSock"><code class="docutils literal notranslate"><span class="pre">trfNCPollMsg()</span></code></a></li>
+<li class="toctree-l2"><a class="reference internal" href="trf_ncp.html#_CPPv412trfNCRecvMsg7TRFSockP7uint8_t8uint32_tiPP22TrfMsg__MessageWrapper"><code class="docutils literal notranslate"><span class="pre">trfNCRecvMsg()</span></code></a></li>
+<li class="toctree-l2"><a class="reference internal" href="trf_ncp.html#_CPPv412trfNCSendMsg7TRFSockP7uint8_t8uint32_tiP22TrfMsg__MessageWrapper"><code class="docutils literal notranslate"><span class="pre">trfNCSendMsg()</span></code></a></li>
+<li class="toctree-l2"><a class="reference internal" href="trf_ncp.html#_CPPv49trfNCRecv7TRFSock7ssize_tP7uint8_ti"><code class="docutils literal notranslate"><span class="pre">trfNCRecv()</span></code></a></li>
+<li class="toctree-l2"><a class="reference internal" href="trf_ncp.html#_CPPv49trfNCSend7TRFSock7ssize_tP7uint8_ti"><code class="docutils literal notranslate"><span class="pre">trfNCSend()</span></code></a></li>
+<li class="toctree-l2"><a class="reference internal" href="trf_ncp.html#_CPPv423trf__AddrMsgToInterfaceP22TrfMsg__MessageWrapperP13PTRFInterface"><code class="docutils literal notranslate"><span class="pre">trf__AddrMsgToInterface()</span></code></a></li>
+</ul>
+</li>
+<li class="toctree-l1"><a class="reference internal" href="trf_preflight.html">Preflight Connectivity Check Functions</a><ul>
+<li class="toctree-l2"><a class="reference internal" href="trf_preflight.html#_CPPv423trfNCClientGetReachable13PTRFInterface7int64_t"><code class="docutils literal notranslate"><span class="pre">trfNCClientGetReachable()</span></code></a></li>
+<li class="toctree-l2"><a class="reference internal" href="trf_preflight.html#_CPPv420trfNCServerPreFlightPiP8uint16_t"><code class="docutils literal notranslate"><span class="pre">trfNCServerPreFlight()</span></code></a></li>
+<li class="toctree-l2"><a class="reference internal" href="trf_preflight.html#_CPPv425trfNCServerPreFlightCheckii8uint64_t13PTRFInterface"><code class="docutils literal notranslate"><span class="pre">trfNCServerPreFlightCheck()</span></code></a></li>
+</ul>
+</li>
 </ul>
 </div>
 </section>

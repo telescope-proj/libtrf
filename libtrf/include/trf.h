@@ -475,7 +475,7 @@ static inline ssize_t trfGetTextureBytes(size_t width, size_t height,
     {
         case TRF_TEX_BGR_888:
         case TRF_TEX_RGB_888:
-        case TRF_TEX_RGB_32:
+        case TRF_TEX_BGR_32:
             return width * height * 3;
         case TRF_TEX_RGBA_8888:
         case TRF_TEX_BGRA_8888:

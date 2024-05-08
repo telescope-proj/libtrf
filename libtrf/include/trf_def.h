@@ -460,7 +460,7 @@ enum TRFTexFormat {
     /**
      * @brief 24-in-32 format for compatibility with Looking Glass
      */
-    TRF_TEX_RGB_32,
+    TRF_TEX_BGR_32,
     /**
       * @brief RGBA, 16 bits per channel HDR float
       */

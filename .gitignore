@@ -58,3 +58,5 @@ CMakeCache.txt
 CMakeFiles/
 
 *.dSYM
+
+build/

@@ -475,6 +475,7 @@ static inline ssize_t trfGetTextureBytes(size_t width, size_t height,
     {
         case TRF_TEX_BGR_888:
         case TRF_TEX_RGB_888:
+        case TRF_TEX_RGB_32:
             return width * height * 3;
         case TRF_TEX_RGBA_8888:
         case TRF_TEX_BGRA_8888:
@@ -485,15 +486,6 @@ static inline ssize_t trfGetTextureBytes(size_t width, size_t height,
         case TRF_TEX_BGRA_16161616:
         case TRF_TEX_BGRA_16161616F:
             return width * height * 8;
-        case TRF_TEX_ETC1:
-        case TRF_TEX_ETC2:
-        case TRF_TEX_DXT1:
-            if (width % 4 || height % 4) { return -ENOTSUP; }
-            return width * height / 2;
-        case TRF_TEX_ETC2_EAC:
-        case TRF_TEX_DXT5:
-            if (width % 4 || height % 4) { return -ENOTSUP; }
-            return width * height;
         default:
             return -EINVAL;
     }
@@ -517,17 +509,7 @@ static inline size_t trfGetCursorBytes(PTRFCursor cur)
 
 static inline uint8_t trfTextureIsCompressed(enum TRFTexFormat fmt)
 {
-    switch (fmt)
-    {
-        case TRF_TEX_ETC1:
-        case TRF_TEX_ETC2:
-        case TRF_TEX_ETC2_EAC:
-        case TRF_TEX_DXT1:
-        case TRF_TEX_DXT5:
-            return 1;
-        default:
-            return 0;
-    }
+    return 0;
 }
 
 /**

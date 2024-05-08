@@ -185,7 +185,7 @@ int trfNCClientInit(PTRFContext ctx, char * host, char * port)
                        strerror(-ret2), fi_strerror(-ret));
         goto free_svr_if_list;
     }
-
+    
     if (ret != 0)
     {
         trf__log_error("Fabric connection failed: %s", strerror(-ret));

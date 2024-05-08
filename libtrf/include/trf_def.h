@@ -458,25 +458,9 @@ enum TRFTexFormat {
       */
     TRF_TEX_BGR_888,
     /**
-      * @brief DXT1 compressed texture format
-      */
-    TRF_TEX_DXT1,
-    /**
-     * @brief DXT5 compressed texture format
+     * @brief 24-in-32 format for compatibility with Looking Glass
      */
-    TRF_TEX_DXT5,
-    /**
-     * @brief ETC1 compressed texture format
-     */
-    TRF_TEX_ETC1,
-    /**
-      * @brief ETC2 (RGB) compressed texture format
-      */
-    TRF_TEX_ETC2,
-    /**
-     * @brief ETC2 (EAC, RGBA) compressed texture format
-     */
-    TRF_TEX_ETC2_EAC,
+    TRF_TEX_RGB_32,
     /**
       * @brief RGBA, 16 bits per channel HDR float
       */

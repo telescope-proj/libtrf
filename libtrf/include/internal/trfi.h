@@ -240,8 +240,8 @@ static inline int trfSleep(uint32_t ms) {
  *              On Windows, this function always returns 0. On Linux, signals
  *              which occur during the sleep return -EINTR.
  */
-static inline int trfNanoSleep(uint64_t ns) {
-    if (!ns)
+static inline int trfNanoSleep(int64_t ns) {
+    if (ns <= 0)
         return 0;
 
 #ifdef _WIN32

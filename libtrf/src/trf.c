@@ -60,6 +60,24 @@ static const char * trf__fi_proto[] = {
 #if TRF_FABRIC_VERSION >= FI_VERSION(1, 12)
     "PSMX3",
 #endif
+#if TRF_FABRIC_VERSION >= FI_VERSION(1, 15)
+    "RXM_TCP",
+    "OPX",
+#endif
+#if TRF_FABRIC_VERSION >= FI_VERSION(1, 16)
+    "CXI",
+    "XNET",
+#endif
+#if TRF_FABRIC_VERSION >= FI_VERSION(1, 18)
+    "COLL",
+    "UCX",
+#endif
+#if TRF_FABRIC_VERSION >= FI_VERSION(1, 19)
+    "SM2",
+#endif
+#if TRF_FABRIC_VERSION >= FI_VERSION(1, 21)
+    "CXI_RNR",
+#endif
     "__MAX"
 };
 
@@ -99,6 +117,24 @@ static const uint32_t trf__fi_enum[] = {
 #endif
 #if TRF_FABRIC_VERSION >= FI_VERSION(1, 12)
     FI_PROTO_PSMX3,
+#endif
+#if TRF_FABRIC_VERSION >= FI_VERSION(1, 15)
+    FI_PROTO_RXM_TCP,
+    FI_PROTO_OPX,
+#endif
+#if TRF_FABRIC_VERSION >= FI_VERSION(1, 16)
+    FI_PROTO_CXI,
+    FI_PROTO_XNET,
+#endif
+#if TRF_FABRIC_VERSION >= FI_VERSION(1, 18)
+    FI_PROTO_COLL,
+    FI_PROTO_UCX,
+#endif
+#if TRF_FABRIC_VERSION >= FI_VERSION(1, 19)
+    FI_PROTO_SM2,
+#endif
+#if TRF_FABRIC_VERSION >= FI_VERSION(1, 21)
+    FI_PROTO_CXI_RNR,
 #endif
     0
 };
@@ -2025,7 +2061,7 @@ int trfGetMessageAuto(PTRFContext ctx, uint64_t flags, uint64_t * processed,
             flag = 2;
             break;
         }
-        trfSleep(ctx->opts->fab_poll_rate);
+        trfNanoSleep(ctx->opts->fab_poll_rate);
     }
 
     switch (flag)

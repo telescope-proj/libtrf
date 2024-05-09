@@ -53,7 +53,7 @@ ssize_t trfFabricSend(PTRFContext ctx, PTRFMem mem, void * addr, size_t len,
         {
             break;
         }
-        trfSleep(ctx->opts->fab_poll_rate);
+        trfNanoSleep(ctx->opts->fab_poll_rate);
     } while (ret == -FI_EAGAIN && !trf__HasPassed(CLOCK_MONOTONIC, &deadline));
     
     struct fi_cq_data_entry cqe;
@@ -130,7 +130,7 @@ ssize_t trfFabricRecv(PTRFContext ctx, PTRFMem mem, void * addr, size_t len,
         {
             break;
         }
-        trfSleep(ctx->opts->fab_poll_rate);
+        trfNanoSleep(ctx->opts->fab_poll_rate);
     } while (ret == -FI_EAGAIN && !trf__HasPassed(CLOCK_MONOTONIC, &deadline));
 
     struct fi_cq_data_entry cqe;

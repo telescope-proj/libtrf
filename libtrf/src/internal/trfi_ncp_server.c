@@ -662,7 +662,7 @@ int trf__NCServerTestTransport(PTRFContext ctx, TRFSock client_sock,
             return -ETIMEDOUT;
         }
 
-        trfSleep(ctx->opts->fab_poll_rate);
+        trfNanoSleep(ctx->opts->fab_poll_rate);
     }
 }
 

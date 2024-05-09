@@ -622,12 +622,12 @@ struct TRFContextOpts {
     */
     size_t     fab_rcv_bufsize;
     /**
-     * @brief Fabric polling rate limit (sleep time in milliseconds)
+     * @brief Fabric polling rate limit (sleep time in nanoseconds)
      * 
      * Note: For latency sensitive applications, this should be set to 0,
      * to use busy waiting.
      */
-    int32_t     fab_poll_rate;
+    int64_t     fab_poll_rate;
     /**
      * @brief Synchronous CQ polling mode.
      */

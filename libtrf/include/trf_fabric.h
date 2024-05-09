@@ -98,6 +98,9 @@ static inline ssize_t trfFabricFlushCQErrors(struct TRFTCQFabric * tcq,
  *                      completion is received. This option reduces CPU usage at
  *                      the expense of latency - not all fabrics support this
  *                      option.
+ * 
+ * @param rate          The interval between polling operations. If the sync
+ *                      parameter is set, this parameter is ignored.
  *
  * @param deadline      Deadline for the operation. Corresponds to the time when
  *                      the operation should be considered timed out. Uses
@@ -116,7 +119,7 @@ static inline ssize_t trfFabricFlushCQErrors(struct TRFTCQFabric * tcq,
 static inline ssize_t trfFabricPoll(struct TRFTCQFabric * tcq,
                                     struct fi_cq_data_entry * de,
                                     struct fi_cq_err_entry * err, 
-                                    bool sync, int rate, 
+                                    bool sync, int64_t rate, 
                                     struct timespec * deadline, size_t count)
 {
     ssize_t ret;
@@ -163,7 +166,7 @@ static inline ssize_t trfFabricPoll(struct TRFTCQFabric * tcq,
                     case -FI_EAGAIN:
                         if (deadline)
                         {
-                            trfSleep(rate);
+                            trfNanoSleep(rate);
                             continue;
                         }
                         else

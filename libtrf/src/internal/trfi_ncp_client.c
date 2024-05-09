@@ -713,7 +713,7 @@ int trf__NCRecvAndTestCandidate(PTRFContext ctx, uint8_t * buffer, size_t size)
     do {        
         ret = trfFabricSend(ctx, mem, trfMemPtr(mem), trfMemSize(mem), lf_addr,
                             ctx->opts);
-        trfSleep(ctx->opts->fab_poll_rate);
+        trfNanoSleep(ctx->opts->fab_poll_rate);
         att++;
     } while (ret == -FI_EAGAIN && !trf__HasPassed(CLOCK_MONOTONIC, &dl));
     
